@@ -1,0 +1,12 @@
+{
+   "ncc":{
+      "cvm_ip":"10.10.10.10",
+      "cvm_user":"ncc",
+      "cvm_password":"ncc"
+   },
+   "vc":{
+      "vc_ip":"10.10.10.10",
+      "vc_user":"vcip",
+      "vc_password":"vcpass"
+   }
+}
