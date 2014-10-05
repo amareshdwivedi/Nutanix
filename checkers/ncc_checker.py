@@ -1,38 +1,44 @@
 __author__ = 'subashatreya'
 
 import time
-from reporters import CheckerResult
+from base_checker import *
 
 
-class NCCChecker:
+class NCCChecker(CheckerBase):
 
     _NAME_ = "ncc"
 
     def __init__(self):
-        self.result = None
-        self.config = {}
+        super(NCCChecker, self).__init__(NCCChecker._NAME_)
 
     def get_name(self):
         return NCCChecker._NAME_
 
-    def configure(self, config):
+    def configure(self, config, reporter):
         self.config['cvm_ip'] = config['cvm_ip']
         self.config['cvm_user'] = config['cvm_user']
+        self.reporter = reporter
 
-    def run_checks(self, listener):
-        listener.notify_progress("Starting NCC Checks")
-        self.result = CheckerResult("ncc", "PASS", "NCC Checks Passed")
-        self.check1(listener)
-        self.check2(listener)
-        listener.notify_progress("Check complete")
+
+    def run_checks(self):
+        self.reporter.notify_progress("++++ Starting NCC Checks ++++")
+        self.result = CheckerResult("ncc")
+
+        self.check1()
+        self.check2()
+
+        self.result.status = "PASS"
+        self.result.message = "NCC Checks Successful"
+        self.reporter.notify_progress("++++ NCC Checks Completed ..... PASS ++++\n")
+
         return self.result
 
-    def check1(self, listener):
+    @check
+    def check1(self):
         time.sleep(1)
-        listener.notify_progress("Check1 ............ PASS")
-        self.result.add_step_result(CheckerResult("Check1", "PASS", "Check 1 passed"))
+        return "FAIL", "Failed"
 
-    def check2(self, listener):
+    @check
+    def check2(self):
         time.sleep(1)
-        listener.notify_progress("Check2 ............ PASS")
-        self.result.add_step_result(CheckerResult("Check2", "PASS", "Check 2 passed"))
+        return "PASS", "Successful"

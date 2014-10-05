@@ -2,13 +2,13 @@ __author__ = 'subashatreya'
 
 
 class CheckerResult:
-    def __init__(self, name, status=None, message=None):
+    def __init__(self, name, passed=None, message=None):
         self.name = name
-        self.status = status
+        self.passed = passed
         self.message = message
         self.steps = []
 
-    def add_step_result(self, step):
+    def add_check_result(self, step):
         self.steps.append(step)
 
     def set_status(self, status):
@@ -18,7 +18,7 @@ class CheckerResult:
         self.message = message
 
     def to_dict(self):
-        dict_obj = {"name": self.name, "status:": self.status, "message:": self.message}
+        dict_obj = {"name": self.name, "pass:": self.passed, "message:": self.message}
 
         if len(self.steps) > 0:
             steps_dict = []
