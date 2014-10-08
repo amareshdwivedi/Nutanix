@@ -2,6 +2,7 @@ __author__ = 'subashatreya'
 
 from checkers.ncc_checker import NCCChecker
 from checkers.vc_checker import VCChecker
+from checkers.checkerObjects import checkerObjectList
 from reporters import DefaultConsoleReporter
 
 import json
@@ -25,16 +26,19 @@ def main():
 
     args = parse_args()
 
-    checkers = {'ncc': NCCChecker(), 'vc': VCChecker()}
-
     checkers_to_run = []
     if len(args.checkers) == 0:
-        args.checkers = ['ncc', 'vc']
-
+        args.checkers = checkerObjectList.keys()
+        
+    #checkers = {'ncc': NCCChecker(), 'vc': VCChecker()}
+    checkers = {}
     for checker in args.checkers:
-        if not checker in checkers.keys():
+        if not checker in checkerObjectList.keys():
             exit_with_message(checker + " is not valid checker")
-
+        checkers[checker] = eval(checkerObjectList[checker])() 
+    #print checkers
+    
+    for checker in args.checkers:
         fp = open("conf"+os.path.sep+checker+".conf", 'r')
         checker_config = json.load(fp)
         fp.close()
