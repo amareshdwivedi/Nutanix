@@ -21,6 +21,7 @@ class CheckerBase:
     def __init__(self, name):
         self.config = {}
         self.reporter = None
+        self.checks=[]
         self.result = CheckerResult(name)
 
     @abc.abstractmethod

@@ -2,10 +2,10 @@ __author__ = 'subash atreya'
 
 import string
 import warnings
+import argparse
 from pyVim.connect import SmartConnect, Disconnect
 
 from base_checker import *
-
 
 class VCChecker(CheckerBase):
 
@@ -26,34 +26,47 @@ class VCChecker(CheckerBase):
         a = config['vc_user']
         a = config['vc_pwd']
         a = config['vc_port']
+        checks_list = [k for k,v in config.items() if k.endswith('checks')]
+        #print checks_list
+        for checks in checks_list:
+            metrics = config[checks]
+            if len(metrics) == 0:
+                raise RuntimeError("At least one metric must be specified in "+ checks + "configuration file");
 
-        metrics = config['checks']
-        if len(metrics) == 0:
-            raise RuntimeError("At least one metric must be specified");
-
+    def parse_vc_args(self,check_list):
+        checks_list = [k for k,v in self.config.items() if k.endswith('checks')]
+        print checks_list
+        parser = argparse.ArgumentParser(description='Nutanix HealthCheck Tool : VCenter Checks')
+        for checks in check_list : 
+            parser.add_argument(checks, help="Checks you want to run")
+        args = parser.parse_args()
+        return args
 
     def run_checks(self):
         self.reporter.notify_progress("+++ Starting VC Checks")
         self.result = CheckerResult("vc")
-
         warnings.simplefilter('ignore')
         si = SmartConnect(host=self.config['vc_ip'], user=self.config['vc_user'], pwd=self.config['vc_pwd'], port=self.config['vc_port'])
 
-        passed_all = True
-
-
-
-        for check in self.config["checks"]:
-            name, xpath_str, expected = string.split(check, ',')
-            name = name.strip()
-            xpath_str = xpath_str.strip()
-            expected = expected.strip()
-
-            xpath = string.split(xpath_str, '.')
-            self.reporter.notify_progress("Check - " + name)
-            passed, message = self.validate_vc_property(xpath, si, None, expected)
-            self.result.add_check_result(CheckerResult(name, passed, message))
-            passed_all = passed_all and passed
+        passed_all = True 
+        #checks_list = [k for k,v in self.config.items() if k.endswith('checks')]
+        if len(self.checks)==0:
+            checks_list = [k for k,v in self.config.items() if k.endswith('checks')]
+        else:
+            checks_list =self.checks
+            
+        for checks in checks_list:
+            for check in self.config[checks]:
+                name, xpath_str, expected = string.split(check, ',')
+                name = name.strip()
+                xpath_str = xpath_str.strip()
+                expected = expected.strip()
+    
+                xpath = string.split(xpath_str, '.')
+                self.reporter.notify_progress("Check - " + name)
+                passed, message = self.validate_vc_property(xpath, si, None, expected)
+                self.result.add_check_result(CheckerResult(name, passed, message))
+                passed_all = passed_all and passed
 
         Disconnect(si)
         self.result.passed = passed_all
