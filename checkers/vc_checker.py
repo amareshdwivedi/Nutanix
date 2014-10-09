@@ -57,15 +57,11 @@ class VCChecker(CheckerBase):
             
         for checks in checks_list:
             for check in self.config[checks]:
-                name, xpath_str, expected = string.split(check, ',')
-                name = name.strip()
-                xpath_str = xpath_str.strip()
-                expected = expected.strip()
-    
-                xpath = string.split(xpath_str, '.')
-                self.reporter.notify_progress("Check - " + name)
-                passed, message = self.validate_vc_property(xpath, si, None, expected)
-                self.result.add_check_result(CheckerResult(name, passed, message))
+                xpath = string.split(check['path'], '.')
+            
+                self.reporter.notify_progress("Check - " + check['name'])
+                passed, message = self.validate_vc_property(xpath, si, check['name'], check['ref-value'], check['user-input'], check['operator'], check['operation'])
+                self.result.add_check_result(CheckerResult(check['path'], passed, message))
                 passed_all = passed_all and passed
 
         Disconnect(si)
@@ -76,7 +72,7 @@ class VCChecker(CheckerBase):
         return self.result
 
 
-    def validate_vc_property(self, xpath, cur_obj, name, expected):
+    def validate_vc_property(self, xpath, cur_obj, name, expected, userInput, operator, operation):
         attr = getattr(cur_obj, xpath[0])
 
         if hasattr(cur_obj, "name"):
@@ -98,10 +94,34 @@ class VCChecker(CheckerBase):
             passed_all = True
             message_all = ""
             for item in attr:
-                passed, message = self.validate_vc_property(xpath[1:], item, name, expected)
+                #GAMGAM : START
+                if xpath[0] in userInput.keys():
+                    if operation.lower() == "match".lower():
+                        if operator.lower() == "equals".lower():
+                            if item.name != userInput[xpath[0]]:
+                                print name+" "+str(item.name)+" filtered as per users specification."
+                                continue
+                        if operator.lower() == "not equals".lower():
+                            if item.name == userInput[xpath[0]]:
+                                print name+" "+str(item.name)+" filtered as per user specification."
+                                continue
+                    if operation.lower() == "does not match".lower():
+                        pass
+                    if operation.lower() == "does not match RE".lower():
+                        pass
+                    if operation.lower() == "match RE".lower():
+                        pass
+                    if operation.lower() == "Compare".lower():
+                        pass
+                    if operation.lower() == "get".lower():
+                        pass
+                    if operation.lower() == "set".lower():
+                        pass
+                #GAMGAM : END
+                passed, message = self.validate_vc_property(xpath[1:], item, name, expected, userInput, operator, operation)
                 passed_all = passed_all and passed
                 message_all = len(message_all) > 0 and (message_all + " , " + message) or message
             return passed_all, message_all
 
         else:
-            return self.validate_vc_property(xpath[1:], attr, name, expected)
+            return self.validate_vc_property(xpath[1:], attr, name, expected, userInput, operator, operation)
