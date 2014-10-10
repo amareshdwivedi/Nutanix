@@ -61,7 +61,7 @@ class VCChecker(CheckerBase):
             
                 self.reporter.notify_progress("Check - " + check['name'])
                 passed, message = self.validate_vc_property(xpath, si, check['name'], check['ref-value'], check['user-input'], check['operator'], check['operation'])
-                self.result.add_check_result(CheckerResult(check['path'], passed, message))
+                self.result.add_check_result(CheckerResult(check['name'], passed, message))
                 passed_all = passed_all and passed
 
         Disconnect(si)

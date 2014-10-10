@@ -3,6 +3,7 @@ __author__ = 'subashatreya'
 from checkers.ncc_checker import NCCChecker
 from checkers.vc_checker import VCChecker
 from reporters import DefaultConsoleReporter
+from PDFGenerator import PDFReportGenerator
 
 import json
 import argparse
@@ -87,7 +88,8 @@ def main():
         checker_module = checkers[checker]
         result = checker_module.run_checks()
         results[checker] = result.to_dict()
-
+    #Generate PDF Report based on results
+    PDFReportGenerator(results);
     outfile = open("results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()
