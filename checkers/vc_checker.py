@@ -4,8 +4,13 @@ import string
 import warnings
 import argparse
 from pyVim.connect import SmartConnect, Disconnect
-
 from base_checker import *
+from prettytable import PrettyTable
+import sys
+
+def exit_with_message(message):
+    print message
+    sys.exit(1)
 
 class VCChecker(CheckerBase):
 
@@ -33,14 +38,38 @@ class VCChecker(CheckerBase):
             if len(metrics) == 0:
                 raise RuntimeError("At least one metric must be specified in "+ checks + "configuration file");
 
-    def parse_vc_args(self,check_list):
+    def usage(self):
+        x = PrettyTable(["Name", "Short help"])
+        x.align["Name"] = "l"
+        x.align["Short help"] = "l" # Left align city names
+        x.padding_width = 1 # One space between column edges and contents (default)
         checks_list = [k for k,v in self.config.items() if k.endswith('checks')]
-        print checks_list
-        parser = argparse.ArgumentParser(description='Nutanix HealthCheck Tool : VCenter Checks')
-        for checks in check_list : 
-            parser.add_argument(checks, help="Checks you want to run")
-        args = parser.parse_args()
-        return args
+        for checks in checks_list:
+            x.add_row([checks,"Run "+checks+" checks"])
+        x.add_row(["run_all", "Run all checks."])
+        print x
+        exit_with_message("")
+     
+    def parse_args(self,options):
+        if len(options)==0:
+            self.usage()
+        option=options[0]
+        checks_list = [k for k,v in self.config.items() if k.endswith('checks')]
+        if option == 'help' :
+            self.usage()
+        if option == 'run_all':
+            self.checks=checks_list
+            return
+        if option not in checks_list :
+            self.usage()
+        else:
+            self.checks=[option]
+#         print checks_list
+#         parser = argparse.ArgumentParser(description='Nutanix HealthCheck Tool : VCenter Checks')
+#         for checks in check_list : 
+#             parser.add_argument(checks, help="Checks you want to run")
+#         args = parser.parse_args()
+        return
 
     def run_checks(self):
         self.reporter.notify_progress("+++ Starting VC Checks")
@@ -50,11 +79,12 @@ class VCChecker(CheckerBase):
 
         passed_all = True 
         #checks_list = [k for k,v in self.config.items() if k.endswith('checks')]
-        if len(self.checks)==0:
-            checks_list = [k for k,v in self.config.items() if k.endswith('checks')]
-        else:
-            checks_list =self.checks
-            
+#         if len(self.checks)==0:
+#             checks_list = [k for k,v in self.config.items() if k.endswith('checks')]
+#         else:
+#             checks_list =self.checks
+
+        checks_list =self.checks           
         for checks in checks_list:
             for check in self.config[checks]:
                 xpath = string.split(check['path'], '.')

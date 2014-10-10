@@ -2,8 +2,13 @@ __author__ = 'subashatreya'
 
 import time
 from base_checker import *
+from prettytable import PrettyTable
+import sys
 
-
+def exit_with_message(message):
+    print message
+    sys.exit(1)
+    
 class NCCChecker(CheckerBase):
 
     _NAME_ = "ncc"
@@ -32,6 +37,23 @@ class NCCChecker(CheckerBase):
         self.reporter.notify_progress("++++ NCC Checks Completed ..... PASS ++++\n")
 
         return self.result
+    
+    def usage(self):
+        x = PrettyTable(["Name", "Short help"])
+        x.align["Name"] = "l"
+        x.align["Short help"] = "l" # Left align city names
+        x.padding_width = 1 # One space between column edges and contents (default)
+        x.add_row(["run_all", "Run all checks."])           
+        print x
+        exit_with_message("")
+    
+    def parse_args(self,options):
+        option=options[0]
+        if option == 'help' :
+            self.usage()
+        if option != "run_all":
+            self.usage() 
+        return
 
     @check
     def check1(self):

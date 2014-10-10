@@ -31,3 +31,11 @@ class CheckerBase:
     @abc.abstractmethod
     def run_checks(self):
         return
+    
+    @abc.abstractmethod
+    def usage(self):
+        return
+    
+    @abc.abstractmethod
+    def parse_args(self,options):
+        return
