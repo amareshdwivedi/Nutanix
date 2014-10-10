@@ -10,7 +10,7 @@ import json
 import argparse
 import sys
 import os
-
+import inspect
 def exit_with_message(message):
     print message
     sys.exit(1)
@@ -39,6 +39,7 @@ def parse_args(args):
 def main():
     option = parse_args(sys.argv[1:])
     #checkers = {'ncc': NCCChecker(), 'vc': VCChecker()}
+    '''
     fp = open("conf"+os.path.sep+"checkerObjects.conf", 'r')
     checkerObjectList = json.load(fp)
     fp.close()    
@@ -54,7 +55,38 @@ def main():
 #             exit_with_message(checker + " is not valid checker")
         checkers[checker] = eval(checkerObjectList[checker])() 
     #print checkers
-     
+    '''
+    #checkers = {'ncc': NCCChecker(), 'vc': VCChecker()}
+    checkers_to_run = []   
+    checkers = {}
+    package = __import__("checkers")
+    for modName, modObj in inspect.getmembers(package, inspect.ismodule):
+        for className, classObj in inspect.getmembers(modObj, inspect.isclass):
+            if not inspect.isabstract(classObj):
+                try:
+                    for xmodule in dir(package):
+                        if xmodule.startswith('__'):
+                            continue;
+                        if xmodule == modName:
+                            moduleFound = eval("package.%s"%modName)
+                            for xclass in dir(moduleFound):
+                                if xclass.startswith('__'):
+                                    continue;
+                                if xclass == className:
+                                    xobj = eval("package.%s.%s"%(modName,className))
+                                    if xobj._NAME_ in option or option=="run_all":
+                                        checkers[xobj._NAME_] = xobj()
+                                    break
+                except:
+                    # To skip the classes which are imported but not available in current module
+                    #print "Exception -",sys.exc_info()[0]
+                    continue
+    #print "Avail checks :",checkers,option,type(option)
+    if option=="run_all":
+        checkerslist = checkers.keys()
+    else:
+        checkerslist=[option]
+        
     for checker in checkerslist:
         fp = open("conf"+os.path.sep+checker+".conf", 'r')
         checker_config = json.load(fp)
