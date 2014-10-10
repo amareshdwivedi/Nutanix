@@ -32,6 +32,8 @@ def parse_args(args):
     option=args[0]
     if option =='help':
         usage()
+    if option != 'ncc' or option != 'vc':
+        usage()
     return option
 
 def main():
