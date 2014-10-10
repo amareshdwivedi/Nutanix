@@ -48,6 +48,8 @@ class NCCChecker(CheckerBase):
         exit_with_message("")
     
     def parse_args(self,options):
+        if len(options)==0:
+            self.usage()
         option=options[0]
         if option == 'help' :
             self.usage()

@@ -32,7 +32,7 @@ def parse_args(args):
     option=args[0]
     if option =='help':
         usage()
-    if option != 'ncc' or option != 'vc':
+    if option not in ['ncc','vc','run_all']:
         usage()
     return option
 
@@ -50,8 +50,8 @@ def main():
          
     checkers = {}
     for checker in checkerslist:
-        if not checker in checkerObjectList.keys():
-            exit_with_message(checker + " is not valid checker")
+#         if not checker in checkerObjectList.keys():
+#             exit_with_message(checker + " is not valid checker")
         checkers[checker] = eval(checkerObjectList[checker])() 
     #print checkers
      
