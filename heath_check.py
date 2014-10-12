@@ -2,9 +2,9 @@ __author__ = 'subashatreya'
 
 from checkers.ncc_checker import NCCChecker
 from checkers.vc_checker import VCChecker
-from checkers.base_checker import CheckerBase;
+from checkers.base_checker import CheckerBase
 from reporters import DefaultConsoleReporter
-#from PDFGenerator import PDFReportGenerator
+from PDFGenerator import PDFReportGenerator
 from prettytable import PrettyTable
 import json
 
@@ -77,11 +77,11 @@ def main():
     for checker in checkers_list:
  
         checker_module = checkers[checker]
-        result = checker_module.run_checks(args[1:])
+        result = checker_module.execute(args[1:])
         results[checker] = result.to_dict()
 
-    #Generate PDF Report based on results
-    #PDFReportGenerator(results);
+    #Generate PDF Report based on results. Temporary comment out
+    #PDFReportGenerator(results)
     outfile = open("results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()

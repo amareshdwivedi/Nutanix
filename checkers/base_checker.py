@@ -37,7 +37,7 @@ class CheckerBase:
         return
 
     @abc.abstractmethod
-    def run_checks(self, args):
+    def execute(self, args):
         return
     
     @abc.abstractmethod

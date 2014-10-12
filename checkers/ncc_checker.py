@@ -39,7 +39,7 @@ class NCCChecker(CheckerBase):
 
 
 
-    def run_checks(self, args):
+    def execute(self, args):
 
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

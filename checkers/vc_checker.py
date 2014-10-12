@@ -6,13 +6,11 @@ from pyVim.connect import SmartConnect, Disconnect
 from base_checker import *
 from prettytable import PrettyTable
 import sys
-import re
+import fnmatch
 
 def exit_with_message(message):
     print message
     sys.exit(1)
-
-
 
 
 class VCChecker(CheckerBase):
@@ -59,7 +57,7 @@ class VCChecker(CheckerBase):
         exit_with_message(message)
 
 
-    def run_checks(self, args):
+    def execute(self, args):
 
         if len(args) == 0:
             self.usage()
@@ -89,16 +87,18 @@ class VCChecker(CheckerBase):
 
         passed_all = True
 
-        #print si.content.rootFolder.childEntity[0].hostFolder.childEntity[0].configuration.drsVmConfig[0].key.name
 
         for check_group in check_groups_run:
+            self.reporter.notify_progress("\n++++ Running check group - " + check_group + " ++++")
 
             for check in self.config[check_group]:
-                xpath = string.split(check['path'], '.')
+
                 self.reporter.notify_progress("Check - " + check['name'])
-                passed, message = self.validate_vc_property(xpath, si, check['name'], check['operator'], check['ref-value'])
+                passed, message = self.validate_vc_property(si, check['path'], check['operator'], check['ref-value'])
                 self.result.add_check_result(CheckerResult(check['name'], passed, message))
                 passed_all = passed_all and passed
+
+
 
         Disconnect(si)
         self.result.passed = passed_all
@@ -107,40 +107,76 @@ class VCChecker(CheckerBase):
 
         return self.result
 
-    @staticmethod
-    def apply_operator(actual, expected, operator):
+
+    def validate_vc_property(self, si, path, operator, expected):
+
+        xpath = string.split(path, '.')
+        props = self.get_vc_property(xpath, si, [])
+
+        if expected.startswith("content"):
+            # Reference to another object
+            xpath = string.split(expected, '.')
+            expected_props = self.get_vc_property(xpath, si, [])
+
+
+        for k,v in props.iteritems():
+            expected_val = expected
+            if expected.startswith("content"):
+                expected_val = str(expected_props[k])
+
+            passed =  self.apply_operator(v, expected_val, operator)
+            message = k + "=" + str(v) + "(Expected: " + operator + expected_val + ")"
+
+            self.reporter.notify_progress("   " +message + (passed and " .... PASS" or " .... FAIL"))
+
+        return True, ""
+
+
+    def apply_operator(self, actual, expected, operator):
+
         if operator == "=":
             return expected == str(actual)
+
+        elif operator == "<":
+            return int(actual) < int(expected)
+
+        elif operator == "<=":
+            return int(actual) <= int(expected)
+
         # Handle others operators as needed
         else:
             raise RuntimeError("Unexpected operator " + operator)
 
 
 
-    def matches_filter(self, xpath, cur_obj, expected):
+    def matches_filter(self, xpath, cur_obj, expected, filter_names):
         attr = getattr(cur_obj, xpath[0])
+
+        if hasattr(cur_obj, "name"):
+            filter_names.append(cur_obj.name)
+
         if len(xpath) == 1:
-            return re.match(expected, attr) is not None
+            return fnmatch.fnmatch(attr, expected)
 
         if isinstance(attr, list):
             matches = True
             for item in attr:
-                matches = matches and self.matches_filter(xpath[1:], item, expected)
+                matches = matches and self.matches_filter(xpath[1:], item, expected, filter_names)
             return matches
         else:
-            return self.matches_filter(xpath[1:], attr, expected)
+            return self.matches_filter(xpath[1:], attr, expected, filter_names)
 
-    def apply_filter(self, cur_obj, filter):
+    def apply_filter(self, cur_obj, filter, filter_names):
         if filter is None:
             return True
 
         filter_prop, filter_val = filter.split("=")
-        filter_prop_xpath = string.split(filter_prop, '.')
+        filter_prop_xpath = string.split(filter_prop, '-')
 
-        return self.matches_filter(filter_prop_xpath, cur_obj, filter_val)
+        return self.matches_filter(filter_prop_xpath, cur_obj, filter_val, filter_names)
 
 
-    def validate_vc_property(self, xpath, cur_obj, name, operator, expected):
+    def get_vc_property(self, xpath, cur_obj, name):
 
         if "[" in xpath[0]:
             node,filter = xpath[0].split("[")
@@ -151,32 +187,40 @@ class VCChecker(CheckerBase):
 
         attr = getattr(cur_obj, node)
 
+        name_added = False
         if hasattr(cur_obj, "name"):
-            name = cur_obj.name
+            name.append(cur_obj.name)
+            name_added = True
 
         if len(xpath) == 1:
-            if VCChecker.apply_operator(attr, expected, operator):
-                passed = True
-                message = name + "." + node + operator + expected
-            else:
-                passed = False
-                message = name + "." + node + "=" + str(attr) + "(Expected: " + operator + expected + ")"
-
-            self.reporter.notify_progress("   " +message + (passed and " .... PASS" or " .... FAIL"))
-
-            return passed, message
+            return {".".join(name): attr}
 
         if isinstance(attr, list):
-            passed_all = True
-            message_all = ""
+            vals = {}
 
             for item in attr:
-                if self.apply_filter(item, filter):
-                    passed, message = self.validate_vc_property(xpath[1:], item, name, operator, expected)
-                    passed_all = passed_all and passed
-                    message_all = len(message_all) > 0 and (message_all + " , " + message) or message
+                filter_names = []
+                filter_pass = self.apply_filter(item, filter, filter_names)
 
-            return passed_all, message_all
+                if filter_pass:
+                    attr_val = self.get_vc_property(xpath[1:], item, name + filter_names)
+                    if attr_val:
+                        vals.update(attr_val)
+
+            if name_added:
+                name.pop()
+
+            return vals
 
         else:
-            return self.apply_filter(attr, filter) and self.validate_vc_property(xpath[1:], attr, name, operator, expected) or (True, "")
+            filter_names = []
+            filter_pass = self.apply_filter(attr, filter, filter_names)
+            result = filter_pass and self.get_vc_property(xpath[1:], attr, name + filter_names) or None
+            if name_added:
+                name.pop()
+
+            return result
+
+
+
+
