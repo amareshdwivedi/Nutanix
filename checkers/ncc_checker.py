@@ -1,14 +1,20 @@
 __author__ = 'subashatreya'
 
-import time
+
+import paramiko
 from base_checker import *
 from prettytable import PrettyTable
 import sys
 
+
+
+
+
 def exit_with_message(message):
     print message
     sys.exit(1)
-    
+
+
 class NCCChecker(CheckerBase):
 
     _NAME_ = "ncc"
@@ -19,24 +25,42 @@ class NCCChecker(CheckerBase):
     def get_name(self):
         return NCCChecker._NAME_
 
+    def get_desc(self):
+        return "This module is used to run NCC checks"
+
     def configure(self, config, reporter):
-        self.config['cvm_ip'] = config['cvm_ip']
-        self.config['cvm_user'] = config['cvm_user']
+        self.config = config
         self.reporter = reporter
 
+        CheckerBase.validate_config(config, "cvm_ip")
+        CheckerBase.validate_config(config, "cvm_user")
+        CheckerBase.validate_config(config, "cvm_pwd")
+        CheckerBase.validate_config(config, "ncc_path")
 
-    def run_checks(self):
-        self.reporter.notify_progress("++++ Starting NCC Checks ++++")
-        self.result = CheckerResult("ncc")
 
-        self.check1()
-        self.check2()
 
-        self.result.status = "PASS"
-        self.result.message = "NCC Checks Successful"
-        self.reporter.notify_progress("++++ NCC Checks Completed ..... PASS ++++\n")
+    def run_checks(self, args):
 
-        return self.result
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(self.config['cvm_ip'], username=self.config['cvm_user'], password=self.config['cvm_pwd'])
+
+        ntnx_env = "source /etc/profile.d/zookeeper_env.sh && source /usr/local/nutanix/profile.d/nutanix_env.sh && "
+
+        cmd = len(args) > 0 and self.config['ncc_path'] + " " + " ".join(args) or self.config['ncc_path']
+        cmd = ntnx_env + cmd
+
+        stdin, stdout, stderr =  ssh.exec_command(cmd)
+
+
+        for line in stdout:
+            print line.strip('\n')
+
+
+        ssh.close()
+
+        return CheckerResult("ncc")
+
     
     def usage(self):
         x = PrettyTable(["Name", "Short help"])
@@ -47,22 +71,3 @@ class NCCChecker(CheckerBase):
         print x
         exit_with_message("")
     
-    def parse_args(self,options):
-        if len(options)==0:
-            self.usage()
-        option=options[0]
-        if option == 'help' :
-            self.usage()
-        if option != "run_all":
-            self.usage() 
-        return
-
-    @check
-    def check1(self):
-        time.sleep(1)
-        return "FAIL", "Failed"
-
-    @check
-    def check2(self):
-        time.sleep(1)
-        return "PASS", "Successful"

@@ -25,17 +25,27 @@ class CheckerBase:
         self.result = CheckerResult(name)
 
     @abc.abstractmethod
+    def get_name(self):
+        return
+
+    @abc.abstractmethod
+    def get_desc(self):
+        return
+
+    @abc.abstractmethod
     def configure(self, config, reporter):
         return
 
     @abc.abstractmethod
-    def run_checks(self):
+    def run_checks(self, args):
         return
     
     @abc.abstractmethod
     def usage(self):
         return
-    
-    @abc.abstractmethod
-    def parse_args(self,options):
-        return
+
+    @staticmethod
+    def validate_config(config, prop):
+        if not prop in config:
+            raise RuntimeError(prop + " not in config")
+
