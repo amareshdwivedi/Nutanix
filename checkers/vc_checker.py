@@ -61,7 +61,7 @@ class VCChecker(CheckerBase):
         checks_list = [k for k in self.config.keys() if k.endswith('checks')]
 
         for checks in checks_list:
-            x.add_row([checks,"Run "+checks+" checks"])
+            x.add_row([checks,"Run "+checks])
         x.add_row(["run_all", "Run all VC checks."])
 
         message = message is None and str(x) or "\nERROR : "+ message + "\n\n" + str(x)
