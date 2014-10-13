@@ -13,12 +13,23 @@ def exit_with_message(message):
     sys.exit(1)
 
 
+def checkgroup(group_name, description):
+    def outer(func):
+        def inner(*args, **kwargs):
+            args[0].reporter.notify_progress("Check - " + description)
+            return func(*args, **kwargs)
+        inner.group = group_name
+        return inner
+    return outer
+
 class VCChecker(CheckerBase):
 
     _NAME_ = "vc"
 
+
     def __init__(self):
         super(VCChecker, self).__init__(VCChecker._NAME_)
+        self.si = None
 
     def get_name(self):
         return VCChecker._NAME_
@@ -83,24 +94,39 @@ class VCChecker(CheckerBase):
         self.reporter.notify_progress("+++ Starting VC Checks")
         self.result = CheckerResult("vc")
         warnings.simplefilter('ignore')
-        si = SmartConnect(host=self.config['vc_ip'], user=self.config['vc_user'], pwd=self.config['vc_pwd'], port=self.config['vc_port'])
+
+
+        check_functions = {}
+        for func in dir(self):
+            func_obj = getattr(self, func)
+            if callable(func_obj) and func.startswith("check_") and hasattr(func_obj, 'group'):
+                group_name = func_obj.group
+                group_functions = check_functions.get(group_name)
+                if group_functions:
+                    group_functions.append(func_obj)
+                else:
+                    check_functions[group_name] = [func_obj]
+
+        self.si = SmartConnect(host=self.config['vc_ip'], user=self.config['vc_user'], pwd=self.config['vc_pwd'], port=self.config['vc_port'])
 
         passed_all = True
 
 
         for check_group in check_groups_run:
             self.reporter.notify_progress("\n++++ Running check group - " + check_group + " ++++")
-
             for check in self.config[check_group]:
-
                 self.reporter.notify_progress("Check - " + check['name'])
-                passed, message = self.validate_vc_property(si, check['path'], check['operator'], check['ref-value'])
+                passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
                 self.result.add_check_result(CheckerResult(check['name'], passed, message))
                 passed_all = passed_all and passed
 
+            if check_group in check_functions:
+                for check_function in check_functions[check_group]:
+                    passed, message = check_function()
+                    self.result.add_check_result(CheckerResult(check['name'], passed, message))
+                    passed_all = passed_all and passed
 
-
-        Disconnect(si)
+        Disconnect(self.si)
         self.result.passed = passed_all
         self.result.message = "VC Checks completed with " + (passed_all and "success" or "failure")
         self.reporter.notify_progress("+++ VC Checks complete\n")
@@ -108,31 +134,36 @@ class VCChecker(CheckerBase):
         return self.result
 
 
-    def validate_vc_property(self, si, path, operator, expected):
+    def validate_vc_property(self, path, operator, expected):
 
-        xpath = string.split(path, '.')
-        props = self.get_vc_property(xpath, si, [])
-
+        props = self.get_vc_property(path)
         if expected.startswith("content"):
             # Reference to another object
-            xpath = string.split(expected, '.')
-            expected_props = self.get_vc_property(xpath, si, [])
+            expected_props = self.get_vc_property(expected)
 
+        passed_all = True
+        message_all = ""
 
-        for k,v in props.iteritems():
+        for path,property in props.iteritems():
             expected_val = expected
             if expected.startswith("content"):
-                expected_val = str(expected_props[k])
+                expected_val = str(expected_props[path])
 
-            passed =  self.apply_operator(v, expected_val, operator)
-            message = k + "=" + str(v) + "(Expected: " + operator + expected_val + ")"
-
+            passed =  VCChecker.apply_operator(property, expected_val, operator)
+            passed_all = passed_all and passed
+            message = path + "=" + str(property) + " (Expected: " + operator + expected_val + ")"
+            if not passed:
+                message_all += ("," + message)
             self.reporter.notify_progress("   " +message + (passed and " .... PASS" or " .... FAIL"))
 
-        return True, ""
+        if passed_all:
+            return True, None
+        else:
+            return False, message_all
 
 
-    def apply_operator(self, actual, expected, operator):
+    @staticmethod
+    def apply_operator(actual, expected, operator):
 
         if operator == "=":
             return expected == str(actual)
@@ -176,7 +207,7 @@ class VCChecker(CheckerBase):
         return self.matches_filter(filter_prop_xpath, cur_obj, filter_val, filter_names)
 
 
-    def get_vc_property(self, xpath, cur_obj, name):
+    def retrieve_vc_property(self, xpath, cur_obj, name):
 
         if "[" in xpath[0]:
             node,filter = xpath[0].split("[")
@@ -203,7 +234,7 @@ class VCChecker(CheckerBase):
                 filter_pass = self.apply_filter(item, filter, filter_names)
 
                 if filter_pass:
-                    attr_val = self.get_vc_property(xpath[1:], item, name + filter_names)
+                    attr_val = self.retrieve_vc_property(xpath[1:], item, name + filter_names)
                     if attr_val:
                         vals.update(attr_val)
 
@@ -215,12 +246,36 @@ class VCChecker(CheckerBase):
         else:
             filter_names = []
             filter_pass = self.apply_filter(attr, filter, filter_names)
-            result = filter_pass and self.get_vc_property(xpath[1:], attr, name + filter_names) or None
+            result = filter_pass and self.retrieve_vc_property(xpath[1:], attr, name + filter_names) or None
             if name_added:
                 name.pop()
 
             return result
 
 
+    def get_vc_property(self, path):
+        return self.retrieve_vc_property(string.split(path, '.'), self.si, [])
 
 
+    # Manual checks
+
+    @checkgroup("cluster_checks", "Validate datastore heartbeat")
+    def check_datastore_heartbeat(self):
+
+        datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.datastore')
+        heartbeat_datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.heartbeatDatastore')
+
+        message = ""
+        for cluster, cluster_datastores in datastores.iteritems():
+            cluster_heartbeat_datastores = [ds.name for ds in heartbeat_datastores[cluster]]
+            for ds in cluster_datastores:
+                if not fnmatch.fnmatch(ds.name, 'NTNX-*'):
+                    is_heartbeating = ds.name in cluster_heartbeat_datastores
+                    self.reporter.notify_progress("   " + cluster+"."+ds.name+"="+str(is_heartbeating) + " (Expected: =True) .... " + (is_heartbeating and " PASS" or " FAIL"))
+                    if not is_heartbeating:
+                        message += ", " +cluster+"."+ds.name+"is not heartbeating"
+
+        if len(message) > 0:
+            return True, None
+        else:
+            return False, message
