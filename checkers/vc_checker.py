@@ -173,6 +173,8 @@ class VCChecker(CheckerBase):
 
         elif operator == "<=":
             return int(actual) <= int(expected)
+        elif operator == "!=":
+            return expected != str(actual)
 
         # Handle others operators as needed
         else:
@@ -208,20 +210,20 @@ class VCChecker(CheckerBase):
 
 
     def retrieve_vc_property(self, xpath, cur_obj, name):
-
         if "[" in xpath[0]:
             node,filter = xpath[0].split("[")
             filter = filter[:-1]
         else:
             node = xpath[0]
             filter = None
-
+    
         attr = getattr(cur_obj, node)
 
         name_added = False
         if hasattr(cur_obj, "name"):
             name.append(cur_obj.name)
             name_added = True
+
 
         if len(xpath) == 1:
             return {".".join(name): attr}
