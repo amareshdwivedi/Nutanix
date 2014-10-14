@@ -306,20 +306,17 @@ class VCChecker(CheckerBase):
                     else:
                         if host.key.config.product.version != version:
                             mult_vers_flag = True
+                            break
+            self.reporter.notify_progress("   " + cluster + " (Expected multiple Version: =No) .... " + (not mult_vers_flag and " PASS" or " FAIL"))
             if mult_vers_flag:
-                self.reporter.notify_progress("    "+cluster+" is Having multiple version... FAIL")
-                message += "    "+cluster+" is Having multiple version... FAIL"
-            else: 
-                self.reporter.notify_progress("   "+cluster+" is not Having multiple version... PASS")
-                message += "    "+cluster+" is not Having multiple version... PASS"
+                message += ", " +cluster+" nodes have multiple versions avilable."        
         if len(message) > 0:
-            return True, message
+            return True, None
         else:
             return False, message
 
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory")
     def check_directory_service_set_to_active_directory(self):
-
         authenticationStoreInfo = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig')
        
         message = ""
@@ -340,22 +337,16 @@ class VCChecker(CheckerBase):
     @checkgroup("vcenter_server_checks", "Validate vCenter Server license expiration date")
     def check_vcenter_server_license_expiry(self):
         expirationDate = self.get_vc_property('content.licenseManager.evaluation.properties[key=expirationDate].value')
+        
+        message = ""
         for item, expiry_date in expirationDate.iteritems():
             #Currently timezone is not considered for the date difference / Need to add
             xexpiry = datetime.datetime(expiry_date.year,expiry_date.month, expiry_date.day)
             
-            valid_day_count = (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days
-            if ( valid_day_count > 60 or valid_day_count < 0):
-                if valid_day_count < 0:
-                    self.reporter.notify_progress("   License expiry older than current date by " +str(-1*valid_day_count)+ " days (Expected: > 60 days) .... PASS" )
-                    message = "   License expiry older than current date by " +str(-1*valid_day_count)+ " days (Expected: > 60 days) .... PASS" 
-                else:
-                    self.reporter.notify_progress("   License expiring within " +str(valid_day_count)+ " (Expected: > 60 days) .... PASS" )
-                    message = "   License expiring within " +str(valid_day_count)+ " (Expected: > 60 days) .... PASS"
-            else:  
-                self.reporter.notify_progress("   License expiring within " +str(valid_day_count)+ " (Expected: > 60 days) .... FAIL" )
-                message = "   License expiring within " +str(valid_day_count)+ " (Expected: > 60 days) .... FAIL"
-        
+            valid_60_days = (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days > 60 or (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days < 0
+            self.reporter.notify_progress("   License Expiration Validation date " + str(expiry_date) + " days (Expected: > 60 days or always valid) ...." + (valid_60_days and " PASS" or " FAIL"))
+            if not valid_60_days:
+                message += ", License valid for less than 60 days"
         if len(message) > 0:
             return True, message
         else:
