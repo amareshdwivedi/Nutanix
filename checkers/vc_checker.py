@@ -182,14 +182,17 @@ class VCChecker(CheckerBase):
 
 
 
-    def matches_filter(self, xpath, cur_obj, expected, filter_names):
+    def matches_filter(self, xpath, cur_obj, expected, filter_names,filter_operator):
         attr = getattr(cur_obj, xpath[0])
 
         if hasattr(cur_obj, "name"):
             filter_names.append(cur_obj.name)
 
         if len(xpath) == 1:
-            return fnmatch.fnmatch(attr, expected)
+            if filter_operator == '=':
+                return fnmatch.fnmatch(attr, expected)
+            elif filter_operator == '!=':
+                return not fnmatch.fnmatch(attr, expected)
 
         if isinstance(attr, list):
             matches = True
@@ -202,11 +205,15 @@ class VCChecker(CheckerBase):
     def apply_filter(self, cur_obj, filter, filter_names):
         if filter is None:
             return True
-
-        filter_prop, filter_val = filter.split("=")
+        if'!=' in filter:
+            filter_prop, filter_val = filter.split("!=")
+            filter_operator = '!='
+        elif '=' in filter:    
+            filter_prop, filter_val = filter.split("=")
+            filter_operator = '=' 
         filter_prop_xpath = string.split(filter_prop, '-')
 
-        return self.matches_filter(filter_prop_xpath, cur_obj, filter_val, filter_names)
+        return self.matches_filter(filter_prop_xpath, cur_obj, filter_val, filter_names, filter_operator)
 
 
     def retrieve_vc_property(self, xpath, cur_obj, name):
@@ -260,7 +267,6 @@ class VCChecker(CheckerBase):
 
 
     # Manual checks
-
     @checkgroup("cluster_checks", "Validate datastore heartbeat")
     def check_datastore_heartbeat(self):
 
@@ -279,5 +285,32 @@ class VCChecker(CheckerBase):
 
         if len(message) > 0:
             return True, None
+        else:
+            return False, message
+    
+    @checkgroup("cluster_checks", "VSphere Cluster Nodes in Same Vesion")
+    def check_vSphere_cluster_nodes_in_same_version(self):
+        #content.rootFolder.childEntity.hostFolder.childEntity.datastore.host.key.config.product.version
+        datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.datastore')
+        
+        message = ""
+        
+        for cluster, cluster_datastores in datastores.iteritems():
+            mult_vers_flag, version = False, ''
+            for datastore in cluster_datastores:
+                for host in datastore.host:
+                    if version == '':
+                        version = host.key.config.product.version
+                    else:
+                        if host.key.config.product.version != version:
+                            mult_vers_flag = True
+            if mult_vers_flag:
+                self.reporter.notify_progress("    "+cluster+" is Having multiple version... FAIL")
+                message += "    "+cluster+" is Having multiple version... FAIL"
+            else: 
+                self.reporter.notify_progress("   "+cluster+" is not Having multiple version... PASS")
+                message += "    "+cluster+" is not Having multiple version... PASS"
+        if len(message) > 0:
+            return True, message
         else:
             return False, message
