@@ -3,6 +3,7 @@ __author__ = 'subash atreya'
 import string
 import warnings
 from pyVim.connect import SmartConnect, Disconnect
+from pyVmomi import vim
 from base_checker import *
 from prettytable import PrettyTable
 import sys
@@ -312,5 +313,25 @@ class VCChecker(CheckerBase):
                 message += "    "+cluster+" is not Having multiple version... PASS"
         if len(message) > 0:
             return True, message
+        else:
+            return False, message
+
+    @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory")
+    def check_directory_service_set_to_active_directory(self):
+
+        authenticationStoreInfo = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig')
+       
+        message = ""
+        for hostname,store in authenticationStoreInfo.iteritems():
+            for item in store :
+                if isinstance(item,vim.host.ActiveDirectoryInfo):
+                    if hasattr(item,"enabled"):
+                        is_active_dir_enabled=item.enabled
+                        self.reporter.notify_progress("   " + hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) .... " + (is_active_dir_enabled and " PASS" or " FAIL"))
+                        if not is_active_dir_enabled:
+                            message += ", " +hostname+" ActiveDirectoryInfo not enabled"
+       
+        if len(message) > 0:
+            return True, None
         else:
             return False, message
