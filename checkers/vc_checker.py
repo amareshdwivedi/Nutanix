@@ -197,10 +197,10 @@ class VCChecker(CheckerBase):
         if isinstance(attr, list):
             matches = True
             for item in attr:
-                matches = matches and self.matches_filter(xpath[1:], item, expected, filter_names)
+                matches = matches and self.matches_filter(xpath[1:], item, expected, filter_names,filter_operator)
             return matches
         else:
-            return self.matches_filter(xpath[1:], attr, expected, filter_names)
+            return self.matches_filter(xpath[1:], attr, expected, filter_names,filter_operator)
 
     def apply_filter(self, cur_obj, filter, filter_names):
         if filter is None:
@@ -288,7 +288,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
     
-    @checkgroup("cluster_checks", "VSphere Cluster Nodes in Same Vesion")
+    @checkgroup("cluster_checks", "VSphere Cluster Nodes in Same Version")
     def check_vSphere_cluster_nodes_in_same_version(self):
         #content.rootFolder.childEntity.hostFolder.childEntity.datastore.host.key.config.product.version
         datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.datastore')
