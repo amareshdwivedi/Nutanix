@@ -8,6 +8,7 @@ from base_checker import *
 from prettytable import PrettyTable
 import sys
 import fnmatch
+import datetime
 
 def exit_with_message(message):
     print message
@@ -333,5 +334,29 @@ class VCChecker(CheckerBase):
        
         if len(message) > 0:
             return True, None
+        else:
+            return False, message
+
+    @checkgroup("vcenter_server_checks", "Validate vCenter Server license expiration date")
+    def check_vcenter_server_license_expiry(self):
+        expirationDate = self.get_vc_property('content.licenseManager.evaluation.properties[key=expirationDate].value')
+        for item, expiry_date in expirationDate.iteritems():
+            #Currently timezone is not considered for the date difference / Need to add
+            xexpiry = datetime.datetime(expiry_date.year,expiry_date.month, expiry_date.day)
+            
+            valid_day_count = (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days
+            if ( valid_day_count > 60 or valid_day_count < 0):
+                if valid_day_count < 0:
+                    self.reporter.notify_progress("   License expiry older than current date by " +str(-1*valid_day_count)+ " days (Expected: > 60 days) .... PASS" )
+                    message = "   License expiry older than current date by " +str(-1*valid_day_count)+ " days (Expected: > 60 days) .... PASS" 
+                else:
+                    self.reporter.notify_progress("   License expiring within " +str(valid_day_count)+ " (Expected: > 60 days) .... PASS" )
+                    message = "   License expiring within " +str(valid_day_count)+ " (Expected: > 60 days) .... PASS"
+            else:  
+                self.reporter.notify_progress("   License expiring within " +str(valid_day_count)+ " (Expected: > 60 days) .... FAIL" )
+                message = "   License expiring within " +str(valid_day_count)+ " (Expected: > 60 days) .... FAIL"
+        
+        if len(message) > 0:
+            return True, message
         else:
             return False, message
