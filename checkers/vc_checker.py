@@ -139,6 +139,12 @@ class VCChecker(CheckerBase):
     def validate_vc_property(self, path, operator, expected):
 
         props = self.get_vc_property(path)
+        if props == None:
+            message = path + "=" + "None" + " (Expected: " + operator + expected + ") "
+            passed =  VCChecker.apply_operator(props, expected, operator)
+            self.reporter.notify_progress(self.reporter.notify_checkLog, message, passed and "PASS" or "FAIL")
+            return False, message
+        
         if expected.startswith("content"):
             # Reference to another object
             expected_props = self.get_vc_property(expected)
