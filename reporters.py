@@ -1,5 +1,5 @@
 __author__ = 'subashatreya'
-from prettytable import PrettyTable
+
 
 class CheckerResult:
     def __init__(self, name, passed=None, message=None):
@@ -7,7 +7,7 @@ class CheckerResult:
         self.passed = passed
         self.message = message
         self.steps = []
-        
+
     def add_check_result(self, step):
         self.steps.append(step)
 
@@ -33,12 +33,6 @@ class DefaultConsoleReporter:
 
     def __init__(self, name):
         self.name = name
-        #self.x = PrettyTable(["Check Property", "Status"])
-        #self.x.align["Check Property"] = "l"
-        #self.x.align["Status"] = "l" # Left align city names
-        #self.x.padding_width = 1 # One space between column edges and contents (default)
-
-
 
     def notify_progress(self, fname,*args):
         fname(*args)
@@ -51,20 +45,11 @@ class DefaultConsoleReporter:
         print self.name + " : " + "\n++++ Running check group - "+message+" ++++"
     
     def notify_checkName(self,message):
-        #print self.name + " : " + "Check - ",message
-        self.x = PrettyTable([message, "Status"])
-        self.x.align[message] = "l"
-        self.x.align["Status"] = "l" # Left align city names
-        self.x.padding_width = 1 # One space between column edges and contents (default)
-        
-        
-    
+        print self.name + " : " + "Check - ",message
     
     def notify_checkLog(self,message,status):
-        #print self.name + " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
-        msg = " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
-        self.x.add_row([message,status])
-        print str(self.x)
+        print self.name + " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
         
+    
     
 
