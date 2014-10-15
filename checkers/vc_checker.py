@@ -18,7 +18,7 @@ def exit_with_message(message):
 def checkgroup(group_name, description):
     def outer(func):
         def inner(*args, **kwargs):
-            args[0].reporter.notify_progress("Check - " + description)
+            args[0].reporter.notify_progress(args[0].reporter.notify_checkName, description)
             return func(*args, **kwargs)
         inner.group = group_name
         return inner
@@ -93,7 +93,7 @@ class VCChecker(CheckerBase):
                 check_groups_run.append(group)
 
 
-        self.reporter.notify_progress("+++ Starting VC Checks")
+        self.reporter.notify_progress(self.reporter.notify_info,"Starting VC Checks")
         self.result = CheckerResult("vc")
         warnings.simplefilter('ignore')
 
@@ -115,9 +115,9 @@ class VCChecker(CheckerBase):
 
 
         for check_group in check_groups_run:
-            self.reporter.notify_progress("\n++++ Running check group - " + check_group + " ++++")
+            self.reporter.notify_progress(self.reporter.notify_checkGroup,check_group)
             for check in self.config[check_group]:
-                self.reporter.notify_progress("Check - " + check['name'])
+                self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
                 self.result.add_check_result(CheckerResult(check['name'], passed, message))
                 passed_all = passed_all and passed
@@ -131,7 +131,7 @@ class VCChecker(CheckerBase):
         Disconnect(self.si)
         self.result.passed = passed_all
         self.result.message = "VC Checks completed with " + (passed_all and "success" or "failure")
-        self.reporter.notify_progress("+++ VC Checks complete\n")
+        self.reporter.notify_progress(self.reporter.notify_info,"VC Checks complete")
 
         return self.result
 
@@ -153,10 +153,10 @@ class VCChecker(CheckerBase):
 
             passed =  VCChecker.apply_operator(property, expected_val, operator)
             passed_all = passed_all and passed
-            message = path + "=" + str(property) + " (Expected: " + operator + expected_val + ")"
+            message = path + "=" + str(property) + " (Expected: " + operator + expected_val + ") "
             if not passed:
                 message_all += ("," + message)
-            self.reporter.notify_progress("   " +message + (passed and " .... PASS" or " .... FAIL"))
+            self.reporter.notify_progress(self.reporter.notify_checkLog,message, passed and "PASS" or "FAIL")
 
         if passed_all:
             return True, None
@@ -281,7 +281,7 @@ class VCChecker(CheckerBase):
             for ds in cluster_datastores:
                 if not fnmatch.fnmatch(ds.name, 'NTNX-*'):
                     is_heartbeating = ds.name in cluster_heartbeat_datastores
-                    self.reporter.notify_progress("   " + cluster+"."+ds.name+"="+str(is_heartbeating) + " (Expected: =True) .... " + (is_heartbeating and " PASS" or " FAIL"))
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,cluster+"."+ds.name+"="+str(is_heartbeating) + " (Expected: =True) " , (is_heartbeating and "PASS" or "FAIL"))
                     if not is_heartbeating:
                         message += ", " +cluster+"."+ds.name+"is not heartbeating"
 
@@ -307,7 +307,7 @@ class VCChecker(CheckerBase):
                         if host.key.config.product.version != version:
                             mult_vers_flag = True
                             break
-            self.reporter.notify_progress("   " + cluster + " (Expected multiple Version: =No) .... " + (not mult_vers_flag and " PASS" or " FAIL"))
+            self.reporter.notify_progress(self.reporter.notify_checkLog, cluster + " (Expected multiple Version: =No) " , (not mult_vers_flag and "PASS" or "FAIL"))
             if mult_vers_flag:
                 message += ", " +cluster+" nodes have multiple versions avilable."        
         if len(message) > 0:
@@ -325,7 +325,7 @@ class VCChecker(CheckerBase):
                 if isinstance(item,vim.host.ActiveDirectoryInfo):
                     if hasattr(item,"enabled"):
                         is_active_dir_enabled=item.enabled
-                        self.reporter.notify_progress("   " + hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) .... " + (is_active_dir_enabled and " PASS" or " FAIL"))
+                        self.reporter.notify_progress(self.reporter.notify_checkLog, hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) " , (is_active_dir_enabled and "PASS" or "FAIL"))
                         if not is_active_dir_enabled:
                             message += ", " +hostname+" ActiveDirectoryInfo not enabled"
        
@@ -344,7 +344,7 @@ class VCChecker(CheckerBase):
             xexpiry = datetime.datetime(expiry_date.year,expiry_date.month, expiry_date.day)
             
             valid_60_days = (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days > 60 or (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days < 0
-            self.reporter.notify_progress("   License Expiration Validation date " + str(expiry_date) + " days (Expected: > 60 days or always valid) ...." + (valid_60_days and " PASS" or " FAIL"))
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"License Expiration Validation date " + str(expiry_date) + " days (Expected: > 60 days or always valid) " , (valid_60_days and "PASS" or "FAIL"))
             if not valid_60_days:
                 message += ", License valid for less than 60 days"
         if len(message) > 0:

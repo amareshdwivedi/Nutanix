@@ -34,7 +34,22 @@ class DefaultConsoleReporter:
     def __init__(self, name):
         self.name = name
 
-    def notify_progress(self, message):
-        print self.name + " : " + message
-
+    def notify_progress(self, fname,*args):
+        fname(*args)
+        
+        
+    def notify_info(self, message):
+        print self.name + " : " + "+++ "+message+" +++"
+    
+    def notify_checkGroup(self,message):
+        print self.name + " : " + "\n++++ Running check group - "+message+" ++++"
+    
+    def notify_checkName(self,message):
+        print self.name + " : " + "Check - ",message
+    
+    def notify_checkLog(self,message,status):
+        print self.name + " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
+        
+    
+    
 
