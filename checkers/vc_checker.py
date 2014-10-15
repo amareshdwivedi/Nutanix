@@ -232,7 +232,13 @@ class VCChecker(CheckerBase):
             node = xpath[0]
             filter = None
     
-        attr = getattr(cur_obj, node)
+        try:
+            attr = getattr(cur_obj, node)
+        except AttributeError:
+            return {}
+        except:
+            print "Unknow error"     
+        
 
         name_added = False
         if hasattr(cur_obj, "name"):
