@@ -191,8 +191,13 @@ class VCChecker(CheckerBase):
 
 
     def matches_filter(self, xpath, cur_obj, expected, filter_names,filter_operator):
-        attr = getattr(cur_obj, xpath[0])
-
+        try:
+            attr = getattr(cur_obj, xpath[0])
+        except AttributeError:
+            return {}
+        except:
+            print "Unknow error"   
+        
         if hasattr(cur_obj, "name"):
             filter_names.append(cur_obj.name)
 
