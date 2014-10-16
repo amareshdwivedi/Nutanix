@@ -313,25 +313,77 @@ class VCChecker(CheckerBase):
         datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.datastore')
         
         message = ""
-        
         for cluster, cluster_datastores in datastores.iteritems():
-            mult_vers_flag, version = False, ''
+            mult_vers_flag, versions = False, [] 
             for datastore in cluster_datastores:
                 for host in datastore.host:
-                    if version == '':
-                        version = host.key.config.product.version
+                    if len(versions) == 0:
+                        versions.append(host.key.config.product.version)
                     else:
-                        if host.key.config.product.version != version:
+                        if host.key.config.product.version not in versions:
+                            versions.append(host.key.config.product.version)
                             mult_vers_flag = True
                             break
-            self.reporter.notify_progress(self.reporter.notify_checkLog, cluster + " (Expected multiple Version: =No) " , (not mult_vers_flag and "PASS" or "FAIL"))
+                if mult_vers_flag:
+                    break
+            self.reporter.notify_progress(self.reporter.notify_checkLog, cluster + " (Expected multiple Version: =No ( found:"+str(versions)+") ) " , (not mult_vers_flag and "PASS" or "FAIL"))
             if mult_vers_flag:
-                message += ", " +cluster+" nodes have multiple versions avilable."        
+                message += ", " +cluster+" Nodes have Multiple Versions Available"        
         if len(message) > 0:
             return True, None
         else:
             return False, message
 
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress1")
+    def check_cluster_das_isolationaddress1(self):
+        all_isolation_address1 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress1].value')
+        all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net.ipAddress')
+        all_ips = []
+        for item in all_cvm_ips.values():
+            all_ips.extend(item)
+        
+        message = ""
+        for cluster, isolation_address1 in all_isolation_address1.iteritems():
+            isolation_address_present = isolation_address1 in all_ips
+            
+            self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress1(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+            if not isolation_address_present:
+                message += ", " +cluster+" isolationaddress1 value is not CVM ipAddress."        
+        if len(message) > 0:
+            return True, None
+        else:
+            return False, message 
+    
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2")
+    def check_cluster_das_isolationaddress2(self):
+        all_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value')
+        all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
+        message = ""
+        for cluster, isolation_address2 in all_isolation_address2.iteritems():
+            isolation_address_present = isolation_address2 in all_cvm_ips.values()
+            self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress2(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+            if not isolation_address_present:
+                message += ", " +cluster+" isolationaddress2 value is not CVM ipAddress."        
+        if len(message) > 0:
+            return True, None
+        else:
+            return False, message 
+                
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3")
+    def check_cluster_das_isolationaddress3(self):
+        all_isolation_address3 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress3].value')
+        all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
+        message = ""
+        for cluster, isolation_address3 in all_isolation_address3.iteritems():
+            isolation_address_present = isolation_address3 in all_cvm_ips.values()
+            self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress3(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+            if not isolation_address_present:
+                message += ", " +cluster+" isolationaddress3 value is not CVM ipAddress."        
+        if len(message) > 0:
+            return True, None
+        else:
+            return False, message   
+    
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory")
     def check_directory_service_set_to_active_directory(self):
         authenticationStoreInfo = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig')
