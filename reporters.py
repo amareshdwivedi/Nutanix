@@ -1,5 +1,8 @@
 __author__ = 'subashatreya'
-
+from prettytable import PrettyTable
+from colorama import Fore, Back, Style
+from colorama import init
+init()
 
 class CheckerResult:
     def __init__(self, name, passed=None, message=None):
@@ -33,7 +36,9 @@ class DefaultConsoleReporter:
 
     def __init__(self, name):
         self.name = name
-
+        self.row_count = 0
+        self.x = PrettyTable(["message", "Status"])
+        
     def notify_progress(self, fname,*args):
         fname(*args)
         
@@ -43,13 +48,26 @@ class DefaultConsoleReporter:
     
     def notify_checkGroup(self,message):
         print self.name + " : " + "\n++++ Running check group - "+message+" ++++"
-    
-    def notify_checkName(self,message):
-        print self.name + " : " + "Check - ",message
-    
-    def notify_checkLog(self,message,status):
-        print self.name + " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
         
-    
+    def notify_checkName(self,message):
+        if self.row_count > 0:
+            print str(self.x)
+        self.x = PrettyTable([message, "Status"])
+        self.x.align[message] = "l"
+        self.x.align["Status"] = "l"
+        self.x.padding_width = 1
+        self.row_count = 0
+        
+        
+    def notify_checkLog(self,message, status):
+        #print self.name + " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
+        #msg = " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
+        if status == "FALSE":
+            status = Fore.RED+status+Fore.RESET
+        else:
+            status = Fore.GREEN+status+Fore.RESET
+        self.x.add_row([message.ljust(120),status])
+        self.row_count += 1
+        
     
 
