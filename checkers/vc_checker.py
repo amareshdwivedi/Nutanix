@@ -369,6 +369,29 @@ class VCChecker(CheckerBase):
         else:
             return False, message
     
+    @checkgroup("vcenter_server_checks", " Validate vCenter Server has VMware Tools installed and is up to date.")
+    def check_vcenter_server_tool_status(self):
+        vcenter_ipv4 = self.get_vc_property('content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value')
+        vcenter_ip=vcenter_ipv4[""]
+        vms = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.vm.guest')
+        
+        message = ""
+        for vm in vms.keys():
+            guest_info=vms[vm]
+            if guest_info.ipAddress == vcenter_ip:
+                toolsStatus=guest_info.toolsStatus
+                toolsStatus_expected="toolsOk"
+                if toolsStatus == toolsStatus_expected :
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (True and "PASS" or "FAIL"))
+                else:
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
+                break
+        
+        if len(message) > 0:
+            return True, message
+        else:
+            return False, message
+    
     @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - Network IO Control")
     def check_virtual_distributed_switch_networ_io_control(self):
         datacenter_networks = self.get_vc_property('content.rootFolder.childEntity.networkFolder.childEntity')
