@@ -402,6 +402,34 @@ class VCChecker(CheckerBase):
             return True, None
         else:
             return False, message
+    
+    @checkgroup("esxi_checks", "Validate NTP client is set to Enabled and is in the running state")
+    def check_ntp_client_enable_running(self):
+        datacenter_hosts =self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host')
+        message = ""
+        for datacenter in datacenter_hosts.keys():
+            for host in datacenter_hosts[datacenter]:
+                try:
+                    ruleset_enable =False
+                    service_running = False
+                    rulesets=host.configManager.firewallSystem.firewallInfo.ruleset
+                    host_services =host.config.service.service
+                    for ruleset in rulesets:
+                        if ruleset.key=="ntpClient":
+                            ruleset_enable=ruleset.enabled
+                             
+                            for service in host_services:
+                                if service.key == "ntpd":
+                                    service_running=service.running
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+host.name+" = NTP Client Status Enabled:"+str(ruleset_enable) + " and is running:"+str(service_running)+" (Expected: ="+" NTP Client Enable : True and running : True "+") " , ((ruleset_enable and service_running) and "PASS" or "FAIL"))
+                except AttributeError:
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+host.name+" = NTP Client not configured" , ((ruleset_enable and service_running) and "PASS" or "FAIL"))
+                    message=datacenter+"."+host.name+" = NTP Client not configured"
+                                    
+        if len(message) > 0:
+            return True, None
+        else:
+            return False, message
 
     @checkgroup("vcenter_server_checks", "Validate vCenter Server license expiration date")
     def check_vcenter_server_license_expiry(self):
