@@ -368,3 +368,46 @@ class VCChecker(CheckerBase):
             return True, message
         else:
             return False, message
+    
+    @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - Network IO Control")
+    def check_virtual_distributed_switch_networ_io_control(self):
+        datacenter_networks = self.get_vc_property('content.rootFolder.childEntity.networkFolder.childEntity')
+       
+        message = ""
+        for datacenter in datacenter_networks.keys():
+            network_list = datacenter_networks.get(datacenter)
+            for network in network_list:
+                if isinstance(network,vim.dvs.VmwareDistributedVirtualSwitch):
+                    nioc_enabled=network.config.networkResourceManagementEnabled
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(nioc_enabled) + " (Expected: =True) " , (nioc_enabled and "PASS" or "FAIL"))
+                    if not nioc_enabled:
+                            message += ", " +datacenter+"."+network.name+"  Network IO Control not enabled"
+       
+        if len(message) > 0:
+            return True, None
+        else:
+            return False, message
+        
+    @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - MTU")
+    def check_virtual_distributed_switch_mtu(self):
+        datacenter_networks = self.get_vc_property('content.rootFolder.childEntity.networkFolder.childEntity')
+       
+        message = ""
+        for datacenter in datacenter_networks.keys():
+            network_list = datacenter_networks.get(datacenter)
+            for network in network_list:
+                if isinstance(network,vim.dvs.VmwareDistributedVirtualSwitch):
+                    maxMtu=network.config.maxMtu
+                    # default value for maxMtu is 1500. Sometime MOB returns None value. So setting maxMtu value to 1500 as default
+                    if maxMtu=="None": 
+                        maxMtu=1500
+                    maxMtu_expected=1500
+                    if maxMtu == maxMtu_expected:
+                        self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+") " , ( True and "PASS" or "FAIL"))
+                    else:
+                            message += ", " +datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+")"
+       
+        if len(message) > 0:
+            return True, None
+        else:
+            return False, message
