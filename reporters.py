@@ -60,7 +60,7 @@ class DefaultConsoleReporter:
         
         
     def notify_checkLog(self,message, status):
-        #print self.name + " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
+        #print self.name +" :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
         #msg = " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
         print "GAMGAM status:",status, type(status)
         if status == "FAIL":
