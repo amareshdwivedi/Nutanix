@@ -21,16 +21,7 @@ class CheckerBase:
 
     def __init__(self, name):
         self.config = {}
-        auth={}
-        try:
-            auth=CheckerBase.get_auth_config(self.get_name())
-        except ValueError:
-            print self.get_name()+ " not configured"
-            self.setup()
-        except KeyError:
-            print self.get_name()+ " not configured"
-            self.setup()
-        self.authconfig=auth
+        self.authconfig={}
         self.reporter = None
         self.checks=[]
         self.result = CheckerResult(name)
@@ -64,12 +55,21 @@ class CheckerBase:
         if not prop in config:
             raise RuntimeError(prop + " not in config")
     
-    @staticmethod
-    def get_auth_config(checker):
-        fp = open("conf" + os.path.sep + "auth.conf", 'r')
-        authconfig = json.load(fp)
-        fp.close()
-        return authconfig[checker]
+    
+    def get_auth_config(self,checker):
+        auth={}
+        try:           
+            fp = open("conf" + os.path.sep + "auth.conf", 'r')
+            authconfig = json.load(fp)
+            fp.close()
+            auth=authconfig[checker]
+        except ValueError:
+            print checker+ " not configured"
+            self.setup()
+        except KeyError:
+            print checker+ " not configured"
+            self.setup()
+        return auth
  
     @staticmethod
     def save_auth_into_auth_config(checker_name, data):

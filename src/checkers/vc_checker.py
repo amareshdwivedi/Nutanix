@@ -43,6 +43,7 @@ class VCChecker(CheckerBase):
     def configure(self, config, reporter):
         self.config = config
         self.reporter = reporter
+        self.authconfig=self.get_auth_config(self.get_name())
         CheckerBase.validate_config(self.authconfig, "vc_ip")
         CheckerBase.validate_config(self.authconfig, "vc_user")
         CheckerBase.validate_config(self.authconfig, "vc_pwd")
@@ -78,6 +79,8 @@ class VCChecker(CheckerBase):
         
         if Validate.valid_ip(vc_ip) == False:
             exit_with_message("\nError : Invalid vCenter Server IP address")
+        if isinstance(vc_port, int ) == False:
+            exit_with_message("\nError : Port number is not a numeric value")
         #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+vc_port
         
         vc_auth = dict()

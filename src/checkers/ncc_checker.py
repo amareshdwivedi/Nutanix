@@ -30,7 +30,7 @@ class NCCChecker(CheckerBase):
     def configure(self, config, reporter):
         self.config = config
         self.reporter = reporter
-        self.authconfig=CheckerBase.get_auth_config(self.get_name())
+        self.authconfig=self.get_auth_config(self.get_name())
         CheckerBase.validate_config(self.authconfig, "cvm_ip")
         CheckerBase.validate_config(self.authconfig, "cvm_user")
         CheckerBase.validate_config(self.authconfig, "cvm_pwd")
