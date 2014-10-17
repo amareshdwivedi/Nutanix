@@ -58,11 +58,14 @@ def PDFReportGenerator(resultJson):
         lenght=len(resultJson[checkers].get('checks'));
         for checks in resultJson[checkers].get('checks'):
             # print "Checks : ", checks['checks']
-            name, status, message = checks.get('name'), checks.get('pass:'), checks.get('message:')
+            name, status, message = checks.get('name:'), checks.get('pass:'), checks.get('message:')
             messagePara=[]
-            for msg in string.split(message, ','):
+            if message is not None:
+             for msg in string.split(message, ','):
                 messagePara.append(Paragraph(msg, styles["Normal"]))
-            datafortable.append([name, status, messagePara])
+            
+            namepara=Paragraph(name, styles["Normal"])
+            datafortable.append([namepara, status, messagePara])
             #print name, '|', status, '|', message
         table = Table(datafortable, colWidths=[doc.width / 3.0] * 3)
         table.setStyle(TableStyle([('TEXTCOLOR', (0, 1), (2, 1), colors.white),
