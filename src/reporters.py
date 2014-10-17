@@ -21,7 +21,7 @@ class CheckerResult:
         self.message = message
 
     def to_dict(self):
-        dict_obj = {"name": self.name, "pass:": self.passed, "message:": self.message}
+        dict_obj = {"name:": self.name, "pass:": self.passed, "message:": self.message}
 
         if len(self.steps) > 0:
             steps_dict = []
@@ -60,14 +60,22 @@ class DefaultConsoleReporter:
         
         
     def notify_checkLog(self,message, status):
-        #print self.name +" :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
-        #msg = " :     "+message + ('[ '+status+' ]').rjust(110-len(message))+''
         if status == "FAIL":
             status = Fore.RED+status+Fore.RESET
         else:
             status = Fore.GREEN+status+Fore.RESET
         self.x.add_row([message.ljust(120),status])
         self.row_count += 1
-        
     
+    def notify_one_line(self,message, status):
+        print "+"+"-"*130+"+"
+        if status == "FAIL":
+            status = Fore.RED+"[ "+status+" ]"+Fore.RESET
+        elif status == "Err":
+            status = Fore.YELLOW+"[ "+status+" ]"+Fore.RESET
+        else:
+            status = Fore.GREEN+"[ "+status+" ]"+Fore.RESET
+        print message.ljust(120),status
+        self.row_count += 1
+        
 

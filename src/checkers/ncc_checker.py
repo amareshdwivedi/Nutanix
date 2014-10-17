@@ -5,7 +5,7 @@ import paramiko
 from base_checker import *
 from prettytable import PrettyTable
 import sys
-
+import ast
 
 
 
@@ -40,27 +40,40 @@ class NCCChecker(CheckerBase):
 
 
     def execute(self, args):
-
+        
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(self.config['cvm_ip'], username=self.config['cvm_user'], password=self.config['cvm_pwd'])
 
+        self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
+        self.result = CheckerResult("ncc")
+        
         ntnx_env = "source /etc/profile.d/zookeeper_env.sh && source /usr/local/nutanix/profile.d/nutanix_env.sh && "
-
-        cmd = len(args) > 0 and self.config['ncc_path'] + " " + " ".join(args) or self.config['ncc_path']
+        cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false " + " ".join(args) or self.config['ncc_path']
         cmd = ntnx_env + cmd
 
+        status_text = {0 : "Done", 3 : "Pass",1 : "Done", 7: "Err"}
         stdin, stdout, stderr =  ssh.exec_command(cmd)
-
-
         for line in stdout:
-            print line.strip('\n')
+            try :
+                t = ast.literal_eval(line.strip('\n').replace("null","'null'").replace("true","'true'").replace("false","'false'"))
+            except :
+                print line.strip('\n')
+                continue
 
-
+            check_name = t["output holder list"][0]["message"]            
+            status = t["status"]
+            message = ""
+            if status in [7]:
+                message = t["detail canvas"]["output holder list"] [0]["message list"][0]
+                
+            self.result.add_check_result(CheckerResult(check_name, status_text[status], message))
+            self.reporter.notify_one_line(check_name, status_text[status])
+        self.reporter.notify_progress(self.reporter.notify_info,"NCC Checks complete")
         ssh.close()
-
-        return CheckerResult("ncc")
-
+        
+        return self.result
+        
     
     def usage(self):
         x = PrettyTable(["Name", "Short help"])
