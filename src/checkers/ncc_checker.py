@@ -52,8 +52,7 @@ class NCCChecker(CheckerBase):
             if args[0] == 'setup':
                 self.setup()
                 exit_with_message("Nutanix Cluster is configured.")
-            else:
-                self.usage("Invalid argument to NCC")
+            
         
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
