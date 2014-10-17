@@ -9,6 +9,7 @@ from prettytable import PrettyTable
 import sys
 import fnmatch
 import datetime
+from validation import Validate
 
 def exit_with_message(message):
     print message
@@ -42,11 +43,10 @@ class VCChecker(CheckerBase):
     def configure(self, config, reporter):
         self.config = config
         self.reporter = reporter
-
-        CheckerBase.validate_config(config, "vc_ip")
-        CheckerBase.validate_config(config, "vc_user")
-        CheckerBase.validate_config(config, "vc_pwd")
-        CheckerBase.validate_config(config, "vc_port")
+        CheckerBase.validate_config(self.authconfig, "vc_ip")
+        CheckerBase.validate_config(self.authconfig, "vc_user")
+        CheckerBase.validate_config(self.authconfig, "vc_pwd")
+        CheckerBase.validate_config(self.authconfig, "vc_port")
 
         checks_list = [k for k in config.keys() if k.endswith('checks')]
         #print checks_list
@@ -65,11 +65,30 @@ class VCChecker(CheckerBase):
         for checks in checks_list:
             x.add_row([checks,"Run "+checks])
         x.add_row(["run_all", "Run all VC checks."])
-
+        x.add_row(["setup", "Set vCenter Server Configuration"])
         message = message is None and str(x) or "\nERROR : "+ message + "\n\n" + str(x)
         exit_with_message(message)
 
-
+    def setup(self):
+        print "\nConfiguring vCenter Server :\n"
+        vc_ip=raw_input("Enter vCenter Server IP : ")
+        vc_user=raw_input("Enter vCenter Server User Name : ")
+        vc_pwd=raw_input("Enter vCenter Server Password : ")
+        vc_port=raw_input("Enter vCenter Server Port : ")
+        
+        if Validate.valid_ip(vc_ip) == False:
+            exit_with_message("\nError : Invalid vCenter Server IP address")
+        #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+vc_port
+        
+        vc_auth = dict()
+        vc_auth["vc_ip"]=vc_ip;
+        vc_auth["vc_user"]=vc_user;
+        vc_auth["vc_pwd"]=vc_pwd;
+        vc_auth["vc_port"]=vc_port;
+        CheckerBase.save_auth_into_auth_config(self.get_name(),vc_auth)
+        exit_with_message("vCenter Server is configured Successfully ")
+        return
+    
     def execute(self, args):
 
         if len(args) == 0:
@@ -85,13 +104,13 @@ class VCChecker(CheckerBase):
             check_groups_run = check_groups
             if len(args) > 1:
                 self.usage("Parameter not expected after run_all")
-
+        elif args[0] == 'setup':
+            self.setup()
         else:
             for group in args:
                 if group not in check_groups:
                     self.usage("Group " + group + " is not a valid check group")
                 check_groups_run.append(group)
-
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting VC Checks")
         self.result = CheckerResult("vc")
@@ -109,7 +128,7 @@ class VCChecker(CheckerBase):
                 else:
                     check_functions[group_name] = [func_obj]
 
-        self.si = SmartConnect(host=self.config['vc_ip'], user=self.config['vc_user'], pwd=self.config['vc_pwd'], port=self.config['vc_port'])
+        self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=self.authconfig['vc_pwd'], port=self.authconfig['vc_port'])
 
         passed_all = True
 

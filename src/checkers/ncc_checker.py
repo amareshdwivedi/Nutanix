@@ -6,8 +6,7 @@ from base_checker import *
 from prettytable import PrettyTable
 import sys
 import ast
-
-
+from validation import Validate
 
 
 def exit_with_message(message):
@@ -31,19 +30,34 @@ class NCCChecker(CheckerBase):
     def configure(self, config, reporter):
         self.config = config
         self.reporter = reporter
-
-        CheckerBase.validate_config(config, "cvm_ip")
-        CheckerBase.validate_config(config, "cvm_user")
-        CheckerBase.validate_config(config, "cvm_pwd")
-        CheckerBase.validate_config(config, "ncc_path")
-
-
+        self.authconfig=CheckerBase.get_auth_config(self.get_name())
+        CheckerBase.validate_config(self.authconfig, "cvm_ip")
+        CheckerBase.validate_config(self.authconfig, "cvm_user")
+        CheckerBase.validate_config(self.authconfig, "cvm_pwd")
+        CheckerBase.validate_config(self.config, "ncc_path")
+        
+    def usage(self, message=None):
+        x = PrettyTable(["Name", "Short help"])
+        x.align["Name"] = "l"
+        x.align["Short help"] = "l" # Left align city names
+        x.padding_width = 1 # One space between column edges and contents (default)
+        x.add_row(["ncc", "Run NCC checks."])
+        x.add_row(["ncc setup", "Set Nutanix Cluster Check Configuration"])
+        message = message is None and str(x) or "\nERROR : "+ message + "\n\n" + str(x)
+        exit_with_message(message)
 
     def execute(self, args):
         
+        if len(args) != 0:
+            if args[0] == 'setup':
+                self.setup()
+                exit_with_message("Nutanix Cluster is configured.")
+            else:
+                self.usage("Invalid argument to NCC")
+        
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(self.config['cvm_ip'], username=self.config['cvm_user'], password=self.config['cvm_pwd'])
+        ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=self.authconfig['cvm_pwd'])
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
         self.result = CheckerResult("ncc")
@@ -73,14 +87,23 @@ class NCCChecker(CheckerBase):
         ssh.close()
         
         return self.result
+ 
+    
+    def setup(self):
+        print "\nConfiguring NCC :\n"
+        cvm_ip=raw_input("Enter CVM IP : ")
+        cvm_user=raw_input("Enter CVM User Name : ")
+        cvm_pwd=raw_input("Enter CVM Password : ")
         
-    
-    def usage(self):
-        x = PrettyTable(["Name", "Short help"])
-        x.align["Name"] = "l"
-        x.align["Short help"] = "l" # Left align city names
-        x.padding_width = 1 # One space between column edges and contents (default)
-        x.add_row(["run_all", "Run all checks."])           
-        print x
-        exit_with_message("")
-    
+        if Validate.valid_ip(cvm_ip) == False:
+            exit_with_message("\nError : Invalid CVM IP address")
+        #print "cvm_ip :"+cvm_ip+" cvm_user :"+cvm_user+" cvm_pwd : "+cvm_pwd
+        
+        ncc_auth = dict()
+        ncc_auth["cvm_ip"]=cvm_ip;
+        ncc_auth["cvm_user"]=cvm_user;
+        ncc_auth["cvm_pwd"]=cvm_pwd;
+     
+        CheckerBase.save_auth_into_auth_config(self.get_name(),ncc_auth)
+        exit_with_message("NCC is configured Successfully ")
+        return
