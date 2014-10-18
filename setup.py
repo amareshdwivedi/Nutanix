@@ -18,11 +18,11 @@ setup(
     author='krishnamurthy_b',
     name='HealthCheck',
      version = '1.0.0',
-    packages=['HealthCheck','HealthCheck.checkers','HealthCheck.reports'],
+    packages=['src','src.checkers','src.reports'],
     include_package_data=True,
-    data_files=[('HealthCheck', ['HealthCheck//nutanixlogo.png']),
-                  ('HealthCheck//conf', ['HealthCheck//conf//ncc.conf','HealthCheck//conf//vc.conf'])],
-    long_description=open('HealthCheck//README.md').read(),
-    install_requires=requires,
+    data_files=[('src', ['src//nutanixlogo.png']),
+                  ('src//conf', ['src//conf//ncc.conf','src//conf//vc.conf','src//conf//auth.conf'])],
+    long_description=open('README.md').read(),
+    install_requires=requires
       )
     
