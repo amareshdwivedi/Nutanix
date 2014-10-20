@@ -24,6 +24,7 @@ def checkgroup(group_name, description):
             args[0].reporter.notify_progress(args[0].reporter.notify_checkName, description)
             return func(*args, **kwargs)
         inner.group = group_name
+        inner.descr = description
         return inner
     return outer
 
@@ -155,7 +156,7 @@ class VCChecker(CheckerBase):
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
-                    self.result.add_check_result(CheckerResult(check['name'], passed, message))
+                    self.result.add_check_result(CheckerResult(check_function.descr, "", message))
                     passed_all = passed_all and passed
                 self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
@@ -170,18 +171,23 @@ class VCChecker(CheckerBase):
     def validate_vc_property(self, path, operator, expected):
 
         props = self.get_vc_property(path)
+        message_all = ""
+        passed_all = True
+        
         if props == None:
-            message = path + "=" + "None" + " (Expected: " + operator + expected + ") "
             passed =  VCChecker.apply_operator(props, expected, operator)
+            message = path + "=" + "None" + " (Expected: " + operator + expected + ") "
+            message_all += (", "+message+"#"+(passed and "PASS" or "FAIL")) 
+            passed_all = passed_all and passed
             self.reporter.notify_progress(self.reporter.notify_checkLog, message, passed and "PASS" or "FAIL")
-            return False, message
+            return False, message_all
         
         if expected.startswith("content"):
             # Reference to another object
             expected_props = self.get_vc_property(expected)
 
-        passed_all = True
-        message_all = ""
+        
+        
 
         for path,property in props.iteritems():
             expected_val = expected
@@ -191,12 +197,12 @@ class VCChecker(CheckerBase):
             passed =  VCChecker.apply_operator(property, expected_val, operator)
             passed_all = passed_all and passed
             message = path + "=" + str(property) + " (Expected: " + operator + expected_val + ") "
-            if not passed:
-                message_all += ("," + message)
+            #if not passed:
+            #    message_all += ("," + message)
             self.reporter.notify_progress(self.reporter.notify_checkLog,message, passed and "PASS" or "FAIL")
-
+            message_all += (", "+message+"#"+(passed and "PASS" or "FAIL")) 
         if passed_all:
-            return True, None
+            return True, message_all
         else:
             return False, message_all
 
@@ -324,17 +330,20 @@ class VCChecker(CheckerBase):
         heartbeat_datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.heartbeatDatastore')
 
         message = ""
+        message_all = ""
         for cluster, cluster_datastores in datastores.iteritems():
             cluster_heartbeat_datastores = [ds.name for ds in heartbeat_datastores[cluster]]
             for ds in cluster_datastores:
                 if not fnmatch.fnmatch(ds.name, 'NTNX-*'):
                     is_heartbeating = ds.name in cluster_heartbeat_datastores
                     self.reporter.notify_progress(self.reporter.notify_checkLog,cluster+"."+ds.name+"="+str(is_heartbeating) + " (Expected: =True) " , (is_heartbeating and "PASS" or "FAIL"))
+                    '''
                     if not is_heartbeating:
-                        message += ", " +cluster+"."+ds.name+"is not heartbeating"
+                    '''
+                    message += ", " +cluster+"."+ds.name+"is not heartbeating"+"#"+((not is_heartbeating) and "PASS" or "FAIL")
 
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
             return False, message
     
@@ -358,10 +367,12 @@ class VCChecker(CheckerBase):
                 if mult_vers_flag:
                     break
             self.reporter.notify_progress(self.reporter.notify_checkLog, cluster + " (Expected multiple Version: =No ( found:"+str(versions)+") ) " , (not mult_vers_flag and "PASS" or "FAIL"))
+            '''
             if mult_vers_flag:
-                message += ", " +cluster+" Nodes have Multiple Versions Available"        
+            '''
+            message += ", " +cluster+" Nodes have Multiple Versions Available"+"#"+(( not mult_vers_flag) and "PASS" or "FAIL")   
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
             return False, message
 
@@ -378,12 +389,14 @@ class VCChecker(CheckerBase):
             isolation_address_present = isolation_address1 in all_ips
             
             self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress1(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+            '''
             if not isolation_address_present:
-                message += ", " +cluster+" isolationaddress1 value is not CVM ipAddress."        
+            '''
+            message += ", " +cluster+" isolationaddress1 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")      
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
-            return False, message 
+            return False, message
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2")
     def check_cluster_das_isolationaddress2(self):
@@ -393,12 +406,14 @@ class VCChecker(CheckerBase):
         for cluster, isolation_address2 in all_isolation_address2.iteritems():
             isolation_address_present = isolation_address2 in all_cvm_ips.values()
             self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress2(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+            '''
             if not isolation_address_present:
-                message += ", " +cluster+" isolationaddress2 value is not CVM ipAddress."        
+            '''
+            message += ", " +cluster+" isolationaddress2 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")        
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
-            return False, message 
+            return False, message
                 
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3")
     def check_cluster_das_isolationaddress3(self):
@@ -408,12 +423,14 @@ class VCChecker(CheckerBase):
         for cluster, isolation_address3 in all_isolation_address3.iteritems():
             isolation_address_present = isolation_address3 in all_cvm_ips.values()
             self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress3(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+            '''
             if not isolation_address_present:
-                message += ", " +cluster+" isolationaddress3 value is not CVM ipAddress."        
+            '''
+            message += ", " +cluster+" isolationaddress3 value is not CVM ipAddress."+"#" +((not isolation_address_present) and "PASS" or "FAIL")         
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
-            return False, message   
+            return False, message  
     
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory")
     def check_directory_service_set_to_active_directory(self):
@@ -426,11 +443,13 @@ class VCChecker(CheckerBase):
                     if hasattr(item,"enabled"):
                         is_active_dir_enabled=item.enabled
                         self.reporter.notify_progress(self.reporter.notify_checkLog, hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) " , (is_active_dir_enabled and "PASS" or "FAIL"))
+                        '''
                         if not is_active_dir_enabled:
-                            message += ", " +hostname+" ActiveDirectoryInfo not enabled"
+                        '''
+                        message += ", " +hostname+" ActiveDirectoryInfo not enabled"+"#"+(( not is_active_dir_enabled) and "PASS" or "FAIL") 
        
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
             return False, message
     
@@ -453,12 +472,13 @@ class VCChecker(CheckerBase):
                                 if service.key == "ntpd":
                                     service_running=service.running
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+host.name+" = NTP Client Status Enabled:"+str(ruleset_enable) + " and is running:"+str(service_running)+" (Expected: ="+" NTP Client Enable : True and running : True "+") " , ((ruleset_enable and service_running) and "PASS" or "FAIL"))
+                    message += ", " +datacenter+"."+host.name+" = NTP Client Status Enabled:"+str(ruleset_enable) + " and is running:"+str(service_running)+" (Expected: ="+" NTP Client Enable : True and running : True "+") "+"#"+ ((ruleset_enable and service_running) and "PASS" or "FAIL")
                 except AttributeError:
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+host.name+" = NTP Client not configured" , ((ruleset_enable and service_running) and "PASS" or "FAIL"))
-                    message=datacenter+"."+host.name+" = NTP Client not configured"
+                    message += ", " +datacenter+"."+host.name+" = NTP Client not configured"+"#"+((ruleset_enable and service_running) and "PASS" or "FAIL")
                                     
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
             return False, message
 
@@ -473,14 +493,13 @@ class VCChecker(CheckerBase):
             
             valid_60_days = (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days > 60 or (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days < 0
             self.reporter.notify_progress(self.reporter.notify_checkLog,"License Expiration Validation date " + str(expiry_date) + " days (Expected: > 60 days or always valid) " , (valid_60_days and "PASS" or "FAIL"))
-            if not valid_60_days:
-                message += ", License valid for less than 60 days"
+            message += ", "+"License valid for less than 60 days"+"#"+((not valid_60_days) and "PASS" or "FAIL")
         if len(message) > 0:
             return True, message
         else:
             return False, message
     
-    @checkgroup("vcenter_server_checks", " Validate vCenter Server has VMware Tools installed and is up to date.")
+    @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date.")
     def check_vcenter_server_tool_status(self):
         vcenter_ipv4 = self.get_vc_property('content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value')
         vcenter_ip=vcenter_ipv4[""]
@@ -496,6 +515,7 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (True and "PASS" or "FAIL"))
                 else:
                     self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
+                message += "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " +"#"+((toolsStatus == toolsStatus_expected) and "PASS" or "FAIL")
                 break
         
         if len(message) > 0:
@@ -514,11 +534,10 @@ class VCChecker(CheckerBase):
                 if isinstance(network,vim.dvs.VmwareDistributedVirtualSwitch):
                     nioc_enabled=network.config.networkResourceManagementEnabled
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(nioc_enabled) + " (Expected: =True) " , (nioc_enabled and "PASS" or "FAIL"))
-                    if not nioc_enabled:
-                            message += ", " +datacenter+"."+network.name+"  Network IO Control not enabled"
+                    message += ", " +datacenter+"."+network.name+"  Network IO Control not enabled"+"#"+((not nioc_enabled) and "PASS" or "FAIL")
        
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
             return False, message
         
@@ -537,11 +556,12 @@ class VCChecker(CheckerBase):
                         maxMtu=1500
                     maxMtu_expected=1500
                     if maxMtu == maxMtu_expected:
+                        message += ", " +datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+")"+"#"+(True and "PASS" or "FAIL")
                         self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+") " , ( True and "PASS" or "FAIL"))
                     else:
-                            message += ", " +datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+")"
+                        message += ", " +datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+")"+"#"+(False and "PASS" or "FAIL")
        
         if len(message) > 0:
-            return True, None
+            return True, message
         else:
             return False, message

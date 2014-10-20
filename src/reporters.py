@@ -8,6 +8,10 @@ class CheckerResult:
     def __init__(self, name, passed=None, message=None):
         self.name = name
         self.passed = passed
+        
+        if self.passed != '':
+            self.passed = passed and "PASS" or "FAIL"
+        
         self.message = message
         self.steps = []
 
@@ -16,13 +20,27 @@ class CheckerResult:
 
     def set_status(self, status):
         self.status = status
-
+    
     def set_message(self, message):
         self.message = message
-
+        
+    def prop_dict(self):
+        props  = []
+        all_prop = [ x for x in self.message.split(', ') if x != '']
+        for xprop in all_prop:
+            xprop,xstatus = xprop.split("#")
+            props.append({"Message":xprop,"Status":xstatus})
+        return props
+        
     def to_dict(self):
-        dict_obj = {"name:": self.name, "pass:": self.passed, "message:": self.message}
-
+        if self.message == None:
+            return None
+        elif ',' in self.message:
+            self.props = self.prop_dict()
+            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props}
+        else:
+            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message}
+            
         if len(self.steps) > 0:
             steps_dict = []
             for step in self.steps:
