@@ -52,6 +52,10 @@ class DefaultConsoleReporter:
     def notify_checkName(self,message):
         if self.row_count > 0:
             print str(self.x)
+            
+        if message == "":
+            return
+        
         self.x = PrettyTable([message, "Status"])
         self.x.align[message] = "l"
         self.x.align["Status"] = "l"

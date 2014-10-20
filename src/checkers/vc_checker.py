@@ -143,12 +143,14 @@ class VCChecker(CheckerBase):
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
                 self.result.add_check_result(CheckerResult(check['name'], passed, message))
                 passed_all = passed_all and passed
+            self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
                     self.result.add_check_result(CheckerResult(check['name'], passed, message))
                     passed_all = passed_all and passed
+                self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
         Disconnect(self.si)
         self.result.passed = passed_all
