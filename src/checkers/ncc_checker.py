@@ -93,6 +93,10 @@ class NCCChecker(CheckerBase):
     def setup(self):
         print "\nConfiguring NCC :\n"
         cvm_ip=raw_input("Enter CVM IP : ")
+        
+        if Validate.valid_ip(cvm_ip) == False:
+            exit_with_message("\nError : Invalid CVM IP address")
+        
         cvm_user=raw_input("Enter CVM User Name : ")
         new_pass=getpass.getpass('Please Enter a  CVM Password: ')
         confirm_pass=getpass.getpass('Please Re-Enter a CVM Password: ')
@@ -100,8 +104,6 @@ class NCCChecker(CheckerBase):
             exit_with_message("\nError :Password miss-match. Please try setup command again")
         cvm_pwd=Security.encrypt(new_pass)
         
-        if Validate.valid_ip(cvm_ip) == False:
-            exit_with_message("\nError : Invalid CVM IP address")
         #print "cvm_ip :"+cvm_ip+" cvm_user :"+cvm_user+" cvm_pwd : "+cvm_pwd
         
         ncc_auth = dict()

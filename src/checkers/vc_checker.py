@@ -75,6 +75,8 @@ class VCChecker(CheckerBase):
     def setup(self):
         print "\nConfiguring vCenter Server :\n"
         vc_ip=raw_input("Enter vCenter Server IP : ")
+        if Validate.valid_ip(vc_ip) == False:
+            exit_with_message("\nError : Invalid vCenter Server IP address")
         vc_user=raw_input("Enter vCenter Server User Name : ")
         new_pass=getpass.getpass('Please Enter vCenter Server Password : ')
         confirm_pass=getpass.getpass('Please Re-Enter vCenter Server Password : ')
@@ -83,9 +85,7 @@ class VCChecker(CheckerBase):
         vc_pwd=Security.encrypt(new_pass)
         
         vc_port=int(raw_input("Enter vCenter Server Port : "))
-        
-        if Validate.valid_ip(vc_ip) == False:
-            exit_with_message("\nError : Invalid vCenter Server IP address")
+    
         if isinstance(vc_port, int ) == False:
             exit_with_message("\nError : Port number is not a numeric value")
         #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+vc_port
