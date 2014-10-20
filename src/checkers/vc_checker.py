@@ -9,7 +9,9 @@ from prettytable import PrettyTable
 import sys
 import fnmatch
 import datetime
+import getpass
 from validation import Validate
+from security import Security
 
 def exit_with_message(message):
     print message
@@ -74,8 +76,13 @@ class VCChecker(CheckerBase):
         print "\nConfiguring vCenter Server :\n"
         vc_ip=raw_input("Enter vCenter Server IP : ")
         vc_user=raw_input("Enter vCenter Server User Name : ")
-        vc_pwd=raw_input("Enter vCenter Server Password : ")
-        vc_port=raw_input("Enter vCenter Server Port : ")
+        new_pass=getpass.getpass('Please Enter vCenter Server Password : ')
+        confirm_pass=getpass.getpass('Please Re-Enter vCenter Server Password : ')
+        if new_pass !=confirm_pass :
+            exit_with_message("\nError :Password miss-match. Please try setup command again")
+        vc_pwd=Security.encrypt(new_pass)
+        
+        vc_port=int(raw_input("Enter vCenter Server Port : "))
         
         if Validate.valid_ip(vc_ip) == False:
             exit_with_message("\nError : Invalid vCenter Server IP address")
@@ -131,7 +138,7 @@ class VCChecker(CheckerBase):
                 else:
                     check_functions[group_name] = [func_obj]
 
-        self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=self.authconfig['vc_pwd'], port=self.authconfig['vc_port'])
+        self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=Security.decrypt(self.authconfig['vc_pwd']), port=self.authconfig['vc_port'])
 
         passed_all = True
 

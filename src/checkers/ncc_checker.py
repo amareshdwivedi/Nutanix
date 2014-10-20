@@ -6,7 +6,9 @@ from base_checker import *
 from prettytable import PrettyTable
 import sys
 import ast
+import getpass
 from validation import Validate
+from security import Security
 
 
 def exit_with_message(message):
@@ -56,7 +58,7 @@ class NCCChecker(CheckerBase):
         
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=self.authconfig['cvm_pwd'])
+        ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=Security.decrypt(self.authconfig['cvm_pwd']))
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
         self.result = CheckerResult("ncc")
@@ -92,7 +94,11 @@ class NCCChecker(CheckerBase):
         print "\nConfiguring NCC :\n"
         cvm_ip=raw_input("Enter CVM IP : ")
         cvm_user=raw_input("Enter CVM User Name : ")
-        cvm_pwd=raw_input("Enter CVM Password : ")
+        new_pass=getpass.getpass('Please Enter a  CVM Password: ')
+        confirm_pass=getpass.getpass('Please Re-Enter a CVM Password: ')
+        if new_pass !=confirm_pass :
+            exit_with_message("\nError :Password miss-match. Please try setup command again")
+        cvm_pwd=Security.encrypt(new_pass)
         
         if Validate.valid_ip(cvm_ip) == False:
             exit_with_message("\nError : Invalid CVM IP address")
