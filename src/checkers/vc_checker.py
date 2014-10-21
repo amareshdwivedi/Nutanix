@@ -241,9 +241,15 @@ class VCChecker(CheckerBase):
 
         if len(xpath) == 1:
             if filter_operator == '=':
-                return fnmatch.fnmatch(attr, expected)
+                for expected_val in expected.split(','):
+                    if fnmatch.fnmatch(attr, expected_val):
+                        return True
+                return False
             elif filter_operator == '!=':
-                return not fnmatch.fnmatch(attr, expected)
+                for expected_val in expected.split(','):
+                    if not fnmatch.fnmatch(attr, expected_val):
+                        return True
+                return False
 
         if isinstance(attr, list):
             matches = True
@@ -267,14 +273,24 @@ class VCChecker(CheckerBase):
         return self.matches_filter(filter_prop_xpath, cur_obj, filter_val, filter_names, filter_operator)
 
 
-    def retrieve_vc_property(self, xpath, cur_obj, name):
+    def retrieve_vc_property(self, xpath, cur_obj, name, cluster_level_entity=False):
         if "[" in xpath[0]:
             node,filter = xpath[0].split("[")
             filter = filter[:-1]
         else:
             node = xpath[0]
             filter = None
-    
+          
+        if node == "hostFolder":
+            cluster_level_entity = True
+            
+        if node == "childEntity" and cluster_level_entity:
+            if self.authconfig['cluster'] != "":
+                filter = "name="+self.authconfig['cluster']
+        if node == "host":
+            if self.authconfig['host'] != "":
+                filter = "name="+self.authconfig['host']
+                
         try:
             attr = getattr(cur_obj, node)
         except AttributeError:
@@ -300,7 +316,7 @@ class VCChecker(CheckerBase):
                 filter_pass = self.apply_filter(item, filter, filter_names)
 
                 if filter_pass:
-                    attr_val = self.retrieve_vc_property(xpath[1:], item, name + filter_names)
+                    attr_val = self.retrieve_vc_property(xpath[1:], item, name + filter_names,cluster_level_entity)
                     if attr_val:
                         vals.update(attr_val)
 
@@ -312,7 +328,7 @@ class VCChecker(CheckerBase):
         else:
             filter_names = []
             filter_pass = self.apply_filter(attr, filter, filter_names)
-            result = filter_pass and self.retrieve_vc_property(xpath[1:], attr, name + filter_names) or None
+            result = filter_pass and self.retrieve_vc_property(xpath[1:], attr, name + filter_names,cluster_level_entity) or None
             if name_added:
                 name.pop()
 
