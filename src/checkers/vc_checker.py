@@ -200,6 +200,8 @@ class VCChecker(CheckerBase):
 
             passed =  VCChecker.apply_operator(property, expected_val, operator)
             passed_all = passed_all and passed
+            if isinstance(property, list):
+                property = ','.join(property)
             message = path + "=" + str(property) + " (Expected: " + operator + expected_val + ") "
             #if not passed:
             #    message_all += ("," + message)
