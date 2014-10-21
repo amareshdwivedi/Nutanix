@@ -91,12 +91,15 @@ class VCChecker(CheckerBase):
         if isinstance(vc_port, int ) == False:
             exit_with_message("\nError : Port number is not a numeric value")
         #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+vc_port
-        
+        cluster=raw_input("Enter Cluster Name[multiple names separated by comma(,); blank to include all clusters] : ")
+        hosts=raw_input("Enter Host IP[multiple names separated by comma(,); blank to include all host] : ")
         vc_auth = dict()
         vc_auth["vc_ip"]=vc_ip;
         vc_auth["vc_user"]=vc_user;
         vc_auth["vc_pwd"]=vc_pwd;
         vc_auth["vc_port"]=vc_port;
+        vc_auth["cluster"]=cluster;
+        vc_auth["host"]=hosts;
         CheckerBase.save_auth_into_auth_config(self.get_name(),vc_auth)
         exit_with_message("vCenter Server is configured Successfully ")
         return
