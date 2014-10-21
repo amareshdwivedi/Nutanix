@@ -4,6 +4,7 @@ from colorama import Fore, Back, Style
 from colorama import init
 init()
 
+MSG_WIDTH = 120
 class CheckerResult:
     def __init__(self, name, passed=None, message=None, severity=1):
         self.name = name
@@ -90,18 +91,19 @@ class DefaultConsoleReporter:
             status = Fore.RED+status+Fore.RESET
         else:
             status = Fore.GREEN+status+Fore.RESET
-        self.x.add_row([message.ljust(120),status])
+        
+        self.x.add_row(['\n'.join([message[x:x+MSG_WIDTH] for x in range(0,len(message),MSG_WIDTH)]).ljust(MSG_WIDTH),status])
         self.row_count += 1
     
     def notify_one_line(self,message, status):
-        print "+"+"-"*130+"+"
+        print "+"+"-"*MSG_WIDTH+"-"*10+"+"
         if status == "FAIL":
             status = Fore.RED+"[ "+status+" ]"+Fore.RESET
         elif status == "Err":
             status = Fore.YELLOW+"[ "+status+" ]"+Fore.RESET
         else:
             status = Fore.GREEN+"[ "+status+" ]"+Fore.RESET
-        print message.ljust(120),status
+        print '\n'.join([message[x:x+MSG_WIDTH] for x in range(0,len(message),MSG_WIDTH)]).ljust(MSG_WIDTH),status
         self.row_count += 1
         
 
