@@ -5,7 +5,7 @@ from colorama import init
 init()
 
 class CheckerResult:
-    def __init__(self, name, passed=None, message=None):
+    def __init__(self, name, passed=None, message=None, severity=1):
         self.name = name
         self.passed = passed
         
@@ -13,6 +13,7 @@ class CheckerResult:
             self.passed = passed and "PASS" or "FAIL"
         
         self.message = message
+        self.severity = severity
         self.steps = []
 
     def add_check_result(self, step):
@@ -23,6 +24,9 @@ class CheckerResult:
     
     def set_message(self, message):
         self.message = message
+        
+    def set_severity(self, severity):
+        self.severity = severity
         
     def prop_dict(self):
         props  = []
@@ -37,9 +41,9 @@ class CheckerResult:
             return None
         elif ',' in self.message:
             self.props = self.prop_dict()
-            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props}
+            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Severity": self.severity}
         else:
-            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message}
+            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "Severity": self.severity}
             
         if len(self.steps) > 0:
             steps_dict = []

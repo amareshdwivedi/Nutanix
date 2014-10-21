@@ -18,13 +18,14 @@ def exit_with_message(message):
     sys.exit(1)
 
 
-def checkgroup(group_name, description):
+def checkgroup(group_name, description, severity):
     def outer(func):
         def inner(*args, **kwargs):
             args[0].reporter.notify_progress(args[0].reporter.notify_checkName, description)
             return func(*args, **kwargs)
         inner.group = group_name
         inner.descr = description
+        inner.severity = severity
         return inner
     return outer
 
@@ -149,14 +150,14 @@ class VCChecker(CheckerBase):
             for check in self.config[check_group]:
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
-                self.result.add_check_result(CheckerResult(check['name'], passed, message))
+                self.result.add_check_result(CheckerResult(check['name'], passed, message, check['severity']))
                 passed_all = passed_all and passed
             self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
-                    self.result.add_check_result(CheckerResult(check_function.descr, "", message))
+                    self.result.add_check_result(CheckerResult(check_function.descr, "", message, check_function.severity))
                     passed_all = passed_all and passed
                 self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
@@ -323,7 +324,7 @@ class VCChecker(CheckerBase):
 
 
     # Manual checks
-    @checkgroup("cluster_checks", "Validate datastore heartbeat")
+    @checkgroup("cluster_checks", "Validate datastore heartbeat", 1)
     def check_datastore_heartbeat(self):
 
         datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.datastore')
@@ -347,7 +348,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
     
-    @checkgroup("cluster_checks", "VSphere Cluster Nodes in Same Version")
+    @checkgroup("cluster_checks", "VSphere Cluster Nodes in Same Version", 1)
     def check_vSphere_cluster_nodes_in_same_version(self):
         #content.rootFolder.childEntity.hostFolder.childEntity.datastore.host.key.config.product.version
         datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.datastore')
@@ -376,7 +377,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
 
-    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress1")
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress1",1)
     def check_cluster_das_isolationaddress1(self):
         all_isolation_address1 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress1].value')
         all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net.ipAddress')
@@ -398,7 +399,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
     
-    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2")
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2",1)
     def check_cluster_das_isolationaddress2(self):
         all_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value')
         all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
@@ -415,7 +416,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
                 
-    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3")
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3",1)
     def check_cluster_das_isolationaddress3(self):
         all_isolation_address3 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress3].value')
         all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
@@ -432,7 +433,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message  
     
-    @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory")
+    @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",3)
     def check_directory_service_set_to_active_directory(self):
         authenticationStoreInfo = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig')
        
@@ -453,7 +454,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
     
-    @checkgroup("esxi_checks", "Validate NTP client is set to Enabled and is in the running state")
+    @checkgroup("esxi_checks", "Validate NTP client is set to Enabled and is in the running state",1)
     def check_ntp_client_enable_running(self):
         datacenter_hosts =self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host')
         message = ""
@@ -482,7 +483,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
 
-    @checkgroup("vcenter_server_checks", "Validate vCenter Server license expiration date")
+    @checkgroup("vcenter_server_checks", "Validate vCenter Server license expiration date",1)
     def check_vcenter_server_license_expiry(self):
         expirationDate = self.get_vc_property('content.licenseManager.evaluation.properties[key=expirationDate].value')
         
@@ -499,7 +500,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
     
-    @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date.")
+    @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date.",3)
     def check_vcenter_server_tool_status(self):
         vcenter_ipv4 = self.get_vc_property('content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value')
         vcenter_ip=vcenter_ipv4[""]
@@ -523,7 +524,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
     
-    @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - Network IO Control")
+    @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - Network IO Control",1)
     def check_virtual_distributed_switch_networ_io_control(self):
         datacenter_networks = self.get_vc_property('content.rootFolder.childEntity.networkFolder.childEntity')
        
@@ -541,7 +542,7 @@ class VCChecker(CheckerBase):
         else:
             return False, message
         
-    @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - MTU")
+    @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - MTU",2)
     def check_virtual_distributed_switch_mtu(self):
         datacenter_networks = self.get_vc_property('content.rootFolder.childEntity.networkFolder.childEntity')
        
