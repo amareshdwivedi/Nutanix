@@ -9,10 +9,8 @@ class CheckerResult:
     def __init__(self, name, passed=None, message=None, severity=1):
         self.name = name
         self.passed = passed
-        
-        if self.passed != '':
+        if str(self.passed) in ("True","False"):
             self.passed = passed and "PASS" or "FAIL"
-        
         self.message = message
         self.severity = severity
         self.steps = []
@@ -38,8 +36,8 @@ class CheckerResult:
         return props
         
     def to_dict(self):
-        if self.message == None:
-            return None
+        if self.message is None:
+            dict_obj = {"Name": self.name, "Status": self.passed} 
         elif ',' in self.message:
             self.props = self.prop_dict()
             dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Severity": self.severity}
@@ -101,6 +99,8 @@ class DefaultConsoleReporter:
             status = Fore.RED+"[ "+status+" ]"+Fore.RESET
         elif status == "Err":
             status = Fore.YELLOW+"[ "+status+" ]"+Fore.RESET
+        elif status == "Warn":
+            status = Fore.MAGENTA+"[ "+status+" ]"+Fore.RESET
         else:
             status = Fore.GREEN+"[ "+status+" ]"+Fore.RESET
         print '\n'.join([message[x:x+MSG_WIDTH] for x in range(0,len(message),MSG_WIDTH)]).ljust(MSG_WIDTH),status

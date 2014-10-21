@@ -157,12 +157,12 @@ class VCChecker(CheckerBase):
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
-                    self.result.add_check_result(CheckerResult(check_function.descr, "", message, check_function.severity))
+                    self.result.add_check_result(CheckerResult(check_function.descr, passed, message, check_function.severity))
                     passed_all = passed_all and passed
                 self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
         Disconnect(self.si)
-        self.result.passed = passed_all
+        self.result.passed = ( passed_all and "PASS" or "FAIL" )
         self.result.message = "VC Checks completed with " + (passed_all and "success" or "failure")
         self.reporter.notify_progress(self.reporter.notify_info,"VC Checks complete")
 
