@@ -56,9 +56,18 @@ class NCCChecker(CheckerBase):
                 exit_with_message("Nutanix Cluster is configured.")
             
         
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=Security.decrypt(self.authconfig['cvm_pwd']))
+        ssh=None
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=Security.decrypt(self.authconfig['cvm_pwd']))
+        
+        except paramiko.AuthenticationException:
+            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
+        except paramiko.SSHException, e:
+            exit_with_message("Error : "+ str(e)+"\n\nPlease run setup command to configure ncc.")
+        except socket.error, e:
+            exit_with_message(str(e)+"\n\nPlease run setup command to configure ncc.")
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
         self.result = CheckerResult("ncc")
