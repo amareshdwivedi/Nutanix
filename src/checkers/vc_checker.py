@@ -347,10 +347,10 @@ class VCChecker(CheckerBase):
     # Manual checks
     @checkgroup("cluster_checks", "Validate datastore heartbeat", 1)
     def check_datastore_heartbeat(self):
-
+ 
         datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.datastore')
         heartbeat_datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.heartbeatDatastore')
-
+ 
         message = ""
         message_all = ""
         for cluster, cluster_datastores in datastores.iteritems():
@@ -363,7 +363,7 @@ class VCChecker(CheckerBase):
                     if not is_heartbeating:
                     '''
                     message += ", " +cluster+"."+ds.name+"is not heartbeating"+"#"+((not is_heartbeating) and "PASS" or "FAIL")
-
+ 
         if len(message) > 0:
             return True, message
         else:
@@ -373,7 +373,7 @@ class VCChecker(CheckerBase):
     def check_vSphere_cluster_nodes_in_same_version(self):
         #content.rootFolder.childEntity.hostFolder.childEntity.datastore.host.key.config.product.version
         datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.datastore')
-        
+         
         message = ""
         for cluster, cluster_datastores in datastores.iteritems():
             mult_vers_flag, versions = False, [] 
@@ -407,14 +407,20 @@ class VCChecker(CheckerBase):
             all_ips.extend(item)
         
         message = ""
-        for cluster, isolation_address1 in all_isolation_address1.iteritems():
-            isolation_address_present = isolation_address1 in all_ips
-            
-            self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress1(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
-            '''
-            if not isolation_address_present:
-            '''
-            message += ", " +cluster+" isolationaddress1 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")      
+        isolation_address_present=True
+        try:
+            for cluster, isolation_address1 in all_isolation_address1.iteritems():
+                isolation_address_present = isolation_address1 in all_ips
+                
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress1(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+                '''
+                if not isolation_address_present:
+                '''
+                message += ", " +cluster+" isolationaddress1 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")      
+        except AttributeError:
+              self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress1 not configured (Expected : = Should be Cluster IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+              message += " isolationaddress1 not configured (Expected : = Should be Cluster IP) "
+              return False, message
         if len(message) > 0:
             return True, message
         else:
@@ -425,13 +431,19 @@ class VCChecker(CheckerBase):
         all_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value')
         all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
         message = ""
-        for cluster, isolation_address2 in all_isolation_address2.iteritems():
-            isolation_address_present = isolation_address2 in all_cvm_ips.values()
-            self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress2(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
-            '''
-            if not isolation_address_present:
-            '''
-            message += ", " +cluster+" isolationaddress2 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")        
+        isolation_address_present=True
+        try:
+            for cluster, isolation_address2 in all_isolation_address2.iteritems():
+                isolation_address_present = isolation_address2 in all_cvm_ips.values()
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress2(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+                '''
+                if not isolation_address_present:
+                '''
+                message += ", " +cluster+" isolationaddress2 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")        
+        except AttributeError:
+              self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+              message += " isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"
+              return False, message
         if len(message) > 0:
             return True, message
         else:
@@ -442,13 +454,19 @@ class VCChecker(CheckerBase):
         all_isolation_address3 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress3].value')
         all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
         message = ""
-        for cluster, isolation_address3 in all_isolation_address3.iteritems():
-            isolation_address_present = isolation_address3 in all_cvm_ips.values()
-            self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress3(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
-            '''
-            if not isolation_address_present:
-            '''
-            message += ", " +cluster+" isolationaddress3 value is not CVM ipAddress."+"#" +((not isolation_address_present) and "PASS" or "FAIL")         
+        isolation_address_present=True
+        try:
+            for cluster, isolation_address3 in all_isolation_address3.iteritems():
+                isolation_address_present = isolation_address3 in all_cvm_ips.values()
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress3(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+                '''
+                if not isolation_address_present:
+                '''
+                message += ", " +cluster+" isolationaddress3 value is not CVM ipAddress."+"#" +((not isolation_address_present) and "PASS" or "FAIL")         
+        except AttributeError:
+              self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+              message += " isolationaddress3 not configured (Expected : = Should be any one of the CVM IP)"
+              return False, message
         if len(message) > 0:
             return True, message
         else:
@@ -498,6 +516,7 @@ class VCChecker(CheckerBase):
                 except AttributeError:
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+host.name+" = NTP Client not configured" , ((ruleset_enable and service_running) and "PASS" or "FAIL"))
                     message += ", " +datacenter+"."+host.name+" = NTP Client not configured"+"#"+((ruleset_enable and service_running) and "PASS" or "FAIL")
+                    return False, message
                                     
         if len(message) > 0:
             return True, message
