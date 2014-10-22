@@ -9,6 +9,7 @@ import ast
 import getpass
 from validation import Validate
 from security import Security
+import socket
 
 
 def exit_with_message(message):
