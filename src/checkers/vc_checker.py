@@ -1,5 +1,5 @@
 __author__ = 'subash atreya'
-
+from requests.exceptions import ConnectionError
 import string
 import warnings
 from pyVim.connect import SmartConnect, Disconnect
@@ -142,11 +142,15 @@ class VCChecker(CheckerBase):
                     group_functions.append(func_obj)
                 else:
                     check_functions[group_name] = [func_obj]
-
-        self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=Security.decrypt(self.authconfig['vc_pwd']), port=self.authconfig['vc_port'])
-
+        
+        try:
+            self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=Security.decrypt(self.authconfig['vc_pwd']), port=self.authconfig['vc_port'])
+        except vim.fault.InvalidLogin:
+            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run setup command to configure vc")
+        except ConnectionError as e:
+            exit_with_message("Error : Connection Error"+"\n\nPlease run setup command to configure vc")
+        
         passed_all = True
-
 
         for check_group in check_groups_run:
             self.reporter.notify_progress(self.reporter.notify_checkGroup,check_group)
