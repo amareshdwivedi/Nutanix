@@ -2,3 +2,6 @@
 /reports
 *.pyc
 results.json
+/build
+/dist
+HealthCheck.egg-info
