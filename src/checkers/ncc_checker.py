@@ -67,7 +67,7 @@ class NCCChecker(CheckerBase):
         cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false " + " ".join(args) or self.config['ncc_path']
         cmd = ntnx_env + cmd
 
-        status_text = {0 : "Done", 3 : "Pass",1 : "Done", 7: "Err", 5:"Warn"}
+        status_text = {0 : "Done",1 : "Done", 3 : "Pass",4: "Pass",5: "Warn",6: "Fail", 7: "Err"}
         stdin, stdout, stderr =  ssh.exec_command(cmd)
         passed_all = True
         for line in stdout:
@@ -85,7 +85,7 @@ class NCCChecker(CheckerBase):
                 
             self.result.add_check_result(CheckerResult(check_name, status_text[status], message))
             self.reporter.notify_one_line(check_name, status_text[status])
-            if status not in [0,1,3]:
+            if status not in [0,1,3,4]:
                 passed_all = False
         self.result.passed = (passed_all and "PASS" or "FAIL")
         self.reporter.notify_progress(self.reporter.notify_info,"NCC Checks complete")

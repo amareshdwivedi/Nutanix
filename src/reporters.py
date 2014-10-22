@@ -95,7 +95,7 @@ class DefaultConsoleReporter:
     
     def notify_one_line(self,message, status):
         print "+"+"-"*MSG_WIDTH+"-"*10+"+"
-        if status == "FAIL":
+        if status == "FAIL" or status == "Fail":
             status = Fore.RED+"[ "+status+" ]"+Fore.RESET
         elif status == "Err":
             status = Fore.YELLOW+"[ "+status+" ]"+Fore.RESET
