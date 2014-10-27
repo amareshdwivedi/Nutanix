@@ -309,7 +309,7 @@ class VCChecker(CheckerBase):
         
 
         name_added = False
-        if hasattr(cur_obj, "name"):
+        if hasattr(cur_obj, "name")  and cur_obj.name not in name:
             name.append(cur_obj.name)
             name_added = True
 
