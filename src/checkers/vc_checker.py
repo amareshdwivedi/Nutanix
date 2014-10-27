@@ -42,7 +42,7 @@ class VCChecker(CheckerBase):
         return VCChecker._NAME_
 
     def get_desc(self):
-        return "This module is used to run VCenter Server checks"
+        return "Performs vCenter Server health checks"
 
     def configure(self, config, reporter):
         self.config = config
@@ -69,7 +69,7 @@ class VCChecker(CheckerBase):
 
         for checks in checks_list:
             x.add_row([checks,"Run "+checks])
-        x.add_row(["run_all", "Run all VC checks."])
+        x.add_row(["run_all", "Run all VC checks"])
         x.add_row(["setup", "Set vCenter Server Configuration"])
         message = message is None and str(x) or "\nERROR : "+ message + "\n\n" + str(x)
         exit_with_message(message)

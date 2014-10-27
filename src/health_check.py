@@ -15,7 +15,7 @@ def exit_with_message(message):
     print message+"\n"
     sys.exit(1)
 
-def usage(checkers, message):
+def usage(checkers, message=None):
 
     x = PrettyTable(["Name", "Description"])
     x.align["Name"] = "l"
@@ -25,7 +25,7 @@ def usage(checkers, message):
     for checker in checkers:
         x.add_row([checker.get_name(), checker.get_desc()])
 
-    x.add_row(["run_all", "Run checks for all modules."])
+    x.add_row(["run_all", "Runs all health checks"])
 
     message = message is None and str(x) or "\nERROR : "+ message + "\n\n" + str(x)
     exit_with_message(message)
@@ -40,7 +40,7 @@ def main():
 
     args = sys.argv[1:]
     if len(args) == 0:
-        usage(checkers.values(), "Please specify which module to run")
+        usage(checkers.values())
 
     option = args[0]
 

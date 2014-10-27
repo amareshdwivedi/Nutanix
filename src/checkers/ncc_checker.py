@@ -28,7 +28,7 @@ class NCCChecker(CheckerBase):
         return NCCChecker._NAME_
 
     def get_desc(self):
-        return "This module is used to run NCC checks"
+        return "Performs Nutanix cluster health checks"
 
     def configure(self, config, reporter):
         self.config = config
