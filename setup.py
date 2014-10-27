@@ -13,7 +13,7 @@ setup(
     name='HealthCheck',
     version = '1.0.0',
 	packages=find_packages(),
-    package_data ={'' : ['*.png','conf//*.conf']},
+    package_data ={'' : ['*.png','conf//*.conf','bin//*.sh','bin//*.bat']},
     install_requires=requires
       )
     
