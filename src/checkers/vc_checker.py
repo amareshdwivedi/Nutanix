@@ -159,14 +159,14 @@ class VCChecker(CheckerBase):
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
                 self.result.add_check_result(CheckerResult(check['name'], passed, message, check['severity']))
                 passed_all = passed_all and passed
-            self.reporter.notify_progress(self.reporter.notify_checkName,"")
+            #self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
                     self.result.add_check_result(CheckerResult(check_function.descr, passed, message, check_function.severity))
                     passed_all = passed_all and passed
-                self.reporter.notify_progress(self.reporter.notify_checkName,"")
+            self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
         Disconnect(self.si)
         self.result.passed = ( passed_all and "PASS" or "FAIL" )
@@ -358,7 +358,12 @@ class VCChecker(CheckerBase):
         message = ""
         message_all = ""
         for cluster, cluster_datastores in datastores.iteritems():
-            cluster_heartbeat_datastores = [ds.name for ds in heartbeat_datastores[cluster]]
+            try:
+                cluster_heartbeat_datastores = [ds.name for ds in heartbeat_datastores[cluster]]
+            except KeyError:
+                cluster_heartbeat_datastores = []
+            except:
+                print "Unknow error"   
             for ds in cluster_datastores:
                 if not fnmatch.fnmatch(ds.name, 'NTNX-*'):
                     is_heartbeating = ds.name in cluster_heartbeat_datastores
@@ -422,9 +427,9 @@ class VCChecker(CheckerBase):
                 '''
                 message += ", " +cluster+" isolationaddress1 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")      
         except AttributeError:
-              self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress1 not configured (Expected : = Should be Cluster IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
-              message += " isolationaddress1 not configured (Expected : = Should be Cluster IP) "
-              return False, message
+            self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress1 not configured (Expected : = Should be Cluster IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+            message += " isolationaddress1 not configured (Expected : = Should be Cluster IP) "
+            return False, message
         if len(message) > 0:
             return True, message
         else:
@@ -445,9 +450,9 @@ class VCChecker(CheckerBase):
                 '''
                 message += ", " +cluster+" isolationaddress2 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")        
         except AttributeError:
-              self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
-              message += " isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"
-              return False, message
+            self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+            message += " isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"
+            return False, message
         if len(message) > 0:
             return True, message
         else:
@@ -468,9 +473,9 @@ class VCChecker(CheckerBase):
                 '''
                 message += ", " +cluster+" isolationaddress3 value is not CVM ipAddress."+"#" +((not isolation_address_present) and "PASS" or "FAIL")         
         except AttributeError:
-              self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
-              message += " isolationaddress3 not configured (Expected : = Should be any one of the CVM IP)"
-              return False, message
+            self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+            message += " isolationaddress3 not configured (Expected : = Should be any one of the CVM IP)"
+            return False, message
         if len(message) > 0:
             return True, message
         else:
