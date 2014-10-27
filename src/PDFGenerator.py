@@ -48,9 +48,9 @@ def vc_report(story,checks_list):
                   textColor=Color(0, 255, 0)))
     SuccessMsgStyle = copy.deepcopy(stylesheet['Pass'])
     for checks in checks_list:
-            print '\t' + checks.get('Name')
-            print '\t' + checks.get('Status')
-            print '\t' + str(checks.get('Severity'))
+#             print '\t' + checks.get('Name')
+#             print '\t' + checks.get('Status')
+#             print '\t' + str(checks.get('Severity'))
             checks_data=[]
             checks_data.append([Paragraph("Name : " + checks.get('Name'), styles['Normal']), 
                                 Paragraph("Status : " + checks.get('Status'), styles['Normal']),
@@ -103,9 +103,9 @@ def ncc_report(story,checks_list):
     property_lenght=len(checks_list)
     checks_property_data = [['Property Tested', 'Status']]
     for checks in checks_list:
-            print '\t' + checks.get('Name')
-            print '\t' + checks.get('Status')
-            print '\t' + str(checks.get('Severity'))
+#             print '\t' + checks.get('Name')
+#             print '\t' + checks.get('Status')
+#             print '\t' + str(checks.get('Severity'))
             status = checks.get('Status')
             msg=checks.get('Name')
             #checks_property_data.append([Paragraph(msg, styles['Normal']), Paragraph(status, NormalMsgStyle)])
@@ -145,6 +145,8 @@ def PDFReportGenerator(resultJson):
         elif checkers == 'vc':
             checkers_table_data.append(["vCenter Health Check Results"])
         
+        if resultJson[checkers].get('checks') is None:
+            exit()
         checks_lenght = len(resultJson[checkers].get('checks'));
         checkers_table = LongTable(checkers_table_data, 500 * inch)
         checkers_table.setStyle(TableStyle([('ALIGN', (0, 0), (0, 0), 'CENTRE'),

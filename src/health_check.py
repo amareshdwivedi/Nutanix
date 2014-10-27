@@ -81,10 +81,12 @@ def main():
         results[checker] = result.to_dict()
 
     #Generate PDF Report based on results. Temporary comment out
-    #PDFReportGenerator(results)
+    
     outfile = open("results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()
+    PDFReportGenerator(results)
+    
 
 if __name__ == "__main__":
     main()
