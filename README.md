@@ -15,6 +15,10 @@ Prerequisite to run HealthCheck (Follows Sequence)
 8.)Install pycrypto (pip install pycrypto).
 9.)Install colorama (pip install colorama). 
 
-To create .egg distribution file for HealthCheck use following command
-======================================================================
+To create .egg distribution file for HealthCheck
+================================================
 python setup.py bdist_egg --exclude-source-files
+
+To install .egg distribution file for HealthCheck
+=================================================
+easy_install -Z HealthCheck-1.0.0-py2.7.egg
