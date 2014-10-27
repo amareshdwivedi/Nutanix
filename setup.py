@@ -14,6 +14,7 @@ setup(
     version = '1.0.0',
 	packages=find_packages(),
     package_data ={'' : ['*.png','conf//*.conf','bin//*.sh','bin//*.bat']},
-    install_requires=requires
+    install_requires=requires,
+    zip_safe=False
       )
     
