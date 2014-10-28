@@ -172,7 +172,7 @@ def PDFReportGenerator(resultJson):
     # Adding timestamp to the report name  
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     # path for generating the report
-    pdffilename ="reports"+os.path.sep+'StatusReport_' + timestamp + '.pdf'
+    pdffilename ="reports"+os.path.sep+'Healthcheck-' + timestamp + '.pdf'
     doc = SimpleDocTemplate(pdffilename, pagesizes=letter, format=landscape, rightMargin=inch / 4, leftMargin=inch / 10, topMargin=inch, bottomMargin=inch / 4)
     story = []
     cover_page_generator(story)

@@ -8,7 +8,7 @@ from PDFGenerator import PDFReportGenerator
 from prettytable import PrettyTable
 import json
 from operator import itemgetter
-
+import csv, time
 import sys
 import os
 
@@ -90,8 +90,10 @@ def main():
             
         
     #Generate CSV Reports
-    import csv
-    csv_file = open("reports"+os.path.sep+'results.csv', 'wb')
+    
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    csv_file = open("reports"+os.path.sep+'Healthcheck-' + timestamp + '.csv' ,'wb')
+    #csv_file = open("reports"+os.path.sep+'results.csv', 'wb')
     csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     csv_writer.writerow(["Category", "Health Check Variable","Status", "Severity"])
     for xchecker,allChecks in results.iteritems():
@@ -103,15 +105,14 @@ def main():
             continue
     csv_file.close()
    
-    #Generate PDF Report based on results. Temporary comment out
-    PDFReportGenerator(results)
-    
     #Generate Json Reports 
     outfile = open("reports"+os.path.sep+"results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()
     
-    
+    #Generate PDF Report based on results. Temporary comment out
+    PDFReportGenerator(results)
+     
 
 if __name__ == "__main__":
     main()
