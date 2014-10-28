@@ -94,7 +94,7 @@ def vc_report(story, checks_list):
     for checks in checks_list:
             count +=1
             story.append(Spacer(1, 0.01 * inch))
-            checks_data = [[str(count)+". Check: " + checks.get('Name'), "   Status : " + checks.get('Status'), "   Severity : " + str(checks.get('Severity'))]]
+            checks_data = [[str(count)+". Check: " + checks.get('Name'), "   Status: " + checks.get('Status'), "   Severity: " + str(checks.get('Severity'))]]
             checks_para_table = Table(checks_data, hAlign='LEFT')
             checks_para_table.setStyle(TableStyle([('ALIGN', (0, 0), (2, 0), 'LEFT'),
                                                    ('FONTSIZE', (0, 0), (2, 0), 10.50)]))
@@ -165,7 +165,9 @@ def cover_page_generator(story):
     story.append(Paragraph("<br/><br/><br/><br/>", NormalMessageStyle))
     story.append(Image('nutanixlogo.png', height=3*cm, width=10* cm))
     story.append(Paragraph("<br/>", NormalMessageStyle))
+    date = time.strftime("%d-%m-%Y")
     story.append(Paragraph("Health Check Report", CoverMsgStyle))
+    story.append(Paragraph(date, CoverMsgStyle))
     story.append(PageBreak())
     
 def PDFReportGenerator(resultJson):   
@@ -198,6 +200,8 @@ def PDFReportGenerator(resultJson):
         story.append(checkers_table)
         story.append(Spacer(1, 0.03 * inch))
         # calling the function based on the checkers
+        if resultJson[checkers].get('checks') is None:
+            exit()
         if checkers == 'vc':
             vc_report(story, resultJson[checkers].get('checks'))
         if checkers == 'ncc':

@@ -78,21 +78,21 @@ class VCChecker(CheckerBase):
         print "\nConfiguring vCenter Server :\n"
         vc_ip=raw_input("Enter vCenter Server IP : ")
         if Validate.valid_ip(vc_ip) == False:
-            exit_with_message("\nError : Invalid vCenter Server IP address")
-        vc_user=raw_input("Enter vCenter Server User Name : ")
-        new_pass=getpass.getpass('Enter vCenter Server Password : ')
-        confirm_pass=getpass.getpass('Re-Enter vCenter Server Password : ')
+            exit_with_message("\nError: Invalid vCenter Server IP address")
+        vc_user=raw_input("Enter vCenter Server User Name: ")
+        new_pass=getpass.getpass('Enter vCenter Server Password: ')
+        confirm_pass=getpass.getpass('Re-Enter vCenter Server Password: ')
         if new_pass !=confirm_pass :
-            exit_with_message("\nError :Password miss-match. Please try setup command again")
+            exit_with_message("\nError: Password miss-match.Please try setup command again")
         vc_pwd=Security.encrypt(new_pass)
         
-        vc_port=int(raw_input("Enter vCenter Server Port : "))
+        vc_port=int(raw_input("Enter vCenter Server Port: "))
     
         if isinstance(vc_port, int ) == False:
-            exit_with_message("\nError : Port number is not a numeric value")
+            exit_with_message("\nError: Port number is not a numeric value")
         #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+vc_port
-        cluster=raw_input("Enter Cluster Name[multiple names separated by comma(,); blank to include all clusters] : ")
-        hosts=raw_input("Enter Host IP[multiple names separated by comma(,); blank to include all host] : ")
+        cluster=raw_input("Enter Cluster Name [multiple names separated by comma(,); blank to include all clusters]: ")
+        hosts=raw_input("Enter Host IP [multiple names separated by comma(,); blank to include all host]: ")
         vc_auth = dict()
         vc_auth["vc_ip"]=vc_ip;
         vc_auth["vc_user"]=vc_user;
