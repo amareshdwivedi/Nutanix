@@ -80,8 +80,8 @@ class VCChecker(CheckerBase):
         if Validate.valid_ip(vc_ip) == False:
             exit_with_message("\nError : Invalid vCenter Server IP address")
         vc_user=raw_input("Enter vCenter Server User Name : ")
-        new_pass=getpass.getpass('Please Enter vCenter Server Password : ')
-        confirm_pass=getpass.getpass('Please Re-Enter vCenter Server Password : ')
+        new_pass=getpass.getpass('Enter vCenter Server Password : ')
+        confirm_pass=getpass.getpass('Re-Enter vCenter Server Password : ')
         if new_pass !=confirm_pass :
             exit_with_message("\nError :Password miss-match. Please try setup command again")
         vc_pwd=Security.encrypt(new_pass)
@@ -556,6 +556,7 @@ class VCChecker(CheckerBase):
         vms = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.vm.guest')
         
         message = ""
+        pass_all=True
         for vm in vms.keys():
             guest_info=vms[vm]
             if guest_info.ipAddress == vcenter_ip:
@@ -564,14 +565,12 @@ class VCChecker(CheckerBase):
                 if toolsStatus == toolsStatus_expected :
                     self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (True and "PASS" or "FAIL"))
                 else:
+                    pass_all=False
                     self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
                 message += ", "+"vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " +"#"+((toolsStatus == toolsStatus_expected) and "PASS" or "FAIL")
                 break
         
-        if len(message) > 0:
-            return True, message
-        else:
-            return False, message
+        return pass_all,message
     
     @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - Network IO Control",1)
     def check_virtual_distributed_switch_networ_io_control(self):
@@ -584,7 +583,7 @@ class VCChecker(CheckerBase):
                 if isinstance(network,vim.dvs.VmwareDistributedVirtualSwitch):
                     nioc_enabled=network.config.networkResourceManagementEnabled
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(nioc_enabled) + " (Expected: =True) " , (nioc_enabled and "PASS" or "FAIL"))
-                    message += ", " +datacenter+"."+network.name+"  Network IO Control not enabled"+"#"+((not nioc_enabled) and "PASS" or "FAIL")
+                    message += ", " +datacenter+"."+network.name+"  Network IO Control not enabled"+"#"+((nioc_enabled) and "PASS" or "FAIL")
        
         if len(message) > 0:
             return True, message
@@ -596,22 +595,53 @@ class VCChecker(CheckerBase):
         datacenter_networks = self.get_vc_property('content.rootFolder.childEntity.networkFolder.childEntity')
        
         message = ""
+        pass_all=True
         for datacenter in datacenter_networks.keys():
             network_list = datacenter_networks.get(datacenter)
             for network in network_list:
                 if isinstance(network,vim.dvs.VmwareDistributedVirtualSwitch):
                     maxMtu=network.config.maxMtu
                     # default value for maxMtu is 1500. Sometime MOB returns None value. So setting maxMtu value to 1500 as default
-                    if maxMtu=="None": 
+                    if maxMtu is None: 
                         maxMtu=1500
                     maxMtu_expected=1500
                     if maxMtu == maxMtu_expected:
                         message += ", " +datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+")"+"#"+(True and "PASS" or "FAIL")
                         self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+") " , ( True and "PASS" or "FAIL"))
                     else:
+                        pass_all=False
+                        self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+") " , ( False and "PASS" or "FAIL"))
                         message += ", " +datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+")"+"#"+(False and "PASS" or "FAIL")
        
-        if len(message) > 0:
-            return True, message
-        else:
-            return False, message
+        return pass_all, message
+    
+    @checkgroup("storage_and_vm_checks", "Confirm the states of vStorage hardware acceleration support for datastore.",2)
+    def check_vStorageSupport(self):
+        datacenter_host = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity')
+        message = ""
+        pass_all=True
+        for host_domain in datacenter_host.keys():      
+            for ClusterComputeRrc in datacenter_host[host_domain]:
+               # print "\n*******************\nClusterComputeRrc : "+str(ClusterComputeRrc)
+                expected_vStorageSupported="vStorageSupported"
+                try:
+                    datastores=ClusterComputeRrc.environmentBrowser.QueryConfigTarget().datastore
+                    for datastore in datastores:
+                        vStorageSupport=datastore.vStorageSupport
+                        #print host_domain+"."+ClusterComputeRrc.name+"."+str(datastore.name)+"="+datastore.vStorageSupport
+                        if vStorageSupport == expected_vStorageSupported:
+                            message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")"+"#"+(True and "PASS" or "FAIL")
+                            self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")" , ( True and "PASS" or "FAIL"))
+                        else:
+                            pass_all=False
+                            # To handle None Value
+                            new_vStorageSupport= vStorageSupport if vStorageSupport else "None"
+                            message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport + " (Expected: ="+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
+                            self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")" , ( False and "PASS" or "FAIL"))
+        
+                except AttributeError:
+                    pass_all=False 
+                    message += ", " + host_domain+"."+ClusterComputeRrc.name+"="+ "DataStore not attached"+ " (Expected: ="+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"="+ "DataStore not attached"+ " (Expected: ="+expected_vStorageSupported+")", ( False and "PASS" or "FAIL"))
+                     
+        return pass_all, message
