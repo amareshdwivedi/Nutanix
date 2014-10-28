@@ -369,7 +369,7 @@ class VCChecker(CheckerBase):
                     is_heartbeating = ds.name in cluster_heartbeat_datastores
                     self.reporter.notify_progress(self.reporter.notify_checkLog,cluster+"."+ds.name+"="+str(is_heartbeating) + " (Expected: =True) " , (is_heartbeating and "PASS" or "FAIL"))
                     passed = passed and is_heartbeating
-                    message += ", " +cluster+"."+ds.name+"is not heartbeating"+"#"+((not is_heartbeating) and "PASS" or "FAIL")
+                    message += ", " +cluster+"."+ds.name+"is not heartbeating"+"#"+((is_heartbeating) and "PASS" or "FAIL")
  
         return passed, message
     
@@ -474,8 +474,8 @@ class VCChecker(CheckerBase):
                     if hasattr(item,"enabled"):
                         is_active_dir_enabled=item.enabled
                         self.reporter.notify_progress(self.reporter.notify_checkLog, hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) " , (is_active_dir_enabled and "PASS" or "FAIL"))
-                        passed = passed and is_active_dir_enabled
-                        message += ", " +hostname+" ActiveDirectoryInfo not enabled"+"#"+(( not is_active_dir_enabled) and "PASS" or "FAIL") 
+                        passed = passed and (is_active_dir_enabled and True or False)
+                        message += ", " +hostname+" ActiveDirectoryInfo not enabled"+"#"+((is_active_dir_enabled) and "PASS" or "FAIL") 
        
         return passed, message
     
