@@ -80,12 +80,28 @@ def main():
         result = checker_module.execute(args[1:])
         results[checker] = result.to_dict()
 
+    #Generate CSV Reports
+    import csv
+    csv_file = open('results.csv', 'wb')
+    csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+    csv_writer.writerow(["Category", "Health Check Variable","Status", "Severity"])
+    for xchecker,allChecks in results.iteritems():
+        try:
+            for xcheck in allChecks['checks']:
+                csv_writer.writerow([xchecker, xcheck['Name'],xcheck['Status'], xcheck['Severity']])
+        except KeyError:
+            #It means- No checks were executed for this checker. 
+            continue
+    csv_file.close()
+   
     #Generate PDF Report based on results. Temporary comment out
+    PDFReportGenerator(results)
     
+    #Generate Json Reports 
     outfile = open("results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()
-    PDFReportGenerator(results)
+    
     
 
 if __name__ == "__main__":

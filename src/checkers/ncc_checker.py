@@ -10,7 +10,7 @@ import getpass
 from validation import Validate
 from security import Security
 import socket
-
+MSG_WIDTH = 120
 
 def exit_with_message(message):
     print message
@@ -98,6 +98,7 @@ class NCCChecker(CheckerBase):
             if status not in [0,1,3,4]:
                 passed_all = False
         self.result.passed = (passed_all and "PASS" or "FAIL")
+        print "+"+"-"*MSG_WIDTH+"-"*10+"+"
         self.reporter.notify_progress(self.reporter.notify_info,"NCC Checks complete")
         ssh.close()
         

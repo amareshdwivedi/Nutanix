@@ -428,7 +428,7 @@ class VCChecker(CheckerBase):
                 message += ", " +cluster+" isolationaddress1 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")      
         except AttributeError:
             self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress1 not configured (Expected : = Should be Cluster IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
-            message += " isolationaddress1 not configured (Expected : = Should be Cluster IP) "
+            message += ", " +"isolationaddress1 not configured (Expected : = Should be Cluster IP) "+"#"+("FAIL") 
             return False, message
         if len(message) > 0:
             return True, message
@@ -451,7 +451,7 @@ class VCChecker(CheckerBase):
                 message += ", " +cluster+" isolationaddress2 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")        
         except AttributeError:
             self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
-            message += " isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"
+            message += ", " +"isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"+"#"+("FAIL")
             return False, message
         if len(message) > 0:
             return True, message
@@ -474,7 +474,7 @@ class VCChecker(CheckerBase):
                 message += ", " +cluster+" isolationaddress3 value is not CVM ipAddress."+"#" +((not isolation_address_present) and "PASS" or "FAIL")         
         except AttributeError:
             self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
-            message += " isolationaddress3 not configured (Expected : = Should be any one of the CVM IP)"
+            message += ", " +"isolationaddress3 not configured (Expected : = Should be any one of the CVM IP)"+"#"+("FAIL")
             return False, message
         if len(message) > 0:
             return True, message
