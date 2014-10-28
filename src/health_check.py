@@ -91,7 +91,7 @@ def main():
         
     #Generate CSV Reports
     import csv
-    csv_file = open("reports"+os.path.sep+'results.csv', 'w')
+    csv_file = open("reports"+os.path.sep+'results.csv', 'wb')
     csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     csv_writer.writerow(["Category", "Health Check Variable","Status", "Severity"])
     for xchecker,allChecks in results.iteritems():
