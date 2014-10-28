@@ -71,7 +71,7 @@ class NCCChecker(CheckerBase):
             exit_with_message(str(e)+"\n\nPlease run setup command to configure ncc.")
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
-        self.result = CheckerResult("ncc")
+        self.result = CheckerResult("ncc",self.authconfig)
         
         ntnx_env = "source /etc/profile.d/zookeeper_env.sh && source /usr/local/nutanix/profile.d/nutanix_env.sh && "
         cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false " + " ".join(args) or self.config['ncc_path']
@@ -93,7 +93,7 @@ class NCCChecker(CheckerBase):
             if status in [7]:
                 message = t["detail canvas"]["output holder list"] [0]["message list"][0]
                 
-            self.result.add_check_result(CheckerResult(check_name, status_text[status], message))
+            self.result.add_check_result(CheckerResult(check_name,None, status_text[status], message))
             self.reporter.notify_one_line(check_name, status_text[status])
             if status not in [0,1,3,4]:
                 passed_all = False

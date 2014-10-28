@@ -7,6 +7,7 @@ from reporters import DefaultConsoleReporter
 from PDFGenerator import PDFReportGenerator
 from prettytable import PrettyTable
 import json
+from operator import itemgetter
 
 import sys
 import os
@@ -79,10 +80,18 @@ def main():
         checker_module = checkers[checker]
         result = checker_module.execute(args[1:])
         results[checker] = result.to_dict()
-
+        
+        # This is to sort the checks in given checker based on the severity ( asc order )
+        try :
+            results[checker]['checks'] = sorted(results[checker]['checks'], key=itemgetter('Severity'))
+        except KeyError:
+            # It means no checks are executed for given checker
+            continue
+            
+        
     #Generate CSV Reports
     import csv
-    csv_file = open('results.csv', 'wb')
+    csv_file = open("reports"+os.path.sep+'results.csv', 'w')
     csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     csv_writer.writerow(["Category", "Health Check Variable","Status", "Severity"])
     for xchecker,allChecks in results.iteritems():
@@ -98,7 +107,7 @@ def main():
     PDFReportGenerator(results)
     
     #Generate Json Reports 
-    outfile = open("results.json", 'w')
+    outfile = open("reports"+os.path.sep+"results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()
     

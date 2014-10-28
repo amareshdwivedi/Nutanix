@@ -128,7 +128,7 @@ class VCChecker(CheckerBase):
                 check_groups_run.append(group)
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting VC Checks")
-        self.result = CheckerResult("vc")
+        self.result = CheckerResult("vc",self.authconfig)
         warnings.simplefilter('ignore')
 
 
@@ -157,14 +157,14 @@ class VCChecker(CheckerBase):
             for check in self.config[check_group]:
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
-                self.result.add_check_result(CheckerResult(check['name'], passed, message, check['severity']))
+                self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['severity']))
                 passed_all = passed_all and passed
             #self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
-                    self.result.add_check_result(CheckerResult(check_function.descr, passed, message, check_function.severity))
+                    self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.severity))
                     passed_all = passed_all and passed
             self.reporter.notify_progress(self.reporter.notify_checkName,"")
 

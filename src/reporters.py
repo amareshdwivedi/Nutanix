@@ -1,3 +1,4 @@
+from exceptions import AttributeError
 __author__ = 'subashatreya'
 from prettytable import PrettyTable
 from colorama import Fore, Back, Style
@@ -6,13 +7,21 @@ init()
 
 MSG_WIDTH = 120
 class CheckerResult:
-    def __init__(self, name, passed=None, message=None, severity=1):
+    def __init__(self, name, authconfig=None, passed=None, message=None, severity=1):
         self.name = name
         self.passed = passed
         if str(self.passed) in ("True","False"):
             self.passed = passed and "PASS" or "FAIL"
         self.message = message
         self.severity = severity
+        if authconfig is not None:
+            if self.name == "vc":
+                self.ip = authconfig['vc_ip']
+                self.user = authconfig['vc_user']
+            elif self.name == "ncc":
+                self.ip = authconfig['cvm_ip']
+                self.user = authconfig['cvm_user']
+                
         self.steps = []
 
     def add_check_result(self, step):
@@ -34,15 +43,21 @@ class CheckerResult:
             xprop,xstatus = xprop.split("#")
             props.append({"Message":xprop,"Status":xstatus})
         return props
+    
         
     def to_dict(self):
         if self.message is None:
-            dict_obj = {"Name": self.name, "Status": self.passed} 
+            dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user} 
         elif ',' in self.message:
             self.props = self.prop_dict()
             dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Severity": self.severity}
         else:
-            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "Severity": self.severity}
+            try:
+                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "Severity": self.severity, "ip":self.ip, "user":self.user}
+            except AttributeError:
+                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "Severity": self.severity}
+                
+                
             
         if len(self.steps) > 0:
             steps_dict = []
