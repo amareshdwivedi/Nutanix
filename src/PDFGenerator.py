@@ -9,30 +9,33 @@ from reportlab.lib import colors
 
 from reportlab.lib.pagesizes import inch, cm, landscape, letter
 from reportlab.lib.styles import getSampleStyleSheet, StyleSheet1, ParagraphStyle
-from reportlab.platypus import  LongTable, TableStyle, Image, Paragraph, Spacer, Table, PageBreak
+from reportlab.platypus import  LongTable, TableStyle, Image, Paragraph, Spacer, Table
 from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.lib.enums import  TA_CENTER
 import copy
 import time
 import os
 
+# import json
+# fp = open("results.json", 'r')
+# resultJson = json.load(fp)
+
 # registering the font colors for each message type
 PSstyle1 = ParagraphStyle
 styles = getSampleStyleSheet()
 stylesheet = StyleSheet1()
 NormalMsgStyle = styles['Normal']
-HeadingMsgStyle =styles['Heading1']
+HeadingMsgStyle = styles['Heading1']
 stylesheet.add(PSstyle1(name='Footer',
                             parent=NormalMsgStyle,
                             fontName='Times-Roman'))
-FooterMsgStyle =copy.deepcopy(stylesheet['Footer'])
+FooterMsgStyle = copy.deepcopy(stylesheet['Footer'])
 FooterMsgStyle.alignment = TA_CENTER
 stylesheet.add(PSstyle1(name='Cover',
                             parent=HeadingMsgStyle,
-                            textColor=colors.grey,
-                            fontName='Times-Roman',fontSize=34))
-CoverMsgStyle=copy.deepcopy(stylesheet['Cover'])
-CoverMsgStyle.alignment=TA_CENTER
+                            fontName='Times-Roman', fontSize=25))
+CoverMsgStyle = copy.deepcopy(stylesheet['Cover'])
+CoverMsgStyle.alignment = TA_CENTER
 stylesheet.add(PSstyle1(name='Normal',
                             parent=NormalMsgStyle,
                             fontName='Times-Roman'))
@@ -76,9 +79,10 @@ def _header_footer(canvas, doc):
         # Save the state of our canvas so we can draw on it
         canvas.saveState()
         # Header
-        header = Image('nutanixlogo.png', height=0.50 * inch, width=5 * cm)
+        header = Image('./resources/images/nutanixlogo.png', height=0.50 * inch, width=5 * cm)
         w, h = header.wrap(doc.width, doc.topMargin)
         header.drawOn(canvas, doc.leftMargin, doc.height + doc.topMargin - h)
+        
  
         # Footer
         
@@ -88,13 +92,14 @@ def _header_footer(canvas, doc):
         # Release the canvas
         canvas.restoreState()
         
+        
 # Function to generate report for VC        
 def vc_report(story, checks_list):
-    count =0
+    count = 0
     for checks in checks_list:
-            count +=1
+            count += 1
             story.append(Spacer(1, 0.01 * inch))
-            checks_data = [[str(count)+". Check: " + checks.get('Name'), "   Status: " + checks.get('Status'), "   Severity: " + str(checks.get('Severity'))]]
+            checks_data = [[str(count) + ". Check: " + checks.get('Name'), "   Status: " + checks.get('Status'), "   Severity: " + str(checks.get('Severity'))]]
             checks_para_table = Table(checks_data, hAlign='LEFT')
             checks_para_table.setStyle(TableStyle([('ALIGN', (0, 0), (2, 0), 'LEFT'),
                                                    ('FONTSIZE', (0, 0), (2, 0), 10.50)]))
@@ -117,7 +122,7 @@ def vc_report(story, checks_list):
                     
                     
             checks_property_table = LongTable(checks_property_data, colWidths=[6 * inch, 0.75 * inch])
-            checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (1, 0), colors.lightsteelblue),
+            checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (1, 0), colors.fidlightblue),
                                                        ('ALIGN', (0, 0), (1, property_lenght), 'LEFT'),
                                         ('INNERGRID', (0, 0), (2, -1), 0.25, colors.black),
                                         ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
@@ -146,7 +151,7 @@ def ncc_report(story, checks_list):
                    
     checks_property_table = LongTable(checks_property_data, colWidths=[6 * inch, 0.75 * inch])
     # style sheet for table
-    checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (1, 0), colors.lightsteelblue),
+    checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (1, 0), colors.fidlightblue),
                                                        ('ALIGN', (0, 0), (1, property_lenght), 'LEFT'),
                                         ('INNERGRID', (0, 0), (2, -1), 0.25, colors.black),
                                         ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
@@ -160,24 +165,24 @@ def ncc_report(story, checks_list):
     story.append(checks_property_table)
     story.append(Spacer(1, 0.3 * inch))
 
-# Function for generating the cover Page of the document            
-def cover_page_generator(story):
-    story.append(Paragraph("<br/><br/><br/><br/>", NormalMessageStyle))
-    story.append(Image('nutanixlogo.png', height=3*cm, width=10* cm))
-    story.append(Paragraph("<br/>", NormalMessageStyle))
-    date = time.strftime("%d-%m-%Y")
-    story.append(Paragraph("Health Check Report", CoverMsgStyle))
-    story.append(Paragraph(date, CoverMsgStyle))
-    story.append(PageBreak())
+
     
 def PDFReportGenerator(resultJson):   
     # Adding timestamp to the report name  
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     # path for generating the report
-    pdffilename ="reports"+os.path.sep+'Healthcheck-' + timestamp + '.pdf'
+    pdffilename = "reports" + os.path.sep + 'Healthcheck-' + timestamp + '.pdf'
     doc = SimpleDocTemplate(pdffilename, pagesizes=letter, format=landscape, rightMargin=inch / 4, leftMargin=inch / 10, topMargin=inch, bottomMargin=inch / 4)
     story = []
-    cover_page_generator(story)
+    date = time.strftime("%B %d, %Y")
+    headingdata = [["   ", "   ", "  ", "  ", Image("./resources/images/hcr.png", height=0.37 * inch, width=12 * cm)],
+                    [ "    ", "    ", "   ", "   ", "  " , date]]
+    headingtable = Table(headingdata)
+    headingtable.setStyle(TableStyle([('ALIGN', (0, 1), (4, 1), 'RIGHT'),
+                                      ('TEXTFONT', (0, 1), (4, 1), 'Times-Roman'),
+                                      ('FONTSIZE', (0, 1), (4, 1), 12)]))
+    story.append(headingtable)
+
     
     for checkers in resultJson.keys():
         checkers_table_data = []
@@ -207,4 +212,6 @@ def PDFReportGenerator(resultJson):
         if checkers == 'ncc':
             ncc_report(story, resultJson[checkers].get('checks'))
      
-    doc.build(story, onLaterPages=_header_footer)
+    doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
+    #print "Success"            
+#PDFReportGenerator(resultJson)
