@@ -75,9 +75,11 @@ class NCCChecker(CheckerBase):
         self.result = CheckerResult("ncc",self.authconfig)
         
         ntnx_env = "source /etc/profile.d/zookeeper_env.sh && source /usr/local/nutanix/profile.d/nutanix_env.sh && "
-        cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false " + " ".join(args) or self.config['ncc_path']
+        #new command that run only health_checks for ncc
+        cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false health_checks " + " ".join(args) or self.config['ncc_path']+" health_checks "
+        #old command
+        #cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false " + " ".join(args) or self.config['ncc_path']
         cmd = ntnx_env + cmd
-
         status_text = {0 : "Done",1 : "Done", 3 : "Pass",4: "Pass",5: "Warn",6: "Fail", 7: "Err"}
         stdin, stdout, stderr =  ssh.exec_command(cmd)
         passed_all = True
@@ -151,17 +153,17 @@ class NCCChecker(CheckerBase):
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(cvm_ip, username=cvm_user, password=Security.decrypt(cvm_pwd))
-            print Fore.GREEN+" Connected"+Fore.RESET
+            print Fore.GREEN+" Connection successful"+Fore.RESET
             ssh.close()
         
         except paramiko.AuthenticationException:
-            print Fore.RED+" Not Connected"+Fore.RESET
+            print Fore.RED+" Connection failure"+Fore.RESET
             exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
         except paramiko.SSHException, e:
-            print Fore.RED+" Not Connected"+Fore.RESET
+            print Fore.RED+" Connection failure"+Fore.RESET
             exit_with_message("Error : "+ str(e)+"\n\nPlease run setup command again.")
         except socket.error, e:
-            print Fore.RED+" Not Connected"+Fore.RESET
+            print Fore.RED+" Connection failure"+Fore.RESET
             exit_with_message(str(e)+"\n\nPlease run setup command again.")
         
         #print "cvm_ip :"+cvm_ip+" cvm_user :"+cvm_user+" cvm_pwd : "+cvm_pwd

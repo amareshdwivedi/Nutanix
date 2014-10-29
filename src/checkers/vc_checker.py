@@ -138,12 +138,12 @@ class VCChecker(CheckerBase):
         warnings.simplefilter('ignore')
         try:
             si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
-            print Fore.GREEN+" Connected"+Fore.RESET
+            print Fore.GREEN+" Connection successful"+Fore.RESET
         except vim.fault.InvalidLogin:
-            print Fore.RED+" Not Connected"+Fore.RESET
+            print Fore.RED+" Connection failure"+Fore.RESET
             exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run setup command again!!")
         except ConnectionError as e:
-            print Fore.RED+" Not Connected"+Fore.RESET
+            print Fore.RED+" Connection failure"+Fore.RESET
             exit_with_message("Error : Connection Error"+"\n\nPlease run setup command again!!")
         finally:
             Disconnect(si)
