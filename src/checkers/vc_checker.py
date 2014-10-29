@@ -600,17 +600,30 @@ class VCChecker(CheckerBase):
                     datastores=ClusterComputeRrc.environmentBrowser.QueryConfigTarget().datastore
                     for datastore in datastores:
                         vStorageSupport=datastore.vStorageSupport
-                        #print host_domain+"."+ClusterComputeRrc.name+"."+str(datastore.name)+"="+datastore.vStorageSupport
-                        if vStorageSupport == expected_vStorageSupported:
-                            message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")"+"#"+(True and "PASS" or "FAIL")
-                            self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")" , ( True and "PASS" or "FAIL"))
+                        
+                        if fnmatch.fnmatch(datastore.name,"NTNX-local-ds*") :
+                            # for datastore NTNX-local-ds* ,  vStorageSupport should not Supported
+                            if (vStorageSupport == expected_vStorageSupported):
+                                pass_all=False
+                                message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: = not-"+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: = not "+expected_vStorageSupported+")" , ( False and "PASS" or "FAIL"))
+                            else:
+                                
+                                # To handle None Value
+                                new_vStorageSupport= vStorageSupport if vStorageSupport else "None"
+                                message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport + " (Expected: = not-"+expected_vStorageSupported+")"+"#"+(True and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport+ " (Expected: = not "+expected_vStorageSupported+")" , ( True and "PASS" or "FAIL"))
                         else:
-                            pass_all=False
-                            # To handle None Value
-                            new_vStorageSupport= vStorageSupport if vStorageSupport else "None"
-                            message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport + " (Expected: ="+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
-                            self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")" , ( False and "PASS" or "FAIL"))
-        
+                            if (vStorageSupport == expected_vStorageSupported):
+                                message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")"+"#"+(True and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")" , ( True and "PASS" or "FAIL"))
+                            else:
+                                pass_all=False
+                                # To handle None Value
+                                new_vStorageSupport= vStorageSupport if vStorageSupport else "None"
+                                message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport + " (Expected: ="+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")" , ( False and "PASS" or "FAIL"))
+            
                 except AttributeError:
                     pass_all=False 
                     message += ", " + host_domain+"."+ClusterComputeRrc.name+"="+ "DataStore not attached"+ " (Expected: ="+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
