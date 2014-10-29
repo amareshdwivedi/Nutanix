@@ -91,8 +91,16 @@ def main():
         
     #Generate CSV Reports
     rows = []
+    details = []
+    details.append(["Nutanix Cluster Health Check Results"])
     rows.append(["Category", "Health Check Variable","Property","Status", "Severity"])
     for xchecker,allChecks in results.iteritems():
+        details.append(["IP",allChecks['ip']])
+        details.append(["Category",allChecks['Name']])
+        details.append(["User Name",allChecks['user']])
+        details.append(["Timestamp",str(time.strftime("%B %d, %Y %H:%M:%S"))])
+        details.append(["Overall Status",allChecks['Status']])
+        
         try:
             for xcheck in allChecks['checks']:
                 if isinstance(xcheck['Properties'], list):
@@ -106,10 +114,12 @@ def main():
             continue
     
     if len(rows) > 1:
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        details.append([None])
+        timestamp = time.strftime("%Y%m%d-%H%M%S")    
         file_name = 'reports'+os.path.sep+'Healthcheck-' + timestamp + '.csv'
         csv_file = open(file_name ,'wb')
         csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerows(details)
         csv_writer.writerows(rows)
         csv_file.close()
         
