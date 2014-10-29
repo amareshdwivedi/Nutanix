@@ -10,6 +10,7 @@ import getpass
 from validation import Validate
 from security import Security
 import socket
+from colorama import Fore
 MSG_WIDTH = 120
 
 def exit_with_message(message):
@@ -107,17 +108,61 @@ class NCCChecker(CheckerBase):
     
     def setup(self):
         print "\nConfiguring NCC :\n"
-        cvm_ip=raw_input("Enter CVM IP : ")
+        current_cvm_ip = self.authconfig['cvm_ip'] if ('cvm_ip' in self.authconfig.keys()) else "Not Set"
+        cvm_ip=raw_input("Enter CVM IP [default: "+current_cvm_ip+"]: ")
+        cvm_ip=cvm_ip.strip()
+        if cvm_ip == "":
+            if(current_cvm_ip == "Not Set"):
+                exit_with_message("Error: Set CVM IP.")
+            cvm_ip=current_cvm_ip
         
         if Validate.valid_ip(cvm_ip) == False:
             exit_with_message("\nError : Invalid CVM IP address")
         
-        cvm_user=raw_input("Enter CVM User Name : ")
-        new_pass=getpass.getpass('Please Enter a  CVM Password: ')
-        confirm_pass=getpass.getpass('Please Re-Enter a CVM Password: ')
-        if new_pass !=confirm_pass :
-            exit_with_message("\nError :Password miss-match. Please try setup command again")
-        cvm_pwd=Security.encrypt(new_pass)
+        #cvm_ip=raw_input("Enter CVM IP : ")
+        
+        
+        current_cvm_user=self.authconfig['cvm_user'] if ('cvm_user' in self.authconfig.keys()) else "Not Set"
+        cvm_user=raw_input("Enter CVM User Name [default: "+current_cvm_user+"]: ")
+        cvm_user=cvm_user.strip()
+        if cvm_user == "":
+            if(current_cvm_user == "Not Set"):
+                current_cvm_user("Error: Set vCenter Server User Name.")
+            cvm_user=current_cvm_user
+        #cvm_user=raw_input("Enter CVM User Name : ")
+        
+        current_pass=self.authconfig['cvm_pwd'] if ('cvm_pwd' in self.authconfig.keys()) else "Not Set"      
+        new_pass=getpass.getpass('Please Enter a CVM Password [Press enter to use previous password]: ')
+        cvm_pwd=None
+        if new_pass == "":
+            if(current_pass == "Not Set"):
+                exit_with_message("Error: Set vCenter Server Password.")
+            cvm_pwd = current_pass
+        else:
+            confirm_pass=getpass.getpass('Please Re-Enter a CVM Password: ')
+            if new_pass !=confirm_pass :
+                exit_with_message("\nError :Password miss-match. Please try setup command again")
+            cvm_pwd=Security.encrypt(new_pass)
+            
+        #Test SSH connection
+        print "Checking CVM Connection Status:",
+        ssh=None
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(cvm_ip, username=cvm_user, password=Security.decrypt(cvm_pwd))
+            print Fore.GREEN+" Connected"+Fore.RESET
+            ssh.close()
+        
+        except paramiko.AuthenticationException:
+            print Fore.RED+" Not Connected"+Fore.RESET
+            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
+        except paramiko.SSHException, e:
+            print Fore.RED+" Not Connected"+Fore.RESET
+            exit_with_message("Error : "+ str(e)+"\n\nPlease run setup command again.")
+        except socket.error, e:
+            print Fore.RED+" Not Connected"+Fore.RESET
+            exit_with_message(str(e)+"\n\nPlease run setup command again.")
         
         #print "cvm_ip :"+cvm_ip+" cvm_user :"+cvm_user+" cvm_pwd : "+cvm_pwd
         

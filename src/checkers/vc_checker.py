@@ -12,6 +12,7 @@ import datetime
 import getpass
 from validation import Validate
 from security import Security
+from colorama import Fore
 
 def exit_with_message(message):
     print message
@@ -71,28 +72,83 @@ class VCChecker(CheckerBase):
             x.add_row([checks,"Run "+checks])
         x.add_row(["run_all", "Run all VC checks"])
         x.add_row(["setup", "Set vCenter Server Configuration"])
-        message = message is None and str(x) or "\nERROR : "+ message + "\n\n" + str(x)
+        message = message is None and str(x) or "\nERROR: "+ message + "\n\n" + str(x)
         exit_with_message(message)
 
     def setup(self):
-        print "\nConfiguring vCenter Server :\n"
-        vc_ip=raw_input("Enter vCenter Server IP : ")
+        print "\nConfiguring vCenter Server:\n"
+        
+#         print "Current configuration for vCenter Server is:\n vCenter Server IP: %s \n vCenter User Name: %s \n VCenter Port: %d\n Clusters: %s \n hosts: %s"%\
+#               (self.authconfig['vc_ip'], self.authconfig['vc_user'], self.authconfig['vc_port'],self.authconfig['cluster'],self.authconfig['host'] )
+        current_vc_ip = self.authconfig['vc_ip'] if ('vc_ip' in self.authconfig.keys()) else "Not Set"
+        vc_ip=raw_input("Enter vCenter Server IP [default: "+current_vc_ip+"]: ")
+        vc_ip=vc_ip.strip()
+        if vc_ip == "":
+            if(current_vc_ip == "Not Set"):
+                exit_with_message("Error: Set vCenter Server IP.")
+            vc_ip=current_vc_ip
+        
         if Validate.valid_ip(vc_ip) == False:
             exit_with_message("\nError: Invalid vCenter Server IP address")
-        vc_user=raw_input("Enter vCenter Server User Name: ")
-        new_pass=getpass.getpass('Enter vCenter Server Password: ')
-        confirm_pass=getpass.getpass('Re-Enter vCenter Server Password: ')
-        if new_pass !=confirm_pass :
-            exit_with_message("\nError: Password miss-match.Please try setup command again")
-        vc_pwd=Security.encrypt(new_pass)
+                
+        current_vc_user=self.authconfig['vc_user'] if ('vc_user' in self.authconfig.keys()) else "Not Set"
+        vc_user=raw_input("Enter vCenter Server User Name [default: "+current_vc_user+"]: ")
+        vc_user=vc_user.strip()
+        if vc_user == "":
+            if(current_vc_user == "Not Set"):
+                exit_with_message("Error: Set vCenter Server User Name.")
+            vc_user=current_vc_user
+            
+            
+        current_pwd=self.authconfig['vc_pwd'] if  ('vc_pwd' in self.authconfig.keys()) else "Not Set"
+        new_vc_pwd=getpass.getpass('Enter vCenter Server Password [Press enter to use previous password]: ')
         
-        vc_port=int(raw_input("Enter vCenter Server Port: "))
-    
+        if new_vc_pwd == "":
+            if(current_pwd == "Not Set"):
+                exit_with_message("Error: Set vCenter Server Password.")
+            vc_pwd = current_pwd
+        else:
+            confirm_pass=getpass.getpass('Re-Enter vCenter Server Password: ')
+            if new_vc_pwd !=confirm_pass :
+                exit_with_message("\nError: Password miss-match.Please try setup command again")
+            vc_pwd=Security.encrypt(new_vc_pwd)
+        
+        current_vc_port=self.authconfig['vc_port'] if  ('vc_port' in self.authconfig.keys()) else "Not Set"
+        vc_port=raw_input("Enter vCenter Server Port [default: "+str(current_vc_port)+"]: ")
+        #vc_port=vc_port.strip()
+        if vc_port == "":
+            if(current_vc_port == "Not Set"):
+                exit_with_message("Error: Set vCenter Server Port.")
+            vc_port=int(current_vc_port)
+        else:
+            vc_port=int(vc_port)
         if isinstance(vc_port, int ) == False:
             exit_with_message("\nError: Port number is not a numeric value")
-        #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+vc_port
-        cluster=raw_input("Enter Cluster Name [multiple names separated by comma(,); blank to include all clusters]: ")
-        hosts=raw_input("Enter Host IP [multiple names separated by comma(,); blank to include all host]: ")
+        
+        current_cluster=self.authconfig['cluster'] if ('cluster' in self.authconfig.keys()) else "Not Set"
+        cluster=raw_input("Enter Cluster Name [default: "+current_cluster+"] {multiple names separated by comma(,); blank to include all clusters}: ")
+        cluster=cluster.strip()
+        
+        current_host=self.authconfig['host'] if ('host' in self.authconfig.keys()) else "Not Set"
+        hosts=raw_input("Enter Host IP [default: "+current_host+"] {multiple names separated by comma(,); blank to include all hosts}: ")
+        
+        #Test Connection Status
+        print "Checking vCenter Server Connection Status:",
+        si=None
+        warnings.simplefilter('ignore')
+        try:
+            si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
+            print Fore.GREEN+" Connected"+Fore.RESET
+        except vim.fault.InvalidLogin:
+            print Fore.RED+" Not Connected"+Fore.RESET
+            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run setup command again!!")
+        except ConnectionError as e:
+            print Fore.RED+" Not Connected"+Fore.RESET
+            exit_with_message("Error : Connection Error"+"\n\nPlease run setup command again!!")
+        finally:
+            Disconnect(si)
+        #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+str(vc_port)+" cluster : "+cluster+" host : "+hosts
+ 
         vc_auth = dict()
         vc_auth["vc_ip"]=vc_ip;
         vc_auth["vc_user"]=vc_user;
