@@ -90,25 +90,28 @@ def main():
             
         
     #Generate CSV Reports
-    
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
-    file_name = 'reports'+os.path.sep+'Healthcheck-' + timestamp + '.csv'
-    csv_file = open(file_name ,'wb')
-    #csv_file = open("reports"+os.path.sep+'results.csv', 'wb')
-    csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-    csv_writer.writerow(["Category", "Health Check Variable","Status", "Severity"])
-    record_exist = False
+    rows = []
+    rows.append(["Category", "Health Check Variable","Property","Status", "Severity"])
     for xchecker,allChecks in results.iteritems():
         try:
             for xcheck in allChecks['checks']:
-                csv_writer.writerow([xchecker, xcheck['Name'],xcheck['Status'], xcheck['Severity']])
-                record_exist = True
+                if isinstance(xcheck['Properties'], list):
+                    rows.append([xchecker, xcheck['Name'],"Overall Status",xcheck['Status'], xcheck['Severity']])
+                    for prop in xcheck['Properties']:
+                        rows.append([xchecker, xcheck['Name'],prop['Message'],prop['Status'], xcheck['Severity']])
+                else:
+                    rows.append([xchecker, xcheck['Name'],None,xcheck['Status'], xcheck['Severity']])
         except KeyError:
             #It means- No checks were executed for this checker. 
             continue
-    csv_file.close()
-    if not record_exist :
-        os.remove(file_name)
+    
+    if len(rows) > 1:
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        file_name = 'reports'+os.path.sep+'Healthcheck-' + timestamp + '.csv'
+        csv_file = open(file_name ,'wb')
+        csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerows(rows)
+        csv_file.close()
         
     #Generate Json Reports 
     outfile = open("reports"+os.path.sep+"results.json", 'w')
