@@ -92,19 +92,24 @@ def main():
     #Generate CSV Reports
     
     timestamp = time.strftime("%Y%m%d-%H%M%S")
-    csv_file = open("reports"+os.path.sep+'Healthcheck-' + timestamp + '.csv' ,'wb')
+    file_name = 'reports'+os.path.sep+'Healthcheck-' + timestamp + '.csv'
+    csv_file = open(file_name ,'wb')
     #csv_file = open("reports"+os.path.sep+'results.csv', 'wb')
     csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     csv_writer.writerow(["Category", "Health Check Variable","Status", "Severity"])
+    record_exist = False
     for xchecker,allChecks in results.iteritems():
         try:
             for xcheck in allChecks['checks']:
                 csv_writer.writerow([xchecker, xcheck['Name'],xcheck['Status'], xcheck['Severity']])
+                record_exist = True
         except KeyError:
             #It means- No checks were executed for this checker. 
             continue
     csv_file.close()
-   
+    if not record_exist :
+        os.remove(file_name)
+        
     #Generate Json Reports 
     outfile = open("reports"+os.path.sep+"results.json", 'w')
     json.dump(results, outfile, indent=2)
