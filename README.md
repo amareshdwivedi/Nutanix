@@ -17,8 +17,8 @@ Prerequisite to run HealthCheck (Follows Sequence)
 
 To create .egg distribution file for HealthCheck
 ================================================
-python setup.py bdist_egg --exclude-source-files
+python setup_egg.py bdist_egg --exclude-source-files
 
 To install .egg distribution file for HealthCheck
 =================================================
-easy_install -Z HealthCheck-1.0.0-py2.7.egg
+easy_install HealthCheck-1.0.0-py2.7.egg
