@@ -79,7 +79,8 @@ def _header_footer(canvas, doc):
         # Save the state of our canvas so we can draw on it
         canvas.saveState()
         # Header
-        header = Image('./resources/images/nutanixlogo.png', height=0.50 * inch, width=5 * cm)
+        png_path=os.path.dirname(__file__)+os.path.sep+'resources'+os.path.sep+'images'+os.path.sep+'nutanixlogo.png'
+        header = Image(png_path, height=0.50 * inch, width=5 * cm)
         w, h = header.wrap(doc.width, doc.topMargin)
         header.drawOn(canvas, doc.leftMargin, doc.height + doc.topMargin - h)
         
@@ -171,11 +172,12 @@ def PDFReportGenerator(resultJson):
     # Adding timestamp to the report name  
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     # path for generating the report
-    pdffilename = "reports" + os.path.sep + 'Healthcheck-' + timestamp + '.pdf'
+    pdffilename = os.path.dirname(__file__)+os.path.sep+"reports" + os.path.sep + 'Healthcheck-' + timestamp + '.pdf'
     doc = SimpleDocTemplate(pdffilename, pagesizes=letter, format=landscape, rightMargin=inch / 4, leftMargin=inch / 10, topMargin=inch, bottomMargin=inch / 4)
     story = []
     date = time.strftime("%B %d, %Y")
-    headingdata = [["   ", "   ", "  ", "  ", Image("./resources/images/hcr.png", height=0.37 * inch, width=12 * cm)],
+    png_path=os.path.dirname(__file__)+os.path.sep+'resources'+os.path.sep+'images'+os.path.sep+'hcr.png'
+    headingdata = [["   ", "   ", "  ", "  ", Image(png_path, height=0.37 * inch, width=12 * cm)],
                     [ "    ", "    ", "   ", "   ", "  " , date]]
     headingtable = Table(headingdata)
     headingtable.setStyle(TableStyle([('ALIGN', (0, 1), (4, 1), 'RIGHT'),
@@ -211,7 +213,6 @@ def PDFReportGenerator(resultJson):
             vc_report(story, resultJson[checkers].get('checks'))
         if checkers == 'ncc':
             ncc_report(story, resultJson[checkers].get('checks'))
-     
     doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
     #print "Success"            
 #PDFReportGenerator(resultJson)

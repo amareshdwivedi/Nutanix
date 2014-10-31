@@ -66,7 +66,8 @@ def main():
     # We call configure on each module first so that we can fail-fast
     # in case some module is not configured properly
     for checker in checkers_list:
-        fp = open("conf" + os.path.sep + checker + ".conf", 'r')
+        checker_conf_path=os.path.dirname(__file__)+os.path.sep +"conf" + os.path.sep + checker + ".conf"
+        fp = open(checker_conf_path, 'r')
         checker_config = json.load(fp)
         fp.close()
         checker_module = checkers[checker]
@@ -115,8 +116,8 @@ def main():
     
     if len(rows) > 1:
         details.append([None])
-        timestamp = time.strftime("%Y%m%d-%H%M%S")    
-        file_name = 'reports'+os.path.sep+'Healthcheck-' + timestamp + '.csv'
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        file_name = os.path.dirname(__file__)+os.path.sep+'reports'+os.path.sep+'Healthcheck-' + timestamp + '.csv'
         csv_file = open(file_name ,'wb')
         csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerows(details)
@@ -124,7 +125,7 @@ def main():
         csv_file.close()
         
     #Generate Json Reports 
-    outfile = open("reports"+os.path.sep+"results.json", 'w')
+    outfile = open(os.path.dirname(__file__)+os.path.sep+"reports"+os.path.sep+"results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()
     

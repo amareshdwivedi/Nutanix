@@ -59,7 +59,8 @@ class CheckerBase:
     def get_auth_config(self,checker):
         auth={}
         try:           
-            fp = open("conf" + os.path.sep + "auth.conf", 'r')
+            auth_path=os.path.join(os.path.dirname(__file__), os.pardir)+os.path.sep+"conf" + os.path.sep + "auth.conf"
+            fp = open(auth_path, 'r')
             authconfig = json.load(fp)
             fp.close()
             auth=authconfig[checker]
@@ -75,14 +76,16 @@ class CheckerBase:
     def save_auth_into_auth_config(checker_name, data):
         authconfig={}
         try:
-            fp = open("conf" + os.path.sep + "auth.conf", 'r')
+            auth_path=os.path.join(os.path.dirname(__file__), os.pardir)+os.path.sep+"conf" + os.path.sep + "auth.conf"
+            fp = open(auth_path, 'r')
             authconfig = json.load(fp)
             fp.close()
             
         except ValueError:
             "do nothing"
         authconfig[checker_name]=data
-        fp = open("conf" + os.path.sep + "auth.conf", 'w')
+        auth_path=os.path.join(os.path.dirname(__file__), os.pardir)+os.path.sep+"conf" + os.path.sep + "auth.conf"
+        fp = open(auth_path, 'w')
         json.dump(authconfig, fp, indent=2)
         fp.close()
     

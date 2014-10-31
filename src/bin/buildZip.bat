@@ -13,8 +13,7 @@ echo Copying Required Files.....
 copy dist\HealthCheck-1.0.0-py2.7.egg HealthCheck-1.0.0\eggs || if %ERRORLEVEL% neq 0 goto :error 
 copy src\libs\*.* HealthCheck-1.0.0\eggs || if %ERRORLEVEL% neq 0 goto :error 
 copy get_pip.py HealthCheck-1.0.0\get_pip || if %ERRORLEVEL% neq 0 goto :error 
-copy src\bin\install.bat HealthCheck-1.0.0 || if %ERRORLEVEL% neq 0 goto :error 
-copy src\bin\uninstall.bat HealthCheck-1.0.0 || if %ERRORLEVEL% neq 0 goto :error 
+copy src\bin\*.py HealthCheck-1.0.0 || if %ERRORLEVEL% neq 0 goto :error 
 copy src\bin\README.txt HealthCheck-1.0.0 || if %ERRORLEVEL% neq 0 goto :error 
 echo Creating .zip File...
 cd src/bin
