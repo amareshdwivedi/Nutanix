@@ -643,7 +643,7 @@ class VCChecker(CheckerBase):
        
         return pass_all, message
     
-    @checkgroup("storage_and_vm_checks", "Confirm the states of vStorage hardware acceleration support for datastore.",2)
+    @checkgroup("storage_and_vm_checks", "Confirm the states of vStorage hardware acceleration support for datastore.",1)
     def check_vStorageSupport(self):
         datacenter_host = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity')
         message = ""
