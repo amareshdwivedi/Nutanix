@@ -658,17 +658,7 @@ class VCChecker(CheckerBase):
                         vStorageSupport=datastore.vStorageSupport
                         
                         if fnmatch.fnmatch(datastore.name,"NTNX-local-ds*") :
-                            # for datastore NTNX-local-ds* ,  vStorageSupport should not Supported
-                            if (vStorageSupport == expected_vStorageSupported):
-                                pass_all=False
-                                message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: = not-"+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
-                                self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: = not "+expected_vStorageSupported+")" , ( False and "PASS" or "FAIL"))
-                            else:
-                                
-                                # To handle None Value
-                                new_vStorageSupport= vStorageSupport if vStorageSupport else "None"
-                                message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport + " (Expected: = not-"+expected_vStorageSupported+")"+"#"+(True and "PASS" or "FAIL")
-                                self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport+ " (Expected: = not "+expected_vStorageSupported+")" , ( True and "PASS" or "FAIL"))
+                            continue
                         else:
                             if (vStorageSupport == expected_vStorageSupported):
                                 message += ", " +host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")"+"#"+(True and "PASS" or "FAIL")
