@@ -1,0 +1,242 @@
+$def with (checkers,msg="")
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Health Check</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="/static/styles/bootstrap.css">
+    <link rel="stylesheet" href="/static/styles/font-awesome.css">
+    <link rel="stylesheet" href="/static/styles/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <!-- 
+    <script src="/static/js/health.js"></script>
+    -->
+    <script type="text/javascript" >
+		jQuery(document).ready(function(){
+			jQuery("#category_select").change(function() {
+				var category = $$("#category_select").val()
+				var select = $$("#category_select");
+				if(category == "vc"){
+					select.push("<option value = 'Test Value'\>");
+				}	
+			});
+			
+		    jQuery("#runnhecks").click(function() {
+		        var looping = false
+		        var inputElements = document.getElementsByClassName('run');
+		        checks = [] 
+		        checks.push({name: 'operation', value: 'exec_checks'}); 
+		        var category = $$("#category_select").val()
+		        var group = $$("#group_select").val()
+		       
+		        checks.push({name: "category", value:category })
+		        checks.push({name: "group" , value: group})
+		         
+		        console.log(checks)
+		        jQuery.ajax({
+		            url: '/',
+		            type: "POST",
+		            data: checks,
+		            success: function(data) {
+		            	looping = false
+		                alert(data)
+		            },
+		        });
+		        //Get call with refresh timer.
+		        looping = true
+		        cont_run = [];
+		        cont_run.push({name: 'operation', value: 'refresh_logs'});
+		        setInterval( function(){
+		                        if(looping = true){
+		                            jQuery.ajax({
+		                                url: '/',
+		                                type: "POST",
+		                                data: cont_run,
+		                                success: function(data) {
+		                                    console.log(looping)
+		                                    document.getElementById('logs').value = data;
+		                                 },
+		                             });
+		                      }},10000)
+		
+		
+		        //polling().done(function(){setTimeout(polling, 20000);});       
+		    return false;
+		    });
+		
+		    jQuery(".conf").click(function() {
+		        if ($$(this).attr('id')=="config_vc") {
+		            var form_data = $$("#vc").serializeArray();
+		            form_data.push({name: 'operation', value: 'config_vc'});
+		            console.log(form_data)
+		                jQuery.ajax({
+		                //url: '/',
+		                type: "POST",
+		                dataType: "json",
+		                data: form_data,
+		                success: function(value) {
+		                    console.log(value)
+		                    alert("Successfully Updated")
+		                },
+		            });
+		        }
+		        if ($$(this).attr('id')=="config_ncc") {
+		            
+		            var form_data = $$("#ncc").serializeArray();
+		            form_data.push({name: 'operation', value: 'config_ncc'});
+		            jQuery.ajax({
+		                //url: '/',
+		                type: "POST",
+		                //contentType: 'application/x-www-form-urlencoded',
+		                dataType: "json",
+		                data: form_data,
+		                success: function(data) {
+		                    alert("Successfully Updated")
+		                    console.log(data)
+		                },
+		            });
+		        }
+		    return false;
+		    });
+		
+		    jQuery(".conn").click(function() {
+		        if ($$(this).attr('id')=="connect_vc") {
+		            var form_data = $$("#vc").serializeArray();
+		            form_data.push({name: 'operation', value: 'connect_vc'});
+		
+		                jQuery.ajax({
+		                //url: '/',
+		                type: "POST",
+		                //contentType: 'application/x-www-form-urlencoded',
+		                dataType: "json",
+		                data: form_data,
+		                success: function(data) {
+		                    console.log(data)
+		                    var status=data["Connection"];
+		                    console.log(status)
+		                    alert("Connection "+status)
+		                },
+		            });
+		        }
+		        if ($$(this).attr('id')=="connect_ncc") {
+		            var form_data = $$("#ncc").serializeArray();
+		            form_data.push({name: 'operation', value: 'connect_ncc'});
+		
+		            jQuery.ajax({
+		                //url: '/',
+		                type: "POST",
+		                //contentType: 'application/x-www-form-urlencoded',
+		                dataType: "json",
+		                data: form_data,
+		                success: function(data) {
+		                    console.log(data)
+		                    var status=data["Connection"];
+		                    console.log(status)
+		                    alert("Connection "+status)
+		                },
+		            });
+		        }
+		    return false;
+		    });
+		});
+		</script>
+    
+</head>
+<body>
+    <div class="view100 page page-dashboard">
+        <div class="container-fluid no-padding top_header ng-scope">
+            <div class="row no-margin top_header_height">
+                <div class="col-sm-5 col-xs-2 no-padding top_left top_header_font">
+                    <span class="top_header_font_sizer">HEALTH CHECK</span>
+                </div>
+                <div class="col-sm-2 col-xs-2 nutanixlogo"><a target="_blank" href="http://www.nutanix.com/"><img src="/static/images/logo.png"></a></div>
+            </div>
+        </div>
+        <div class="row no-margin nx-main-container">
+            <div class="col-lg-3 col-md-3 col-sm-3 no-padding">
+            	<div class="col-lg-12 col-md-12 col-sm-12 leftSide_area no-margin">
+            		<h2>Connection Details</h2>
+            		$ id1 = "config_"
+				    $ id2 = "connect_"
+				    $ id3 = "run_"
+				    $for checker, checkObject in checkers.iteritems():
+				    <div class="col-lg-12 col-md-12 col-sm-12 no-margin  connectionForms">
+				    	<form id=$checker method="post">
+				    		<div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formTbl">
+				    			$:checkObject.config_form.render()
+				    		</div>
+				    		<div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formButtonsSec">
+				    			<input type="button" id=$:id1$:checker class="conf btn btn-primary healthCheckBtn" value="Configure" /> 
+				                <input type="button" id=$:id2$:checker class="conn btn btn-primary healthCheckBtn" value="Verify Connection"  />
+				    		</div>
+				    	</form>
+				    </div>
+            	</div>
+				<!-- <table border=1 bgcolor="" width=30%>
+				    <tr><th>Select Check</th><th>Check Category</th><th>Connection Details</th></tr>
+				    $ id1 = "config_"
+				    $ id2 = "connect_"
+				    $ id3 = "run_"
+				    $for checker, checkObject in checkers.iteritems():
+				    <tr>
+				        <td><input id=$:id3$:checker name=$:checker type="checkbox" class='run' size=20></td>
+				        <td width=30% style="vertical-align=top"><b>$checker :</b></td>
+				        <td>
+				            <form id=$checker method="post">
+				                <table border=1>
+				                    <tr>
+				                        <td>$:checkObject.config_form.render()</td>
+				                    </tr>
+				                    <tr>
+				                        <td align=right>
+				                            <input type="button" id=$:id1$:checker class="conf" value="Configure" /> 
+				                            <input type="button" id=$:id2$:checker class="conn" value="Verify Connection"  />
+				                        </td>
+				                    </tr>
+				                </table>
+				            </form>
+				
+				        </td>
+				    </tr>
+					<tr>
+		    	<td><input type="button" id="runnhecks" value="Run" bgcolor="green"/><td/>
+		    	<td></td>
+					</tr>
+				</table> -->
+            </div>
+            <div class="col-lg-9 col-md-9 col-sm-9">
+	            <div class="col-lg-12 col-md-12 col-sm-12 categorySec">
+	            	Checker :
+		            <select id="category_select"> 
+		            	<option value="Run All">Run All</option>
+		            	$for checker, checkObject in checkers.iteritems():
+			            	<option value=$checker >$:checker</option>
+		            </select>
+		            Check Group:
+		            <select id="group_select"> 
+		            	<option value="Run All">Run All</option>
+		            	<option value="cluster_checks">cluster_checks</option>
+		            	<option value="esxi_checks">esxi_checks</option>
+		            	<option value="cvm_checks">cvm_checks</option>
+		            	<option value="vcenter_server_checks">vcenter_server_checks</option>
+		            	<option value="storage_and_vm_checks">storage_and_vm_checks</option>
+		            	<option value="network_and_switch_checks">network_and_switch_checks</option>
+		            </select>
+		            
+		            <input type="button" id="runnhecks" value="Run" class="btn btn-primary healthCheckBtn runBtn"/>
+	            </div>
+	            <div class="col-lg-12 col-md-12 col-sm-12 no-padding logArea">
+	            	<textarea id="logs" class="col-lg-12 col-md-12 col-sm-12 logcontainer"></textarea>
+	            </div>
+		    
+            </div>
+            
+        </div>
+    </div>  
+</body>
+</html>
+

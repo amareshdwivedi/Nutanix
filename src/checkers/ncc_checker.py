@@ -11,6 +11,9 @@ from validation import Validate
 from security import Security
 import socket
 from colorama import Fore
+import web
+from web import form
+
 MSG_WIDTH = 120
 
 def exit_with_message(message):
@@ -24,7 +27,18 @@ class NCCChecker(CheckerBase):
 
     def __init__(self):
         super(NCCChecker, self).__init__(NCCChecker._NAME_)
-
+        
+        print self.authconfig
+        
+        pwd = Security.decrypt(self.authconfig['cvm_pwd'])
+        print "password :",pwd
+        self.config_form =  form.Form( 
+                form.Textbox('Server',value=self.authconfig['cvm_ip']), 
+                form.Textbox('User',value=self.authconfig['cvm_user']),
+                form.Password('Password',value=pwd),
+                form.Password('Retype_Password',value=pwd))() 
+        
+        #self.config_form.User = "Ganesh"
     def get_name(self):
         return NCCChecker._NAME_
 
@@ -101,7 +115,7 @@ class NCCChecker(CheckerBase):
             if status not in [0,1,3,4]:
                 passed_all = False
         self.result.passed = (passed_all and "PASS" or "FAIL")
-        print "+"+"-"*MSG_WIDTH+"-"*10+"+"
+        print "\n+"+"-"*MSG_WIDTH+"-"*10+"+"
         self.reporter.notify_progress(self.reporter.notify_info,"NCC Checks complete")
         ssh.close()
         

@@ -13,6 +13,8 @@ import getpass
 from validation import Validate
 from security import Security
 from colorama import Fore
+import web
+from web import form
 
 def exit_with_message(message):
     print message
@@ -37,6 +39,15 @@ class VCChecker(CheckerBase):
 
     def __init__(self):
         super(VCChecker, self).__init__(VCChecker._NAME_)
+        self.config_form =  form.Form( 
+                form.Textbox("Server",value=self.authconfig['vc_ip']),
+                form.Textbox("Port",value=self.authconfig['vc_port']),
+                form.Textbox("User",value=self.authconfig['vc_user']),
+                form.Password("Password",value=Security.decrypt(self.authconfig['vc_pwd'])),
+                form.Password("Retype_Password",value=Security.decrypt(self.authconfig['vc_pwd'])), 
+                form.Textbox("Cluster",value=self.authconfig['cluster']),
+                form.Textbox("Host",value=self.authconfig['host']))() 
+
         self.si = None
 
     def get_name(self):
