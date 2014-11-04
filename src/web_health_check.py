@@ -63,18 +63,26 @@ class index:
         f = open("test.txt", "w")
         f.close()
         
-        if data['category'] == "Run_All":
-            checkers_list = ['ncc','vc']
+        checkers_list, group = [], []
+        if data['category'] == "Run All":
+            checkers_list = self.checkers.keys()
             
         if data['category'] == "ncc":
             checkers_list = ['ncc']
             
         if data['category'] == "vc":
             checkers_list = ['vc']
-            
-
+            if data['group'] == "Run All":
+                group.append("run_all")
+            else:
+                group.append(data['group'])
+        
         for checker in checkers_list:
             checker_module = self.checkers[checker]
+            
+            if checker == "vc":
+                result = checker_module.execute(group)
+                
             result = checker_module.execute(["run_all"])
             results[checker] = result.to_dict()
             
@@ -84,7 +92,6 @@ class index:
             except KeyError:
                 # It means no checks are executed for given checker
                 continue
-        
         return True
     
     def do_config(self,data):
