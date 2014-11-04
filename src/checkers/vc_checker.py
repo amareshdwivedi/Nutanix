@@ -13,6 +13,8 @@ import getpass
 from validation import Validate
 from security import Security
 from colorama import Fore
+import web
+from web import form
 
 def exit_with_message(message):
     print message
@@ -37,6 +39,15 @@ class VCChecker(CheckerBase):
 
     def __init__(self):
         super(VCChecker, self).__init__(VCChecker._NAME_)
+        self.config_form =  form.Form( 
+                form.Textbox("Server",value=self.authconfig['vc_ip']),
+                form.Textbox("Port",value=self.authconfig['vc_port']),
+                form.Textbox("User",value=self.authconfig['vc_user']),
+                form.Password("Password",value=Security.decrypt(self.authconfig['vc_pwd'])),
+                form.Password("Retype_Password",value=Security.decrypt(self.authconfig['vc_pwd'])), 
+                form.Textbox("Cluster",value=self.authconfig['cluster']),
+                form.Textbox("Host",value=self.authconfig['host']))() 
+
         self.si = None
 
     def get_name(self):
@@ -110,7 +121,7 @@ class VCChecker(CheckerBase):
         else:
             confirm_pass=getpass.getpass('Re-Enter vCenter Server Password: ')
             if new_vc_pwd !=confirm_pass :
-                exit_with_message("\nError: Password miss-match.Please try setup command again")
+                exit_with_message("\nError: Password miss-match.Please run \"vc setup\" command again")
             vc_pwd=Security.encrypt(new_vc_pwd)
         
         current_vc_port=self.authconfig['vc_port'] if  ('vc_port' in self.authconfig.keys()) else "Not Set"
@@ -134,19 +145,13 @@ class VCChecker(CheckerBase):
         
         #Test Connection Status
         print "Checking vCenter Server Connection Status:",
-        si=None
-        warnings.simplefilter('ignore')
-        try:
-            si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
+        status, message = self.check_connectivity(vc_ip, vc_user, vc_pwd, vc_port)
+        if status == True:
             print Fore.GREEN+" Connection successful"+Fore.RESET
-        except vim.fault.InvalidLogin:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run setup command again!!")
-        except ConnectionError as e:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message("Error : Connection Error"+"\n\nPlease run setup command again!!")
-        finally:
-            Disconnect(si)
+        else:
+           print Fore.RED+" Connection failure"+Fore.RESET
+           exit_with_message(message)
+           
         #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+str(vc_port)+" cluster : "+cluster+" host : "+hosts
  
         vc_auth = dict()
@@ -159,6 +164,19 @@ class VCChecker(CheckerBase):
         CheckerBase.save_auth_into_auth_config(self.get_name(),vc_auth)
         exit_with_message("vCenter Server is configured Successfully ")
         return
+    
+    def check_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port):
+        si=None
+        warnings.simplefilter('ignore')
+        try:
+            si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
+            return True,None
+        except vim.fault.InvalidLogin:
+            return False,"Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command again!!"
+        except ConnectionError as e:
+            return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
+        finally:
+            Disconnect(si)
     
     def execute(self, args):
 
@@ -202,9 +220,9 @@ class VCChecker(CheckerBase):
         try:
             self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=Security.decrypt(self.authconfig['vc_pwd']), port=self.authconfig['vc_port'])
         except vim.fault.InvalidLogin:
-            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run setup command to configure vc")
+            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command to configure vc")
         except ConnectionError as e:
-            exit_with_message("Error : Connection Error"+"\n\nPlease run setup command to configure vc")
+            exit_with_message("Error : Connection Error"+"\n\nPlease run \"vc setup\" command to configure vc")
         
         passed_all = True
 

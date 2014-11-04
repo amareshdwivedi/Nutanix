@@ -11,6 +11,9 @@ from validation import Validate
 from security import Security
 import socket
 from colorama import Fore
+import web
+from web import form
+
 MSG_WIDTH = 120
 
 def exit_with_message(message):
@@ -24,7 +27,15 @@ class NCCChecker(CheckerBase):
 
     def __init__(self):
         super(NCCChecker, self).__init__(NCCChecker._NAME_)
-
+        
+        pwd = Security.decrypt(self.authconfig['cvm_pwd'])
+        self.config_form =  form.Form( 
+                form.Textbox('Server',value=self.authconfig['cvm_ip']), 
+                form.Textbox('User',value=self.authconfig['cvm_user']),
+                form.Password('Password',value=pwd),
+                form.Password('Retype_Password',value=pwd))() 
+        
+        #self.config_form.User = "Ganesh"
     def get_name(self):
         return NCCChecker._NAME_
 
@@ -65,11 +76,11 @@ class NCCChecker(CheckerBase):
             ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=Security.decrypt(self.authconfig['cvm_pwd']))
         
         except paramiko.AuthenticationException:
-            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
+            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
         except paramiko.SSHException, e:
-            exit_with_message("Error : "+ str(e)+"\n\nPlease run setup command to configure ncc.")
+            exit_with_message("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
         except socket.error, e:
-            exit_with_message(str(e)+"\n\nPlease run setup command to configure ncc.")
+            exit_with_message(str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
         self.result = CheckerResult("ncc",self.authconfig)
@@ -101,7 +112,7 @@ class NCCChecker(CheckerBase):
             if status not in [0,1,3,4]:
                 passed_all = False
         self.result.passed = (passed_all and "PASS" or "FAIL")
-        print "+"+"-"*MSG_WIDTH+"-"*10+"+"
+        print "\n+"+"-"*MSG_WIDTH+"-"*10+"+"
         self.reporter.notify_progress(self.reporter.notify_info,"NCC Checks complete")
         ssh.close()
         
@@ -143,28 +154,18 @@ class NCCChecker(CheckerBase):
         else:
             confirm_pass=getpass.getpass('Please Re-Enter a CVM Password: ')
             if new_pass !=confirm_pass :
-                exit_with_message("\nError :Password miss-match. Please try setup command again")
+                exit_with_message("\nError :Password miss-match. Please run \"ncc setup\" command again")
             cvm_pwd=Security.encrypt(new_pass)
             
         #Test SSH connection
         print "Checking CVM Connection Status:",
-        ssh=None
-        try:
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(cvm_ip, username=cvm_user, password=Security.decrypt(cvm_pwd))
-            print Fore.GREEN+" Connection successful"+Fore.RESET
-            ssh.close()
         
-        except paramiko.AuthenticationException:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
-        except paramiko.SSHException, e:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message("Error : "+ str(e)+"\n\nPlease run setup command again.")
-        except socket.error, e:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message(str(e)+"\n\nPlease run setup command again.")
+        status, message = self.check_connectivity(cvm_ip, cvm_user, cvm_pwd)
+        if status == True:
+            print Fore.GREEN+" Connection successful"+Fore.RESET
+        else:
+           print Fore.RED+" Connection failure"+Fore.RESET
+           exit_with_message(message)
         
         #print "cvm_ip :"+cvm_ip+" cvm_user :"+cvm_user+" cvm_pwd : "+cvm_pwd
         
@@ -176,3 +177,21 @@ class NCCChecker(CheckerBase):
         CheckerBase.save_auth_into_auth_config(self.get_name(),ncc_auth)
         exit_with_message("NCC is configured Successfully ")
         return
+    
+    def check_connectivity(self,cvm_ip,cvm_user,cvm_pwd):
+        ssh=None
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(cvm_ip, username=cvm_user, password=Security.decrypt(cvm_pwd))
+            return True, None
+            ssh.close()
+        
+        except paramiko.AuthenticationException:
+            return False,("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
+        except paramiko.SSHException, e:
+            #print Fore.RED+" Connection failure"+Fore.RESET
+            return False,("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command again.")
+        except socket.error, e:
+            #print Fore.RED+" Connection failure"+Fore.RESET
+            return False,(str(e)+"\n\nPlease run \"ncc setup\" command again.")

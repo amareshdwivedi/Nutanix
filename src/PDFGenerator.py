@@ -172,11 +172,11 @@ def PDFReportGenerator(resultJson):
     # Adding timestamp to the report name  
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     # path for generating the report
-    pdffilename = os.path.dirname(__file__)+os.path.sep+"reports" + os.path.sep + 'Healthcheck-' + timestamp + '.pdf'
+    pdffilename = os.path.abspath(os.path.dirname(__file__))+os.path.sep+"reports" + os.path.sep + 'Healthcheck-' + timestamp + '.pdf'
     doc = SimpleDocTemplate(pdffilename, pagesizes=letter, format=landscape, rightMargin=inch / 4, leftMargin=inch / 10, topMargin=inch, bottomMargin=inch / 4)
     story = []
     date = time.strftime("%B %d, %Y")
-    png_path=os.path.dirname(__file__)+os.path.sep+'resources'+os.path.sep+'images'+os.path.sep+'hcr.png'
+    png_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep+'resources'+os.path.sep+'images'+os.path.sep+'hcr.png'
     headingdata = [["   ", "   ", "  ", "  ", Image(png_path, height=0.37 * inch, width=12 * cm)],
                     [ "    ", "    ", "   ", "   ", "  " , date]]
     headingtable = Table(headingdata)
@@ -214,5 +214,7 @@ def PDFReportGenerator(resultJson):
         if checkers == 'ncc':
             ncc_report(story, resultJson[checkers].get('checks'))
     doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
+    
+    print "\nReports generated successfully at " + os.path.abspath(os.path.dirname(__file__))+os.path.sep+"reports"
     #print "Success"            
 #PDFReportGenerator(resultJson)
