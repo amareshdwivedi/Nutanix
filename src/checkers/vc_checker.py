@@ -134,19 +134,13 @@ class VCChecker(CheckerBase):
         
         #Test Connection Status
         print "Checking vCenter Server Connection Status:",
-        si=None
-        warnings.simplefilter('ignore')
-        try:
-            si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
+        status, message = self.check_connectivity(vc_ip, vc_user, vc_pwd, vc_port)
+        if status == True:
             print Fore.GREEN+" Connection successful"+Fore.RESET
-        except vim.fault.InvalidLogin:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run setup command again!!")
-        except ConnectionError as e:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message("Error : Connection Error"+"\n\nPlease run setup command again!!")
-        finally:
-            Disconnect(si)
+        else:
+           print Fore.RED+" Connection failure"+Fore.RESET
+           exit_with_message(message)
+           
         #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+str(vc_port)+" cluster : "+cluster+" host : "+hosts
  
         vc_auth = dict()
@@ -159,6 +153,19 @@ class VCChecker(CheckerBase):
         CheckerBase.save_auth_into_auth_config(self.get_name(),vc_auth)
         exit_with_message("vCenter Server is configured Successfully ")
         return
+    
+    def check_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port):
+        si=None
+        warnings.simplefilter('ignore')
+        try:
+            si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
+            return True,None
+        except vim.fault.InvalidLogin:
+            return False,"Error : Invalid vCenter Server Username or password\n\nPlease run setup command again!!"
+        except ConnectionError as e:
+            return False,"Error : Connection Error"+"\n\nPlease run setup command again!!"
+        finally:
+            Disconnect(si)
     
     def execute(self, args):
 

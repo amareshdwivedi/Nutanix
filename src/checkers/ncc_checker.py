@@ -148,23 +148,13 @@ class NCCChecker(CheckerBase):
             
         #Test SSH connection
         print "Checking CVM Connection Status:",
-        ssh=None
-        try:
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(cvm_ip, username=cvm_user, password=Security.decrypt(cvm_pwd))
-            print Fore.GREEN+" Connection successful"+Fore.RESET
-            ssh.close()
         
-        except paramiko.AuthenticationException:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
-        except paramiko.SSHException, e:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message("Error : "+ str(e)+"\n\nPlease run setup command again.")
-        except socket.error, e:
-            print Fore.RED+" Connection failure"+Fore.RESET
-            exit_with_message(str(e)+"\n\nPlease run setup command again.")
+        status, message = self.check_connectivity(cvm_ip, cvm_user, cvm_pwd)
+        if status == True:
+            print Fore.GREEN+" Connection successful"+Fore.RESET
+        else:
+           print Fore.RED+" Connection failure"+Fore.RESET
+           exit_with_message(message)
         
         #print "cvm_ip :"+cvm_ip+" cvm_user :"+cvm_user+" cvm_pwd : "+cvm_pwd
         
@@ -176,3 +166,21 @@ class NCCChecker(CheckerBase):
         CheckerBase.save_auth_into_auth_config(self.get_name(),ncc_auth)
         exit_with_message("NCC is configured Successfully ")
         return
+    
+    def check_connectivity(self,cvm_ip,cvm_user,cvm_pwd):
+        ssh=None
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(cvm_ip, username=cvm_user, password=Security.decrypt(cvm_pwd))
+            return True, None
+            ssh.close()
+        
+        except paramiko.AuthenticationException:
+            return False,("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
+        except paramiko.SSHException, e:
+            #print Fore.RED+" Connection failure"+Fore.RESET
+            return False,("Error : "+ str(e)+"\n\nPlease run setup command again.")
+        except socket.error, e:
+            #print Fore.RED+" Connection failure"+Fore.RESET
+            return False,(str(e)+"\n\nPlease run setup command again.")
