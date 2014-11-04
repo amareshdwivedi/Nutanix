@@ -82,8 +82,9 @@ class index:
             
             if checker == "vc":
                 result = checker_module.execute(group)
-                
-            result = checker_module.execute(["run_all"])
+            else:    
+                result = checker_module.execute(["run_all"])
+            
             results[checker] = result.to_dict()
             
             # This is to sort the checks in given checker based on the severity ( asc order )
