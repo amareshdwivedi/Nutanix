@@ -19,10 +19,22 @@ $def with (checkers,msg="")
 		jQuery(document).ready(function(){
 			jQuery("#category_select").change(function() {
 				var category = $$("#category_select").val()
-				var select = $$("#category_select");
+
 				if(category == "vc"){
-					select.push("<option value = 'Test Value'\>");
-				}	
+				$$("#group_select").empty()
+				$$("#group_select").append('<option value="Run All">Run All</option>')	
+				$$("#group_select").append('<option value="cluster_checks">cluster_checks</option>')
+				$$("#group_select").append('<option value="esxi_checks">esxi_checks</option>')
+				$$("#group_select").append('<option value="cvm_checks">cvm_checks</option>')
+				$$("#group_select").append('<option value="vcenter_server_checks">vcenter_server_checks</option>')
+				$$("#group_select").append('<option value="storage_and_vm_checks">storage_and_vm_checks</option>')
+				$$("#group_select").append('<option value="network_and_switch_checks">network_and_switch_checks</option>')
+				}
+				if(category == "ncc"){
+					$$("#group_select").empty()
+					$$("#group_select").append('<option value="Run All">Run All</option>')
+				}
+				
 			});
 			
 		    jQuery("#runnhecks").click(function() {
@@ -219,12 +231,6 @@ $def with (checkers,msg="")
 		            Check Group:
 		            <select id="group_select"> 
 		            	<option value="Run All">Run All</option>
-		            	<option value="cluster_checks">cluster_checks</option>
-		            	<option value="esxi_checks">esxi_checks</option>
-		            	<option value="cvm_checks">cvm_checks</option>
-		            	<option value="vcenter_server_checks">vcenter_server_checks</option>
-		            	<option value="storage_and_vm_checks">storage_and_vm_checks</option>
-		            	<option value="network_and_switch_checks">network_and_switch_checks</option>
 		            </select>
 		            
 		            <input type="button" id="runnhecks" value="Run" class="btn btn-primary healthCheckBtn runBtn"/>
