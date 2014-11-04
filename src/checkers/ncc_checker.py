@@ -82,7 +82,6 @@ class NCCChecker(CheckerBase):
         except socket.error, e:
             exit_with_message(str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
 
-        self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
         self.result = CheckerResult("ncc",self.authconfig)
         
         ntnx_env = "source /etc/profile.d/zookeeper_env.sh && source /usr/local/nutanix/profile.d/nutanix_env.sh && "
@@ -94,12 +93,17 @@ class NCCChecker(CheckerBase):
         status_text = {0 : "Done",1 : "Done", 3 : "Pass",4: "Pass",5: "Warn",6: "Fail", 7: "Err"}
         stdin, stdout, stderr =  ssh.exec_command(cmd)
         passed_all = True
+        first_json = 0
         for line in stdout:
             try :
                 t = ast.literal_eval(line.strip('\n').replace("null","'null'").replace("true","'true'").replace("false","'false'"))
+                first_json += 1
             except :
                 print line.strip('\n')
                 continue
+            
+            if first_json == 1:
+                self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
 
             check_name = t["output holder list"][0]["message"]            
             status = t["status"]
@@ -112,8 +116,9 @@ class NCCChecker(CheckerBase):
             if status not in [0,1,3,4]:
                 passed_all = False
         self.result.passed = (passed_all and "PASS" or "FAIL")
-        print "\n+"+"-"*MSG_WIDTH+"-"*10+"+"
-        self.reporter.notify_progress(self.reporter.notify_info,"NCC Checks complete")
+        if first_json: 
+            print "+"+"-"*MSG_WIDTH+"-"*10+"+"
+            self.reporter.notify_progress(self.reporter.notify_info,"NCC Checks complete")
         ssh.close()
         
         return self.result
