@@ -75,7 +75,6 @@ class index:
 
         for checker in checkers_list:
             checker_module = self.checkers[checker]
-            print "about to execute ",checker
             result = checker_module.execute(["run_all"])
             results[checker] = result.to_dict()
             
@@ -90,7 +89,6 @@ class index:
     
     def do_config(self,data):
         if data['operation'].split('_')[1] == "vc":
-            print "vc :",data
             conf_data = { "vc_port": data['Port'], 
                           "vc_user": data['User'], 
                           "vc_ip": data['Server'], 
@@ -103,8 +101,6 @@ class index:
             return json.dumps(status)
 
         if data['operation'].split('_')[1] == "ncc":
-            print "ncc :",data
-
             conf_data = { "cvm_ip": data['Server'], 
                           "cvm_pwd": Security.encrypt(data['Password']), 
                           "cvm_user": data['User']
@@ -131,7 +127,7 @@ class index:
 
     def POST(self): 
         data = web.input()
-        print "Post Received Data:",data,type(data)
+        #print "Post Received Data:",data,type(data)
         
         if data['operation'].split('_')[0] == "config":
             return(self.do_config(data))

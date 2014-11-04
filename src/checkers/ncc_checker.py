@@ -28,10 +28,7 @@ class NCCChecker(CheckerBase):
     def __init__(self):
         super(NCCChecker, self).__init__(NCCChecker._NAME_)
         
-        print self.authconfig
-        
         pwd = Security.decrypt(self.authconfig['cvm_pwd'])
-        print "password :",pwd
         self.config_form =  form.Form( 
                 form.Textbox('Server',value=self.authconfig['cvm_ip']), 
                 form.Textbox('User',value=self.authconfig['cvm_user']),
