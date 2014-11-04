@@ -110,7 +110,7 @@ class VCChecker(CheckerBase):
         else:
             confirm_pass=getpass.getpass('Re-Enter vCenter Server Password: ')
             if new_vc_pwd !=confirm_pass :
-                exit_with_message("\nError: Password miss-match.Please try setup command again")
+                exit_with_message("\nError: Password miss-match.Please run \"vc setup\" command again")
             vc_pwd=Security.encrypt(new_vc_pwd)
         
         current_vc_port=self.authconfig['vc_port'] if  ('vc_port' in self.authconfig.keys()) else "Not Set"
@@ -161,9 +161,9 @@ class VCChecker(CheckerBase):
             si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
             return True,None
         except vim.fault.InvalidLogin:
-            return False,"Error : Invalid vCenter Server Username or password\n\nPlease run setup command again!!"
+            return False,"Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command again!!"
         except ConnectionError as e:
-            return False,"Error : Connection Error"+"\n\nPlease run setup command again!!"
+            return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
         finally:
             Disconnect(si)
     
@@ -209,9 +209,9 @@ class VCChecker(CheckerBase):
         try:
             self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=Security.decrypt(self.authconfig['vc_pwd']), port=self.authconfig['vc_port'])
         except vim.fault.InvalidLogin:
-            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run setup command to configure vc")
+            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command to configure vc")
         except ConnectionError as e:
-            exit_with_message("Error : Connection Error"+"\n\nPlease run setup command to configure vc")
+            exit_with_message("Error : Connection Error"+"\n\nPlease run \"vc setup\" command to configure vc")
         
         passed_all = True
 

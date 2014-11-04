@@ -65,11 +65,11 @@ class NCCChecker(CheckerBase):
             ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=Security.decrypt(self.authconfig['cvm_pwd']))
         
         except paramiko.AuthenticationException:
-            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
+            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
         except paramiko.SSHException, e:
-            exit_with_message("Error : "+ str(e)+"\n\nPlease run setup command to configure ncc.")
+            exit_with_message("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
         except socket.error, e:
-            exit_with_message(str(e)+"\n\nPlease run setup command to configure ncc.")
+            exit_with_message(str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting NCC Checks")
         self.result = CheckerResult("ncc",self.authconfig)
@@ -143,7 +143,7 @@ class NCCChecker(CheckerBase):
         else:
             confirm_pass=getpass.getpass('Please Re-Enter a CVM Password: ')
             if new_pass !=confirm_pass :
-                exit_with_message("\nError :Password miss-match. Please try setup command again")
+                exit_with_message("\nError :Password miss-match. Please run \"ncc setup\" command again")
             cvm_pwd=Security.encrypt(new_pass)
             
         #Test SSH connection
@@ -177,10 +177,10 @@ class NCCChecker(CheckerBase):
             ssh.close()
         
         except paramiko.AuthenticationException:
-            return False,("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run setup command to configure ncc.")
+            return False,("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
         except paramiko.SSHException, e:
             #print Fore.RED+" Connection failure"+Fore.RESET
-            return False,("Error : "+ str(e)+"\n\nPlease run setup command again.")
+            return False,("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command again.")
         except socket.error, e:
             #print Fore.RED+" Connection failure"+Fore.RESET
-            return False,(str(e)+"\n\nPlease run setup command again.")
+            return False,(str(e)+"\n\nPlease run \"ncc setup\" command again.")
