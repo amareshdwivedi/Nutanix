@@ -46,7 +46,7 @@ class index:
             self.checkers[checker.get_name()] = checker
         
         for checker in self.checkers.keys():
-            checker_conf_path=os.path.dirname(__file__)+os.path.sep +"conf" + os.path.sep + checker + ".conf"
+            checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
             fp = open(checker_conf_path, 'r')
             checker_config = json.load(fp)
             fp.close()
