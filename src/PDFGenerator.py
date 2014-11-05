@@ -79,7 +79,7 @@ def _header_footer(canvas, doc):
         # Save the state of our canvas so we can draw on it
         canvas.saveState()
         # Header
-        png_path=os.path.dirname(__file__)+os.path.sep+'resources'+os.path.sep+'images'+os.path.sep+'nutanixlogo.png'
+        png_path=os.path.dirname(__file__)+os.path.sep+'static'+os.path.sep+'images'+os.path.sep+'nutanixlogo.png'
         header = Image(png_path, height=0.50 * inch, width=5 * cm)
         w, h = header.wrap(doc.width, doc.topMargin)
         header.drawOn(canvas, doc.leftMargin, doc.height + doc.topMargin - h)
@@ -176,7 +176,7 @@ def PDFReportGenerator(resultJson):
     doc = SimpleDocTemplate(pdffilename, pagesizes=letter, format=landscape, rightMargin=inch / 4, leftMargin=inch / 10, topMargin=inch, bottomMargin=inch / 4)
     story = []
     date = time.strftime("%B %d, %Y")
-    png_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep+'resources'+os.path.sep+'images'+os.path.sep+'hcr.png'
+    png_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep+'static'+os.path.sep+'images'+os.path.sep+'hcr.png'
     headingdata = [["   ", "   ", "  ", "  ", Image(png_path, height=0.37 * inch, width=12 * cm)],
                     [ "    ", "    ", "   ", "   ", "  " , date]]
     headingtable = Table(headingdata)
@@ -215,6 +215,6 @@ def PDFReportGenerator(resultJson):
             ncc_report(story, resultJson[checkers].get('checks'))
     doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
     
-    print "\nReports generated successfully at " + os.path.abspath(os.path.dirname(__file__))+os.path.sep+"reports"
+    print "\nReports generated successfully at :: " + os.path.abspath(os.path.dirname(__file__))+os.path.sep+"reports"
     #print "Success"            
 #PDFReportGenerator(resultJson)
