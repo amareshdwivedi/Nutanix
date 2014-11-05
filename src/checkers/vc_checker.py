@@ -266,7 +266,7 @@ class VCChecker(CheckerBase):
                             xprop_exp = xprop_exp.split(")")[0]
                             props.append({"Message":xprop_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
                         
-                        self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
+                        self.realtime_results['vc']['checks'].append({'Message':check_function.descr ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
                         with open("test.json", "w") as myfile:
                             json.dump(self.realtime_results, myfile)
                     except:
