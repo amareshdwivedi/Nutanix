@@ -198,10 +198,8 @@ class index:
         if data['operation'] == "refresh_logs":
             try:
                 f = open("test.json", 'r')
-                print "GAMGAM ",f.read()
                 return f.read()
             except:
-                print "inside except"
                 return True
             
        
