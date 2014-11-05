@@ -196,8 +196,14 @@ class index:
                 return "Execution Completed"
 
         if data['operation'] == "refresh_logs":
-            f = open("test.json", 'r')
-            return f.read()
+            try:
+                f = open("test.json", 'r')
+                print "GAMGAM ",f.read()
+                return f.read()
+            except:
+                print "inside except"
+                return True
+            
        
 if __name__ == "__main__":
     web.internalerror = web.debugerror

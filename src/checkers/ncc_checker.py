@@ -109,11 +109,13 @@ class NCCChecker(CheckerBase):
             check_name = t["output holder list"][0]["message"]            
             status = t["status"]
             
-            self.realtime_results = json.load(open("test.json","r"))
-            self.realtime_results['ncc']['checks'].append({'Name':check_name ,'Status': status_text[status]})
-            with open("test.json", "w") as myfile:
-                json.dump(self.realtime_results, myfile)
-                
+            try:
+                self.realtime_results = json.load(open("test.json","r"))
+                self.realtime_results['ncc']['checks'].append({'Name':check_name ,'Status': status_text[status]})
+                with open("test.json", "w") as myfile:
+                    json.dump(self.realtime_results, myfile)
+            except:
+                pass    
             message = ""
             if status in [7]:
                 message = t["detail canvas"]["output holder list"] [0]["message list"][0]
