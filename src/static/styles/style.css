@@ -187,7 +187,7 @@ input[type="text"], input[type="password"], select {background-color: #fff;
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
     width: 100%; margin-bottom: 5px;}
     
-.logcontainer{  height:380px; border: 1px solid #ccc;
+.logcontainer{  height:380px; border: 1px solid #ccc; overflow-y:scroll;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
@@ -196,3 +196,9 @@ input[type="text"], input[type="password"], select {background-color: #fff;
 .categorySec{ padding: 5px; color:#6f787e; font-size:12px;}
 .categorySec select{ width:100px; display:inline-block; margin-right: 15px; margin-top: 10px;}
 .runBtn{ margin-top:-4px;}
+
+#logs h4{padding:5px; margin:0; font-size:14px; width:100%; float:left;}
+.logsHeading,.logsdata{ margin:0;padding:0;}
+.logsHeading div{ font-size:14px; font-weight:bold; padding:5px; color:#fff; background:#26bcf1; margin:0;}
+.logsmainData div{ padding:5px; font-size:12px; border:1px solid #ccc;margin:0;color:#6f787e;}
+.logsmainData{ width: 100%; float:left}
