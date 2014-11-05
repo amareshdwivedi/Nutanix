@@ -55,6 +55,7 @@ $def with (checkers,msg="")
 		            data: checks,
 		            success: function(data) {
 		            	looping = false;
+		            	clearInterval(interval);
 		                alert(data);
 		            },
 		        });
@@ -62,7 +63,7 @@ $def with (checkers,msg="")
 		        //looping = true;
 		        cont_run = [];
 		        cont_run.push({name: 'operation', value: 'refresh_logs'});
-		        setInterval( function(){
+		        var interval = setInterval( function(){
 		                        if(looping = true){
 		                            jQuery.ajax({
 		                                url: '/',
