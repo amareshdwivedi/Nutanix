@@ -61,15 +61,13 @@ $def with (checkers,msg="")
                                 	jQuery("#logs").empty();
                                 	jQuery("#logs").append("<div id='nccDataHead' class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
 						        			"<div class='col-lg-9 col-md-9 col-sm-9'>Check</div>"+
-						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Expected</div>"+
-						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Actual</div>"+
+						        			
 						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>"+
 						        		"</div>");
 		                        		jQuery("#logs").append("<div id='nccMainData' class='logsdata col-lg-12 col-md-12 col-sm-12'></div>");
 		                        		for(i=0; i<obj.ncc.checks.length; i++){
                                 		jQuery("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-9 col-md-9 col-sm-9'>"+obj.ncc.checks[i].Name+"</div>"+
-		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>&nbsp;</div>"+
-		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>&nbsp;</div>"+
+		                        		
 		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.ncc.checks[i].Status+"</div></div>");
 		                        	}
 		                        }  if(category == "vc"){
