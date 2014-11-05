@@ -475,7 +475,7 @@ class VCChecker(CheckerBase):
                     is_heartbeating = ds.name in cluster_heartbeat_datastores
                     self.reporter.notify_progress(self.reporter.notify_checkLog,cluster+"."+ds.name+"="+str(is_heartbeating) + " (Expected: =True) " , (is_heartbeating and "PASS" or "FAIL"))
                     passed = passed and is_heartbeating
-                    message += ", " +cluster+"."+ds.name+"is not heartbeating"+"#"+((is_heartbeating) and "PASS" or "FAIL")
+                    message += ", " +cluster+"."+ds.name+"="+str(is_heartbeating) + " (Expected: =True) "+"#"+((is_heartbeating) and "PASS" or "FAIL")
  
         return passed, message
     
@@ -519,13 +519,13 @@ class VCChecker(CheckerBase):
             for cluster, isolation_address1 in all_isolation_address1.iteritems():
                 isolation_address_present = isolation_address1 in all_ips
                 
-                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress1(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+                self.reporter.notify_progress(self.reporter.notify_checkLog,   cluster + "=CVM IP:"+str(isolation_address_present)+" (Expected: =CVM IP: True)" , (isolation_address_present and "PASS" or "FAIL"))
                 passed = passed and isolation_address_present 
-                message += ", " +cluster+" isolationaddress1 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")      
+                message += ", " + cluster + "=CVM-IP:"+str(isolation_address_present)+" (Expected: =CVM-IP:True) " +"#"+((isolation_address_present) and "PASS" or "FAIL")      
         except AttributeError:
             self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress1 not configured (Expected : = Should be Cluster IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
             passed = False
-            message += ", " +"isolationaddress1 not configured (Expected : = Should be Cluster IP) "+"#"+("FAIL") 
+            message += ", " +"=isolationaddress1 not configured (Expected : = Should be Cluster IP) "+"#"+("FAIL") 
             return False, message
         return passed, message
     
@@ -539,13 +539,13 @@ class VCChecker(CheckerBase):
         try:
             for cluster, isolation_address2 in all_isolation_address2.iteritems():
                 isolation_address_present = isolation_address2 in all_cvm_ips.values()
-                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress2(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + "=CVM IP:"+str(isolation_address_present)+" (Expected: =CVM IP: True) "  , (isolation_address_present and "PASS" or "FAIL"))
                 passed = passed and isolation_address_present  
-                message += ", " +cluster+" isolationaddress2 value is not CVM ipAddress."+"#"+((not isolation_address_present) and "PASS" or "FAIL")        
+                message += ", " + cluster + "=CVM-IP:"+str(isolation_address_present)+" (Expected: =CVM-IP:True) " +"#"+(( isolation_address_present) and "PASS" or "FAIL")        
         except AttributeError:
             self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
             passed = False
-            message += ", " +"isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"+"#"+("FAIL")
+            message += ", " +"=isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"+"#"+("FAIL")
             return False, message
         return passed, message
                 
@@ -559,13 +559,13 @@ class VCChecker(CheckerBase):
         try:
             for cluster, isolation_address3 in all_isolation_address3.iteritems():
                 isolation_address_present = isolation_address3 in all_cvm_ips.values()
-                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected : =Cluster configuration option IsolationAddress3(Value) is some CVM's ipAddress ) " , (isolation_address_present and "PASS" or "FAIL"))
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + "=CVM IP:"+str(isolation_address_present)+" (Expected: =CVM IP: True) " , (isolation_address_present and "PASS" or "FAIL"))
                 passed = passed and isolation_address_present
-                message += ", " +cluster+" isolationaddress3 value is not CVM ipAddress."+"#" +((not isolation_address_present) and "PASS" or "FAIL")         
+                message += ", " +cluster+"=CVM-IP:"+str(isolation_address_present)+" (Expected: =CVM-IP:True) "+"#" +((isolation_address_present) and "PASS" or "FAIL")         
         except AttributeError:
-            self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+            self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected: = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
             passed = False
-            message += ", " +"isolationaddress3 not configured (Expected : = Should be any one of the CVM IP)"+"#"+("FAIL")
+            message += ", " +"=isolationaddress3 not configured(Expected : = Should be any one of the CVM IP)"+"#"+("FAIL")
         return passed, message  
     
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",3)
@@ -581,7 +581,7 @@ class VCChecker(CheckerBase):
                         is_active_dir_enabled=item.enabled
                         self.reporter.notify_progress(self.reporter.notify_checkLog, hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) " , (is_active_dir_enabled and "PASS" or "FAIL"))
                         passed = passed and (is_active_dir_enabled and True or False)
-                        message += ", " +hostname+" ActiveDirectoryInfo not enabled"+"#"+((is_active_dir_enabled) and "PASS" or "FAIL") 
+                        message += ", " +"="+str(is_active_dir_enabled) + " (Expected: =True) "+"#"+((is_active_dir_enabled) and "PASS" or "FAIL") 
        
         return passed, message
     
@@ -624,9 +624,9 @@ class VCChecker(CheckerBase):
             xexpiry = datetime.datetime(expiry_date.year,expiry_date.month, expiry_date.day)
             
             valid_60_days = (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days > 60 or (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days < 0
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"License Expiration Validation date " + str(expiry_date) + " days (Expected: > 60 days or always valid) " , (valid_60_days and "PASS" or "FAIL"))
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"License Expiration Validation date " + str(expiry_date) + " days (Expected: => 60 days or always valid) " , (valid_60_days and "PASS" or "FAIL"))
             passed = passed and valid_60_days
-            message += ", "+"License valid for less than 60 days"+"#"+((not valid_60_days) and "PASS" or "FAIL")
+            message += ", "+"License Expiration Validation date " + str(expiry_date) + " days (Expected: => 60 days or always valid) "+"#"+((not valid_60_days) and "PASS" or "FAIL")
         return passed, message
     
     @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date.",3)
@@ -664,7 +664,7 @@ class VCChecker(CheckerBase):
                 if isinstance(network,vim.dvs.VmwareDistributedVirtualSwitch):
                     nioc_enabled=network.config.networkResourceManagementEnabled
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(nioc_enabled) + " (Expected: =True) " , (nioc_enabled and "PASS" or "FAIL"))
-                    message += ", " +datacenter+"."+network.name+"  Network IO Control not enabled"+"#"+((nioc_enabled) and "PASS" or "FAIL")
+                    message += ", " +datacenter+"."+network.name+"="+str(nioc_enabled) + " (Expected: =True) "+"#"+((nioc_enabled) and "PASS" or "FAIL")
                     passed = passed and nioc_enabled
         return passed, message
         
