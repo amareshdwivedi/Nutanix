@@ -72,7 +72,7 @@ $def with (checkers,msg="")
 		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>&nbsp;</div>"+
 		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.ncc.checks[i].Status+"</div></div>");
 		                        	}
-		                        } else if(category == "vc"){
+		                        }  if(category == "vc"){
 		                        	jQuery("#logs").empty();
 		                        	jQuery("#nccDataHead").remove();
 		                        	jQuery("#nccMainData").remove();
@@ -275,7 +275,7 @@ $def with (checkers,msg="")
 	            <div class="col-lg-12 col-md-12 col-sm-12 categorySec">
 	            	Checker :
 		            <select id="category_select"> 
-		            	<option value="Run All">Run All</option>
+		            	<!-- <option value="Run All">Run All</option>  -->
 		            	$for checker, checkObject in checkers.iteritems():
 			            	<option value=$checker >$:checker</option>
 		            </select>
