@@ -48,7 +48,7 @@ healthchecklines=['import os,sys',
 #'lib_path = os.path.abspath(os.path.dirname(__file__))+os.path.sep+"libs"',
 'lib_path = ' + "'" + install_dir + "'" + '+os.path.sep+\'libs\'',
 'os.environ["PYTHONPATH"] = lib_path',
-'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"health_check.pyc"',
+'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"health_check.pyc "',
 'os.system(executable_path+ " ".join(sys.argv[1:]))']
 
 #run_health_check_pyfile=open(install_dir+os.path.sep+"health_check.py","wb")
@@ -61,7 +61,8 @@ health_check_pyfile.close()
 webhealthchecklines=['import os,sys',
 'lib_path = ' + "'" + install_dir + "'" + '+os.path.sep+\'libs\'',
 'os.environ["PYTHONPATH"] = lib_path',
-'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"web_health_check.pyc"',
+'os.chdir(lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep)',
+'executable_path="python web_health_check.pyc"',
 'os.system(executable_path+ " ".join(sys.argv[1:]))']
 
 
