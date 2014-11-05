@@ -232,19 +232,22 @@ class VCChecker(CheckerBase):
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
                 
-                self.realtime_results = json.load(open("test.json","r"))
-                all_prop,props = [ x for x in message.split(', ') if x != ''], []
-                for xprop in all_prop:
-                    xprop,xstatus = xprop.split("#")
-                    xprop_msg, xprop_actual, xprop_exp = xprop.split("=")
-                    xprop_actual = xprop_actual.split(' ')[0]
-                    xprop_exp = xprop_exp.split(")")[0]
-                    props.append({"Message":xprop_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
-                
-                self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
-                with open("test.json", "w") as myfile:
-                    json.dump(self.realtime_results, myfile)
-                
+                try:
+                    self.realtime_results = json.load(open("test.json","r"))
+                    all_prop,props = [ x for x in message.split(', ') if x != ''], []
+                    for xprop in all_prop:
+                        xprop,xstatus = xprop.split("#")
+                        xprop_msg, xprop_actual, xprop_exp = xprop.split("=")
+                        xprop_actual = xprop_actual.split(' ')[0]
+                        xprop_exp = xprop_exp.split(")")[0]
+                        props.append({"Message":xprop_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
+                    
+                    self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
+                    with open("test.json", "w") as myfile:
+                        json.dump(self.realtime_results, myfile)
+                except:
+                    # Need to handle temp-file case for command line
+                    pass
                 self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['severity']))
                 passed_all = passed_all and passed
             #self.reporter.notify_progress(self.reporter.notify_checkName,"")
@@ -252,7 +255,7 @@ class VCChecker(CheckerBase):
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
-                    
+                    self.reporter.notify_progress(self.reporter.notify_checkName,"")
                     try:
                         self.realtime_results = json.load(open("test.json","r"))
                         all_prop,props = [ x for x in message.split(', ') if x != ''], []
@@ -268,11 +271,9 @@ class VCChecker(CheckerBase):
                             json.dump(self.realtime_results, myfile)
                     except:
                         pass
-                    
                     self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.severity))
-                    self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
                     passed_all = passed_all and passed
-            self.reporter.notify_progress(self.reporter.notify_checkName,"")
+                    
 
         Disconnect(self.si)
         self.result.passed = ( passed_all and "PASS" or "FAIL" )
