@@ -236,11 +236,18 @@ class VCChecker(CheckerBase):
                     all_prop,props = [ x for x in message.split(', ') if x != ''], []
                     for xprop in all_prop:
                         xprop,xstatus = xprop.split("#")
+                        
                         xprop_msg, xprop_actual, xprop_exp = xprop.split("=")
+                        if xprop_msg == "":
+                            xprop_msg = check['name']
                         xprop_actual = xprop_actual.split(' ')[0]
-                        xprop_exp = xprop_exp.split(")")[0]
+                        
+                        if check['operator'] == "=": 
+                            xprop_exp = check['ref-value']
+                        else:
+                            xprop_exp = "not "+check['ref-value']  
                         props.append({"Message":xprop_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
-                    
+                
                     self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
                     with open("test.json", "w") as myfile:
                         json.dump(self.realtime_results, myfile)
@@ -253,7 +260,6 @@ class VCChecker(CheckerBase):
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
-                    self.reporter.notify_progress(self.reporter.notify_checkName,"")
                     try:
                         self.realtime_results = json.load(open("test.json","r"))
                         all_prop,props = [ x for x in message.split(', ') if x != ''], []
