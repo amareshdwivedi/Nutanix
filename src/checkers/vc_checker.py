@@ -231,7 +231,6 @@ class VCChecker(CheckerBase):
             for check in self.config[check_group]:
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
-                
                 try:
                     self.realtime_results = json.load(open("test.json","r"))
                     all_prop,props = [ x for x in message.split(', ') if x != ''], []
@@ -250,8 +249,7 @@ class VCChecker(CheckerBase):
                     pass
                 self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['severity']))
                 passed_all = passed_all and passed
-            #self.reporter.notify_progress(self.reporter.notify_checkName,"")
-
+            
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
@@ -273,7 +271,8 @@ class VCChecker(CheckerBase):
                         pass
                     self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.severity))
                     passed_all = passed_all and passed
-                    
+            self.reporter.notify_progress(self.reporter.notify_checkName,"")
+        
 
         Disconnect(self.si)
         self.result.passed = ( passed_all and "PASS" or "FAIL" )
