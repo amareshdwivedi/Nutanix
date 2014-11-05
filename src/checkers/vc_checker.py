@@ -253,7 +253,6 @@ class VCChecker(CheckerBase):
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
-                    self.reporter.notify_progress(self.reporter.notify_checkName,"")
                     try:
                         self.realtime_results = json.load(open("test.json","r"))
                         all_prop,props = [ x for x in message.split(', ') if x != ''], []
