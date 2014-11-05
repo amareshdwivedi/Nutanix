@@ -33,6 +33,14 @@ $def with (checkers,msg="")
 				if(category == "ncc"){
 					$$("#group_select").empty()
 					$$("#group_select").append('<option value="Run All">Run All</option>')
+					$$("#group_select").append('<option value="cassandra_checks">cassandra_checks</option>')
+				    $$("#group_select").append('<option value="data_protection_checks">data_protection_checks</option>')
+				    $$("#group_select").append('<option value="hardware_checks">hardware_checks</option>')
+				    $$("#group_select").append('<option value="hypervisor_checks">hypervisor_checks</option>')
+				    $$("#group_select").append('<option value="network_checks">network_checks</option>')
+				    $$("#group_select").append('<option value="sar_checks">sar_checks</option>')
+				    $$("#group_select").append('<option value="stargate_checks">stargate_checks</option>')
+				    $$("#group_select").append('<option value="system_checks">system_checks</option>')
 				}
 				
 			});

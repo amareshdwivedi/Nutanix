@@ -71,7 +71,11 @@ class index:
         if data['category'] == "ncc":
             checkers_list = ['ncc']
             run_logs['ncc'] = {'checks': []}
-            
+            if data['group'] == "Run All":
+                group.append("run_all")
+            else:
+                group.append(data['group'] + " " + "run_all")
+                
         if data['category'] == "vc":
             checkers_list = ['vc']
             run_logs['vc'] = {'checks': []}
@@ -87,7 +91,9 @@ class index:
             
             if checker == "vc":
                 result = checker_module.execute(group)
-            else:    
+            elif checker == 'ncc':
+                result = checker_module.execute(group)
+            else:        
                 result = checker_module.execute(["run_all"])
             
             results[checker] = result.to_dict()
