@@ -205,7 +205,7 @@ class VCChecker(CheckerBase):
         self.result = CheckerResult("vc",self.authconfig)
         warnings.simplefilter('ignore')
 
-
+        
         check_functions = {}
         for func in dir(self):
             func_obj = getattr(self, func)
@@ -225,12 +225,23 @@ class VCChecker(CheckerBase):
             exit_with_message("Error : Connection Error"+"\n\nPlease run \"vc setup\" command to configure vc")
         
         passed_all = True
-
+        #self.realtime_results['vc'] = []
         for check_group in check_groups_run:
             self.reporter.notify_progress(self.reporter.notify_checkGroup,check_group)
             for check in self.config[check_group]:
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
+                
+                self.realtime_results = json.load(open("test.json","r"))
+                all_prop,props = [ x for x in message.split(', ') if x != ''], []
+                for xprop in all_prop:
+                    xprop,xstatus = xprop.split("#")
+                    props.append({"Message":xprop,"Status":xstatus})
+                
+                self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': passed,"Properties": props})
+                with open("test.json", "w") as myfile:
+                    json.dump(self.realtime_results, myfile)
+                
                 self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['severity']))
                 passed_all = passed_all and passed
             #self.reporter.notify_progress(self.reporter.notify_checkName,"")
@@ -238,6 +249,12 @@ class VCChecker(CheckerBase):
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
+                    
+                    self.realtime_results = json.load(open("test.json","r"))
+                    self.realtime_results['vc'].append({'check':check['name'] ,'status': passed})
+                    with open("test.json", "a") as myfile:
+                        json.dump(self.realtime_results, myfile)
+                    
                     self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.severity))
                     passed_all = passed_all and passed
             self.reporter.notify_progress(self.reporter.notify_checkName,"")

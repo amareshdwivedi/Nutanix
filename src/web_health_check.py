@@ -60,23 +60,28 @@ class index:
         
     def run_checks(self,data):
         results = {}
-        f = open("test.txt", "w")
-        f.close()
+        run_logs = {}
         
         checkers_list, group = [], []
         if data['category'] == "Run All":
             checkers_list = self.checkers.keys()
+            for item in checkers_list:
+                run_logs[item] = {'checks': []}
             
         if data['category'] == "ncc":
             checkers_list = ['ncc']
+            run_logs['ncc'] = {'checks': []}
             
         if data['category'] == "vc":
             checkers_list = ['vc']
+            run_logs['vc'] = {'checks': []}
             if data['group'] == "Run All":
                 group.append("run_all")
             else:
                 group.append(data['group'])
         
+        with open("test.json", "w") as myfile:
+            json.dump(run_logs, myfile)
         for checker in checkers_list:
             checker_module = self.checkers[checker]
             
@@ -191,7 +196,7 @@ class index:
                 return "Execution Completed"
 
         if data['operation'] == "refresh_logs":
-            f = open("test.txt", 'r')
+            f = open("test.json", 'r')
             return f.read()
        
 if __name__ == "__main__":

@@ -26,6 +26,7 @@ class CheckerBase:
         self.reporter = None
         self.checks=[]
         self.result = CheckerResult(name)
+        self.realtime_results = {}
 
     @abc.abstractmethod
     def get_name(self):

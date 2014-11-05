@@ -93,6 +93,7 @@ class NCCChecker(CheckerBase):
         status_text = {0 : "Done",1 : "Done", 3 : "Pass",4: "Pass",5: "Warn",6: "Fail", 7: "Err"}
         stdin, stdout, stderr =  ssh.exec_command(cmd)
         passed_all = True
+        #self.realtime_results['ncc'] = []
         first_json = 0
         for line in stdout:
             try :
@@ -107,9 +108,16 @@ class NCCChecker(CheckerBase):
 
             check_name = t["output holder list"][0]["message"]            
             status = t["status"]
+            
+            self.realtime_results = json.load(open("test.json","r"))
+            self.realtime_results['ncc']['checks'].append({'Name':check_name ,'Status': status_text[status]})
+            with open("test.json", "w") as myfile:
+                json.dump(self.realtime_results, myfile)
+                
             message = ""
             if status in [7]:
                 message = t["detail canvas"]["output holder list"] [0]["message list"][0]
+            
                 
             self.result.add_check_result(CheckerResult(check_name,None, status_text[status], message))
             self.reporter.notify_one_line(check_name, status_text[status])
