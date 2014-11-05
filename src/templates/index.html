@@ -87,6 +87,7 @@ $def with (checkers,msg="")
 					                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.ncc.checks[i].Status+"</div></div>");
 					                        	}
 					                        } else if(category == "vc"){
+					                        	jQuery("#logs").empty();
 					                        	jQuery("#nccDataHead").remove();
 					                        	jQuery("#nccMainData").remove();
 					                        	for(i=0; i<obj.vc.checks.length; i++){
@@ -97,9 +98,9 @@ $def with (checkers,msg="")
 									        			"<div class='col-lg-2 col-md-2 col-sm-2'>Actual</div>"+
 									        			"<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>"+
 									        		"</div>");
-					                        		jQuery("#logs").append("<div class='logsdata col-lg-12 col-md-12 col-sm-12'></div>");
+					                        		jQuery("#logs").append("<div class='logsdata"+i+" col-lg-12 col-md-12 col-sm-12'></div>");
 					                        		for(j=0; j<obj.vc.checks[i].Properties.length; j++){
-						                        		jQuery("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-7 col-md-7 col-sm-7'>"+obj.vc.checks[i].Properties[j].Message+"</div>"+
+						                        		jQuery("#logs .logsdata"+i).append("<div class='logsmainData'><div class='col-lg-7 col-md-7 col-sm-7'>"+obj.vc.checks[i].Properties[j].Message+"</div>"+
 						                        		"<div class='col-lg-2 col-md-2 col-sm-2'>"+obj.vc.checks[i].Properties[j].Expected+"</div>"+
 						                        		"<div class='col-lg-2 col-md-2 col-sm-2'>"+obj.vc.checks[i].Properties[j].Actual+"</div>"+
 						                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.vc.checks[i].Properties[j].Status+"</div></div>");
@@ -109,7 +110,7 @@ $def with (checkers,msg="")
 		                                    //document.getElementById('logs').value = data;
 		                                 },
 		                             });
-		                      }},10000)
+		                      }},3000)
 		
 		
 		        //polling().done(function(){setTimeout(polling, 20000);});       
