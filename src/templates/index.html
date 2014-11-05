@@ -38,8 +38,59 @@ $def with (checkers,msg="")
 			});
 			
 		    jQuery("#runnhecks").click(function() {
-		        var looping = true;
-		        var inputElements = document.getElementsByClassName('run');
+		    	
+		    	function fetch_data(){
+		    		cont_run = [];
+			        cont_run.push({name: 'operation', value: 'refresh_logs'});
+                    
+                        jQuery.ajax({
+                            url: '/',
+                            type: "POST",
+                            data: cont_run,
+                            success: function(data) {
+                                var obj = jQuery.parseJSON(data);
+                                if(category == "ncc"){
+                                	jQuery("#logs").empty();
+                                	jQuery("#logs").append("<div id='nccDataHead' class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
+						        			"<div class='col-lg-9 col-md-9 col-sm-9'>Check</div>"+
+						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Expected</div>"+
+						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Actual</div>"+
+						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>"+
+						        		"</div>");
+		                        		jQuery("#logs").append("<div id='nccMainData' class='logsdata col-lg-12 col-md-12 col-sm-12'></div>");
+		                        		for(i=0; i<obj.ncc.checks.length; i++){
+                                		jQuery("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-9 col-md-9 col-sm-9'>"+obj.ncc.checks[i].Name+"</div>"+
+		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>&nbsp;</div>"+
+		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>&nbsp;</div>"+
+		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.ncc.checks[i].Status+"</div></div>");
+		                        	}
+		                        } else if(category == "vc"){
+		                        	jQuery("#logs").empty();
+		                        	jQuery("#nccDataHead").remove();
+		                        	jQuery("#nccMainData").remove();
+		                        	for(i=0; i<obj.vc.checks.length; i++){
+		                        		jQuery("#logs").append("<h4>"+obj.vc.checks[i].Message+"</h4>");
+		                        		jQuery("#logs").append("<div class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
+						        			"<div class='col-lg-7 col-md-7 col-sm-7'>Check</div>"+
+						        			"<div class='col-lg-2 col-md-2 col-sm-2'>Expected</div>"+
+						        			"<div class='col-lg-2 col-md-2 col-sm-2'>Actual</div>"+
+						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>"+
+						        		"</div>");
+		                        		jQuery("#logs").append("<div class='logsdata"+i+" col-lg-12 col-md-12 col-sm-12'></div>");
+		                        		for(j=0; j<obj.vc.checks[i].Properties.length; j++){
+			                        		jQuery("#logs .logsdata"+i).append("<div class='logsmainData'><div class='col-lg-7 col-md-7 col-sm-7'>"+obj.vc.checks[i].Properties[j].Message+"</div>"+
+			                        		"<div class='col-lg-2 col-md-2 col-sm-2'>"+obj.vc.checks[i].Properties[j].Expected+"</div>"+
+			                        		"<div class='col-lg-2 col-md-2 col-sm-2'>"+obj.vc.checks[i].Properties[j].Actual+"</div>"+
+			                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.vc.checks[i].Properties[j].Status+"</div></div>");
+		                        		}
+		                        	}
+		                        }
+                                //document.getElementById('logs').value = data;
+                             },
+                         });
+                  }
+		    	
+		    	var inputElements = document.getElementsByClassName('run');
 		        checks = [] ;
 		        checks.push({name: 'operation', value: 'exec_checks'}); 
 		        var category = $$("#category_select").val();
@@ -56,62 +107,16 @@ $def with (checkers,msg="")
 		            success: function(data) {
 		            	looping = false;
 		            	clearInterval(interval);
+		            	fetch_data();
 		                alert(data);
 		            },
 		        });
+		        var interval = setInterval(function(){fetch_data()},3000);
+		        
 		        //Get call with refresh timer.
 		        //looping = true;
-		        cont_run = [];
-		        cont_run.push({name: 'operation', value: 'refresh_logs'});
-		        var interval = setInterval( function(){
-		                        if(looping = true){
-		                            jQuery.ajax({
-		                                url: '/',
-		                                type: "POST",
-		                                data: cont_run,
-		                                success: function(data) {
-		                                    console.log(looping)
-		                                    var obj = jQuery.parseJSON(data);
-		                                    if(category == "ncc"){
-		                                    	jQuery("#logs").empty();
-		                                    	jQuery("#logs").append("<div id='nccDataHead' class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
-									        			"<div class='col-lg-9 col-md-9 col-sm-9'>Check</div>"+
-									        			"<div class='col-lg-1 col-md-1 col-sm-1'>Expected</div>"+
-									        			"<div class='col-lg-1 col-md-1 col-sm-1'>Actual</div>"+
-									        			"<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>"+
-									        		"</div>");
-					                        		jQuery("#logs").append("<div id='nccMainData' class='logsdata col-lg-12 col-md-12 col-sm-12'></div>");
-					                        		for(i=0; i<obj.ncc.checks.length; i++){
-		                                    		jQuery("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-9 col-md-9 col-sm-9'>"+obj.ncc.checks[i].Name+"</div>"+
-					                        		"<div class='col-lg-1 col-md-1 col-sm-1'>&nbsp;</div>"+
-					                        		"<div class='col-lg-1 col-md-1 col-sm-1'>&nbsp;</div>"+
-					                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.ncc.checks[i].Status+"</div></div>");
-					                        	}
-					                        } else if(category == "vc"){
-					                        	jQuery("#logs").empty();
-					                        	jQuery("#nccDataHead").remove();
-					                        	jQuery("#nccMainData").remove();
-					                        	for(i=0; i<obj.vc.checks.length; i++){
-					                        		jQuery("#logs").append("<h4>"+obj.vc.checks[i].Message+"</h4>");
-					                        		jQuery("#logs").append("<div class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
-									        			"<div class='col-lg-7 col-md-7 col-sm-7'>Check</div>"+
-									        			"<div class='col-lg-2 col-md-2 col-sm-2'>Expected</div>"+
-									        			"<div class='col-lg-2 col-md-2 col-sm-2'>Actual</div>"+
-									        			"<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>"+
-									        		"</div>");
-					                        		jQuery("#logs").append("<div class='logsdata"+i+" col-lg-12 col-md-12 col-sm-12'></div>");
-					                        		for(j=0; j<obj.vc.checks[i].Properties.length; j++){
-						                        		jQuery("#logs .logsdata"+i).append("<div class='logsmainData'><div class='col-lg-7 col-md-7 col-sm-7'>"+obj.vc.checks[i].Properties[j].Message+"</div>"+
-						                        		"<div class='col-lg-2 col-md-2 col-sm-2'>"+obj.vc.checks[i].Properties[j].Expected+"</div>"+
-						                        		"<div class='col-lg-2 col-md-2 col-sm-2'>"+obj.vc.checks[i].Properties[j].Actual+"</div>"+
-						                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.vc.checks[i].Properties[j].Status+"</div></div>");
-					                        		}
-					                        	}
-					                        }
-		                                    //document.getElementById('logs').value = data;
-		                                 },
-		                             });
-		                      }},3000)
+		        
+		        
 		
 		
 		        //polling().done(function(){setTimeout(polling, 20000);});       
