@@ -84,7 +84,7 @@ class index:
             else:
                 group.append(data['group'])
         
-        with open("test.json", "w") as myfile:
+        with open("display_json.json", "w") as myfile:
             json.dump(run_logs, myfile)
         for checker in checkers_list:
             checker_module = self.checkers[checker]
@@ -203,7 +203,7 @@ class index:
 
         if data['operation'] == "refresh_logs":
             try:
-                f = open("test.json", 'r')
+                f = open("display_json.json", 'r')
                 return f.read()
             except:
                 return True

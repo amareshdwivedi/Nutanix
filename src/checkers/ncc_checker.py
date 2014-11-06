@@ -110,9 +110,9 @@ class NCCChecker(CheckerBase):
             status = t["status"]
             
             try:
-                self.realtime_results = json.load(open("test.json","r"))
+                self.realtime_results = json.load(open("display_json.json","r"))
                 self.realtime_results['ncc']['checks'].append({'Name':check_name ,'Status': status_text[status]})
-                with open("test.json", "w") as myfile:
+                with open("display_json.json", "w") as myfile:
                     json.dump(self.realtime_results, myfile)
             except:
                 pass    
