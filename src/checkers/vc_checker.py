@@ -240,12 +240,20 @@ class VCChecker(CheckerBase):
                         xprop_msg, xprop_actual, xprop_exp = xprop.split("=")
                         if xprop_msg == "":
                             xprop_msg = check['name']
-                        xprop_actual = xprop_actual.split(' ')[0]
+                        xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
                         
                         if check['operator'] == "=": 
-                            xprop_exp = check['ref-value']
-                        else:
-                            xprop_exp = "not "+check['ref-value']  
+                            xprop_exp = check['ref-value'] or "None"
+                        elif check['operator'] == "!=":
+                            xprop_exp = "Not equal to "+(check['ref-value']  or "None")
+                        elif check['operator'] == "<=":
+                            xprop_exp = "Less than or Equal to "+( check['ref-value'] or "None" )
+                        
+                        if xprop_exp == "none":
+                            xprop_exp = "None"
+                        if xprop_actual == "none":
+                            xprop_actual = "None"
+                            
                         props.append({"Message":xprop_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
                 
                     self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
@@ -266,8 +274,14 @@ class VCChecker(CheckerBase):
                         for xprop in all_prop:
                             xprop,xstatus = xprop.split("#")
                             xprop_msg, xprop_actual, xprop_exp = xprop.split("=")
-                            xprop_actual = xprop_actual.split(' ')[0]
-                            xprop_exp = xprop_exp.split(")")[0]
+                            xprop_actual = xprop_actual.split('(')[0] or  xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+                            xprop_exp = xprop_exp.split(")")[0] or xprop_exp.split(" )")[0] or "None"
+                            
+                            if xprop_exp == "none":
+                                xprop_exp = "None"
+                            if xprop_actual == "none":
+                                xprop_actual = "None"
+                            
                             props.append({"Message":xprop_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
                         
                         self.realtime_results['vc']['checks'].append({'Message':check_function.descr ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
