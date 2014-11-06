@@ -68,6 +68,6 @@ shutil.rmtree("build", ignore_errors=True)
 shutil.rmtree("HealthCheck.egg-info", ignore_errors=True)
 shutil.rmtree("HealthCheck-1.0.0", ignore_errors=True)
 
-print "HealthCheck-1.0.0.zip Created Successfully...."
+print "HealthCheck-1.0.0.zip Created Successfully at: " + os.getcwd()
 
 
