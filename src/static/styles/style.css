@@ -164,7 +164,7 @@ body {
 
 .leftSide_area{ padding: 2%;}
 .leftSide_area h2{ font-size:14px;color: #6f787e;
-    font-family: ProximaNovaSoftSemiBold; margin: 0;}
+    font-family: ProximaNovaSoftSemiBold; margin: 0; width:100%; float:left;}
  .healthCheckBtn{background-color: #26bcf1;
     border: 1px solid #26bcf1;
     color: #fff;
@@ -187,14 +187,14 @@ input[type="text"], input[type="password"], select {background-color: #fff;
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
     width: 100%; margin-bottom: 5px;}
     
-.logcontainer{  height:380px; border: 1px solid #ccc; overflow-y:scroll;
+.logcontainer{  height:480px; border: 1px solid #ccc; overflow-y:scroll;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
     color: #343536; padding:8px 10px;
     display: block;font-size: 11px;}
 .categorySec{ padding: 5px; color:#6f787e; font-size:12px;}
-.categorySec select{ width:100px; display:inline-block; margin-right: 15px; margin-top: 10px;}
+.categorySec select{ width:150px; display:inline-block; margin-right: 15px; margin-top: 10px;}
 .runBtn{ margin-top:-4px;}
 
 #logs h4{padding:5px; margin:0; font-size:14px; width:100%; float:left;}
@@ -202,3 +202,12 @@ input[type="text"], input[type="password"], select {background-color: #fff;
 .logsHeading div{ font-size:14px; font-weight:bold; padding:5px; color:#fff; background:#26bcf1; margin:0;}
 .logsmainData div{ padding:5px; font-size:12px; border:1px solid #ccc;margin:0;color:#6f787e;}
 .logsmainData{ width: 100%; float:left}
+.formHeading{ text-transform: capitalize; padding:10px 0 5px 0}
+.formHeading span{ text-transform: uppercase;}
+
+.fail{
+    color:#fb6f6b !important;
+}
+.success{
+    color:#42b663 !important;
+}

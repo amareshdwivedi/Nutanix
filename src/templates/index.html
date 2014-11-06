@@ -18,6 +18,15 @@ $def with (checkers,msg="")
     <script type="text/javascript" >
 		jQuery(document).ready(function(){
 			jQuery("#category_select").change(function() {
+				if(jQuery("#category_select").val() == ""){
+					jQuery("#runnhecks").attr('disabled','disabled');
+					jQuery("#group_select").attr('disabled','disabled');
+					jQuery("#group_select").empty();
+					jQuery("#group_select").append("<option val=''>Select Checks</option>");
+				}else{
+					jQuery("#runnhecks").removeAttr('disabled');
+					jQuery("#group_select").removeAttr('disabled');
+				}
 				var category = $$("#category_select").val()
 
 				if(category == "vc"){
@@ -60,15 +69,20 @@ $def with (checkers,msg="")
                                 if(category == "ncc"){
                                 	jQuery("#logs").empty();
                                 	jQuery("#logs").append("<div id='nccDataHead' class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
-						        			"<div class='col-lg-9 col-md-9 col-sm-9'>Check</div>"+
+						        			"<div class='col-lg-10 col-md-10 col-sm-10'>Check</div>"+
 						        			
-						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>"+
+						        			"<div class='col-lg-2 col-md-2 col-sm-2'>Status</div>"+
 						        		"</div>");
 		                        		jQuery("#logs").append("<div id='nccMainData' class='logsdata col-lg-12 col-md-12 col-sm-12'></div>");
 		                        		for(i=0; i<obj.ncc.checks.length; i++){
-                                		jQuery("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-9 col-md-9 col-sm-9'>"+obj.ncc.checks[i].Name+"</div>"+
+                                		jQuery("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-10 col-md-10 col-sm-10'>"+obj.ncc.checks[i].Name+"</div>"+
+		                        		"<div class='col-lg-2 col-md-2 col-sm-2 result"+i+"'>"+obj.ncc.checks[i].Status+"</div></div>");
 		                        		
-		                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.ncc.checks[i].Status+"</div></div>");
+		                        			if(jQuery(".result"+i+"").html()=="Pass"){
+					                        	jQuery(".result"+i+"").addClass("success");
+					                        }else if(jQuery(".result"+i+"").html()=="Fail"){
+					                        	jQuery(".result"+i+"").addClass("fail");
+					                        }
 		                        	}
 		                        }  if(category == "vc"){
 		                        	jQuery("#logs").empty();
@@ -82,15 +96,23 @@ $def with (checkers,msg="")
 						        			"<div class='col-lg-2 col-md-2 col-sm-2'>Actual</div>"+
 						        			"<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>"+
 						        		"</div>");
-		                        		jQuery("#logs").append("<div class='logsdata"+i+" col-lg-12 col-md-12 col-sm-12'></div>");
+		                        		jQuery("#logs").append("<div class='logsdata"+i+" col-lg-12 col-md-12 col-sm-12 logsdata'></div>");
 		                        		for(j=0; j<obj.vc.checks[i].Properties.length; j++){
 			                        		jQuery("#logs .logsdata"+i).append("<div class='logsmainData'><div class='col-lg-7 col-md-7 col-sm-7'>"+obj.vc.checks[i].Properties[j].Message+"</div>"+
 			                        		"<div class='col-lg-2 col-md-2 col-sm-2'>"+obj.vc.checks[i].Properties[j].Expected+"</div>"+
 			                        		"<div class='col-lg-2 col-md-2 col-sm-2'>"+obj.vc.checks[i].Properties[j].Actual+"</div>"+
-			                        		"<div class='col-lg-1 col-md-1 col-sm-1'>"+obj.vc.checks[i].Properties[j].Status+"</div></div>");
+			                        		"<div class='col-lg-1 col-md-1 col-sm-1  result"+i+j+"'>"+obj.vc.checks[i].Properties[j].Status+"</div></div>");
+			                        		
+			                        		if(jQuery(".result"+i+j+"").html()=="PASS"){
+					                        	jQuery(".result"+i+j+"").addClass("success");
+					                        }else if(jQuery(".result"+i+j+"").html()=="FAIL"){
+					                        	jQuery(".result"+i+j+"").addClass("fail");
+					                        }
 		                        		}
 		                        	}
 		                        }
+		                        
+		                        
                                 //document.getElementById('logs').value = data;
                              },
                          });
@@ -220,11 +242,11 @@ $def with (checkers,msg="")
         <div class="row no-margin nx-main-container">
             <div class="col-lg-3 col-md-3 col-sm-3 no-padding">
             	<div class="col-lg-12 col-md-12 col-sm-12 leftSide_area no-margin">
-            		<h2>Connection Details</h2>
             		$ id1 = "config_"
 				    $ id2 = "connect_"
 				    $ id3 = "run_"
 				    $for checker, checkObject in checkers.iteritems():
+				    <h2 class="formHeading"><span>$:checker</span> configration detail</h2>
 				    <div class="col-lg-12 col-md-12 col-sm-12 no-margin  connectionForms">
 				    	<form id=$checker method="post">
 				    		<div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formTbl">
@@ -273,16 +295,17 @@ $def with (checkers,msg="")
 	            <div class="col-lg-12 col-md-12 col-sm-12 categorySec">
 	            	Checker :
 		            <select id="category_select"> 
-		            	<!-- <option value="Run All">Run All</option>  -->
+		            	<option value="">Select Checker</option>
 		            	$for checker, checkObject in checkers.iteritems():
 			            	<option value=$checker >$:checker</option>
 		            </select>
 		            Check Group:
-		            <select id="group_select"> 
-		            	<option value="Run All">Run All</option>
+		            <select id="group_select" disabled> 
+		            	<option value="">Select Check</option>
+		            	
 		            </select>
 		            
-		            <input type="button" id="runnhecks" value="Run" class="btn btn-primary healthCheckBtn runBtn"/>
+		            <input type="button" id="runnhecks" value="Run" disabled class="btn btn-primary healthCheckBtn runBtn"/>
 	            </div>
 	            <div class="col-lg-12 col-md-12 col-sm-12 no-padding logArea">
 	            	<!--<textarea id="logs" class="col-lg-12 col-md-12 col-sm-12 logcontainer"></textarea>-->
