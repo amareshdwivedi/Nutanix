@@ -74,29 +74,19 @@ class DefaultConsoleReporter:
         self.name = name
         self.row_count = 0
         self.x = PrettyTable(["message", "Status"])
-        '''
-        f = open("test.txt", "w")
-        f.close()
-        '''
     def notify_progress(self, fname,*args):
         fname(*args)
         
         
     def notify_info(self, message):
         print self.name + " : " + "+++ "+message+" +++"
-        with open("test.txt", "a") as myfile:
-            myfile.write("\n"+self.name + " : " + "+++ "+message+" +++")
     
     def notify_checkGroup(self,message):
         print self.name + " : " + "\n++++ Running check group - "+message+" ++++"
-        with open("test.txt", "a") as myfile:
-            myfile.write("\n"+self.name + " : " + "++++ Running check group - "+message+" ++++")
         
     def notify_checkName(self,message):
         if self.row_count > 0:
             print str(self.x)
-            with open("test.txt", "a") as myfile:
-                myfile.write("\n"+str(self.x))
             
         if message == "":
             return
@@ -119,8 +109,6 @@ class DefaultConsoleReporter:
     
     def notify_one_line(self,message, status):
         print "+"+"-"*MSG_WIDTH+"-"*10+"+"
-        with open("test.txt", "a") as myfile:
-             myfile.write("\n+"+"-"*MSG_WIDTH+"-"*10+"+")
         if status == "FAIL" or status == "Fail":
             status = Fore.RED+"[ "+status+" ]"+Fore.RESET
         elif status == "Err":
@@ -130,8 +118,6 @@ class DefaultConsoleReporter:
         else:
             status = Fore.GREEN+"[ "+status+" ]"+Fore.RESET
         print '\n'.join([message[x:x+MSG_WIDTH] for x in range(0,len(message),MSG_WIDTH)]).ljust(MSG_WIDTH),status
-        with open("test.txt", "a") as myfile:
-             myfile.write('\n'+'\n'.join([message[x:x+MSG_WIDTH] for x in range(0,len(message),MSG_WIDTH)]).ljust(MSG_WIDTH)+status)
         self.row_count += 1
         
 

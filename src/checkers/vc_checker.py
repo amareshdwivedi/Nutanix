@@ -232,7 +232,7 @@ class VCChecker(CheckerBase):
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
                 try:
-                    self.realtime_results = json.load(open("test.json","r"))
+                    self.realtime_results = json.load(open("display_json.json","r"))
                     all_prop,props = [ x for x in message.split(', ') if x != ''], []
                     for xprop in all_prop:
                         xprop,xstatus = xprop.split("#")
@@ -257,7 +257,7 @@ class VCChecker(CheckerBase):
                         props.append({"Message":xprop_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
                 
                     self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
-                    with open("test.json", "w") as myfile:
+                    with open("display_json.json", "w") as myfile:
                         json.dump(self.realtime_results, myfile)
                 except:
                     # Need to handle temp-file case for command line
@@ -269,7 +269,7 @@ class VCChecker(CheckerBase):
                 for check_function in check_functions[check_group]:
                     passed, message = check_function()
                     try:
-                        self.realtime_results = json.load(open("test.json","r"))
+                        self.realtime_results = json.load(open("display_json.json","r"))
                         all_prop,props = [ x for x in message.split(', ') if x != ''], []
                         for xprop in all_prop:
                             xprop,xstatus = xprop.split("#")
@@ -285,7 +285,7 @@ class VCChecker(CheckerBase):
                             props.append({"Message":xprop_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
                         
                         self.realtime_results['vc']['checks'].append({'Message':check_function.descr ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
-                        with open("test.json", "w") as myfile:
+                        with open("display_json.json", "w") as myfile:
                             json.dump(self.realtime_results, myfile)
                     except:
                         pass
