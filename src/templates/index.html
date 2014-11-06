@@ -22,7 +22,7 @@ $def with (checkers,msg="")
 					jQuery("#runnhecks").attr('disabled','disabled');
 					jQuery("#group_select").attr('disabled','disabled');
 					jQuery("#group_select").empty();
-					jQuery("#group_select").append("<option val=''>Select Checks</option>");
+					jQuery("#group_select").append("<option val=''>Select Check Group</option>");
 				}else{
 					jQuery("#runnhecks").removeAttr('disabled');
 					jQuery("#group_select").removeAttr('disabled');
@@ -301,7 +301,7 @@ $def with (checkers,msg="")
 		            </select>
 		            Check Group:
 		            <select id="group_select" disabled> 
-		            	<option value="">Select Check</option>
+		            	<option value="">Select Check Group</option>
 		            	
 		            </select>
 		            

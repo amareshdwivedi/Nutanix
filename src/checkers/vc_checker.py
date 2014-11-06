@@ -243,11 +243,16 @@ class VCChecker(CheckerBase):
                         xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
                         
                         if check['operator'] == "=": 
+                            
                             xprop_exp = check['ref-value'] or "None"
                         elif check['operator'] == "!=":
                             xprop_exp = "Not equal to "+(check['ref-value']  or "None")
                         elif check['operator'] == "<=":
-                            xprop_exp = "Less than or Equal to "+( check['ref-value'] or "None" )
+                            if check['ref-value'].startswith("content."):
+                                xprop_exp = xprop_exp.split(')')[0] or xprop_exp.split(') ')[0] or "None"
+                                xprop_exp = "Less than or Equal to "+xprop_exp
+                            else:
+                                xprop_exp = "Less than or Equal to "+( check['ref-value'] or "None" )
                         
                         if xprop_exp == "none":
                             xprop_exp = "None"
@@ -521,7 +526,8 @@ class VCChecker(CheckerBase):
                     break
             self.reporter.notify_progress(self.reporter.notify_checkLog, cluster + " (Expected multiple Version: =No ( found:"+str(versions)+") ) " , (not mult_vers_flag and "PASS" or "FAIL"))
             passed = passed and (not mult_vers_flag)
-            message += ", " +cluster+" Nodes have Multiple Versions Available"+"#"+(( not mult_vers_flag) and "PASS" or "FAIL")   
+            #message += ", " +cluster+" Nodes have Multiple Versions Available"+"#"+(( not mult_vers_flag) and "PASS" or "FAIL")
+            message += ", " +cluster + "= found:"+str(versions)+" = Expected multiple Version: No"+"#"+(not mult_vers_flag and "PASS" or "FAIL")   
         return passed, message
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress1",1)
@@ -646,7 +652,7 @@ class VCChecker(CheckerBase):
             valid_60_days = (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days > 60 or (xexpiry - (datetime.datetime.today() + datetime.timedelta(60))).days < 0
             self.reporter.notify_progress(self.reporter.notify_checkLog,"License Expiration Validation date " + str(expiry_date) + " days (Expected: => 60 days or always valid) " , (valid_60_days and "PASS" or "FAIL"))
             passed = passed and valid_60_days
-            message += ", "+"License Expiration Validation date " + str(expiry_date) + " days (Expected: => 60 days or always valid) "+"#"+((not valid_60_days) and "PASS" or "FAIL")
+            message += ", "+"License Expiration Validation = Expiry Date:" + str(expiry_date) + " =Not within 60 days or always valid) "+"#"+((valid_60_days) and "PASS" or "FAIL")
         return passed, message
     
     @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date.",3)
