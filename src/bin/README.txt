@@ -1,4 +1,4 @@
-Nutanix Health Check Application v0.9
+Nutanix Health Check Application v0.1
 
 
 Table Of Contents
@@ -39,8 +39,8 @@ Table Of Contents
                 install.py will check if the system has setup tool 'pip' and 'easy_install' available,
                 if not will install these first.
                 Next it will install all the required python packages having extension .egg
-             - Once the installation is complete, change to the directory where HealthCheck is installed
-               (usually it is in <python directory>\lib\site-lib directory) and run script 'healthcheck.py'
+             - Once the installation is complete,additional file 'healthcheck.py' and 'webhealthcheck.py' will be created in same folder.
+             - Run these files to run the command line version or webversion respectively. 
 
        2.1.3 Un-installation Instructions(Windows 32-bit and 64-bit)
 
@@ -57,18 +57,14 @@ Table Of Contents
 
 03 How to run healthcheck
    
-   3.1 Command line
-        
-       change to the directory where HealthCheck is installed (usually it is in <python directory>\lib\site-lib directory)
-       run script 'healthcheck.py'
-
+   3.1 Command line        
+       Run script 'healthcheck.py'.
        Output is displayed on the screen.
-       PDF report is generated and stored under directory Reports
+       PDF/CSV reports are generated and stored under reports directory,the complete path will be displayed once the run is complete.
 
 
     3.2 Web Application
-        change to the directory where HealthCheck is installed (usually it is in <python directory>\lib\site-lib directory)
-        Change to 'src' directory and run web_health_check.py. This will start a Web server listening on port 8080
+        Run script 'webhealthcheck.py',this will start a Web server listening on port 8080
         Connect to Web UI by using url http://localhost:8080/ from your browser.
 
 
