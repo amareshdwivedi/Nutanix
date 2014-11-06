@@ -22,7 +22,6 @@ print "Starting HealthCheck Installation..."
 with open("install_log.txt", "w+") as output:
     subprocess.call(["python", "./install_helper.py",install_dir],stdout=output);
 
-print("\n")
 print "Creating healthcheck script..."
 
 healthchecklines=['import os,sys',
@@ -37,7 +36,6 @@ for line in healthchecklines:
 health_check_pyfile.close()
 time.sleep(2)
 
-print("\n")
 print "Creating webhealthcheck script..."
 
 webhealthchecklines=['import os,sys',
@@ -53,7 +51,6 @@ for line in webhealthchecklines:
 web_health_check_pyfile.close()
 time.sleep(2)
 
-print("\n")
 print "Creating uninstall script..."
 
 uninstall_lines=['import os,sys,shutil,time',
@@ -71,7 +68,6 @@ for line in uninstall_lines:
     uninstall_pyfile.writelines(line+"\n")
 uninstall_pyfile.close()
 time.sleep(2)
-
-print("\n")    
+   
 print "HealthCheck Installation Successfull..."
     
