@@ -28,6 +28,7 @@ os.mkdir("HealthCheck-1.0.0")
 os.chdir("HealthCheck-1.0.0")
 os.mkdir("eggs")
 os.mkdir("get_pip")
+os.mkdir("reports")
 
 print "Copying Required Files....."
 time.sleep(2)
