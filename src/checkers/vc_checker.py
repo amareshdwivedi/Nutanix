@@ -480,7 +480,7 @@ class VCChecker(CheckerBase):
 
 
     # Manual checks
-    '''
+    
     @checkgroup("cluster_checks", "Validate datastore heartbeat", 1)
     def check_datastore_heartbeat(self):
  
@@ -530,7 +530,7 @@ class VCChecker(CheckerBase):
             #message += ", " +cluster+" Nodes have Multiple Versions Available"+"#"+(( not mult_vers_flag) and "PASS" or "FAIL")
             message += ", " +cluster + "= found:"+str(versions)+" = Expected multiple Version: No"+"#"+(not mult_vers_flag and "PASS" or "FAIL")   
         return passed, message
-    '''
+    
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress1",1)
     def check_cluster_das_isolationaddress1(self):
         all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
@@ -618,7 +618,7 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         return passed_all , message
     
-    @checkgroup("cluster_checks", "Cluster Advance Settings das.ignoreInsufficientHbDatastore",1)
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.ignoreInsufficientHbDatastore",3)
     def check_cluster_das_ignoreInsufficientHbDatastore(self):
         all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
         clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*ignoreInsufficientHbDatastore].value')
