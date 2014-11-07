@@ -6,7 +6,7 @@ import sys
 
 print "Creating Egg..."
 
-os.chdir("../../")
+os.chdir(".."+os.path.sep+".."+os.path.sep)
 
 cmd = 'python setup_egg.py bdist_egg --exclude-source-files'
 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
