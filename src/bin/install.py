@@ -1,7 +1,8 @@
 import os
 import time
 import subprocess
-
+import threading
+import sys
 cmd = 'python get_pip/get_pip.py'
 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
 out, err = p.communicate()
@@ -18,10 +19,28 @@ else :
     os.makedirs(install_dir)    
 
 print "Starting HealthCheck Installation..."
+def progress_bar():
+    for i in range(21):
+        sys.stdout.write('\r')
+        sys.stdout.write("[%-20s] %d%%" % ('#'*i, 5*i))
+        sys.stdout.flush()
+        time.sleep(0.40)
+    sys.stdout.write('\r')
+        
+def installing_dependencies():
+    with open("install_log.txt", "w+") as output:
+        subprocess.call(["python", "./install_helper.py",install_dir],stdout=output);
 
-with open("install_log.txt", "w+") as output:
-    subprocess.call(["python", "./install_helper.py",install_dir],stdout=output);
-
+threads = []
+thread_progress_bar = threading.Thread(target=progress_bar)
+thread_installing_dep = threading.Thread(target=installing_dependencies)
+thread_progress_bar.start()
+thread_installing_dep.start()
+threads.append(thread_progress_bar)
+threads.append(thread_installing_dep)
+for t in threads:
+    t.join()
+    
 print "Creating healthcheck script..."
 
 healthchecklines=['import os,sys',
