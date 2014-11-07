@@ -533,8 +533,8 @@ class VCChecker(CheckerBase):
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress1",1)
     def check_cluster_das_isolationaddress1(self):
-        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
-        clusters_with_isolation_address1 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress1].value')
+        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option') or {}
+        clusters_with_isolation_address1 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress1].value') or {}
         message = ""
         passed_all = True
         isolation_address_present=True
@@ -543,7 +543,7 @@ class VCChecker(CheckerBase):
             cluster_all_ips = []
             cluster_str = ''
             if cluster in clusters_with_isolation_address1.keys():
-                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
+                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net') or {}
                 
                 for nic, nicInfo in nics.iteritems():
                     cluster_all_ips.extend(nicInfo[0].ipAddress)
@@ -563,8 +563,8 @@ class VCChecker(CheckerBase):
     def check_cluster_das_isolationaddress2(self):
         #all_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value')
         #all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
-        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
-        clusters_with_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value')
+        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option') or {}
+        clusters_with_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value') or {}
         message = ""
         passed_all = True
         isolation_address_present=True
@@ -573,7 +573,7 @@ class VCChecker(CheckerBase):
             cluster_all_ips = []
             cluster_str = ''
             if cluster in clusters_with_isolation_address2.keys():
-                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
+                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net') or {}
                 
                 for nic, nicInfo in nics.iteritems():
                     cluster_all_ips.extend(nicInfo[0].ipAddress)
@@ -592,8 +592,8 @@ class VCChecker(CheckerBase):
                 
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3",1)
     def check_cluster_das_isolationaddress3(self):
-        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
-        clusters_with_isolation_address3 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress3].value')
+        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option') or {}
+        clusters_with_isolation_address3 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress3].value') or {}
         message = ""
         passed_all = True
         isolation_address_present=True
@@ -602,7 +602,7 @@ class VCChecker(CheckerBase):
             cluster_all_ips = []
             cluster_str = ''
             if cluster in clusters_with_isolation_address3.keys():
-                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
+                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net') or {}
                 
                 for nic, nicInfo in nics.iteritems():
                     cluster_all_ips.extend(nicInfo[0].ipAddress)
@@ -620,8 +620,8 @@ class VCChecker(CheckerBase):
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.ignoreInsufficientHbDatastore",3)
     def check_cluster_das_ignoreInsufficientHbDatastore(self):
-        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
-        clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*ignoreInsufficientHbDatastore].value')
+        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option') or {}
+        clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*ignoreInsufficientHbDatastore].value') or {}
         message = ""
         passed_all = True
         for cluster, options in all_cluster_options.iteritems():
@@ -644,8 +644,8 @@ class VCChecker(CheckerBase):
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.useDefaultIsolationAddress",1)
     def check_cluster_das_useDefaultIsolationAddress(self):
-        all_cluster_hosts = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration')
-        clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*useDefaultIsolationAddress].value')
+        all_cluster_hosts = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration') or {}
+        clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*useDefaultIsolationAddress].value') or {}
         message = ""
         passed_all = True
         for cluster, options in all_cluster_hosts.iteritems():
