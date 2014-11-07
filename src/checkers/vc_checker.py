@@ -480,6 +480,7 @@ class VCChecker(CheckerBase):
 
 
     # Manual checks
+    '''
     @checkgroup("cluster_checks", "Validate datastore heartbeat", 1)
     def check_datastore_heartbeat(self):
  
@@ -529,70 +530,141 @@ class VCChecker(CheckerBase):
             #message += ", " +cluster+" Nodes have Multiple Versions Available"+"#"+(( not mult_vers_flag) and "PASS" or "FAIL")
             message += ", " +cluster + "= found:"+str(versions)+" = Expected multiple Version: No"+"#"+(not mult_vers_flag and "PASS" or "FAIL")   
         return passed, message
-    
+    '''
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress1",1)
     def check_cluster_das_isolationaddress1(self):
-        all_isolation_address1 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress1].value')
-        all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net.ipAddress')
-        all_ips = []
-        for item in all_cvm_ips.values():
-            all_ips.extend(item)
-        
+        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
+        clusters_with_isolation_address1 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress1].value')
         message = ""
+        passed_all = True
         isolation_address_present=True
-        passed = True
-        try:
-            for cluster, isolation_address1 in all_isolation_address1.iteritems():
-                isolation_address_present = isolation_address1 in all_ips
-                
-                self.reporter.notify_progress(self.reporter.notify_checkLog,   cluster + "=CVM IP:"+str(isolation_address_present)+" (Expected: =CVM IP: True)" , (isolation_address_present and "PASS" or "FAIL"))
-                passed = passed and isolation_address_present 
-                message += ", " + cluster + "=CVM-IP:"+str(isolation_address_present)+" (Expected: =CVM-IP:True) " +"#"+((isolation_address_present) and "PASS" or "FAIL")      
-        except AttributeError:
-            self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress1 not configured (Expected : = Should be Cluster IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+        for cluster, options in all_cluster_options.iteritems():
             passed = False
-            message += ", " +"=isolationaddress1 not configured (Expected : = Should be Cluster IP) "+"#"+("FAIL") 
-            return False, message
-        return passed, message
+            cluster_all_ips = []
+            cluster_str = ''
+            if cluster in clusters_with_isolation_address1.keys():
+                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
+                
+                for nic, nicInfo in nics.iteritems():
+                    cluster_all_ips.extend(nicInfo[0].ipAddress)
+                
+                for item in cluster_all_ips:
+                    cluster_str += item + " "
+                passed = clusters_with_isolation_address1[cluster] in cluster_all_ips
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected: =Among:"+str(cluster_all_ips)+")  Actual isolation_address1: "+str(clusters_with_isolation_address1[cluster]), (passed and "PASS" or "FAIL"))
+                message += ", "+cluster +"=isolation_address1: "+str(clusters_with_isolation_address1[cluster])+" =Among:["+cluster_str+"] #"+(passed and "PASS" or "FAIL")
+            else:
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected: =Among:"+str(cluster_all_ips)+") =Options: Not Set", (passed and "PASS" or "FAIL"))
+                message += ", "+cluster +"=Options: Not Set =Among:["+cluster_str+"]#"+(passed and "PASS" or "FAIL")
+            passed_all = passed_all and passed
+        return passed_all , message
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2",1)
     def check_cluster_das_isolationaddress2(self):
-        all_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value')
-        all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
+        #all_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value')
+        #all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
+        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
+        clusters_with_isolation_address2 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress2].value')
         message = ""
+        passed_all = True
         isolation_address_present=True
-        passed = False
-        try:
-            for cluster, isolation_address2 in all_isolation_address2.iteritems():
-                isolation_address_present = isolation_address2 in all_cvm_ips.values()
-                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + "=CVM IP:"+str(isolation_address_present)+" (Expected: =CVM IP: True) "  , (isolation_address_present and "PASS" or "FAIL"))
-                passed = passed and isolation_address_present  
-                message += ", " + cluster + "=CVM-IP:"+str(isolation_address_present)+" (Expected: =CVM-IP:True) " +"#"+(( isolation_address_present) and "PASS" or "FAIL")        
-        except AttributeError:
-            self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+        for cluster, options in all_cluster_options.iteritems():
             passed = False
-            message += ", " +"=isolationaddress2 not configured (Expected : = Should be any one of the CVM IP)"+"#"+("FAIL")
-            return False, message
-        return passed, message
+            cluster_all_ips = []
+            cluster_str = ''
+            if cluster in clusters_with_isolation_address2.keys():
+                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
+                
+                for nic, nicInfo in nics.iteritems():
+                    cluster_all_ips.extend(nicInfo[0].ipAddress)
+                
+                for item in cluster_all_ips:
+                    cluster_str += item + " "
+                passed = clusters_with_isolation_address2[cluster] in cluster_all_ips
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected: =Among:"+str(cluster_all_ips)+")  Actual isolation_address2: "+str(clusters_with_isolation_address2[cluster]), (passed and "PASS" or "FAIL"))
+                message += ", "+cluster +"=isolation_address2: "+str(clusters_with_isolation_address2[cluster])+" =Among:["+cluster_str+"] #"+(passed and "PASS" or "FAIL")
+            else:
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected: =Among:"+str(cluster_all_ips)+") =Options: Not Set", (passed and "PASS" or "FAIL"))
+                message += ", "+cluster +"=Options: Not Set =Among:["+cluster_str+"]#"+(passed and "PASS" or "FAIL")
+            passed_all = passed_all and passed
+        return passed_all , message
+    
                 
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3",1)
     def check_cluster_das_isolationaddress3(self):
-        all_isolation_address3 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress3].value')
-        all_cvm_ips = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.ipAddress')
+        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
+        clusters_with_isolation_address3 = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*isolationaddress3].value')
         message = ""
+        passed_all = True
         isolation_address_present=True
-        passed = True
-        try:
-            for cluster, isolation_address3 in all_isolation_address3.iteritems():
-                isolation_address_present = isolation_address3 in all_cvm_ips.values()
-                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + "=CVM IP:"+str(isolation_address_present)+" (Expected: =CVM IP: True) " , (isolation_address_present and "PASS" or "FAIL"))
-                passed = passed and isolation_address_present
-                message += ", " +cluster+"=CVM-IP:"+str(isolation_address_present)+" (Expected: =CVM-IP:True) "+"#" +((isolation_address_present) and "PASS" or "FAIL")         
-        except AttributeError:
-            self.reporter.notify_progress(self.reporter.notify_checkLog," isolationaddress2 not configured (Expected: = Should be any one of the CVM IP)"  , (not isolation_address_present and "PASS" or "FAIL"))
+        for cluster, options in all_cluster_options.iteritems():
             passed = False
-            message += ", " +"=isolationaddress3 not configured(Expected : = Should be any one of the CVM IP)"+"#"+("FAIL")
-        return passed, message  
+            cluster_all_ips = []
+            cluster_str = ''
+            if cluster in clusters_with_isolation_address3.keys():
+                nics = self.get_vc_property('content.rootFolder.childEntity[name='+cluster.split('.')[1]+'].hostFolder.childEntity.configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
+                
+                for nic, nicInfo in nics.iteritems():
+                    cluster_all_ips.extend(nicInfo[0].ipAddress)
+                
+                for item in cluster_all_ips:
+                    cluster_str += item + " "
+                passed = clusters_with_isolation_address3[cluster] in cluster_all_ips
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected: =Among:"+str(cluster_all_ips)+")  Actual isolation_address3: "+str(clusters_with_isolation_address3[cluster]), (passed and "PASS" or "FAIL"))
+                message += ", "+cluster +"=isolation_address3: "+str(clusters_with_isolation_address3[cluster])+" =Among:["+cluster_str+"] #"+(passed and "PASS" or "FAIL")
+            else:
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected: =Among:"+str(cluster_all_ips)+") =Options: Not Set", (passed and "PASS" or "FAIL"))
+                message += ", "+cluster +"=Options: Not Set =Among:["+cluster_str+"]#"+(passed and "PASS" or "FAIL")
+            passed_all = passed_all and passed
+        return passed_all , message
+    
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.ignoreInsufficientHbDatastore",1)
+    def check_cluster_das_ignoreInsufficientHbDatastore(self):
+        all_cluster_options = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option')
+        clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*ignoreInsufficientHbDatastore].value')
+        message = ""
+        passed_all = True
+        for cluster, options in all_cluster_options.iteritems():
+            passed = True
+            if cluster in clusters_with_given_option.keys():
+                
+                if clusters_with_given_option[cluster] == "true":
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster +" das.ignoreInsufficientHbDatastore (Expected: true )  Actual=true", (passed and "PASS" or "FAIL"))
+                    message += ", "+cluster +"=true =true#"+(passed and "PASS" or "FAIL")
+                else:
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster +" das.ignoreInsufficientHbDatastore (Expected: true )  Actual=false", (passed and "PASS" or "FAIL"))
+                    message += ", "+cluster +"=true =false#"+(passed and "PASS" or "FAIL")
+            else:
+                passed = False
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected: =true ) Options: Not Set", (passed and "PASS" or "FAIL"))
+                message += ", "+cluster +"=Options: Not Set =true#"+(passed and "PASS" or "FAIL")
+            passed_all = passed_all and passed
+        return passed_all , message
+    
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.useDefaultIsolationAddress",1)
+    def check_cluster_das_useDefaultIsolationAddress(self):
+        all_cluster_hosts = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration')
+        clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*useDefaultIsolationAddress].value')
+        message = ""
+        passed_all = True
+        for cluster, options in all_cluster_hosts.iteritems():
+            passed = True
+            if cluster in clusters_with_given_option.keys():
+                if clusters_with_given_option[cluster] == "false":
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster +" das.useDefaultIsolationAddress (Expected: false )  Actual=false", (passed and "PASS" or "FAIL"))
+                    message += ", "+cluster +"=false =false#"+(passed and "PASS" or "FAIL")
+                else:
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster +" das.useDefaultIsolationAddress (Expected: false )  Actual=true", (passed and "PASS" or "FAIL"))
+                    message += ", "+cluster +"=false =true#"+(passed and "PASS" or "FAIL")
+            else:
+                passed = False
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + " (Expected: =true ) Options: Not Set", (passed and "PASS" or "FAIL"))
+                message += ", "+cluster +"=Options: Not Set =false#"+(passed and "PASS" or "FAIL")
+                    
+            passed_all = passed_all and passed
+        return passed_all , message
     
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",3)
     def check_directory_service_set_to_active_directory(self):
