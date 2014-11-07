@@ -117,7 +117,7 @@ def main():
     if len(rows) > 1:
         details.append([None])
         timestamp = time.strftime("%Y%m%d-%H%M%S")
-        file_name = os.path.abspath(os.path.dirname(__file__))+os.path.sep+'reports'+os.path.sep+'Healthcheck-' + timestamp + '.csv'
+        file_name = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'
         csv_file = open(file_name ,'wb')
         csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerows(details)
@@ -125,7 +125,7 @@ def main():
         csv_file.close()
         
     #Generate Json Reports 
-    outfile = open(os.path.abspath(os.path.dirname(__file__))+os.path.sep+"reports"+os.path.sep+"results.json", 'w')
+    outfile = open(os.getcwd() + os.path.sep +"reports"+os.path.sep+"results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()
     
