@@ -710,6 +710,34 @@ class VCChecker(CheckerBase):
                     passed = False
                     message += ", " +datacenter+"."+host.name+" = NTP Client not configured"+" (Expected: ="+" NTP Client Enable : True and running : True "+") "+"#"+ ((ruleset_enable and service_running) and "PASS" or "FAIL")
         return passed, message
+    
+    @checkgroup("esxi_checks", "NTP Servers Configured",1)
+    def check_ntp_servers_configured(self):
+        all_hosts = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host') or {}
+        message = ""
+        passed_all = True
+        
+        for cluster, hostObject in all_hosts.iteritems():
+            if len(hostObject) == 0:
+                pass
+                #self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+" = No Hosts are configured ( Expected: = At-least 2 NTP Servers are configured )","FAIL")
+                #passed = False
+                #message += ", " +cluster+"= No Hosts are configured (Expected:= At-least 2 NTP Servers are configured ) #FAIL"
+            else:
+                for host in hostObject:
+                    passed = True
+                    ntp_servers = host.config.dateTimeInfo.ntpConfig.server
+                    ntp_servers_str = ' '.join(ntp_servers)
+                    if len(ntp_servers) < 2:
+                        passed = False
+                        self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+" "+host.name+" = NTP Servers configured ["+','.join(ntp_servers)+"]  ( Expected: = at-least 2 NTP Servers are configured )","FAIL")
+                        message += ", " +cluster+"= NTP Servers Configured ["+','.join(ntp_servers)+"] (Expected:= At-least 2 NTP Servers are configured ) #FAIL"
+                    else:
+                        self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+" "+host.name+" = NTP Servers configured ["+','.join(ntp_servers)+"]  ( Expected: = at-least 2 NTP Servers are configured )","PASS")
+                        message += ", " +cluster+"= NTP Servers Configured ["+','.join(ntp_servers)+"] (Expected:= At-least 2 NTP Servers are configured ) #PASS"     
+                    
+                    passed_all = passed_all and passed
+        return passed_all, message
 
     @checkgroup("vcenter_server_checks", "Validate vCenter Server license expiration date",1)
     def check_vcenter_server_license_expiry(self):
