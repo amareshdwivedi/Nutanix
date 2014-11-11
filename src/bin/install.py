@@ -5,7 +5,7 @@ import threading
 import sys
 import shutil
 
-cmd = 'python get_pip/get_pip.py'
+cmd = 'python '+os.path.abspath(os.path.dirname(__file__))+os.path.sep +'scripts'+ os.path.sep +'get_pip.py'
 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
 out, err = p.communicate()
 
@@ -30,8 +30,9 @@ def progress_bar():
     sys.stdout.write('\r')
         
 def installing_dependencies():
-    with open("install_log.txt", "w+") as output:
-        subprocess.call(["python", "./install_helper.py",default_install],stderr=output,stdout=output);
+    with open("install_log.log", "w+") as output:
+        install_helper=os.path.abspath(os.path.dirname(__file__))+os.path.sep +'scripts'+ os.path.sep +"install_helper.py"
+        subprocess.call(["python", install_helper,default_install],stderr=output,stdout=output);
 
 threads = []
 thread_installing_dep = threading.Thread(target=installing_dependencies)
@@ -51,7 +52,7 @@ healthchecklines=['import os,sys',
 'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"health_check.pyc "',
 'os.system(executable_path+ " ".join(sys.argv[1:]))']
 
-health_check_pyfile=open("healthcheck.py","wb")
+health_check_pyfile=open(default_install+os.path.sep+"healthcheck.py","wb")
 for line in healthchecklines:
     health_check_pyfile.writelines(line+"\n")
 health_check_pyfile.close()
@@ -66,7 +67,7 @@ webhealthchecklines=['import os,sys',
 'executable_path="python web_health_check.pyc"',
 'os.system(executable_path+ " ".join(sys.argv[1:]))']
 
-web_health_check_pyfile=open("webhealthcheck.py","wb")
+web_health_check_pyfile=open(default_install+os.path.sep+"webhealthcheck.py","wb")
 for line in webhealthchecklines:
     web_health_check_pyfile.writelines(line+"\n")
 web_health_check_pyfile.close()
@@ -84,11 +85,25 @@ uninstall_lines=['import os,sys,shutil,time',
 'time.sleep(2)',
 'print "\\nHealthCheck Un-installation Successfull..."']
 
-uninstall_pyfile=open("uninstall.py","wb")
+uninstall_pyfile=open(default_install+os.path.sep+"uninstall.py","wb")
 for line in uninstall_lines:
     uninstall_pyfile.writelines(line+"\n")
 uninstall_pyfile.close()
 time.sleep(2)
-   
+
+if sys.platform.startswith("win"):
+    import shutil
+    shutil.copy(default_install+os.path.sep+"healthcheck.py",os.path.abspath(os.path.dirname(__file__)))
+    shutil.copy(default_install+os.path.sep+"webhealthcheck.py",os.path.abspath(os.path.dirname(__file__)))
+    shutil.copy(default_install+os.path.sep+"uninstall.py",os.path.abspath(os.path.dirname(__file__)))
+    
+    #add to system path
+    import _winreg as wreg
+    key = wreg.OpenKey(wreg.HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",0, wreg.KEY_ALL_ACCESS)
+    value,ty=wreg.QueryValueEx(key, "Path")
+    wreg.SetValueEx(key,"Path",0,ty,value+";"+default_install)
+    
+       
 print "HealthCheck Installation Successfull..."
+
     

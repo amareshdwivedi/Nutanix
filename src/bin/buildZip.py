@@ -26,22 +26,23 @@ if os.path.exists("HealthCheck-1.0.0"):
 
 os.mkdir("HealthCheck-1.0.0")
 os.chdir("HealthCheck-1.0.0")
-os.mkdir("eggs")
-os.mkdir("get_pip")
+os.mkdir("libs")
+os.mkdir("scripts")
 os.mkdir("reports")
 
 print "Copying Required Files....."
 time.sleep(2)
 os.chdir(home_dir)
-shutil.copy("get_pip.py", "HealthCheck-1.0.0"+os.sep+"get_pip")
+shutil.copy("get_pip.py", "HealthCheck-1.0.0"+os.sep+"scripts")
+
 
 os.chdir(home_dir+os.sep+"dist")
 
-shutil.copy("HealthCheck-1.0.0-py2.7.egg", home_dir+os.sep+"HealthCheck-1.0.0"+os.sep+"eggs")
+shutil.copy("HealthCheck-1.0.0-py2.7.egg", home_dir+os.sep+"HealthCheck-1.0.0"+os.sep+"libs")
 
 os.chdir(home_dir+os.sep+"src"+os.sep+"libs")
 for xfile in os.listdir("."):
-	shutil.copy(xfile, home_dir+os.sep+"HealthCheck-1.0.0"+os.sep+"eggs")
+	shutil.copy(xfile, home_dir+os.sep+"HealthCheck-1.0.0"+os.sep+"libs")
 
 
 os.chdir(home_dir+os.sep+"src"+os.sep+"bin")
@@ -49,7 +50,10 @@ for xfile in os.listdir("."):
 	if (xfile.startswith("build") or xfile.startswith("BUILD")):
 		continue
 	else:
-         shutil.copy(xfile, home_dir+os.sep+"HealthCheck-1.0.0")
+         if xfile.startswith("install_helper.py"):
+         	shutil.copy(xfile, home_dir+os.sep+"HealthCheck-1.0.0"+os.sep+"scripts")
+         else:
+          	shutil.copy(xfile, home_dir+os.sep+"HealthCheck-1.0.0")
 
 os.chdir(home_dir+os.sep+"src"+os.sep+"bin")
 

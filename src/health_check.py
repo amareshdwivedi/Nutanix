@@ -90,6 +90,9 @@ def main():
             continue
             
         
+    healthcheckreportfolder=os.getcwd() + os.path.sep +"reports"
+    if not os.path.exists(healthcheckreportfolder):
+        os.mkdir(healthcheckreportfolder) 
     #Generate CSV Reports
     rows = []
     details = []
