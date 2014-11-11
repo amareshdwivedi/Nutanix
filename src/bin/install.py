@@ -98,10 +98,9 @@ if sys.platform.startswith("win"):
     shutil.copy(default_install+os.path.sep+"uninstall.py",os.path.abspath(os.path.dirname(__file__)))
     
     #add to system path
-    import _winreg as wreg
-    key = wreg.OpenKey(wreg.HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",0, wreg.KEY_ALL_ACCESS)
-    value,ty=wreg.QueryValueEx(key, "Path")
-    wreg.SetValueEx(key,"Path",0,ty,value+";"+default_install)
+    print "Setting environment path variable \n"
+    subprocess.call(['setx','Path','%Path%;'+default_install])
+
     
        
 print "HealthCheck Installation Successfull..."
