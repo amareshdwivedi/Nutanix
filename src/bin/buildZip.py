@@ -50,7 +50,7 @@ for xfile in os.listdir("."):
 	if (xfile.startswith("build") or xfile.startswith("BUILD")):
 		continue
 	else:
-         if xfile.startswith("install_helper.py"):
+         if xfile.startswith("install_helper.py") or xfile.startswith("install_linux_dependencies.py"):
          	shutil.copy(xfile, home_dir+os.sep+"HealthCheck-1.0.0"+os.sep+"scripts")
          else:
           	shutil.copy(xfile, home_dir+os.sep+"HealthCheck-1.0.0")

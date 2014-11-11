@@ -46,7 +46,8 @@ for t in threads:
     
 print "Creating healthcheck script..."
 
-healthchecklines=['import os,sys',
+import platform
+healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
 'lib_path = ' + "'" + default_install + "'",
 'os.environ["PYTHONPATH"] = lib_path',
 'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"health_check.pyc "',
@@ -60,7 +61,7 @@ time.sleep(2)
 
 print "Creating webhealthcheck script..."
 
-webhealthchecklines=['import os,sys',
+webhealthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
 'lib_path = ' + "'" + default_install + "'",
 'os.environ["PYTHONPATH"] = lib_path',
 'os.chdir(lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep)',
@@ -81,7 +82,7 @@ uninstall_lines=['import os,sys,shutil,time',
 'shutil.rmtree(install_dir, ignore_errors=True)',
 'os.remove(\'healthcheck.py\')',
 'os.remove(\'webhealthcheck.py\')',
-'os.remove(\'install_log.txt\')',
+'os.remove(\'install_log.log\')',
 'time.sleep(2)',
 'print "\\nHealthCheck Un-installation Successfull..."']
 
@@ -100,8 +101,12 @@ if sys.platform.startswith("win"):
     #add to system path
     print "Setting environment path variable \n"
     subprocess.call(['setx','Path','%Path%;'+default_install])
-
-    
+if sys.platform.startswith("linux"):
+    import shutil
+    shutil.move(default_install+os.path.sep+"healthcheck.py","/bin/healthcheck.py")
+    shutil.move(default_install+os.path.sep+"webhealthcheck.py","/bin/webhealthcheck.py")
+    os.chmod("/bin/healthcheck.py",0755)
+    os.chmod("/bin/webhealthcheck.py",0755)  
        
 print "HealthCheck Installation Successfull..."
 
