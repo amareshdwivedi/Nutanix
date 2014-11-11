@@ -81,9 +81,9 @@ uninstall_lines=['import os,sys,shutil,time',
 'shutil.rmtree(install_dir, ignore_errors=True)',
 'os.remove(\'healthcheck.py\')',
 'os.remove(\'webhealthcheck.py\')',
-'os.remove(\'install_log.txt\')',
+'os.remove(\'install_log.log\')',
 'time.sleep(2)',
-'print "\\nHealthCheck Un-installation Successfull..."']
+'print "HealthCheck Un-installation Successfull..."']
 
 uninstall_pyfile=open(default_install+os.path.sep+"uninstall.py","wb")
 for line in uninstall_lines:
@@ -98,11 +98,9 @@ if sys.platform.startswith("win"):
     shutil.copy(default_install+os.path.sep+"uninstall.py",os.path.abspath(os.path.dirname(__file__)))
     
     #add to system path
-    print "Setting environment path variable \n"
+    print "Setting environment path variable..."
     subprocess.call(['setx','Path','%Path%;'+default_install])
-
-    
-       
+     
 print "HealthCheck Installation Successfull..."
 
     
