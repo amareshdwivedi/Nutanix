@@ -83,6 +83,8 @@ $def with (checkers,msg="")
 					                        }else if(jQuery(".result"+i+"").html()=="Fail"){
 					                        	jQuery(".result"+i+"").addClass("fail");
 					                        }
+				                        var h1 = jQuery('#logs')[0].scrollHeight,h2 = jQuery('#logs').height();
+				                        jQuery('#logs').scrollTop(h1 - h2);	
 		                        	}
 		                        }  if(category == "vc"){
 		                        	jQuery("#logs").empty();
@@ -110,9 +112,9 @@ $def with (checkers,msg="")
 					                        }
 		                        		}
 		                        	}
+			                        var h1 = jQuery('#logs')[0].scrollHeight,h2 = jQuery('#logs').height();
+			                        jQuery('#logs').scrollTop(h1 - h2);	
 		                        }
-		                        
-		                        
                                 //document.getElementById('logs').value = data;
                              },
                          });
