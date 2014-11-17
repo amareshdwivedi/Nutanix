@@ -74,29 +74,11 @@ for line in webhealthchecklines:
 web_health_check_pyfile.close()
 time.sleep(2)
 
-print "Creating uninstall script..."
-
-uninstall_lines=['import os,sys,shutil,time',
-'print "Starting HealthCheck Un-installation..."',                 
-'install_dir = ' + "'" + default_install + "'",                               
-'shutil.rmtree(install_dir, ignore_errors=True)',
-'os.remove(\'healthcheck.py\')',
-'os.remove(\'webhealthcheck.py\')',
-'os.remove(\'install_log.log\')',
-'time.sleep(2)',
-'print "HealthCheck Un-installation Successfull..."']
-
-uninstall_pyfile=open(default_install+os.path.sep+"uninstall.py","wb")
-for line in uninstall_lines:
-    uninstall_pyfile.writelines(line+"\n")
-uninstall_pyfile.close()
-time.sleep(2)
-
 if sys.platform.startswith("win"):
     import shutil
     shutil.copy(default_install+os.path.sep+"healthcheck.py",os.path.abspath(os.path.dirname(__file__)))
     shutil.copy(default_install+os.path.sep+"webhealthcheck.py",os.path.abspath(os.path.dirname(__file__)))
-    shutil.copy(default_install+os.path.sep+"uninstall.py",os.path.abspath(os.path.dirname(__file__)))
+    #shutil.copy(default_install+os.path.sep+"uninstall.py",os.path.abspath(os.path.dirname(__file__)))
     
     #add to system path
     print "Setting environment path variable..."
@@ -107,7 +89,24 @@ if sys.platform.startswith("linux"):
     shutil.move(default_install+os.path.sep+"webhealthcheck.py","/bin/webhealthcheck.py")
     os.chmod("/bin/healthcheck.py",0755)
     os.chmod("/bin/webhealthcheck.py",0755)  
-       
+
+print "Creating uninstall script..."
+
+uninstall_lines=['import os,sys,shutil,time',
+'print "Starting HealthCheck Un-installation..."',                 
+'install_dir = ' + "'" + default_install + "'",                               
+'shutil.rmtree(install_dir, ignore_errors=True)',
+'os.remove(\'/bin/healthcheck.py\')' if sys.platform.startswith("linux") else '',
+'os.remove(\'/bin/webhealthcheck.py\')' if sys.platform.startswith("linux") else '',
+'time.sleep(2)',
+'print "HealthCheck Un-installation Successfull..."']
+
+uninstall_pyfile=open(default_install+os.path.sep+"uninstall.py","wb")
+for line in uninstall_lines:
+    uninstall_pyfile.writelines(line+"\n")
+uninstall_pyfile.close()
+time.sleep(2)
+
 print "HealthCheck Installation Successfull..."
 
     
