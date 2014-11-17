@@ -2,8 +2,7 @@ HealthCheck
 ===========
 Nutanix HealthCheck Tool
 
-
-Prerequisite to run HealthCheck (Follows Sequence)
+Pre-requisite to run healthCheck source code on windows(Follow Sequence)
 ==================================================
 1.)Download and install Python 2.7.8.
 2.)For windows machine download and install - Microsoft Visual C++ Compiler for Python 2.7 (http://www.microsoft.com/en-us/download/details.aspx?id=44266).
@@ -14,11 +13,4 @@ Prerequisite to run HealthCheck (Follows Sequence)
 7.)Install paramiko (pip install paramiko).
 8.)Install pycrypto (pip install pycrypto).
 9.)Install colorama (pip install colorama). 
-
-To create .egg distribution file for HealthCheck
-================================================
-python setup_egg.py bdist_egg --exclude-source-files
-
-To install .egg distribution file for HealthCheck
-=================================================
-easy_install HealthCheck-1.0.0-py2.7.egg
+10.)Install web.py (pip install web.py).
