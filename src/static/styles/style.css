@@ -211,3 +211,5 @@ input[type="text"], input[type="password"], select {background-color: #fff;
 .success{
     color:#42b663 !important;
 }
+
+.loader{ display:none; margin-left: 10px;}

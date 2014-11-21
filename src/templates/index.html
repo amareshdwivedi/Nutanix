@@ -117,6 +117,9 @@ $def with (checkers,msg="")
 		                        }
                                 //document.getElementById('logs').value = data;
                              },
+                                beforeSend: function(){
+                                   jQuery('.loader').css('display','inline-block');
+                               }
                          });
                   }
 		    	
@@ -139,6 +142,7 @@ $def with (checkers,msg="")
 		            	clearInterval(interval);
 		            	fetch_data();
 		                alert(data);
+                        jQuery('.loader').css('display','none');
 		            },
 		        });
 		        var interval = setInterval(function(){fetch_data()},3000);
@@ -308,6 +312,8 @@ $def with (checkers,msg="")
 		            </select>
 		            
 		            <input type="button" id="runnhecks" value="Run" disabled class="btn btn-primary healthCheckBtn runBtn"/>
+                    
+                    <span class="loader"><img src="/static/images/loading.gif" /></span>
 	            </div>
 	            <div class="col-lg-12 col-md-12 col-sm-12 no-padding logArea">
 	            	<!--<textarea id="logs" class="col-lg-12 col-md-12 col-sm-12 logcontainer"></textarea>-->

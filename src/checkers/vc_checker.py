@@ -44,7 +44,6 @@ class VCChecker(CheckerBase):
                 form.Textbox("Port",value=self.authconfig['vc_port']),
                 form.Textbox("User",value=self.authconfig['vc_user']),
                 form.Password("Password",value=Security.decrypt(self.authconfig['vc_pwd'])),
-                form.Password("Retype_Password",value=Security.decrypt(self.authconfig['vc_pwd'])), 
                 form.Textbox("Cluster",value=self.authconfig['cluster']),
                 form.Textbox("Host",value=self.authconfig['host']))() 
 
