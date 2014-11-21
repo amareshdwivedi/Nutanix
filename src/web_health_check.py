@@ -21,12 +21,10 @@ from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
 from requests.exceptions import ConnectionError
 
-'''
-def hello(values):
-        print "Run these checks:",values
-        #return "GaneshManalPatil"
-'''
-
+if (len(sys.argv) > 1):
+    cur_dir=sys.argv[2]
+else:
+    cur_dir = None
 urls = (
   '/', 'index'
   #'/(.*)', 'index'
@@ -131,8 +129,7 @@ class index:
         
         if len(rows) > 1:
             details.append([None])
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
-            file_name = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'
+            file_name = self.getCSVFilePath(cur_dir)
             csv_file = open(file_name ,'wb')
             csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerows(details)
@@ -145,7 +142,7 @@ class index:
         outfile.close()
         
         #Generate PDF Report based on results. Temporary comment out
-        PDFReportGenerator(results)
+        PDFReportGenerator(results,cur_dir)
             
         return True
     
@@ -207,7 +204,14 @@ class index:
                 return f.read()
             except:
                 return True
-            
+     
+    def getCSVFilePath(self,cur_dir=None): 
+        timestamp = time.strftime("%Y%m%d-%H%M%S")  
+        if cur_dir is None:
+            csv_file_name = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'
+        else:
+            csv_file_name =  cur_dir + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'      
+        return csv_file_name
        
 if __name__ == "__main__":
     web.internalerror = web.debugerror

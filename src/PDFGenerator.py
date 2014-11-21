@@ -168,11 +168,16 @@ def ncc_report(story, checks_list):
 
 
     
-def PDFReportGenerator(resultJson):   
+def PDFReportGenerator(resultJson,curdir=None):   
     # Adding timestamp to the report name  
     timestamp = time.strftime("%Y%m%d-%H%M%S")
+
     # path for generating the report
-    pdffilename = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.pdf'
+    if curdir is None:
+        pdffilename = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.pdf'
+    else:
+        pdffilename =  curdir + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.pdf'   
+
     doc = SimpleDocTemplate(pdffilename, pagesizes=letter, format=landscape, rightMargin=inch / 4, leftMargin=inch / 10, topMargin=inch, bottomMargin=inch / 4)
     story = []
     date = time.strftime("%B %d, %Y")
@@ -215,6 +220,7 @@ def PDFReportGenerator(resultJson):
             ncc_report(story, resultJson[checkers].get('checks'))
     doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
     
-    print "\nReports generated successfully at :: " + os.getcwd() + os.path.sep +"reports"
-    #print "Success"            
-#PDFReportGenerator(resultJson)
+    if curdir is None:
+        print "\nReports generated successfully at :: " + os.getcwd() + os.path.sep +"reports"
+    else:
+        print "\nReports generated successfully at :: " + curdir + os.path.sep +"reports"
