@@ -1,4 +1,21 @@
-import atexit
+#!/usr/bin/env python
+#title           :clusterProvision.py
+#description     :This will do the provisioning like creating datacenter,cluster,resource pool,etc & Adding Host & configuring network etc.
+#author          :GaneshM
+#date            :2014/11/21
+#version         :1.0
+#usage           :
+'''
+				  python clusterProvision.py host user pwd port dcName clusterName hostList  
+				  Hosts shold be send in below format
+				  hostList = [{'ip':'10.1.222.83','user':'root','pwd':'nutanix/4u'}]
+				  ex.  python clusterProvision.py 10.1.222.184 root vmware 443 TestDatacenter TestCluster [{'ip':'10.1.222.83','user':'root','pwd':'nutanix/4u'}]
+'''
+#notes           :
+#python_version  :2.7.8  
+#==============================================================================
+
+import atexit,ast
 from pyVim import connect
 from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
@@ -99,8 +116,8 @@ class ClusterProvision:
 
 			# confiugre connectspec using sslThumbprint
 			add_host = vim.host.ConnectSpec(hostName=xhost['ip'],userName=xhost['user'],password=xhost['pwd'])
-			print "Add Host :",add_host, type(add_host)
-			print "Container :",cluster, type(cluster)
+			#print "Add Host :",add_host, type(add_host)
+			#print "Container :",cluster, type(cluster)
 			try:
 				taskid = cluster.AddHost(add_host,asConnected=True,license="D4:F1:35:5D:60:6D:6F:78:05:B2:70:62:F1:74:FA:B5:BD:29:DD:0E")
 			except:
@@ -129,15 +146,15 @@ if __name__ == "__main__":
 	dcName = sys.argv[5]
 	clusterName= sys.argv[6]
 	
-	# Hosts shold be send as command line arguement in below format // for now host is hardcoded.
-        #hostList = sys.argv[7]
-	hostList = [{'ip':'10.1.222.83','user':'root','pwd':'nutanix/4u'}]
+
+	hostList = sys.argv[7]
+	#hostList = [{'ip':'10.1.222.83','user':'root','pwd':'nutanix/4u'}]
 
 	provObj = ClusterProvision(host,user,pwd,port)
 
 	dc = provObj.create_datacenter(dcName)
 	newc = provObj.create_cluster(clusterName, dc)
-	provObj.add_host(newc,hostList)
+	provObj.add_host(newc,ast.literal_eval(hostList))
 
 	provObj.disConnectVC()
 	sys.exit(1)
