@@ -5,7 +5,7 @@ from checkers.ncc_checker import NCCChecker
 from checkers.vc_checker import VCChecker
 from checkers.base_checker import CheckerBase
 from reporters import DefaultConsoleReporter
-from PDFGenerator import PDFReportGenerator
+from report_generator import PDFReportGenerator,CSVReportGenerator
 from prettytable import PrettyTable
 import json
 from operator import itemgetter
@@ -21,12 +21,11 @@ from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
 from requests.exceptions import ConnectionError
 
-'''
-def hello(values):
-        print "Run these checks:",values
-        #return "GaneshManalPatil"
-'''
-
+if (len(sys.argv) > 1):
+    cur_dir=sys.argv[2]
+else:
+    cur_dir = None
+    
 urls = (
   '/', 'index'
   #'/(.*)', 'index'
@@ -99,53 +98,22 @@ class index:
             results[checker] = result.to_dict()
             
             # This is to sort the checks in given checker based on the severity ( asc order )
-            try :
-                results[checker]['checks'] = sorted(results[checker]['checks'], key=itemgetter('Severity'))
-            except KeyError:
+            #try :
+            #    results[checker]['checks'] = sorted(results[checker]['checks'], key=itemgetter('Severity'))
+            #except KeyError:
                 # It means no checks are executed for given checker
-                continue
-            
-        #Generate CSV Reports
-        rows = []
-        details = []
-        details.append(["Nutanix Cluster Health Check Results"])
-        rows.append(["Category", "Health Check Variable","Property","Status", "Severity"])
-        for xchecker,allChecks in results.iteritems():
-            details.append(["IP",allChecks['ip']])
-            details.append(["Category",allChecks['Name']])
-            details.append(["User Name",allChecks['user']])
-            details.append(["Timestamp",str(time.strftime("%B %d, %Y %H:%M:%S"))])
-            details.append(["Overall Status",allChecks['Status']])
-            
-            try:
-                for xcheck in allChecks['checks']:
-                    if isinstance(xcheck['Properties'], list):
-                        rows.append([xchecker, xcheck['Name'],"Overall Status",xcheck['Status'], xcheck['Severity']])
-                        for prop in xcheck['Properties']:
-                            rows.append([xchecker, xcheck['Name'],prop['Message'],prop['Status'], xcheck['Severity']])
-                    else:
-                        rows.append([xchecker, xcheck['Name'],None,xcheck['Status'], xcheck['Severity']])
-            except KeyError:
-                #It means- No checks were executed for this checker. 
-                continue
-        
-        if len(rows) > 1:
-            details.append([None])
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
-            file_name = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'
-            csv_file = open(file_name ,'wb')
-            csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerows(details)
-            csv_writer.writerows(rows)
-            csv_file.close()
-            
+            #   continue
+
         #Generate Json Reports 
         outfile = open(os.getcwd() + os.path.sep +"reports"+os.path.sep+"results.json", 'w')
         json.dump(results, outfile, indent=2)
         outfile.close()
+                    
+        #Generate CSV Reports
+        CSVReportGenerator(results,cur_dir)
         
-        #Generate PDF Report based on results. Temporary comment out
-        PDFReportGenerator(results)
+        #Generate PDF Report based on results. 
+        PDFReportGenerator(results,cur_dir)
             
         return True
     
@@ -208,7 +176,6 @@ class index:
             except:
                 return True
             
-       
 if __name__ == "__main__":
     web.internalerror = web.debugerror
     app.run()

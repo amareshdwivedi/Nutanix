@@ -43,8 +43,8 @@ Table Of Contents
              - From command prompt, navigate to the extracted folder.
              - Verify python command can be executed by typing 'python --version'. It should display version of python installed.
              - Execute python script - 'install.py' at the command prompt.install.py will check if the system has setup tool 'pip' and 'easy_install' available, if not will install these first. It also check weather system has 'gcc','python-devel', 'zlib-devel', 'freetype', 'freetype-devel', 'libjpeg-devel' installed, if not it installs these dependences using system package manager (i.e. yum, apt-get etc).  Next it will install all the required python packages having extension .egg
-             - Once the installation is complete,additional file 'healthcheck.py' and 'webhealthcheck.py' will be created in /bin folder.
-             - Run these files to run the command line version or webversion respectively. 
+             - Once the installation is complete,additional file 'healthcheck.py' and 'webhealthcheck.py' will be created in /bin and in the same folder.
+             - Run these files to run the command line version or webversion respectively(use SUDO if you don't have root permission). 
 
        2.1.3 Un-installation Instructions()
              - Open command prompt and navigate to folder python package folder( for Centos: /usr/lib/python2.7/site-packages/healthcheck)

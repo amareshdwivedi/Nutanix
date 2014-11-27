@@ -38,6 +38,13 @@ $def with (checkers,msg="")
 				$$("#group_select").append('<option value="vcenter_server_checks">vcenter_server_checks</option>')
 				$$("#group_select").append('<option value="storage_and_vm_checks">storage_and_vm_checks</option>')
 				$$("#group_select").append('<option value="network_and_switch_checks">network_and_switch_checks</option>')
+				$$("#group_select").append('<option value="availability">availability</option>')
+				$$("#group_select").append('<option value="performance">performance</option>')
+				$$("#group_select").append('<option value="security">security</option>')
+				$$("#group_select").append('<option value="reliability">reliability</option>')
+				$$("#group_select").append('<option value="recoverability">recoverability</option>')
+				$$("#group_select").append('<option value="manageability">manageability</option>')
+				$$("#group_select").append('<option value="post-install">post-install</option>')
 				}
 				if(category == "ncc"){
 					$$("#group_select").empty()
@@ -46,7 +53,7 @@ $def with (checkers,msg="")
 				    $$("#group_select").append('<option value="data_protection_checks">data_protection_checks</option>')
 				    $$("#group_select").append('<option value="hardware_checks">hardware_checks</option>')
 				    $$("#group_select").append('<option value="hypervisor_checks">hypervisor_checks</option>')
-				    //$$("#group_select").append('<option value="network_checks">network_checks</option>')
+				    $$("#group_select").append('<option value="network_checks">network_checks</option>')
 				    $$("#group_select").append('<option value="sar_checks">sar_checks</option>')
 				    $$("#group_select").append('<option value="stargate_checks">stargate_checks</option>')
 				    $$("#group_select").append('<option value="system_checks">system_checks</option>')
@@ -117,6 +124,9 @@ $def with (checkers,msg="")
 		                        }
                                 //document.getElementById('logs').value = data;
                              },
+                                beforeSend: function(){
+                                   jQuery('.loader').css('display','inline-block');
+                               }
                          });
                   }
 		    	
@@ -139,6 +149,7 @@ $def with (checkers,msg="")
 		            	clearInterval(interval);
 		            	fetch_data();
 		                alert(data);
+                        jQuery('.loader').css('display','none');
 		            },
 		        });
 		        var interval = setInterval(function(){fetch_data()},3000);
@@ -308,6 +319,8 @@ $def with (checkers,msg="")
 		            </select>
 		            
 		            <input type="button" id="runnhecks" value="Run" disabled class="btn btn-primary healthCheckBtn runBtn"/>
+                    
+                    <span class="loader"><img src="/static/images/loading.gif" /></span>
 	            </div>
 	            <div class="col-lg-12 col-md-12 col-sm-12 no-padding logArea">
 	            	<!--<textarea id="logs" class="col-lg-12 col-md-12 col-sm-12 logcontainer"></textarea>-->

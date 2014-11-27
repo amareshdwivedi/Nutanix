@@ -46,10 +46,11 @@ for t in threads:
     
 print "Creating healthcheck script..."
 
-import platform
 healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
 'lib_path = ' + "'" + default_install + "'",
 'os.environ["PYTHONPATH"] = lib_path',
+'if not os.path.exists(os.getcwd() + os.path.sep +"reports"):',
+'     os.mkdir("reports")',
 'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"health_check.pyc "',
 'os.system(executable_path+ " ".join(sys.argv[1:]))']
 
@@ -64,9 +65,12 @@ print "Creating webhealthcheck script..."
 webhealthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
 'lib_path = ' + "'" + default_install + "'",
 'os.environ["PYTHONPATH"] = lib_path',
+'cur_dir = os.getcwd()',
+'if not os.path.exists(cur_dir + os.path.sep +"reports"):',
+'     os.mkdir("reports")',
 'os.chdir(lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep)',
-'executable_path="python web_health_check.pyc"',
-'os.system(executable_path+ " ".join(sys.argv[1:]))']
+'executable_path="python web_health_check.pyc 8080 " + cur_dir',
+'os.system(executable_path)']
 
 web_health_check_pyfile=open(default_install+os.path.sep+"webhealthcheck.py","wb")
 for line in webhealthchecklines:
@@ -74,21 +78,25 @@ for line in webhealthchecklines:
 web_health_check_pyfile.close()
 time.sleep(2)
 
+shutil.copy(default_install+os.path.sep+"healthcheck.py",os.path.abspath(os.path.dirname(__file__)))
+shutil.copy(default_install+os.path.sep+"webhealthcheck.py",os.path.abspath(os.path.dirname(__file__)))
+
+if sys.platform.startswith("linux"):
+    os.chmod(os.path.abspath(os.path.dirname(__file__))+os.path.sep+"healthcheck.py",0755)
+    os.chmod(os.path.abspath(os.path.dirname(__file__))+os.path.sep+"webhealthcheck.py",0755)
+
+
 if sys.platform.startswith("win"):
-    import shutil
-    shutil.copy(default_install+os.path.sep+"healthcheck.py",os.path.abspath(os.path.dirname(__file__)))
-    shutil.copy(default_install+os.path.sep+"webhealthcheck.py",os.path.abspath(os.path.dirname(__file__)))
-    #shutil.copy(default_install+os.path.sep+"uninstall.py",os.path.abspath(os.path.dirname(__file__)))
-    
     #add to system path
     print "Setting environment path variable..."
     subprocess.call(['setx','Path','%Path%;'+default_install])
+
 if sys.platform.startswith("linux"):
-    import shutil
-    shutil.move(default_install+os.path.sep+"healthcheck.py","/bin/healthcheck.py")
-    shutil.move(default_install+os.path.sep+"webhealthcheck.py","/bin/webhealthcheck.py")
+    shutil.copy(default_install+os.path.sep+"healthcheck.py","/bin/healthcheck.py")
+    shutil.copy(default_install+os.path.sep+"webhealthcheck.py","/bin/webhealthcheck.py")
     os.chmod("/bin/healthcheck.py",0755)
-    os.chmod("/bin/webhealthcheck.py",0755)  
+    os.chmod("/bin/webhealthcheck.py",0755)
+    
 
 print "Creating uninstall script..."
 

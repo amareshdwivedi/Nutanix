@@ -7,13 +7,13 @@ init()
 
 MSG_WIDTH = 121
 class CheckerResult:
-    def __init__(self, name, authconfig=None, passed=None, message=None, severity=1):
+    def __init__(self, name, authconfig=None, passed=None, message=None, category=None, path=None, expected_result=None):
         self.name = name
         self.passed = passed
         if str(self.passed) in ("True","False"):
             self.passed = passed and "PASS" or "FAIL"
         self.message = message
-        self.severity = severity
+        self.category = category
         if authconfig is not None:
             if self.name == "vc":
                 self.ip = authconfig['vc_ip']
@@ -23,6 +23,8 @@ class CheckerResult:
                 self.user = authconfig['cvm_user']
                 
         self.steps = []
+        self.path = path
+        self.expected_result = expected_result
 
     def add_check_result(self, step):
         self.steps.append(step)
@@ -41,7 +43,27 @@ class CheckerResult:
         all_prop = [ x for x in self.message.split(', ') if x != '']
         for xprop in all_prop:
             xprop,xstatus = xprop.split("#")
-            props.append({"Message":xprop,"Status":xstatus})
+            firstChildEntity = True
+            datacenter = cluster = entity = host = ''           
+            
+            is_hosname_added=False
+            for xzip in zip(self.path.split('.'),xprop.split('=')[0].split('@')[1:]):
+                if xzip[0] == "childEntity":
+                    if firstChildEntity:
+                        datacenter = xzip[1]
+                        firstChildEntity = False
+                    else:
+                        cluster = xzip[1]
+                if xzip[1] != "NoName":
+                    entity = xzip[1].split('[')[0]
+
+                if xzip[0] == "host":
+                    if is_hosname_added == False: #check if host Name is added
+                        is_hosname_added=True
+                        host = xzip[1]
+                        
+            xprop = xprop.replace('NoName.','').replace('NoName','')    
+            props.append({"Message":xprop,"Status":xstatus,"Datacenter":datacenter,"Cluster":cluster,"Host":host, "Entity":entity})
         return props
     
         
@@ -50,12 +72,12 @@ class CheckerResult:
             dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user} 
         elif ',' in self.message:
             self.props = self.prop_dict()
-            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Severity": self.severity}
+            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Category": self.category, "Expected_Result": self.expected_result}
         else:
             try:
-                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "Severity": self.severity, "ip":self.ip, "user":self.user}
+                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "ip":self.ip, "user":self.user}
             except AttributeError:
-                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "Severity": self.severity}
+                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message}
                 
                 
             
@@ -104,7 +126,7 @@ class DefaultConsoleReporter:
         else:
             status = Fore.GREEN+status+Fore.RESET
         
-        self.x.add_row(['\n'.join([message[x:x+MSG_WIDTH] for x in range(0,len(message),MSG_WIDTH)]).ljust(MSG_WIDTH),status])
+        self.x.add_row(['\n'.join([message.replace('NoName@','').replace("NoName",'').replace('@','.')[x:x+MSG_WIDTH] for x in range(0,len(message.replace('NoName.','').replace('NoName','')),MSG_WIDTH)]).ljust(MSG_WIDTH),status])
         self.row_count += 1
     
     def notify_one_line(self,message, status):

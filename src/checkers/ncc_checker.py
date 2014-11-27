@@ -32,10 +32,8 @@ class NCCChecker(CheckerBase):
         self.config_form =  form.Form( 
                 form.Textbox('Server',value=self.authconfig['cvm_ip']), 
                 form.Textbox('User',value=self.authconfig['cvm_user']),
-                form.Password('Password',value=pwd),
-                form.Password('Retype_Password',value=pwd))() 
+                form.Password('Password',value=pwd))() 
         
-        #self.config_form.User = "Ganesh"
     def get_name(self):
         return NCCChecker._NAME_
 

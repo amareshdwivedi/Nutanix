@@ -7,14 +7,12 @@ requires = [
           'reportlab >= 3.1.8',
           'web.py >= 0.37',
           ],
-		  
 setup(
     author='nutanix',
     name='HealthCheck',
     version = '1.0.0',
 	packages=find_packages(),
-    package_data ={'' : ['conf//*.conf','bin//*.sh','bin//*.bat','static//fonts//*.*','static//images//*.*','static//js//*.*','static//styles//*.*','templates//*.*']},
-    exclude_package_data = { '': ['bin//build*.bat'] },
+    package_data ={'' : ['conf//*.conf','static//fonts//*.*','static//images//*.*','static//js//*.*','static//styles//*.*','templates//*.*']},
     install_requires=requires,
     zip_safe=False
       )
