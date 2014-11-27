@@ -239,7 +239,7 @@ class VCChecker(CheckerBase):
         for check_group in check_groups_run:
             
             self.reporter.notify_progress(self.reporter.notify_checkGroup,check_group)
-            
+           
             for check in self.config[check_group]:
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])              
                 if self.category!=None: #condition for category 
@@ -288,7 +288,7 @@ class VCChecker(CheckerBase):
                     pass
                 self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'],check['path'],check['expectedresult']))
                 passed_all = passed_all and passed
-            
+       
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
                     
@@ -512,36 +512,75 @@ class VCChecker(CheckerBase):
         return self.retrieve_vc_property(string.split(path, '.'), self.si, [])
 
 
-        # Manual checks
-    
-    @checkgroup("cluster_checks", "Validate datastore heartbeat", ["availability"],"Heatbeat Datastore Name")
-    def check_datastore_heartbeat(self):
-        path='content.rootFolder.childEntity.hostFolder.childEntity.datastore'
-        datastores = self.get_vc_property(path)
-        heartbeat_datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.heartbeatDatastore')
+
+    # Manual checks
+   
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.ignoreInsufficientHbDatastore",["availability"],"True")
+    def check_cluster_das_ignoreInsufficientHbDatastore(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity'
+        cluster_map = self.get_vc_property(path)
         passed = True
         message = ""
         message_all = ""
-        for cluster, cluster_datastores in datastores.iteritems():
-            if cluster_datastores == 'Not-Configured':
-                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster+"="+"Datastore-Not-Configured (Expected: =True) " , (False and "PASS" or "FAIL"))
-                passed =False
-                message += ", " +cluster+"=Datastore-Not-Configured (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
-                continue
-            
-            try:
-                cluster_heartbeat_datastores = [ds.name for ds in heartbeat_datastores[cluster]]
-            except KeyError:
-                cluster_heartbeat_datastores = []
-               
-            for ds in cluster_datastores:
-                if not fnmatch.fnmatch(ds.name, 'NTNX-*'):
-                    is_heartbeating = ds.name in cluster_heartbeat_datastores
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,cluster+"."+ds.name+"="+str(is_heartbeating) + " (Expected: =True) " , (is_heartbeating and "PASS" or "FAIL"))
-                    passed = passed and is_heartbeating
-                    message += ", " +cluster+"@"+ds.name+"="+str(is_heartbeating) + " (Expected: =True) "+"#"+((is_heartbeating) and "PASS" or "FAIL")
- 
+        for clusters_key, clusters in cluster_map.iteritems():
+            if clusters!="Not-Configured":
+                for cluster in clusters:
+                    cluster_name=cluster.name
+                    if not isinstance(cluster, vim.ClusterComputeResource):
+                        #condition to check if any host attached to datacenter without adding to any cluster
+                        continue
+                    heartbeatDatastoreInfos=cluster.RetrieveDasAdvancedRuntimeInfo.__call__().heartbeatDatastoreInfo
+                    if len(heartbeatDatastoreInfos)>=1:                        
+                        is_option_set=False
+                        for option in cluster.configuration.dasConfig.option:
+                            if option.key=="das.ignoreInsufficientHbDatastore":
+                                print cluster_name , option.value
+                                passed = False
+                                if option.value=='true':
+                                    self.reporter.notify_progress(self.reporter.notify_checkLog,  clusters_key  +'@'+cluster_name+ "=true (Expected: =true)", (True and "PASS" or "FAIL"))
+                                    message += ", "+clusters_key  +'@'+cluster_name+ "=true (Expected: =true)#"+(True and "PASS" or "FAIL")
+                                else:
+                                    self.reporter.notify_progress(self.reporter.notify_checkLog,  clusters_key  +'@'+cluster_name+ "=false (Expected: =true)", (False and "PASS" or "FAIL"))
+                                    message += ", "+clusters_key  +'@'+cluster_name+ "=false (Expected: =true)#"+(False and "PASS" or "FAIL")
+                                is_option_set=True
+                                break
+                            
+                        if is_option_set == False:
+                            passed = False
+                            self.reporter.notify_progress(self.reporter.notify_checkLog,  clusters_key +'@'+cluster_name+ "=Not-Configured (Expected: =true)", (False and "PASS" or "FAIL"))
+                            message += ", "+clusters_key +"=Not-Configured (Expected: =true)#"+(False and "PASS" or "FAIL")
         return passed, message,path
+   
+   
+    
+    @checkgroup("cluster_checks", "Validate Datastore Heartbeat", ["availability"],"Heatbeat Datastore Name")
+    def check_datastore_heartbeat(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity'
+        cluster_map = self.get_vc_property(path)
+        passed = True
+        message = ""
+        message_all = ""
+        for clusters_key, clusters in cluster_map.iteritems():
+            if clusters!="Not-Configured":
+                for cluster in clusters:
+                    cluster_name=cluster.name
+                    if not isinstance(cluster, vim.ClusterComputeResource):
+                        #condition to check if any host attached to datacenter without adding to any cluster
+                        continue
+                    heartbeatDatastoreInfos=cluster.RetrieveDasAdvancedRuntimeInfo.__call__().heartbeatDatastoreInfo
+                    if len(heartbeatDatastoreInfos)==0:
+                        passed = False
+                        self.reporter.notify_progress(self.reporter.notify_checkLog,clusters_key+"@"+cluster_name+"=Not-Configured (Expected: =Datastore Name) " , (False and "PASS" or "FAIL"))
+                        message += ", " +clusters_key+"@"+cluster_name+"=Not-Configured (Expected: =Datastore Name) "+"#"+(False and "PASS" or "FAIL")
+                    else:
+                        datastore_names=[]
+                        for heartbeatDatastoreInfo in heartbeatDatastoreInfos:
+                            datastore_names.append(heartbeatDatastoreInfo.datastore.name)
+                        names=','.join(datastore_names)
+                        self.reporter.notify_progress(self.reporter.notify_checkLog,clusters_key+"@"+cluster_name+"="+names+" (Expected: =Datastore Name) " , (True and "PASS" or "FAIL"))
+                        message += ", " +clusters_key+"@"+cluster_name+"="+names+" (Expected: =Datastore Name) "+"#"+(True and "PASS" or "FAIL")
+        return passed, message,path
+    
     
     @checkgroup("cluster_checks", "VSphere Cluster Nodes in Same Version", ["availability"],"All Nodes in Same Version")
     def check_vSphere_cluster_nodes_in_same_version(self):
@@ -756,31 +795,31 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         return passed_all , message,path
  
-    @checkgroup("cluster_checks", "Cluster Advance Settings das.ignoreInsufficientHbDatastore",["availability"],"True")
-    def check_cluster_das_ignoreInsufficientHbDatastore(self):
-        path='content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option'
-        all_cluster_options = self.get_vc_property(path) or {}
-        clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*ignoreInsufficientHbDatastore].value') or {}
-        message = ""
-        passed_all = True
-        for cluster, options in all_cluster_options.iteritems():
-            passed = True
-            if cluster in clusters_with_given_option.keys():
-                
-                if clusters_with_given_option[cluster] == "true":
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster+"=true (Expected: =true)", (passed and "PASS" or "FAIL"))
-                    message += ", "+cluster +"=true (Expected: =true)#"+(passed and "PASS" or "FAIL")
-                else:
-                    passed = False
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster +"=false (Expected: =true)", (passed and "PASS" or "FAIL"))
-                    message += ", "+cluster +"=false (Expected: =true)#"+(passed and "PASS" or "FAIL")
-            else:
-                passed = False
-                self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + "=Not-Configured (Expected: =true)", (passed and "PASS" or "FAIL"))
-                message += ", "+cluster +"=Not-Configured (Expected: =true)#"+(passed and "PASS" or "FAIL")
-            passed_all = passed_all and passed
-        return passed_all , message,path
-    
+#    @checkgroup("cluster_checks", "Cluster Advance Settings das.ignoreInsufficientHbDatastore",["availability"],"True")
+#     def check_cluster_das_ignoreInsufficientHbDatastore(self):
+#         path='content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option'
+#         all_cluster_options = self.get_vc_property(path) or {}
+#         clusters_with_given_option = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.option[key=das*ignoreInsufficientHbDatastore].value') or {}
+#         message = ""
+#         passed_all = True
+#         for cluster, options in all_cluster_options.iteritems():
+#             passed = True
+#             if cluster in clusters_with_given_option.keys():
+#                 
+#                 if clusters_with_given_option[cluster] == "true":
+#                     self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster+"=true (Expected: =true)", (passed and "PASS" or "FAIL"))
+#                     message += ", "+cluster +"=true (Expected: =true)#"+(passed and "PASS" or "FAIL")
+#                 else:
+#                     passed = False
+#                     self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster +"=false (Expected: =true)", (passed and "PASS" or "FAIL"))
+#                     message += ", "+cluster +"=false (Expected: =true)#"+(passed and "PASS" or "FAIL")
+#             else:
+#                 passed = False
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog,  cluster + "=Not-Configured (Expected: =true)", (passed and "PASS" or "FAIL"))
+#                 message += ", "+cluster +"=Not-Configured (Expected: =true)#"+(passed and "PASS" or "FAIL")
+#             passed_all = passed_all and passed
+#         return passed_all , message,path
+#     
 #     @checkgroup("cluster_checks", "Cluster Advance Settings das.useDefaultIsolationAddress",["availability"],"False")
 #     def check_cluster_das_useDefaultIsolationAddress(self):
 #         path='content.rootFolder.childEntity.hostFolder.childEntity.configuration'
@@ -829,7 +868,7 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         
         return passed_all , message,path_curr
-    
+   
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
     def check_directory_service_set_to_active_directory(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig'
