@@ -198,13 +198,12 @@ def ncc_report(story, checks_list):
 def PDFReportGenerator(resultJson,curdir=None):   
     # Adding timestamp to the report name  
     timestamp = time.strftime("%Y%m%d-%H%M%S")
-    
     # path for generating the report
     if curdir is None:
         pdffilename = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.pdf'
     else:
-        pdffilename =  curdir + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.pdf' 
-        
+        pdffilename =  curdir + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.pdf'   
+
     doc = SimpleDocTemplate(pdffilename, pagesizes=letter, format=landscape, rightMargin=inch / 8, leftMargin=inch / 12, topMargin=inch, bottomMargin=inch / 4)
     story = []
     date = time.strftime("%B %d, %Y")
