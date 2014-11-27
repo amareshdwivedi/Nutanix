@@ -519,13 +519,13 @@ class VCChecker(CheckerBase):
         path='content.rootFolder.childEntity.hostFolder.childEntity.datastore'
         datastores = self.get_vc_property(path)
         heartbeat_datastores = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.configuration.dasConfig.heartbeatDatastore')
-        passed = False
+        passed = True
         message = ""
         message_all = ""
         for cluster, cluster_datastores in datastores.iteritems():
             if cluster_datastores == 'Not-Configured':
-                passed = False
                 self.reporter.notify_progress(self.reporter.notify_checkLog,cluster+"="+"Datastore-Not-Configured (Expected: =True) " , (False and "PASS" or "FAIL"))
+                passed =False
                 message += ", " +cluster+"=Datastore-Not-Configured (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
                 continue
             

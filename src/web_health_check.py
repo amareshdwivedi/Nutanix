@@ -25,7 +25,7 @@ if (len(sys.argv) > 1):
     cur_dir=sys.argv[2]
 else:
     cur_dir = None
-
+    
 urls = (
   '/', 'index'
   #'/(.*)', 'index'
@@ -175,14 +175,7 @@ class index:
                 return f.read()
             except:
                 return True
-     
-    def getCSVFilePath(self,cur_dir=None): 
-        timestamp = time.strftime("%Y%m%d-%H%M%S")  
-        if cur_dir is None:
-            csv_file_name = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'
-        else:
-            csv_file_name =  cur_dir + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'      
-        return csv_file_name
+            
 if __name__ == "__main__":
     web.internalerror = web.debugerror
     app.run()
