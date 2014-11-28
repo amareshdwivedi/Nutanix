@@ -149,7 +149,7 @@ def vc_report(story, checks_list,vCenterIP):
                                                  Paragraph(severity, NormalMessageStyle)])
 
                                      
-            checks_property_table = LongTable(checks_property_data, colWidths=[1 * inch,1.2*inch,1*inch,1.15*inch,3*inch, 0.75 * inch])
+            checks_property_table = LongTable(checks_property_data, colWidths=[1*inch,1.2*inch,1*inch,1.15*inch,2.7*inch,0.65*inch])
             checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (5, 0), colors.fidlightblue),
                                                        ('ALIGN', (0, 0), (5, property_lenght), 'LEFT'),
                                         ('INNERGRID', (0, 0), (5, -1), 0.25, colors.black),

@@ -225,33 +225,39 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     # Start of storage_and_vm Checks 
     if check_name == "VMware Tools Status on VMs":
         if actual_value == "toolsOk":
-            return str(actual_value), False, ''
+            return actual_value, False, ''
         else:
-            return "VMware tools on virtual machine ["+entity+"] is in ["+actual_value+"] status", True, 'info'
+            return "VMware tools on virtual machine ["+entity+"] is in ["+actual_value+"] status", True, 'info'     
         
+    if check_name == "Storage I/O Control of Datastores":
+        if actual_value == "False":
+            return actual_value, False, ''
+        else:
+            return "In Datacenter ["+datacenter+"], Datastore ["+entity+"] has Storage IO [Enabled]", True, 'alert'
+                
     if check_name == "Hardware Acceleration of Datastores":
         if actual_value == "vStorageSupported":
             return 'vStorageSupported', False,''
         elif actual_value == "vStorageUnknown":
-            return "On host ["+host+"] hardware acceleration on datastore ["+entity+"] is  ["+actual_value+"])", True, 'warning'
+            return "On host ["+host+"] hardware acceleration on datastore ["+entity+"] is  ["+actual_value+"]", True, 'warning'
         elif actual_value == "vStorageUnsupported":
-            return "On host ["+host+"] hardware acceleration on datastore ["+entity+"] is  ["+actual_value+"])", True, 'warning'
+            return "On host ["+host+"] hardware acceleration on datastore ["+entity+"] is  ["+actual_value+"]", True, 'warning'
         elif actual_value == "Datastore not attached":
             return 'Datastore not attached', False,''
         else: 
-            return str(actual_value), False, ''  
+            return actual_value, False, ''  
         
         
     # Start of vcenter_server Checks 
     if check_name == "Validate vCenter Server has VMware Tools installed and is up to date":
         if actual_value == "toolsOk":
-            return str(actual_value), False, ''
+            return actual_value, False, ''
         else:
             return "VMware tools on virtual machine ["+entity+"] is in ["+actual_value+"] status", True, 'warning'
         
     if check_name == "vCenter Server Update Manager Installed":
         if actual_value == "VMware vSphere Update Manager extension":
-            return str(actual_value), False, ''
+            return actual_value, False, ''
         elif actual_value == "Not-Configured":
             return "VMware update manager on vCenter Server ["+vCenterServerIP+"] is not installed", True, 'info'
         else:
@@ -259,7 +265,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         
     if check_name == "vCenter Server Statistics Interval":
         if actual_value == "1":
-            return str(actual_value), False, ''
+            return actual_value, False, ''
         elif actual_value == "2":
             return "Interval ["+entity+"] is set to ["+actual_value+"]", True, 'warning'
         elif actual_value == "3":
@@ -360,7 +366,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             elif actual_value=="False":
                 return '[Syslog.global.logDirunique] is set to ['+actual_value+']', True,''
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
         
     if check_name == "Validate the Directory Services Configuration is set to Active Directory":
         if actual_value == "False":
@@ -432,7 +438,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "loadbalance_loadbased":
             return "Load Balancing policy on host ["+host+"] on ["+entity+"] is set to ["+actual_value+"]", True,'warning'                        
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
                 
     if check_name == "Virtual Standard Switch - Network Failover Detection":
         if actual_value == "Not-Configured":
@@ -440,7 +446,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "True":
             return "Network Failover Detection policy on host ["+host+"] on ["+entity+"] is set to ["+actual_value+"]", True,'warning'
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
         
     if check_name == "Virtual Standard Switch - Notify Switches":
         if actual_value == "Not-Configured":
@@ -448,7 +454,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "False":
             return "Notify Switches policy on host ["+host+"] on ["+entity+"] is set to ["+actual_value+"]", True,'warning'
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
         
     if check_name == "Virtual Standard Switch - Failback":
         if actual_value == "Not-Configured":
@@ -456,7 +462,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "False":
             return "Failback policy on host ["+host+"] on ["+entity+"] is set to ["+actual_value+"]", True,'warning'                       
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
         
     if check_name == "Virtual Networking Security(VSS) - Promiscuous Mode":
         if actual_value == "Not-Configured":
@@ -464,7 +470,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "True":
             return "Promiscuous Mode policy on host ["+host+"] on ["+entity+"] is set to ["+actual_value+"]", True,'info'                       
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
 
     if check_name == "Virtual Networking Security(VSS) - MAC Address Changes":
         if actual_value == "Not-Configured":
@@ -472,7 +478,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "True":
             return "MAC Address Changes policy on host ["+host+"] on ["+entity+"] is set to ["+actual_value+"]", True,'info'                       
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
 
     if check_name == "Virtual Networking Security(VSS) - Forged Transmits":
         if actual_value == "Not-Configured":
@@ -480,7 +486,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "True":
             return "Forged Transmits policy on host ["+host+"] on ["+entity+"] is set to ["+actual_value+"]", True,'info'                       
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
         
     if check_name == "Virtual Distributed Switch - Load Balancing":
         if actual_value == "Not-Configured":
@@ -494,7 +500,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "failover_explicit":
             return "Load Balancing policy on VDS ["+entity+"] is set to ["+actual_value+"]", True,'warning'
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
                 
     if check_name == "Virtual Distributed Switch - Network Failover Detection":
         if actual_value == "Not-Configured":
@@ -502,7 +508,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "True":
             return "Network Failover Detection policy on VDS ["+entity+"] is set to ["+actual_value+"]", True,'warning'
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
         
     if check_name == "Virtual Distributed Switch - Notify Switches":
         if actual_value == "Not-Configured":
@@ -510,7 +516,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "False":
             return "Notify Switches policy on VDS ["+entity+"] is set to ["+actual_value+"]", True,'warning'
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
         
     if check_name == "Virtual Distributed Switch - Failback":
         if actual_value == "Not-Configured":
@@ -518,7 +524,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "False":
             return "Failback policy on VDS ["+entity+"] is set to ["+actual_value+"]", True,'warning'                       
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
         
     if check_name == "Virtual Networking Security(VDS) - Promiscuous Mode":
         if actual_value == "Not-Configured":
@@ -526,7 +532,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "True":
             return "Promiscuous Mode policy on VDS ["+entity+"] is set to ["+actual_value+"]", True,'info'                       
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
 
     if check_name == "Virtual Networking Security(VDS) - MAC Address Changes":
         if actual_value == "Not-Configured":
@@ -534,7 +540,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "True":
             return "MAC Address Changes policy on VDS ["+entity+"] is set to ["+actual_value+"]", True,'info'                       
         else:
-            return str(actual_value), False,''
+            return actual_value, False,''
 
     if check_name == "Virtual Networking Security(VDS) - Forged Transmits":
         if actual_value == "Not-Configured":
@@ -542,7 +548,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "True":
             return "Forged Transmits policy on VDS ["+entity+"] is set to ["+actual_value+"]", True,'info'                       
         else:
-            return str(actual_value), False,''        
+            return actual_value, False,''        
     
     if check_name == "Virtual Distributed Switch - Network IO Control":
         if actual_value == "Not-Configured":
@@ -567,4 +573,6 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "MTU size on vSwitch["+entity+"] on host["+host+"] has MTU["+actual_value+"]", False,''                       
         else:
             return "MTU size on vSwitch["+entity+"] on host["+host+"] has MTU["+actual_value+"]", True,'info'
+        
+        
     return str(actual_value), True,'info'
