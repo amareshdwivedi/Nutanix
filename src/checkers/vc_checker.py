@@ -1065,34 +1065,48 @@ class VCChecker(CheckerBase):
     @checkgroup("storage_and_vm_checks", "Hardware Acceleration of Datastores", ["performance"], "Supported")
     def check_vStorageSupport(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity'
-        datacenter_host = self.get_vc_property(path)
+        clusters_object= self.get_vc_property(path)
         message = ""
         pass_all=True
-        for host_domain in datacenter_host.keys():      
-            for ClusterComputeRrc in datacenter_host[host_domain]:
-                # print "\n*******************\nClusterComputeRrc : "+str(ClusterComputeRrc)
-                expected_vStorageSupported="vStorageSupported"
-                try:
-                    datastores=ClusterComputeRrc.environmentBrowser.QueryConfigTarget().datastore
-                    for datastore in datastores:
-                        vStorageSupport=datastore.vStorageSupport
-                        
-                        if fnmatch.fnmatch(datastore.name,"NTNX-local-ds*") :
-                            continue
-                        else:
-                            if (vStorageSupport == expected_vStorageSupported):
-                                message += ", " +host_domain+"@"+ClusterComputeRrc.name+"@"+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")"+"#"+(True and "PASS" or "FAIL")
-                                self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")" , ( True and "PASS" or "FAIL"))
-                            else:
-                                pass_all=False
-                                # To handle None Value
-                                new_vStorageSupport= vStorageSupport if vStorageSupport else "None"
-                                message += ", " +host_domain+"@"+ClusterComputeRrc.name+"@"+datastore.name+"="+new_vStorageSupport + " (Expected: ="+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
-                                self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"."+datastore.name+"="+new_vStorageSupport+ " (Expected: ="+expected_vStorageSupported+")" , ( False and "PASS" or "FAIL"))
+        
+        for dcs_key, clusters in clusters_object.iteritems():
+            if clusters == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
             
-                except AttributeError:
-                    pass_all=False 
-                    message += ", " + host_domain+"@"+ClusterComputeRrc.name+"="+ "DataStore not attached"+ " (Expected: ="+expected_vStorageSupported+")"+"#"+(False and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, host_domain+"."+ClusterComputeRrc.name+"="+ "DataStore not attached"+ " (Expected: ="+expected_vStorageSupported+")", ( False and "PASS" or "FAIL"))
-                     
-        return pass_all, message,path+'.datastore'
+            for cluster in clusters:
+                if not isinstance(cluster, vim.ClusterComputeResource):
+                    #condition to check if host directly attached to cluster
+                    continue
+                
+                cluster_name=cluster.name
+                # Start of Datastore VStorageSupport
+                if cluster.environmentBrowser ==None:
+                    continue 
+                datastore_dict={}
+                datastores=cluster.environmentBrowser.QueryConfigTarget().datastore
+                for datastore in datastores:
+                    datastore_dict[datastore.name]=datastore.vStorageSupport
+                # End of Datastore VStorageSupport
+                
+                # Start of datastore mount to host
+                if cluster.datastore ==None:
+                    #condition to check if any host exist in cluster
+                    continue
+                
+                for cluster_ds in cluster.datastore:
+                    cluster_ds_name=cluster_ds.name
+                    if fnmatch.fnmatch(cluster_ds_name,"NTNX-local-ds*"):
+                        continue
+                    host_mounted_map={} 
+                    for cluster_ds_host_mount in cluster_ds.host:
+                        hostname=cluster_ds_host_mount.key.name
+                        if cluster_ds_host_mount.mountInfo.accessible== True:
+                            #print cluster_name, hostname , cluster_ds_name ,cluster_ds_host_mount.mountInfo.accessible ,datastore_dict[cluster_ds_name]
+                            expected_vStorageSupported="vStorageSupported"
+                            actual_vStorageSupported=datastore_dict[cluster_ds_name]
+                            
+                            message += ", " +dcs_key+"@"+cluster_name+"@"+hostname+"@"+cluster_ds_name+"="+actual_vStorageSupported+ " (Expected: ="+expected_vStorageSupported+")"+"#"+((expected_vStorageSupported == actual_vStorageSupported) and "PASS" or "FAIL")
+                            self.reporter.notify_progress(self.reporter.notify_checkLog,dcs_key+"@"+cluster_name+"@"+hostname+"@"+cluster_ds_name+"="+actual_vStorageSupported+ " (Expected: ="+expected_vStorageSupported+")" , ( (expected_vStorageSupported == actual_vStorageSupported) and "PASS" or "FAIL"))
+                # End of datastore mount to host            
+        return pass_all, message,path+'.host.datastore'
