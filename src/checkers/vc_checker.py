@@ -534,7 +534,7 @@ class VCChecker(CheckerBase):
                         is_option_set=False
                         for option in cluster.configuration.dasConfig.option:
                             if option.key=="das.ignoreInsufficientHbDatastore":
-                                print cluster_name , option.value
+                                #print cluster_name , option.value
                                 passed = False
                                 if option.value=='true':
                                     self.reporter.notify_progress(self.reporter.notify_checkLog,  clusters_key  +'@'+cluster_name+ "=true (Expected: =true)", (True and "PASS" or "FAIL"))
