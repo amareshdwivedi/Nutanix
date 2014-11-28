@@ -294,7 +294,7 @@ def CSVReportGenerator(resultJson,curdir=None):
                         if is_prop_include == False:
                            continue
                        
-                        rows.append([xchecker, xcheck['Name'],prop['Entity'],prop['Datacenter'],prop['Cluster'],xcheck['Expected_Result'],actual_result,xcheck['Category'], severity])
+                        rows.append([xchecker, xcheck['Name'],prop['Entity'],prop['Datacenter'],prop['Cluster'],xcheck['Expected_Result'],actual_result,'|'.join(xcheck['Category']), severity])
                 else:
                     rows.append([xchecker, xcheck['Name'],None,None,None,None,xcheck['Status'],None,None])
         except KeyError:
