@@ -526,6 +526,12 @@ class VCChecker(CheckerBase):
             if clusters!="Not-Configured":
                 for cluster in clusters:
                     cluster_name=cluster.name
+                    
+                    if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            print "skipping "+cluster_name
+                            continue
+                    
                     if not isinstance(cluster, vim.ClusterComputeResource):
                         #condition to check if any host attached to datacenter without adding to any cluster
                         continue
@@ -564,6 +570,12 @@ class VCChecker(CheckerBase):
             if clusters!="Not-Configured":
                 for cluster in clusters:
                     cluster_name=cluster.name
+                    
+                    if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            print "skipping "+cluster_name
+                            continue
+                        
                     if not isinstance(cluster, vim.ClusterComputeResource):
                         #condition to check if any host attached to datacenter without adding to any cluster
                         continue
@@ -592,6 +604,10 @@ class VCChecker(CheckerBase):
             for dc, dcInfo in root.iteritems():
                 for xdc in dcInfo:
                     for xcluster in xdc.hostFolder.childEntity:
+                        if self.authconfig['cluster']!='':
+                            if xcluster.name not in self.authconfig['cluster']:
+                                print "skipping "+xcluster.name
+                                continue
                         passed = True
                         mult_vers_flag, versions = False, [] 
                         hosts = xcluster.host
@@ -630,6 +646,12 @@ class VCChecker(CheckerBase):
                 for cluster in clusters:
                     passed = False
                     cluster_name=cluster.name
+                    
+                    if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            print "skipping "+cluster_name
+                            continue
+                        
                     
                     nics = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity[name='+cluster_name+'].configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
                     cluster_all_ips = []
@@ -690,6 +712,12 @@ class VCChecker(CheckerBase):
                     passed = False
                     cluster_name=cluster.name
                     
+                    if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            print "skipping "+cluster_name
+                            continue
+                        
+                    
                     nics = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity[name='+cluster_name+'].configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
                     cluster_all_ips = []
                     cluster_str = ''
@@ -749,6 +777,12 @@ class VCChecker(CheckerBase):
                 for cluster in clusters:
                     passed = False
                     cluster_name=cluster.name
+                    
+                    if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            print "skipping "+cluster_name
+                            continue
+                        
                     
                     nics = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity[name='+cluster_name+'].configurationEx.dasVmConfig.key[name=NTNX*CVM].guest.net')
                     cluster_all_ips = []
@@ -855,6 +889,7 @@ class VCChecker(CheckerBase):
         passed_all = True
         
         for current_key in current_balance:
+            
             passed = True
             if (current_balance[current_key]<=target_balance[current_key]) and (current_balance[current_key] != -1000) and (target_balance[current_key]!=-1000) and (current_balance[current_key] != "Not-Configured") and (target_balance[current_key]!="Not-Configured") :
                 self.reporter.notify_progress(self.reporter.notify_checkLog,  current_key + "="+str(current_balance[current_key])+" (Expected: <="+str(target_balance[current_key])+" )", ("PASS"))
