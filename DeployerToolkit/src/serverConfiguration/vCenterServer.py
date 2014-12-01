@@ -200,7 +200,7 @@ class VCenterServerConf:
     
     def do_configuration(self):
         #Specify which version to run
-        version = "1.3"
+        version = "1.0"
         print "Running version %s of the Nutanix GSO cluster provisioning script"%(version)
         print "+"+"-"*100+"+"+"\n"
         dc = self.create_datacenter()
