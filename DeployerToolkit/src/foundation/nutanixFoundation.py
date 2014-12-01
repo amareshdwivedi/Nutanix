@@ -30,10 +30,10 @@ class FoundationProvision:
         
         response_code = response.status_code
         if(response_code == 200):
-            print "Foundation is successfully initialised."
-            print "-- Please be patient.  This could take 30-60 minutes --"
+            return None
         elif(response_code == 404):
             print "Foundation Server not reachable"
+            sys.exit(1)
         else:
             print "Error occurred"
             sys.exit(1)
