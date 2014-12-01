@@ -125,4 +125,7 @@ if returncode == 0:
     print "HealthCheck Installation Successfull..."
 
 else:
-    print "Exception occured during installtion process...\nPlease refer install_log for details"        
+    print "Exception occured during installation process..."
+    if sys.platform.startswith("win"):
+        print "Please Check if Microsoft Visual C++ Compiler for Python 2.7 is installed on your machine (Download from - http://aka.ms/vcpython27)" 
+    print "Please refer install_log for details"        
