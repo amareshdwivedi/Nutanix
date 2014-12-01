@@ -10,6 +10,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     actual_value=actual_value.strip()
     exp_value_from_msg=exp_value_from_msg.strip()
     
+    if entity == "host" and actual_value == "Not-Configured":
+        return 'Cluster Skipped', False , ''
+        
     # Start of Cluster Checks
     if check_name == "CPU Compatibility-EVC":
         if actual_value == "None":
