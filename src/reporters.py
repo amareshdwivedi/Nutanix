@@ -69,15 +69,15 @@ class CheckerResult:
         
     def to_dict(self):
         if self.message is None:
-            dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user} 
+            dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user, "Category": self.category} 
         elif ',' in self.message:
             self.props = self.prop_dict()
             dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Category": self.category, "Expected_Result": self.expected_result}
         else:
             try:
-                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "ip":self.ip, "user":self.user}
+                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "ip":self.ip, "user":self.user, "Category": self.category}
             except AttributeError:
-                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message}
+                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message,"Category": self.category}
                 
                 
             

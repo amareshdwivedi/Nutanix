@@ -529,7 +529,7 @@ class VCChecker(CheckerBase):
                     
                     if self.authconfig['cluster']!='':
                         if cluster_name not in self.authconfig['cluster']:
-                            print "skipping "+cluster_name
+                            #print "skipping "+cluster_name
                             continue
                     
                     if not isinstance(cluster, vim.ClusterComputeResource):
@@ -573,7 +573,7 @@ class VCChecker(CheckerBase):
                     
                     if self.authconfig['cluster']!='':
                         if cluster_name not in self.authconfig['cluster']:
-                            print "skipping "+cluster_name
+                            #print "skipping "+cluster_name
                             continue
                         
                     if not isinstance(cluster, vim.ClusterComputeResource):
@@ -606,7 +606,7 @@ class VCChecker(CheckerBase):
                     for xcluster in xdc.hostFolder.childEntity:
                         if self.authconfig['cluster']!='':
                             if xcluster.name not in self.authconfig['cluster']:
-                                print "skipping "+xcluster.name
+                                #print "skipping "+xcluster.name
                                 continue
                         passed = True
                         mult_vers_flag, versions = False, [] 
@@ -649,7 +649,7 @@ class VCChecker(CheckerBase):
                     
                     if self.authconfig['cluster']!='':
                         if cluster_name not in self.authconfig['cluster']:
-                            print "skipping "+cluster_name
+                            #print "skipping "+cluster_name
                             continue
                         
                     
@@ -714,7 +714,7 @@ class VCChecker(CheckerBase):
                     
                     if self.authconfig['cluster']!='':
                         if cluster_name not in self.authconfig['cluster']:
-                            print "skipping "+cluster_name
+                            #print "skipping "+cluster_name
                             continue
                         
                     
@@ -780,7 +780,7 @@ class VCChecker(CheckerBase):
                     
                     if self.authconfig['cluster']!='':
                         if cluster_name not in self.authconfig['cluster']:
-                            print "skipping "+cluster_name
+                            #print "skipping "+cluster_name
                             continue
                         
                     
@@ -932,6 +932,11 @@ class VCChecker(CheckerBase):
             try :
                 for host in datacenter_hosts[datacenter]:
                     try:
+                        host_name=host.name
+                        if self.authconfig['host']!='':
+                            if host_name not in self.authconfig['host']:
+                                #print "skipping host "+host_name
+                                continue
                         ruleset_enable =False
                         service_running = False
                         rulesets=host.configManager.firewallSystem.firewallInfo.ruleset
@@ -975,6 +980,11 @@ class VCChecker(CheckerBase):
                 else:
                     for host in hostObject:
                         passed = True
+                        host_name=host.name
+                        if self.authconfig['host']!='':
+                            if host_name not in self.authconfig['host']:
+                                #print "skipping host "+host_name
+                                continue
                         ntp_servers = host.config.dateTimeInfo.ntpConfig.server
                         ntp_servers_str = ' '.join(ntp_servers)
                         if len(ntp_servers) < 2:
@@ -1136,6 +1146,11 @@ class VCChecker(CheckerBase):
                     host_mounted_map={} 
                     for cluster_ds_host_mount in cluster_ds.host:
                         hostname=cluster_ds_host_mount.key.name
+                        #host_name=host.name
+                        if self.authconfig['host']!='':
+                            if hostname not in self.authconfig['host']:
+                                #print "skipping host "+hostname
+                                continue
                         if cluster_ds_host_mount.mountInfo.accessible== True:
                             #print cluster_name, hostname , cluster_ds_name ,cluster_ds_host_mount.mountInfo.accessible ,datastore_dict[cluster_ds_name]
                             expected_vStorageSupported="vStorageSupported"
