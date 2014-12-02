@@ -105,6 +105,7 @@ class DefaultConsoleReporter:
     
     def notify_checkGroup(self,message):
         print self.name + " : " + "\n++++ Running check group - "+message+" ++++"
+        self.row_count = 0
         
     def notify_checkName(self,message):
         if self.row_count > 0:

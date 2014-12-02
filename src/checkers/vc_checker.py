@@ -236,17 +236,16 @@ class VCChecker(CheckerBase):
         
         passed_all = True
         
-        for check_group in check_groups_run:
-            
+        for check_group in check_groups_run:          
             self.reporter.notify_progress(self.reporter.notify_checkGroup,check_group)
            
             for check in self.config[check_group]:
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])              
+                
                 if self.category!=None: #condition for category 
                     if self.category not in check['category']:
                         continue
                           
-                self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])
                 passed, message = self.validate_vc_property(check['path'], check['operator'], check['ref-value'])
                 try:
                     self.realtime_results = json.load(open("display_json.json","r"))
