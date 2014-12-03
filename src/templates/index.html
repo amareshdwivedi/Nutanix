@@ -19,12 +19,12 @@ $def with (checkers,msg="")
 		jQuery(document).ready(function(){
 			jQuery("#category_select").change(function() {
 				if(jQuery("#category_select").val() == ""){
-					jQuery("#runnhecks").attr('disabled','disabled');
+					jQuery("#runchecks").attr('disabled','disabled');
 					jQuery("#group_select").attr('disabled','disabled');
 					jQuery("#group_select").empty();
 					jQuery("#group_select").append("<option val=''>Select Check Group</option>");
 				}else{
-					jQuery("#runnhecks").removeAttr('disabled');
+					jQuery("#runchecks").removeAttr('disabled');
 					jQuery("#group_select").removeAttr('disabled');
 				}
 				var category = $$("#category_select").val()
@@ -61,7 +61,7 @@ $def with (checkers,msg="")
 				
 			});
 			
-		    jQuery("#runnhecks").click(function() {
+		    jQuery("#runchecks").click(function() {
 		    	
 		    	function fetch_data(){
 		    		cont_run = [];
@@ -148,7 +148,9 @@ $def with (checkers,msg="")
 		            	looping = false;
 		            	clearInterval(interval);
 		            	fetch_data();
-		                alert(data);
+		                //alert(data);
+		                jQuery("#modal_runchecks .runckeckStatus").html(data);
+		                jQuery("#modal_runchecks").modal('show');
                         jQuery('.loader').css('display','none');
 		            },
 		        });
@@ -176,7 +178,8 @@ $def with (checkers,msg="")
 		                data: form_data,
 		                success: function(value) {
 		                    console.log(value)
-		                    alert("Successfully Updated")
+		                    //alert("Successfully Updated")
+		                    jQuery("#modal_config_vc").modal('show');
 		                },
 		            });
 		        }
@@ -191,7 +194,8 @@ $def with (checkers,msg="")
 		                dataType: "json",
 		                data: form_data,
 		                success: function(data) {
-		                    alert("Successfully Updated")
+		                    //alert("Successfully Updated");
+		                    jQuery("#modal_config_ncc").modal('show');
 		                    console.log(data)
 		                },
 		            });
@@ -213,8 +217,10 @@ $def with (checkers,msg="")
 		                success: function(data) {
 		                    console.log(data)
 		                    var status=data["Connection"];
-		                    console.log(status)
-		                    alert("Connection "+status)
+		                    console.log(status);
+		                    jQuery("#modal_connect_vc .connStatus").html( "Connection "+status);
+		                    jQuery("#modal_connect_vc").modal('show');
+		                    //alert("Connection "+status)
 		                },
 		            });
 		        }
@@ -231,8 +237,10 @@ $def with (checkers,msg="")
 		                success: function(data) {
 		                    console.log(data)
 		                    var status=data["Connection"];
-		                    console.log(status)
-		                    alert("Connection "+status)
+		                    console.log(status);
+		                    jQuery("#modal_connect_ncc .connStatus").html( "Connection "+status);
+		                    jQuery("#modal_connect_ncc").modal('show');
+		                    //alert("Connection "+status)
 		                },
 		            });
 		        }
@@ -266,9 +274,42 @@ $def with (checkers,msg="")
 				    			$:checkObject.config_form.render()
 				    		</div>
 				    		<div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formButtonsSec">
-				    			<input type="button" id=$:id1$:checker class="conf btn btn-primary healthCheckBtn" value="Configure" /> 
-				                <input type="button" id=$:id2$:checker class="conn btn btn-primary healthCheckBtn" value="Verify Connection"  />
+				    			<input type="button" data-toggle="modal" data-target=#modal_$:id1$:checker id=$:id1$:checker class="conf btn btn-primary healthCheckBtn" value="Configure" /> 
+				                <input type="button" data-toggle="modal" data-target=#modal_$:id2$:checker id=$:id2$:checker class="conn btn btn-primary healthCheckBtn" value="Verify Connection"  />
 				    		</div>
+				    		<div class="modal fade" id="modal_$:id1$:checker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+							  <div class="modal-dialog">
+							    <div class="modal-content">
+							      <div class="modal-header">
+							        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+							        <h4 class="modal-title" id="myModalLabel">Configuration Status</h4>
+							      </div>
+							      <div class="modal-body">
+							        	Successfully Updated
+							      </div>
+							      <div class="modal-footer">
+							        <button type="button" class="btn btn-primary healthCheckBtn" data-dismiss="modal">Close</button>
+							      </div>
+							    </div>
+							  </div>
+							</div>
+							<div class="modal fade" id="modal_$:id2$:checker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+							  <div class="modal-dialog">
+							    <div class="modal-content">
+							      <div class="modal-header">
+							        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+							        <h4 class="modal-title" id="myModalLabel">Connection Status</h4>
+							      </div>
+							      <div class="modal-body">
+							       <!--  Successfully Updated -->
+							        <div class="connStatus"></div>
+							      </div>
+							      <div class="modal-footer">
+							        <button type="button" class="btn btn-primary healthCheckBtn" data-dismiss="modal">Close</button>
+							      </div>
+							    </div>
+							  </div>
+							</div>
 				    	</form>
 				    </div>
             	</div>
@@ -299,7 +340,7 @@ $def with (checkers,msg="")
 				        </td>
 				    </tr>
 					<tr>
-		    	<td><input type="button" id="runnhecks" value="Run" bgcolor="green"/><td/>
+		    	<td><input type="button" id="runchecks" value="Run" bgcolor="green"/><td/>
 		    	<td></td>
 					</tr>
 				</table> -->
@@ -318,9 +359,25 @@ $def with (checkers,msg="")
 		            	
 		            </select>
 		            
-		            <input type="button" id="runnhecks" value="Run" disabled class="btn btn-primary healthCheckBtn runBtn"/>
+		            <input type="button" data-toggle="modal" data-target="#modal_runchecks" id="runchecks" value="Run" disabled class="btn btn-primary healthCheckBtn runBtn"/>
                     
                     <span class="loader"><img src="/static/images/loading.gif" /></span>
+                    <div class="modal fade" id="modal_runchecks" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+					  <div class="modal-dialog">
+					    <div class="modal-content">
+					      <div class="modal-header">
+					        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					        <h4 class="modal-title" id="myModalLabel">Execution Status</h4>
+					      </div>
+					      <div class="modal-body">
+					        <div class="runckeckStatus"></div>
+					      </div>
+					      <div class="modal-footer">
+					        <button type="button" class="btn btn-primary healthCheckBtn" data-dismiss="modal">Close</button>
+					      </div>
+					    </div>
+					  </div>
+					</div>
 	            </div>
 	            <div class="col-lg-12 col-md-12 col-sm-12 no-padding logArea">
 	            	<!--<textarea id="logs" class="col-lg-12 col-md-12 col-sm-12 logcontainer"></textarea>-->

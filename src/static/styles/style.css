@@ -213,3 +213,7 @@ input[type="text"], input[type="password"], select {background-color: #fff;
 }
 
 .loader{ display:none; margin-left: 10px;}
+.modal-dialog{ width:300px;}
+.modal-header, .modal-footer{ padding:10px 15px;}
+.modal-header h4{ font-size:14px;}
+.modal-header .close{ margin-top:3px;}
