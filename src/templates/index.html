@@ -17,6 +17,23 @@ $def with (checkers,msg="")
     -->
     <script type="text/javascript" >
 		jQuery(document).ready(function(){
+			jQuery("#openPanel").hide();
+			jQuery("#closePanel").click(function() {
+				jQuery("#openPanel").show();
+				jQuery("#closePanel").hide();
+				jQuery("#leftPanel").hide();
+				jQuery("#mainContent").removeClass("col-lg-9 col-md-9 col-sm-9").addClass("col-lg-12 col-md-12 col-sm-12");
+				jQuery(".categorySec").css("margin-top","-35px");
+			});
+			
+			jQuery("#openPanel").click(function() {
+				jQuery("#openPanel").hide();
+				jQuery("#closePanel").show();
+				jQuery("#leftPanel").show();
+				jQuery("#mainContent").removeClass("col-lg-12 col-md-12 col-sm-12").addClass("col-lg-9 col-md-9 col-sm-9");
+				jQuery(".categorySec").css("margin-top","-8px");
+			});
+			
 			jQuery("#category_select").change(function() {
 				if(jQuery("#category_select").val() == ""){
 					jQuery("#runchecks").attr('disabled','disabled');
@@ -261,7 +278,11 @@ $def with (checkers,msg="")
             </div>
         </div>
         <div class="row no-margin nx-main-container">
-            <div class="col-lg-3 col-md-3 col-sm-3 no-padding">
+        	<div class="openClosePanel">
+        		<a href="#." id="openPanel"><img src="/static/images/right_arrow.png" width="25"/> Show Configration Panel</a> 
+        		<a href="#." id="closePanel"><img src="/static/images/left_arrow.png" width="25" /> Hide Configration Panel</a>
+        	</div>
+            <div class="col-lg-3 col-md-3 col-sm-3 no-padding" id="leftPanel">
             	<div class="col-lg-12 col-md-12 col-sm-12 leftSide_area no-margin">
             		$ id1 = "config_"
 				    $ id2 = "connect_"
@@ -345,8 +366,9 @@ $def with (checkers,msg="")
 					</tr>
 				</table> -->
             </div>
-            <div class="col-lg-9 col-md-9 col-sm-9">
+            <div class="col-lg-9 col-md-9 col-sm-9" id="mainContent">
 	            <div class="col-lg-12 col-md-12 col-sm-12 categorySec">
+	            <div class="centerAlign">
 	            	Checker :
 		            <select id="category_select"> 
 		            	<option value="">Select Checker</option>
@@ -362,6 +384,7 @@ $def with (checkers,msg="")
 		            <input type="button" data-toggle="modal" data-target="#modal_runchecks" id="runchecks" value="Run" disabled class="btn btn-primary healthCheckBtn runBtn"/>
                     
                     <span class="loader"><img src="/static/images/loading.gif" /></span>
+                    </div>
                     <div class="modal fade" id="modal_runchecks" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 					  <div class="modal-dialog">
 					    <div class="modal-content">

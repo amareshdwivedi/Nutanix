@@ -172,7 +172,7 @@ body {
     font-size: 11px; padding: 3px 8px;}
 .formButtonsSec{ text-align: right; margin-right:10px; padding: 0;}
 .formTbl table{ width: 100%; font-size: 12px;font-family: 'ProximaNovaSoftRegular'; }
-.connectionForms{ border-bottom: 1px solid #ccc; padding: 5px 0;}
+.connectionForms{ border-bottom: 1px solid #ccc; padding: 5px 0 15px; margin-bottom:10px;}
 input[type="text"], input[type="password"], select {background-color: #fff;
     background-image: none;
     border: 1px solid #ccc;
@@ -193,7 +193,7 @@ input[type="text"], input[type="password"], select {background-color: #fff;
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
     color: #343536; padding:8px 10px;
     display: block;font-size: 11px;}
-.categorySec{ padding: 5px; color:#6f787e; font-size:12px;}
+.categorySec{ padding: 5px; color:#6f787e; font-size:12px; margin-top:-8px;}
 .categorySec select{ width:150px; display:inline-block; margin-right: 15px; margin-top: 10px;}
 .runBtn{ margin-top:-4px;}
 
@@ -217,3 +217,6 @@ input[type="text"], input[type="password"], select {background-color: #fff;
 .modal-header, .modal-footer{ padding:10px 15px;}
 .modal-header h4{ font-size:14px;}
 .modal-header .close{ margin-top:3px;}
+.openClosePanel{ float: left;width:100%; margin-top:10px;}
+.openClosePanel a{ padding:10px 5px; border:1px solid #ccc; border-radius: 0 4px 4px 0; position:relative; z-index:1;}
+.centerAlign{ width: 550px; margin:0 auto}
