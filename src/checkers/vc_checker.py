@@ -404,8 +404,8 @@ class VCChecker(CheckerBase):
         except:
             print "Unknow error"   
         
-#         if hasattr(cur_obj, "name"):
-#             filter_names.append(cur_obj.name)
+        if hasattr(cur_obj, "name"):
+            filter_names.append(cur_obj.name)
 
         if len(xpath) == 1:
             if filter_operator == '=':
