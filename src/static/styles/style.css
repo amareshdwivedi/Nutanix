@@ -217,6 +217,6 @@ input[type="text"], input[type="password"], select {background-color: #fff;
 .modal-header, .modal-footer{ padding:10px 15px;}
 .modal-header h4{ font-size:14px;}
 .modal-header .close{ margin-top:3px;}
-.openClosePanel{ float: left;width:100%; margin-top:10px;}
-.openClosePanel a{ padding:10px 5px; border:1px solid #ccc; border-radius: 0 4px 4px 0; position:relative; z-index:1;}
+.openClosePanel{ float: left;width:100%; margin-top:15px;}
+.openClosePanel a{ padding:5px 5px; border:1px solid #ccc; border-radius: 0 4px 4px 0; position:relative; z-index:1;}
 .centerAlign{ width: 550px; margin:0 auto}
