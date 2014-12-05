@@ -578,4 +578,4 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "MTU size on vSwitch["+entity+"] on host["+host+"] has MTU["+actual_value+"]", True,'info'
         
         
-    return str(actual_value), True,'info'
+    return str(actual_value), False,'info'
