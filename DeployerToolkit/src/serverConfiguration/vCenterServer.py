@@ -8,7 +8,7 @@
 #notes           :
 #python_version  :2.7.8  
 #==============================================================================
-
+#! python
 import atexit,ast
 from pyVim import connect
 from pyVmomi import vim
@@ -184,19 +184,34 @@ class VCenterServerConf:
             print "-- Please be patient.  This could take a few moments --"
             add_host = vim.host.ConnectSpec(hostName=xhost['ip'],userName=xhost['user'],password=xhost['pwd'],sslThumbprint=sslThumbprint)
             try:
-                taskid = cluster.AddHost(add_host,asConnected=True)
+                task = cluster.AddHost(add_host,asConnected=True)
             except:
                 print "Unexpected error:", sys.exc_info()[0]
                 sys.exit(2)
 
             #Loop till host is getting connected // Write proper logic
-            for i in range(15):
-                print ".",
-                time.sleep(1)
-
+            self.wait_for_task(task)
             print "\n[ Host successfully added! ]"
             print "+"+"-"*100+"+"+"\n"
         return True
+
+    def wait_for_task(self,task,actionName="Job",hideResult=False):
+        while task.info.state == vim.TaskInfo.State.running:
+            time.sleep(2)
+    
+        if task.info.state == vim.TaskInfo.State.success:
+            if task.info.result is not None and not hideResult:
+                out = '%s completed successfully, result: %s' % (actionName, task.info.result)
+                print out
+            else:
+                out = '%s completed successfully.' % actionName
+                print out
+        else:
+            out = '%s did not complete successfully: %s' % (actionName, task.info.error)
+            raise task.info.error
+            print out
+
+        return task.info.result
     
     def do_configuration(self):
         #Specify which version to run
@@ -251,10 +266,10 @@ class VCenterServerConf:
         #Reconfigure cluster with above configuration
         print "+"+"-"*100+"+"+"\n"
         task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
-        print "Reconfigure cluster for Health Check Properties"
-
+        print "Reconfigured cluster for Health Check Properties"
+        self.wait_for_task(task)
+        
         #Reconfigure Host Properties
-
         #Confirm all ESXi hosts in the cluster has a 'connected' status.
         cluster_hosts = clusterObj.host
         for xhost in cluster_hosts:
@@ -263,8 +278,6 @@ class VCenterServerConf:
 
         print "+"+"-"*100+"+"+"\n"
         self.add_host(newc)
-        
-        #print "+"+"-"*100+"+"+"\n"
         self.disConnectVC()
 
         '''
