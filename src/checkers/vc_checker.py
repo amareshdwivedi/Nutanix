@@ -404,8 +404,8 @@ class VCChecker(CheckerBase):
         except:
             print "Unknow error"   
         
-#         if hasattr(cur_obj, "name"):
-#             filter_names.append(cur_obj.name)
+        if hasattr(cur_obj, "name"):
+            filter_names.append(cur_obj.name)
 
         if len(xpath) == 1:
             if filter_operator == '=':
@@ -1159,3 +1159,46 @@ class VCChecker(CheckerBase):
                             self.reporter.notify_progress(self.reporter.notify_checkLog,dcs_key+"@"+cluster_name+"@"+hostname+"@"+cluster_ds_name+"="+actual_vStorageSupported+ " (Expected: ="+expected_vStorageSupported+")" , ( (expected_vStorageSupported == actual_vStorageSupported) and "PASS" or "FAIL"))
                 # End of datastore mount to host            
         return pass_all, message,path+'.host.datastore'
+    
+    
+    @checkgroup("storage_and_vm_checks", "Check if USB device is listed on VM virtual hardware", ["performance"], "False")
+    def check_vStorageSupport(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.hardware.device'
+        vms_virtual_hardware= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vms_key, vms_vDevice in vms_virtual_hardware.iteritems():
+            if vms_vDevice == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            usb_found=False
+            for device in vms_vDevice:
+                if isinstance(device, vim.vm.device.VirtualUSB):
+                    usb_found=True
+                    break
+            message += ", " +vms_key+"="+str(usb_found) + " (Expected: =false)"+"#"+(not usb_found and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(usb_found) + " (Expected: =false)", (not usb_found and "PASS" or "FAIL"))
+                         
+        return pass_all, message,path
+    
+    @checkgroup("storage_and_vm_checks", "Check if RS-232 Serial Port is listed on VM virtual hardware ", ["performance"], "False")
+    def check_vStorageSupport(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.hardware.device'
+        vms_virtual_hardware= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vms_key, vms_vDevice in vms_virtual_hardware.iteritems():
+            if vms_vDevice == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            serial_found=False
+            for device in vms_vDevice:
+                if isinstance(device, vim.vm.device.VirtualSerialPort):
+                    serial_found=True
+                    break
+            message += ", " +vms_key+"="+str(serial_found) + " (Expected: =false)"+"#"+(not serial_found and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(serial_found) + " (Expected: =false)", (not serial_found and "PASS" or "FAIL"))
+                         
+        return pass_all, message,path
