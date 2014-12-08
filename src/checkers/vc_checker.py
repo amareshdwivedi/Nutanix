@@ -1,3 +1,4 @@
+from bdb import effective
 __author__ = 'subash atreya'
 from requests.exceptions import ConnectionError
 import string
@@ -1042,6 +1043,29 @@ class VCChecker(CheckerBase):
                         self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
                     message += ", "+"vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " +"#"+((toolsStatus == toolsStatus_expected) and "PASS" or "FAIL")
                     break
+         
+        return passed,message,''
+    #{"name" : "vCenter Server Plugins", "path" : "content.extensionManager.extensionList.description.key", "operator":"=", "ref-value": "", "category": ["security"],"expectedresult": "Plugin is Registered"}
+    @checkgroup("vcenter_server_checks", "VCenter Server Plugins",["performance"],"List of plugins")
+    def check_vcenter_server_plugins(self):
+        vcenter_plugins_map = self.get_vc_property('content.extensionManager.extensionList')
+               
+        message = ""
+        passed = True
+        plug_list=[]
+        for key, plugins in vcenter_plugins_map.iteritems():
+            if plugins ==None:
+                continue
+            for plugin in plugins:
+                plug_list.append(plugin.description.label)
+            
+        if len(plug_list) > 0:
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= [" + ','.join(plug_list) + "] (Expected: =Plugin List)" , (True and "PASS" or "FAIL"))
+            message += ", "+"License Expiration Validation = " + ','.join(plug_list) + " (Expected: =Plugin List) "+"#"+((True) and "PASS" or "FAIL")
+        else:
+            passed = False
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= Plugins-Not-Found (Expected: =Plugin List)" , (False and "PASS" or "FAIL"))
+            message += ", "+"License Expiration Validation = Plugins-Not-Found (Expected: =Plugin List) "+"#"+((False) and "PASS" or "FAIL")
          
         return passed,message,''
     
