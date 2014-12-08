@@ -1060,8 +1060,8 @@ class VCChecker(CheckerBase):
                 plug_list.append(plugin.description.label)
             
         if len(plug_list) > 0:
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= [" + ','.join(plug_list) + "] (Expected: =Plugin List)" , (True and "PASS" or "FAIL"))
-            message += ", "+"License Expiration Validation = " + ','.join(plug_list) + " (Expected: =Plugin List) "+"#"+((True) and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= [" + ','.join(set(plug_list)) + "] (Expected: =Plugin List)" , (True and "PASS" or "FAIL"))
+            message += ", "+"License Expiration Validation = " + ','.join(set(plug_list)) + " (Expected: =Plugin List) "+"#"+((True) and "PASS" or "FAIL")
         else:
             passed = False
             self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= Plugins-Not-Found (Expected: =Plugin List)" , (False and "PASS" or "FAIL"))
