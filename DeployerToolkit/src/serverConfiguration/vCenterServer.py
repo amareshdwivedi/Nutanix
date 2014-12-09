@@ -105,7 +105,7 @@ class VCenterServerConf:
                 if clust.name == cName:
                     return clust
         return None
-
+    
     def create_cluster(self, datacenter):
         cName,reuseAction = self.confDetails['cluster'],self.confDetails['cluster_reuse_if_exist']
         
@@ -197,7 +197,7 @@ class VCenterServerConf:
 
     def wait_for_task(self,task,actionName="Job",hideResult=False):
         while task.info.state == vim.TaskInfo.State.running:
-            time.sleep(2)
+            time.sleep(1)
     
         if task.info.state == vim.TaskInfo.State.success:
             if task.info.result is not None and not hideResult:
@@ -213,6 +213,16 @@ class VCenterServerConf:
 
         return task.info.result
     
+        
+    def get_all_vms(self,dCenter):
+        vms = []
+        for child in self.si.content.rootFolder.childEntity:
+            if hasattr(child, 'vmFolder') and child.name == dCenter.name:
+                container = self.si.content.viewManager.CreateContainerView(child, [vim.VirtualMachine], True)
+                vms = [ vm for vm in container.view]
+        return vms
+
+    
     def do_configuration(self):
         #Specify which version to run
         version = "1.0"
@@ -222,46 +232,74 @@ class VCenterServerConf:
         print "+"+"-"*100+"+"+"\n"
         newc = self.create_cluster(dc)
         print "+"+"-"*100+"+"+"\n"
-        #Enable HA For a cluster
+        
+        #Add hosts to the cluster :
+        self.add_host(newc)
+        print "+"+"-"*100+"+"+"\n"
+
         clusterObj = self.get_cluster(dc,self.confDetails['cluster'])
         clusterSpec = vim.cluster.ConfigSpec()
         
-        #cluster parameters
-        #possible values :vmDirectory/hostLocal/inherit
-        newc.configurationEx.vmSwapPlacement = "hostLocal"
-
         #dasConfig
         print "Configuring vSphere HA"
-        dasconfig = vim.cluster.DasConfigInfo()
-        dasconfig.dynamicType = ""
-        dasconfig.enabled = True
-        dasconfig.hostMonitoring = "enabled"
-        dasconfig.admissionControlEnabled = True
-        dasconfig.vmMonitoring = "vmMonitoringDisabled"
-        clusterSpec.dasConfig = dasconfig
-
+        dasConfig = vim.cluster.DasConfigInfo()
+        dasConfig.dynamicType = ""
+        dasConfig.enabled = True
+        #dasConfig.hostMonitoring = "enabled"
+        dasConfig.admissionControlEnabled = True
+        dasConfig.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
+        clusterSpec.dasConfig = dasConfig
         #dasVmConfig
-        dasVmConfig = vim.cluster.DasVmConfigInfo()
-        dasVmConfig.restartPriority = "enabled"
-        #clusterSpec.dasVmConfigSpec = dasVmConfig
+        settings = []
+        vms = self.get_all_vms(dc)
+        for xvm in vms:
+            dasVmConfigSpec = vim.cluster.DasVmConfigSpec()
+            dasVmConfigSpec.operation = vim.option.ArrayUpdateSpec.Operation.add
 
+            dasVmConfigInfo = vim.cluster.DasVmConfigInfo()
+            dasVmConfigInfo.key = vms[0]
+            dasVmConfigInfo.restartPriority = vim.cluster.DasVmConfigInfo.Priority.disabled
+            
+            vm_settings = vim.cluster.DasVmSettings()
+            vm_settings.restartPriority = vim.cluster.DasVmSettings.RestartPriority.disabled
+            monitor = vim.cluster.VmToolsMonitoringSettings()
+            monitor.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
+            monitor.clusterSettings = False
+            vm_settings.vmToolsMonitoringSettings = monitor
+            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.none
+            dasVmConfigInfo.dasSettings = vm_settings
+            dasVmConfigSpec.info = dasVmConfigInfo
+            
+            settings.append(dasVmConfigSpec)
+        clusterSpec.dasVmConfigSpec = settings
+        
         #drsConfig
         print "+"+"-"*100+"+"+"\n"
         print "Configuring vSphere DRS"
         drsConfig = vim.cluster.DrsConfigInfo()
         drsConfig.enabled = True
         #possible values : fullyAutomated/manual/partiallyAutomated
-        drsConfig.defaultVmBehavior = "fullyAutomated"
+        drsConfig.defaultVmBehavior = vim.cluster.DrsConfigInfo.DrsBehavior.fullyAutomated
         clusterSpec.drsConfig = drsConfig
 
         #drsVmConfig
-        clusterSpec_ex = vim.cluster.ConfigSpecEx()
-        drsVmConfig = vim.cluster.DrsVmConfigInfo()
-        drsVmConfig.enabled = True
-        drsVmConfigSpec = vim.cluster.DrsVmConfigSpec()
-        drsVmConfigSpec.info = drsVmConfig
-        for vm in clusterSpec_ex.drsVmConfigSpec:
-            vm.drsVmConfigSpec = drsVmConfigSpec
+        settings = []
+        vms = self.get_all_vms(dc)
+        for xvm in vms:
+            drsVmConfigSpec = vim.cluster.DrsVmConfigSpec()
+            drsVmConfigSpec.operation = vim.option.ArrayUpdateSpec.Operation.add
+
+            drsVmConfigInfo = vim.cluster.DrsVmConfigInfo()
+            drsVmConfigInfo.key = xvm
+            drsVmConfigInfo.enabled = False
+            drsVmConfigInfo.behavior = vim.cluster.DrsConfigInfo.DrsBehavior.partiallyAutomated
+            
+            drsVmConfigSpec.info = drsVmConfigInfo
+            settings.append(drsVmConfigSpec)
+        clusterSpec.drsVmConfigSpec = settings
+
+        #dpmConfigSpec
+        
         
         #Reconfigure cluster with above configuration
         print "+"+"-"*100+"+"+"\n"
@@ -270,6 +308,29 @@ class VCenterServerConf:
         self.wait_for_task(task)
         
         #Reconfigure Host Properties
+        #START
+        #ESXi Checks
+        '''
+        #1 host - set hyperthreading enabled 
+        #https://github.com/vmware/pyvmomi/blob/master/docs/vim/host/ConfigInfo.rst
+        vim.host.ConfigInfo
+        
+        #2. host - set power management information
+        vim.host.ConfigInfo
+        
+        #3. host - set ntp client to enabled
+        vim.host.ConfigInfo
+        
+        #4. Configure ntp servers
+
+        #5. dns & Routing settings-
+        #https://github.com/vmware/pyvmomi/blob/master/docs/vim/host/NetworkInfo.rst
+
+        #6. Authentication inforamtion -
+        #https://github.com/vmware/pyvmomi/blob/master/docs/vim/host/AuthenticationManagerInfo.rst
+        '''
+        #END
+        
         #Confirm all ESXi hosts in the cluster has a 'connected' status.
         cluster_hosts = clusterObj.host
         for xhost in cluster_hosts:
@@ -277,7 +338,6 @@ class VCenterServerConf:
                 xhost.ReconnectHost_Task()
 
         print "+"+"-"*100+"+"+"\n"
-        self.add_host(newc)
         self.disConnectVC()
 
         '''
