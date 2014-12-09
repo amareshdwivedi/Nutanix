@@ -903,6 +903,37 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         
         return passed_all , message,path_curr
+    
+    @checkgroup("cluster_checks", "Storage DRS",["performance"],"false")
+    def check_cluster_storgae_drs(self):
+        path_curr='content.rootFolder.childEntity.datastoreFolder.childEntity'
+        storage_clusters_map = self.get_vc_property(path_curr)
+        
+        message = ""
+        passed_all = True
+        
+        for datacenter, storage_clusters in storage_clusters_map.iteritems():
+            passed = True
+            if storage_clusters == "Not-Configured":
+                continue
+            storage_clusters_found=False
+            for storage_cluster in storage_clusters:
+                
+                if isinstance(storage_cluster, vim.StoragePod):
+                    storage_clusters_found=True
+                    storage_cluster_name=storage_cluster.name
+                    storage_drs= storage_cluster.podStorageDrsEntry.storageDrsConfig.podConfig.enabled
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+storage_cluster_name+ "="+str(storage_drs)+" (Expected: =false)", ((not storage_drs) and "PASS" or "FAIL"))
+                    message += ", "+datacenter +"@"+storage_cluster_name+ "="+str(storage_drs)+" (Expected: =false)#"+((not storage_drs) and "PASS" or "FAIL")            
+                        
+            if storage_clusters_found == False:
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "=Storage-Cluster-not-found (Expected: =false)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter + "=No-Storage-Cluster-found (Expected: =false)#"+(False and "PASS" or "FAIL")
+                passed=False
+              
+            passed_all = passed_all and passed
+        
+        return passed_all , message,path_curr
    
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
     def check_directory_service_set_to_active_directory(self):
