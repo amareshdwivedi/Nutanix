@@ -1,3 +1,4 @@
+from bdb import effective
 __author__ = 'subash atreya'
 from requests.exceptions import ConnectionError
 import string
@@ -902,6 +903,37 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         
         return passed_all , message,path_curr
+    
+    @checkgroup("cluster_checks", "Storage DRS",["performance"],"false")
+    def check_cluster_storgae_drs(self):
+        path_curr='content.rootFolder.childEntity.datastoreFolder.childEntity'
+        storage_clusters_map = self.get_vc_property(path_curr)
+        
+        message = ""
+        passed_all = True
+        
+        for datacenter, storage_clusters in storage_clusters_map.iteritems():
+            passed = True
+            if storage_clusters == "Not-Configured":
+                continue
+            storage_clusters_found=False
+            for storage_cluster in storage_clusters:
+                
+                if isinstance(storage_cluster, vim.StoragePod):
+                    storage_clusters_found=True
+                    storage_cluster_name=storage_cluster.name
+                    storage_drs= storage_cluster.podStorageDrsEntry.storageDrsConfig.podConfig.enabled
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+storage_cluster_name+ "="+str(storage_drs)+" (Expected: =false)", ((not storage_drs) and "PASS" or "FAIL"))
+                    message += ", "+datacenter +"@"+storage_cluster_name+ "="+str(storage_drs)+" (Expected: =false)#"+((not storage_drs) and "PASS" or "FAIL")            
+                        
+            if storage_clusters_found == False:
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "=Storage-Cluster-not-found (Expected: =false)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter + "=No-Storage-Cluster-found (Expected: =false)#"+(False and "PASS" or "FAIL")
+                passed=False
+              
+            passed_all = passed_all and passed
+        
+        return passed_all , message,path_curr
    
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
     def check_directory_service_set_to_active_directory(self):
@@ -1042,6 +1074,29 @@ class VCChecker(CheckerBase):
                         self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
                     message += ", "+"vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " +"#"+((toolsStatus == toolsStatus_expected) and "PASS" or "FAIL")
                     break
+         
+        return passed,message,''
+    #{"name" : "vCenter Server Plugins", "path" : "content.extensionManager.extensionList.description.key", "operator":"=", "ref-value": "", "category": ["security"],"expectedresult": "Plugin is Registered"}
+    @checkgroup("vcenter_server_checks", "VCenter Server Plugins",["performance"],"List of plugins")
+    def check_vcenter_server_plugins(self):
+        vcenter_plugins_map = self.get_vc_property('content.extensionManager.extensionList')
+               
+        message = ""
+        passed = True
+        plug_list=[]
+        for key, plugins in vcenter_plugins_map.iteritems():
+            if plugins ==None:
+                continue
+            for plugin in plugins:
+                plug_list.append(plugin.description.label)
+            
+        if len(plug_list) > 0:
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= [" + ','.join(set(plug_list)) + "] (Expected: =Plugin List)" , (True and "PASS" or "FAIL"))
+            message += ", "+"License Expiration Validation = " + ','.join(set(plug_list)) + " (Expected: =Plugin List) "+"#"+((True) and "PASS" or "FAIL")
+        else:
+            passed = False
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= Plugins-Not-Found (Expected: =Plugin List)" , (False and "PASS" or "FAIL"))
+            message += ", "+"License Expiration Validation = Plugins-Not-Found (Expected: =Plugin List) "+"#"+((False) and "PASS" or "FAIL")
          
         return passed,message,''
     
