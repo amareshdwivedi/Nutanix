@@ -257,7 +257,21 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return 'Datastore not attached', False,''
         else: 
             return actual_value, False, ''  
-        
+    if check_name == "USB device not connected to VM":
+        if status == "FAIL":
+            return "Virtual machine ["+entity+"] has connected USB device",True,"info"
+        else:
+            return "Virtual machine ["+entity+"] has disconnected USB device",False,"info"
+    if check_name == "RS-232 Serial Port not connected to VM":
+        if status == "FAIL":
+            return "Virtual machine ["+entity+"] has connected serial port device",True,"info"
+        else:
+            return "Virtual machine ["+entity+"] has disconnected serial port device",False,"info"
+    if check_name == "CD-ROM not connected to VM":
+        if status == "FAIL":
+            return "Virtual machine ["+entity+"] has connected CD-ROM device",True,"info"
+        else:
+            return "Virtual machine ["+entity+"] has disconnected CD-ROM device",False,"info"
         
     # Start of vcenter_server Checks 
     if check_name == "Validate vCenter Server has VMware Tools installed and is up to date":

@@ -1292,8 +1292,8 @@ class VCChecker(CheckerBase):
         return pass_all, message,path+'.host.datastore'
     
     
-    @checkgroup("storage_and_vm_checks", "Check if USB device is listed on VM virtual hardware", ["performance"], "False")
-    def check_vStorageSupport(self):
+    @checkgroup("storage_and_vm_checks", "USB device not connected to VM", ["manageability","reliability"], "false")
+    def check_usb_disabled(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.hardware.device'
         vms_virtual_hardware= self.get_vc_property(path)
         message = ""
@@ -1306,15 +1306,15 @@ class VCChecker(CheckerBase):
             usb_found=False
             for device in vms_vDevice:
                 if isinstance(device, vim.vm.device.VirtualUSB):
-                    usb_found=True
+                    usb_found=device.connectable.connected
+                    message += ", " +vms_key+"="+str(usb_found) + " (Expected: =false)"+"#"+(usb_found and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(usb_found) + " (Expected: =false)", (usb_found and "PASS" or "FAIL"))
                     break
-            message += ", " +vms_key+"="+str(usb_found) + " (Expected: =false)"+"#"+(not usb_found and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(usb_found) + " (Expected: =false)", (not usb_found and "PASS" or "FAIL"))
                          
         return pass_all, message,path
     
-    @checkgroup("storage_and_vm_checks", "Check if RS-232 Serial Port is listed on VM virtual hardware ", ["performance"], "False")
-    def check_vStorageSupport(self):
+    @checkgroup("storage_and_vm_checks", "RS-232 Serial Port not connected to VM", ["manageability","reliability"], "false")
+    def check_rs232_serial_port_disabled(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.hardware.device'
         vms_virtual_hardware= self.get_vc_property(path)
         message = ""
@@ -1327,9 +1327,30 @@ class VCChecker(CheckerBase):
             serial_found=False
             for device in vms_vDevice:
                 if isinstance(device, vim.vm.device.VirtualSerialPort):
-                    serial_found=True
+                    serial_found= device.connectable.connected
+                    message += ", " +vms_key+"="+str(serial_found) + " (Expected: =false)"+"#"+(( not serial_found) and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(serial_found) + " (Expected: =false)", ((not serial_found) and "PASS" or "FAIL"))
                     break
-            message += ", " +vms_key+"="+str(serial_found) + " (Expected: =false)"+"#"+(not serial_found and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(serial_found) + " (Expected: =false)", (not serial_found and "PASS" or "FAIL"))
+            
                          
+        return pass_all, message,path
+    
+    @checkgroup("storage_and_vm_checks", "CD-ROM not connected to VM",["manageability","reliability"], "false")
+    def check_rs232_cdrom_disabled(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.hardware.device'
+        vms_virtual_hardware= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vms_key, vms_vDevice in vms_virtual_hardware.iteritems():
+            if vms_vDevice == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            serial_found=False
+            for device in vms_vDevice:
+                if isinstance(device, vim.vm.device.VirtualSerialPort):
+                    serial_found= device.connectable.connected
+                    message += ", " +vms_key+"="+str(serial_found) + " (Expected: =false)"+"#"+(( not serial_found) and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(serial_found) + " (Expected: =false)", ((not serial_found) and "PASS" or "FAIL"))
+                    break     
         return pass_all, message,path
