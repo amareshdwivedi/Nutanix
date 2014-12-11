@@ -1,3 +1,4 @@
+from __future__ import division
 from bdb import effective
 __author__ = 'subash atreya'
 from requests.exceptions import ConnectionError
@@ -16,6 +17,7 @@ from security import Security
 from colorama import Fore
 import web
 from web import form
+
 
 def exit_with_message(message):
     print message
@@ -934,7 +936,81 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         
         return passed_all , message,path_curr
-   
+    
+    @checkgroup("cluster_checks", "Number of DRS Faults",["performance"],"No. of Faults")
+    def check_cluster_drs_fault_count(self):
+        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.drsFault'
+        clusters_map = self.get_vc_property(path_curr)
+        
+        message = ""
+        passed_all = True
+        
+        for datacenter, clusters_drf_faults in clusters_map.iteritems():
+            
+            if clusters_drf_faults == "Not-Configured":
+                continue
+            
+            count=len(clusters_drf_faults) if clusters_drf_faults !=None else 0                
+            self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "="+str(count)+" (Expected: =0)", ((True if count ==0 else False) and "PASS" or "FAIL"))
+            message += ", "+datacenter + "="+str(count)+" (Expected: =0)#"+((True if count ==0 else False) and "PASS" or "FAIL") 
+            passed = (True if count ==0 else False)
+            passed_all = passed_all and passed
+        
+        return passed_all , message,path_curr
+    
+    @checkgroup("cluster_checks", "Cluster Memory utilization %",["performance"],"memory consumed %")
+    def check_cluster_memory_utilization(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.summary'
+        clusters_summary = self.get_vc_property(path)
+        message = ""
+        passed_all = True
+         
+        for clusters_key, clusters_summ in clusters_summary.iteritems():
+             
+            passed = True
+            effectiveMemory =clusters_summ.effectiveMemory
+            totalMemory=clusters_summ.totalMemory
+            
+            if totalMemory > 0:
+                effectiveMemory_to_bytes= effectiveMemory* 1000000 # converting to bytes
+                cpu_utilization_percentage= round((effectiveMemory_to_bytes*100)/totalMemory,2)
+                self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key + "="+str(cpu_utilization_percentage)+"% (Expected: =memory-consumed-%)", (True and "PASS" or "FAIL"))
+                message += ", "+clusters_key + "="+str(cpu_utilization_percentage)+"% (Expected: =memory-consumed-%)#"+(True and "PASS" or "FAIL")
+             
+            passed_all = passed_all and passed
+        return passed_all , message,path
+    
+    @checkgroup("cluster_checks", "Cluster Memory Overcommitment",["performance"],"memory oversubscrption %")
+    def check_cluster_memory_overcommitment(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity'
+        clusters_map= self.get_vc_property(path)
+        message = ""
+        passed_all = True
+         
+        for clusters_key, clusters in clusters_map.iteritems():
+            passed = True
+            
+            for cluster in clusters:
+                cluster_name= cluster.name
+                cluster_total_memory=cluster.summary.totalMemory
+                vRam=0
+                for host in cluster.host:
+                    for vm in host.vm:
+                        vRam+=vm.summary.config.memorySizeMB
+                
+                vRam=vRam*1000000
+                if cluster_total_memory >0:
+                    
+                    #cluster_total_memory=(cluster_total_memory/1024)/1024
+                    memory_overcommitment=round((vRam/cluster_total_memory),2) 
+                    memory_overcommitment_percentage= (memory_overcommitment*100)%100
+                    print   cluster_name,   cluster_total_memory , vRam , memory_overcommitment, memory_overcommitment_percentage
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)", (True and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)#"+(True and "PASS" or "FAIL")
+                    
+        passed_all = passed_all and passed
+        return passed_all , message,path
+    
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
     def check_directory_service_set_to_active_directory(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig'

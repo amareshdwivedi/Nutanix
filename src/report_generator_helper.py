@@ -197,7 +197,15 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "VSphere Cluster Nodes in multiple version ["+actual_value+"]", True, "warning"
         elif status == "PASS":
             return "VSphere Cluster Nodes in same version ["+actual_value+"]", False, ''
-        
+    
+    if check_name =="Number of DRS Faults":
+        return "Cluster["+cluster+"] | Number of DRS faults are "+actual_value, True, ''
+    if check_name =="Cluster Memory utilization %":
+        return "Cluster["+cluster+"] | memory consumed is "+actual_value, True, ''
+    if check_name =="Cluster Memory Overcommitment":
+        return "Cluster["+cluster+"] | memory oversubscrption is "+actual_value, True, ''
+    
+    # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
         if actual_value == "Not-Configured":
             return 'Not-Configured', False, ''
