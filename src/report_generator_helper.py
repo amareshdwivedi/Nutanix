@@ -259,6 +259,22 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return actual_value, False, ''  
         
         
+    if check_name ==  "VM Ballooned Memory":
+        if actual_value == "Not-Configured":
+            return actual_value, False, ''
+        elif actual_value == "0":
+            return actual_value, False, '' 
+        else :
+            return "On virtual machine ["+entity+"] ballooned memory is ["+actual_value+"] MB", True , 'alert'
+     
+    if check_name ==  "VM Swapped Memory":
+        if actual_value == "Not-Configured":
+            return actual_value, False, ''
+        elif actual_value == "0":
+            return actual_value, False, '' 
+        else :
+            return "On virtual machine ["+entity+"] swapped memory is ["+actual_value+"] MB", True , 'alert'        
+        
     # Start of vcenter_server Checks 
     if check_name == "Validate vCenter Server has VMware Tools installed and is up to date":
         if actual_value == "toolsOk":
