@@ -1043,7 +1043,7 @@ class VCChecker(CheckerBase):
                 vCPU=0
                 for host in cluster.host:
                     for vm in host.vm:
-                        vCPU+=vm.summary.config.numCpu
+                        vCPU+= 0 if vm.summary.config.numCpu == None else vm.summary.config.numCpu
                         
                 
                 if pCPU >0:
