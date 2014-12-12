@@ -199,19 +199,25 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "VSphere Cluster Nodes in same version ["+actual_value+"]", False, ''
     
     if check_name =="Number of DRS Faults":
-        return "Cluster["+cluster+"] | Number of DRS faults are "+actual_value, True, ''
+        return "On Cluster["+cluster+"] | Number of DRS faults are ["+actual_value+"]", True, ''
+    
     if check_name =="Cluster Memory utilization %":
-        return "Cluster["+cluster+"] | memory consumed is "+actual_value, True, ''
+        return "On Cluster["+cluster+"] | memory consumed is ["+actual_value+"]", True, ''
+    
     if check_name =="Cluster Memory Overcommitment":
-        return "Cluster["+cluster+"] | memory oversubscrption is "+actual_value, True, ''
+        return "On Cluster["+cluster+"] | memory oversubscrption is ["+actual_value+"]", True, ''
+    
     if check_name =="Ratio pCPU/vCPU":
-        return "Cluster["+cluster+"] | Ratio pCPU/vCPU is  "+actual_value, True, ''
-    if check_name =="Admission control policy - percentage based calculated based on the number of nodes in the cluster":
+        return "On Cluster["+cluster+"] | Ratio pCPU/vCPU is  ["+actual_value+"]", True, ''
+    
+    if check_name =="Admission control policy - Percentage Based on Nodes in the Cluster":
         if status == 'FAIL':
             if actual_value == "ACP is disabled":
                 return actual_value,True, 'alert'
             else:
                 return actual_value,True, 'warning'
+            
+            
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
         if actual_value == "Not-Configured":
@@ -264,17 +270,20 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return 'Datastore not attached', False,''
         else: 
             return actual_value, False, ''  
-    if check_name == "USB device not connected to VM":
+        
+    if check_name == "USB Device Connected to VM":
         if status == "FAIL":
             return "Virtual machine ["+entity+"] has connected USB device",True,"info"
         else:
             return "Virtual machine ["+entity+"] has disconnected USB device",False,"info"
-    if check_name == "RS-232 Serial Port not connected to VM":
+        
+    if check_name == "RS-232 Serial Port Connected to VM":
         if status == "FAIL":
             return "Virtual machine ["+entity+"] has connected serial port device",True,"info"
         else:
             return "Virtual machine ["+entity+"] has disconnected serial port device",False,"info"
-    if check_name == "CD-ROM not connected to VM":
+        
+    if check_name == "CD-ROM Connected to VM":
         if status == "FAIL":
             return "Virtual machine ["+entity+"] has connected CD-ROM device",True,"info"
         else:
@@ -294,7 +303,73 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "0":
             return actual_value, False, '' 
         else :
-            return "On virtual machine ["+entity+"] swapped memory is ["+actual_value+"] MB", True , 'alert'        
+            return "On virtual machine ["+entity+"] swapped memory is ["+actual_value+"] MB", True , 'alert' 
+        
+    if check_name == "CPU Reservation Per VM(MHz)":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "0":
+            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", True ,"alert"
+        else:
+            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", False ,"alert"
+        
+    if check_name == "Memory Reservation Per VM(MB)":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "0":
+            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", True ,'alert'
+        else:
+            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'
+
+    if check_name == "VM Advance Setting[isolation.tools.diskWiper.disable]":
+        if actual_value == "Not-Configured":
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskWiper.disable] is not set", True, 'info'
+        elif actual_value != "True":
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskWiper.disable] is set to ["+actual_value+"]", True, 'info'
+        else:
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskWiper.disable] is set to ["+actual_value+"]", False, 'info'
+
+    if check_name == "VM Advance Setting[isolation.tools.diskShrink.disable]":
+        if actual_value == "Not-Configured":
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskShrink.disable] is not set", True, 'info'
+        elif actual_value != "True":
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskShrink.disable] is set to ["+actual_value+"]", True, 'info'
+        else:
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskShrink.disable] is set to ["+actual_value+"]", False, 'info'
+        
+                
+    if check_name == "VM Advance Setting[isolation.tools.copy.disable]":
+        if actual_value == "Not-Configured":
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.copy.disable] is not set", True, 'info'
+        elif actual_value != "True":
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.copy.disable] is set to ["+actual_value+"]", True, 'info'
+        else:
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.copy.disable] is set to ["+actual_value+"]", False, 'info'
+
+    if check_name == "VM Advance Setting[isolation.tools.paste.disable]":
+        if actual_value == "Not-Configured":
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.paste.disable] is not set", True, 'info'
+        elif actual_value != "True":
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.paste.disable] is set to ["+actual_value+"]", True, 'info'
+        else:
+            return "On virtual machine ["+entity+"] advance setting [isolation.tools.paste.disable] is set to ["+actual_value+"]", False, 'info'
+
+    if check_name == "VM Advance Setting[log.keepOld]":
+        if actual_value == "Not-Configured":
+            return "On virtual machine ["+entity+"] advance setting [log.keepOld] is not set", True, 'info'
+        elif actual_value != "8":
+            return "On virtual machine ["+entity+"] advance setting [log.keepOld] is set to ["+actual_value+"]", True, 'info'
+        else:
+            return "On virtual machine ["+entity+"] advance setting [log.keepOld] is set to ["+actual_value+"]", False, 'info'
+
+    if check_name == "VM Advance Setting[RemoteDisplay.maxConnections]":
+        if actual_value == "Not-Configured":
+            return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is not set", True, 'info'
+        elif actual_value != "1":
+            return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is set to ["+actual_value+"]", True, 'info'
+        else:
+            return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is set to ["+actual_value+"]", False, 'info'
+
         
     # Start of vcenter_server Checks 
     if check_name == "Validate vCenter Server has VMware Tools installed and is up to date":
