@@ -204,6 +204,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         return "Cluster["+cluster+"] | memory consumed is "+actual_value, True, ''
     if check_name =="Cluster Memory Overcommitment":
         return "Cluster["+cluster+"] | memory oversubscrption is "+actual_value, True, ''
+    if check_name =="Ratio pCPU/vCPU":
+        return "Cluster["+cluster+"] | Ratio pCPU/vCPU is  "+actual_value, True, ''
     
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":

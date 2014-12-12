@@ -995,6 +995,12 @@ class VCChecker(CheckerBase):
             
             for cluster in clusters:
                 cluster_name= cluster.name
+                
+                if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            #print "skipping "+cluster_name
+                            continue
+                
                 cluster_total_memory=cluster.summary.totalMemory
                 vRam=0
                 for host in cluster.host:
@@ -1012,6 +1018,40 @@ class VCChecker(CheckerBase):
                     message += ", "+clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)#"+(True and "PASS" or "FAIL")
                     
         passed_all = passed_all and passed
+        return passed_all , message,path
+    
+    @checkgroup("cluster_checks", "Ratio pCPU/vCPU",["performance"],"pCPU/vCPU")
+    def check_cluster_ratio_pCPU_vCPU(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity'
+        clusters_map= self.get_vc_property(path)
+        message = ""
+        passed_all = True
+         
+        for clusters_key, clusters in clusters_map.iteritems():
+            passed = True
+            
+            for cluster in clusters:
+                cluster_name= cluster.name
+                
+                if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            #print "skipping "+cluster_name
+                            continue
+                
+                numCpuCores=cluster.summary.numCpuCores
+                pCPU=round(numCpuCores+numCpuCores*.3)
+                vCPU=0
+                for host in cluster.host:
+                    for vm in host.vm:
+                        vCPU+=vm.summary.config.numCpu
+                        
+                
+                if pCPU >0:
+                    ratio= "1:"+str(int(round(vCPU/pCPU)))                    
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+str(ratio)+" (Expected: =pCPU/vCPU)", (True and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "="+str(ratio)+" (Expected: =pCPU/vCPU)#"+(True and "PASS" or "FAIL")
+                    
+                passed_all = passed_all and passed
         return passed_all , message,path
     
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
