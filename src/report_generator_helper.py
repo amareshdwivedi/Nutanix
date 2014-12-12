@@ -1,4 +1,5 @@
 import datetime
+from validation import Validate
 
 
 def diff_dates(licencedate):
@@ -322,50 +323,50 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'
 
     if check_name == "VM Advance Setting[isolation.tools.diskWiper.disable]":
-        if actual_value == "Not-Configured":
+        if actual_value == "Not-Configured" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskWiper.disable] is not set", True, 'info'
-        elif actual_value != "True":
+        elif actual_value != "True" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskWiper.disable] is set to ["+actual_value+"]", True, 'info'
         else:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskWiper.disable] is set to ["+actual_value+"]", False, 'info'
 
     if check_name == "VM Advance Setting[isolation.tools.diskShrink.disable]":
-        if actual_value == "Not-Configured":
+        if actual_value == "Not-Configured" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskShrink.disable] is not set", True, 'info'
-        elif actual_value != "True":
+        elif actual_value != "True" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskShrink.disable] is set to ["+actual_value+"]", True, 'info'
         else:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.diskShrink.disable] is set to ["+actual_value+"]", False, 'info'
         
                 
     if check_name == "VM Advance Setting[isolation.tools.copy.disable]":
-        if actual_value == "Not-Configured":
+        if actual_value == "Not-Configured" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.copy.disable] is not set", True, 'info'
-        elif actual_value != "True":
+        elif actual_value != "True" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.copy.disable] is set to ["+actual_value+"]", True, 'info'
         else:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.copy.disable] is set to ["+actual_value+"]", False, 'info'
 
     if check_name == "VM Advance Setting[isolation.tools.paste.disable]":
-        if actual_value == "Not-Configured":
+        if actual_value == "Not-Configured" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.paste.disable] is not set", True, 'info'
-        elif actual_value != "True":
+        elif actual_value != "True" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.paste.disable] is set to ["+actual_value+"]", True, 'info'
         else:
             return "On virtual machine ["+entity+"] advance setting [isolation.tools.paste.disable] is set to ["+actual_value+"]", False, 'info'
 
     if check_name == "VM Advance Setting[log.keepOld]":
-        if actual_value == "Not-Configured":
+        if actual_value == "Not-Configured" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [log.keepOld] is not set", True, 'info'
-        elif actual_value != "8":
+        elif actual_value != "8" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [log.keepOld] is set to ["+actual_value+"]", True, 'info'
         else:
             return "On virtual machine ["+entity+"] advance setting [log.keepOld] is set to ["+actual_value+"]", False, 'info'
 
     if check_name == "VM Advance Setting[RemoteDisplay.maxConnections]":
-        if actual_value == "Not-Configured":
+        if actual_value == "Not-Configured" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is not set", True, 'info'
-        elif actual_value != "1":
+        elif actual_value != "1" and entity != host:
             return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is set to ["+actual_value+"]", True, 'info'
         else:
             return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is set to ["+actual_value+"]", False, 'info'
