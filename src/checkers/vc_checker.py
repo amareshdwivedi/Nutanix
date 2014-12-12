@@ -1397,16 +1397,23 @@ class VCChecker(CheckerBase):
         pass_all=True
         
         for vms_key, vms_vDevice in vms_virtual_hardware.iteritems():
+            passed = True
             if vms_vDevice == 'Not-Configured' :
                 #condition to check if any clusters not found 
                 continue
             usb_found=False
             for device in vms_vDevice:
                 if isinstance(device, vim.vm.device.VirtualUSB):
-                    usb_found=device.connectable.connected
-                    message += ", " +vms_key+"="+str(usb_found) + " (Expected: =False)"+"#"+(not usb_found and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(usb_found) + " (Expected: =False)", (not usb_found and "PASS" or "FAIL"))
-                    break                     
+                    usb_found=True
+                    usb_connected=device.connectable.connected
+                    passed=not usb_connected
+                    message += ", " +vms_key+"="+str(usb_connected) + " (Expected: =False)"+"#"+(not usb_connected and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(usb_connected) + " (Expected: =False)", (not usb_connected and "PASS" or "FAIL"))
+                    break
+            if usb_found==False:
+                message += ", " +vms_key+"=not-attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=not-attached (Expected: =False)", (True and "PASS" or "FAIL"))
+            pass_all= pass_all and passed    
         return pass_all, message,path
     
     @checkgroup("storage_and_vm_checks", "RS-232 Serial Port Connected to VM", ["manageability","reliability"], "False")
@@ -1421,12 +1428,19 @@ class VCChecker(CheckerBase):
                 #condition to check if any clusters not found 
                 continue
             serial_found=False
+            passed=True
             for device in vms_vDevice:
                 if isinstance(device, vim.vm.device.VirtualSerialPort):
-                    serial_found= device.connectable.connected
-                    message += ", " +vms_key+"="+str(serial_found) + " (Expected: =False)"+"#"+(( not serial_found) and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(serial_found) + " (Expected: =False)", ((not serial_found) and "PASS" or "FAIL"))
-                    break                    
+                    serial_found= True
+                    serial_connected=device.connectable.connected
+                    passed=not serial_connected
+                    message += ", " +vms_key+"="+str(serial_connected) + " (Expected: =False)"+"#"+(( not serial_connected) and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(serial_connected) + " (Expected: =False)", ((not serial_connected) and "PASS" or "FAIL"))
+                    break 
+            if serial_found==False:
+                message += ", " +vms_key+"=not-attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=not-attached (Expected: =False)", (True and "PASS" or "FAIL"))                   
+            pass_all= pass_all and passed
         return pass_all, message,path
     
     @checkgroup("storage_and_vm_checks", "CD-ROM Connected to VM",["manageability","reliability"], "False")
@@ -1441,10 +1455,17 @@ class VCChecker(CheckerBase):
                 #condition to check if any clusters not found 
                 continue
             cdrom_found=False
+            passed =True
             for device in vms_vDevice:
                 if isinstance(device, vim.vm.device.VirtualCdrom):
-                    cdrom_found= device.connectable.connected
-                    message += ", " +vms_key+"="+str(cdrom_found) + " (Expected: =False)"+"#"+(( not cdrom_found) and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(cdrom_found) + " (Expected: =False)", ((not cdrom_found) and "PASS" or "FAIL"))
-                    break     
+                    cdrom_found=True
+                    cdrom_connected= device.connectable.connected
+                    passed=not cdrom_connected
+                    message += ", " +vms_key+"="+str(cdrom_connected) + " (Expected: =False)"+"#"+(( not cdrom_connected) and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(cdrom_connected) + " (Expected: =False)", ((not cdrom_connected) and "PASS" or "FAIL"))
+                    break
+            if cdrom_found==False:
+                message += ", " +vms_key+"=not-attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=not-attached (Expected: =False)", (True and "PASS" or "FAIL"))     
+            pass_all= pass_all and passed
         return pass_all, message,path
