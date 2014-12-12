@@ -1054,6 +1054,60 @@ class VCChecker(CheckerBase):
                 passed_all = passed_all and passed
         return passed_all , message,path
     
+    @checkgroup("cluster_checks", "Admission control policy - percentage based calculated based on the number of nodes in the cluster",["performance"],"true")
+    def check_cluster_acpPercentage_basedOn_nodes(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity'
+        clusters_map= self.get_vc_property(path)
+        message = ""
+        passed_all = True
+         
+        for clusters_key, clusters in clusters_map.iteritems():
+            passed = True
+            
+            if clusters == "Not-Configured":
+                continue
+            
+            for cluster in clusters:
+                cluster_name= cluster.name
+                
+                if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            #print "skipping "+cluster_name
+                            continue
+                
+                
+                acp_enabled=cluster.configuration.dasConfig.admissionControlEnabled
+                if not acp_enabled:
+                    
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=ACP is disabled (Expected: =true)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=ACP is disabled (Expected: =true)#"+(False and "PASS" or "FAIL")
+                    continue
+                
+                admissionControlPolicy=cluster.configuration.dasConfig.admissionControlPolicy
+                if not isinstance(admissionControlPolicy, vim.cluster.FailoverResourcesAdmissionControlPolicy):
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=ACP is set to different policy than percentage based (Expected: =true)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=ACP is set to different policy than percentage based (Expected: =true)#"+(False and "PASS" or "FAIL")
+                    continue
+                
+                cpuFailoverResourcesPercent=cluster.configuration.dasConfig.admissionControlPolicy.cpuFailoverResourcesPercent
+                memoryFailoverResourcesPercent=cluster.configuration.dasConfig.admissionControlPolicy.memoryFailoverResourcesPercent        
+                numberof_nodes=len(cluster.host)
+                nplus=numberof_nodes+1
+                nplus_policy_based_percentage=round(100/nplus)
+                
+                if (nplus_policy_based_percentage != cpuFailoverResourcesPercent) and (memoryFailoverResourcesPercent !=nplus_policy_based_percentage):
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=ACP reservation policy does not meet N+1 failover requirements (Expected: =true)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=ACP reservation policy does not meet N+1 failover requirements (Expected: =true)#"+(False and "PASS" or "FAIL")
+                else:
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=true (Expected: =true)", (True and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=true (Expected: =true)#"+(True and "PASS" or "FAIL")
+                           
+                passed_all = passed_all and passed
+        return passed_all , message,path
+    
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
     def check_directory_service_set_to_active_directory(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig'

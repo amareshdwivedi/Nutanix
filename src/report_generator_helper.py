@@ -206,7 +206,12 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         return "Cluster["+cluster+"] | memory oversubscrption is "+actual_value, True, ''
     if check_name =="Ratio pCPU/vCPU":
         return "Cluster["+cluster+"] | Ratio pCPU/vCPU is  "+actual_value, True, ''
-    
+    if check_name =="Admission control policy - percentage based calculated based on the number of nodes in the cluster":
+        if status == 'FAIL':
+            if actual_value == "ACP is disabled":
+                return actual_value,True, 'alert'
+            else:
+                return actual_value,True, 'warning'
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
         if actual_value == "Not-Configured":
