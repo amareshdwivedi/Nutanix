@@ -966,6 +966,9 @@ class VCChecker(CheckerBase):
         passed_all = True
          
         for clusters_key, clusters_summ in clusters_summary.iteritems():
+            
+            if clusters_summ == "Not-Configured":
+                continue
              
             passed = True
             effectiveMemory =clusters_summ.effectiveMemory
@@ -1004,7 +1007,7 @@ class VCChecker(CheckerBase):
                     #cluster_total_memory=(cluster_total_memory/1024)/1024
                     memory_overcommitment=round((vRam/cluster_total_memory),2) 
                     memory_overcommitment_percentage= (memory_overcommitment*100)%100
-                    print   cluster_name,   cluster_total_memory , vRam , memory_overcommitment, memory_overcommitment_percentage
+                    #print   cluster_name,   cluster_total_memory , vRam , memory_overcommitment, memory_overcommitment_percentage
                     self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)", (True and "PASS" or "FAIL"))
                     message += ", "+clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)#"+(True and "PASS" or "FAIL")
                     
