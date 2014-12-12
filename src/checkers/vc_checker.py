@@ -1004,9 +1004,9 @@ class VCChecker(CheckerBase):
                 cluster_total_memory=cluster.summary.totalMemory
                 vRam=0
                 for host in cluster.host:
-                    for vm in host.vm:
-                        vRam+=vm.summary.config.memorySizeMB
-                
+                    for vm in host.vm:                        
+                        vRam+= 0  if vm.summary.config.memorySizeMB == None else vm.summary.config.memorySizeMB
+                        
                 vRam=vRam*1000000
                 if cluster_total_memory >0:
                     
@@ -1068,6 +1068,10 @@ class VCChecker(CheckerBase):
                 continue
             
             for cluster in clusters:
+                
+                if not isinstance(cluster, vim.ClusterComputeResource):
+                    #condition to check if host directly attached to cluster
+                    continue
                 cluster_name= cluster.name
                 
                 if self.authconfig['cluster']!='':
@@ -1411,8 +1415,8 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(usb_connected) + " (Expected: =False)", (not usb_connected and "PASS" or "FAIL"))
                     break
             if usb_found==False:
-                message += ", " +vms_key+"=not-attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=not-attached (Expected: =False)", (True and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=Not-Attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Not-Attached (Expected: =False)", (True and "PASS" or "FAIL"))
             pass_all= pass_all and passed    
         return pass_all, message,path
     
@@ -1438,8 +1442,8 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(serial_connected) + " (Expected: =False)", ((not serial_connected) and "PASS" or "FAIL"))
                     break 
             if serial_found==False:
-                message += ", " +vms_key+"=not-attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=not-attached (Expected: =False)", (True and "PASS" or "FAIL"))                   
+                message += ", " +vms_key+"=Not-Attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Not-Attached (Expected: =False)", (True and "PASS" or "FAIL"))                   
             pass_all= pass_all and passed
         return pass_all, message,path
     
@@ -1465,7 +1469,7 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+str(cdrom_connected) + " (Expected: =False)", ((not cdrom_connected) and "PASS" or "FAIL"))
                     break
             if cdrom_found==False:
-                message += ", " +vms_key+"=not-attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=not-attached (Expected: =False)", (True and "PASS" or "FAIL"))     
+                message += ", " +vms_key+"=Not-Attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Not-Attached (Expected: =False)", (True and "PASS" or "FAIL"))     
             pass_all= pass_all and passed
         return pass_all, message,path
