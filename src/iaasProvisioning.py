@@ -17,7 +17,7 @@ def usage():
     x.align["Option"] = "l"
     x.align["Description"] = "l"
     x.padding_width = 1 
-    x.add_row(["foundation", "Perfrom foundation based on the input parameters"])
+    x.add_row(["foundation", "Perform foundation based on the input parameters"])
     x.add_row(["cluster_config", "Create Storage pool and Container for the cluster"])
     x.add_row(["vcenter_server_config", "Peform Server Configuration"])
     x.add_row(["run_all", "Runs all health checks"])
@@ -28,7 +28,7 @@ def console_msg(message=None):
        print "\n"+message+"\n"+"+"+"-"*100+"+"
 
 def main():   
-    confFile = os.getcwd()+os.path.sep+"conf"+os.path.sep+"input.json"
+    confFile = os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + "input.json"
     fp = open(confFile,"r")
     inputData = json.load(fp)
 

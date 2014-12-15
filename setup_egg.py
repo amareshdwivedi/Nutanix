@@ -6,6 +6,7 @@ requires = [
           'pyvmomi >= 5.5.0.2014.1.1',
           'reportlab >= 3.1.8',
           'web.py >= 0.37',
+          'lepl >= 5.1.3',
           ],
 setup(
     author='nutanix',

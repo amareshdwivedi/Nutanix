@@ -61,9 +61,13 @@ Table Of Contents
        PDF/CSV reports are generated and stored under 'reports' directory which is created at the location from where 'healthchek.py' is run.
 
    3.2 Web Application
-        Run script 'webhealthcheck.py',this will start a Web server listening on port 8080. Connect to Web UI by using url - http://localhost:8080/ from your browser.
-        PDF/CSV reports are generated and stored under 'reports' directory which is created at the location from where 'webhealthchek.py' is run.
+       Run script 'webhealthcheck.py',this will start a Web server listening on port 8080. Connect to Web UI by using url - http://localhost:8080/ from your browser.
+       PDF/CSV reports are generated and stored under 'reports' directory which is created at the location from where 'webhealthchek.py' is run.
 
+04 How to run IaaS Provisioning
+       Run script 'iaasProvisioning.py'.
+       This will provide all the necessary options to perform provisioning ( all steps or explicitely perticular step)
+       Options provided includes - ['foundation','cluster_config','vcenter_server_config','run_all']
 
 04 Known issues
    
