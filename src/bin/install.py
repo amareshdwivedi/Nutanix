@@ -97,7 +97,6 @@ if returncode == 0:
 
     provisioning_pyfile=open(default_install+os.path.sep+"iaasProvisioning.py","wb")
     for line in healthchecklines:
-        print line+"\n"
         provisioning_pyfile.writelines(line+"\n")
     provisioning_pyfile.close()
     time.sleep(2)
