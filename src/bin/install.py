@@ -6,11 +6,11 @@ import sys
 import shutil
 import platform
 
-version = platform.python_version()
-
-if version != "2.7.8":
-   print "Python Version Should be 2.7.8"
-   sys.exit(1)
+# version = platform.python_version()
+# 
+# if version != "2.7.8":
+#    print "Python Version Should be 2.7.8"
+#    sys.exit(1)
    
 cmd = 'python '+os.path.abspath(os.path.dirname(__file__))+os.path.sep +'scripts'+ os.path.sep +'get_pip.py'
 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)

@@ -226,11 +226,13 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "Storage Cluster not found", False, 'info'      
     if check_name == "Resource Pool Memory Limits (in MB)" or check_name=="Resource Pool CPU Limits (in MHz)":
         if status == 'FAIL':
-            return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Limit is "+str(actual_value), True, 'info'
+            if actual_value != "Not-Configured":
+                return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Limit is "+str(actual_value), True, 'info'
     
     if check_name == "Resource Pool CPU Reservation (in MHz)" or check_name=="Resource Pool Memory Reservation (in MB)":
         if status == 'FAIL':
-            return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Reservation is "+str(actual_value), True, 'info'       
+            if actual_value != "Not-Configured":
+                return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Reservation is "+str(actual_value), True, 'info'       
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
         if actual_value == "Not-Configured":
