@@ -85,8 +85,28 @@ if returncode == 0:
     web_health_check_pyfile.close()
     time.sleep(2)
 
+    print "Creating iaasProvisioning script..."
+
+    healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
+    'lib_path = ' + "'" + default_install + "'",
+    'os.environ["PYTHONPATH"] = lib_path',
+    'if not os.path.exists(os.getcwd() + os.path.sep +"reports"):',
+    '     os.mkdir("reports")',
+    'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"iaasProvisioning.pyc "',
+    'os.system(executable_path+ " ".join(sys.argv[1:]))']
+
+    provisioning_pyfile=open(default_install+os.path.sep+"iaasProvisioning.py","wb")
+    for line in healthchecklines:
+        print line+"\n"
+        provisioning_pyfile.writelines(line+"\n")
+    provisioning_pyfile.close()
+    time.sleep(2)
+
+
     shutil.copy(default_install+os.path.sep+"healthcheck.py",os.path.abspath(os.path.dirname(__file__)))
     shutil.copy(default_install+os.path.sep+"webhealthcheck.py",os.path.abspath(os.path.dirname(__file__)))
+    shutil.copy(default_install+os.path.sep+"iaasProvisioning.py",os.path.abspath(os.path.dirname(__file__)))
+
 
     if sys.platform.startswith("linux"):
         os.chmod(os.path.abspath(os.path.dirname(__file__))+os.path.sep+"healthcheck.py",0755)

@@ -4,7 +4,7 @@ setup(
     name='HealthCheck',
     version = '1.0.0',
     packages=find_packages(),
-    package_data ={'' : ['conf//*.conf','static//fonts//*.*','static//images//*.*','static//js//*.*','static//styles//*.*','templates//*.*']},
+    package_data ={'' : ['conf//*.*','static//fonts//*.*','static//images//*.*','static//js//*.*','static//styles//*.*','templates//*.*']},
     zip_safe=False
       )
     
