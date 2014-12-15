@@ -919,23 +919,48 @@ class VCChecker(CheckerBase):
             if storage_clusters == "Not-Configured":
                 continue
             storage_clusters_found=False
+            ntnx_datastore_found=False
+            storage_cluster_name=None
             for storage_cluster in storage_clusters:
+                if not isinstance(storage_cluster, vim.StoragePod):
+                    continue
                 
-                if isinstance(storage_cluster, vim.StoragePod):
-                    storage_clusters_found=True
-                    storage_cluster_name=storage_cluster.name
+                storage_clusters_found=True
+                storage_cluster_name=storage_cluster.name
+                for datastore in storage_cluster.childEntity:
+                    
+                    datastore_name=datastore.name
+                    if not fnmatch.fnmatch(datastore_name,"NTNX-local-ds*"):
+                        #condition to check if NTNX-local name of Datastore found
+                        #if not found skip check
+                        continue
+                    ntnx_datastore_found=True
+                    mount_remote_host=datastore.info.nas.remoteHost
+                    
+                    if mount_remote_host != "192.168.5.2":
+                        # condition to check if NTNX-local datastore mounted to 192.168.5.2
+                        # if not mounted then skip check
+                        continue
+                    
+                
+                    
                     storage_drs= storage_cluster.podStorageDrsEntry.storageDrsConfig.podConfig.enabled
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+storage_cluster_name+ "="+str(storage_drs)+" (Expected: =false)", ((not storage_drs) and "PASS" or "FAIL"))
-                    message += ", "+datacenter +"@"+storage_cluster_name+ "="+str(storage_drs)+" (Expected: =false)#"+((not storage_drs) and "PASS" or "FAIL")            
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+storage_cluster_name+"@"+datastore_name+"="+str(storage_drs)+" (Expected: =false)", ((not storage_drs) and "PASS" or "FAIL"))
+                    message += ", "+datacenter +"@"+storage_cluster_name+"@"+datastore_name+ "="+str(storage_drs)+" (Expected: =false)#"+((not storage_drs) and "PASS" or "FAIL")            
                         
             if storage_clusters_found == False:
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "=Storage-Cluster-not-found (Expected: =false)", (False and "PASS" or "FAIL"))
-                message += ", "+datacenter + "=No-Storage-Cluster-found (Expected: =false)#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "=Storage-Cluster-not-found (Expected: =false)", (True and "PASS" or "FAIL"))
+                message += ", "+datacenter + "=No-Storage-Cluster-found (Expected: =false)#"+(True and "PASS" or "FAIL")
                 passed=False
+            elif ntnx_datastore_found==False:
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "@"+storage_cluster_name+"=NTNX-Datastore-not-found (Expected: =false)", (True and "PASS" or "FAIL"))
+                message += ", "+datacenter +"@"+storage_cluster_name+ "=NTNX-Datastore-not-found (Expected: =false)#"+(True and "PASS" or "FAIL")
+                passed=False
+            
               
             passed_all = passed_all and passed
         
-        return passed_all , message,path_curr
+        return passed_all , message,path_curr+".datastore"
     
     @checkgroup("cluster_checks", "Number of DRS Faults",["performance"],"No. of Faults")
     def check_cluster_drs_fault_count(self):
