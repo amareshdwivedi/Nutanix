@@ -45,7 +45,7 @@ def main():
     inputData = json.load(fp)
     
     print "Configuration File:",confFile
-    print "Did you configured all the necessary Parameters; If not exit (n), update input file & then continue(y)"
+    print "Did you configured all the necessary Parameters; If not exit (n), update input file & then continue(y)."
     choice = raw_input('Do You want to Continue(y/n) ?')
     if choice[0].lower() == 'n':
         sys.exit(0)

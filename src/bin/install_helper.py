@@ -29,8 +29,16 @@ for lib in libs:
                 easy_install.main(["-Z", "--install-dir", install_dir, lib_path + 'Pillow-2.6.1-py2.7-win32.egg'])
             elif (8 * struct.calcsize("P")) == 64:  # for 64bit python compiler
                 easy_install.main(["-Z", "--install-dir", install_dir, lib_path + 'Pillow-2.6.1-py2.7-win-amd64.egg'])
-            else:
-                easy_install.main(["-Z", "--install-dir", install_dir, lib_path + lib])
+        else:
+            easy_install.main(["-Z", "--install-dir", install_dir, lib_path + lib])
+    elif "pycrypto" in lib:
+        if sys.platform == "win32" or sys.platform == "win64":
+            if (8 * struct.calcsize("P")) == 32:  # for 32bit python compiler 
+                easy_install.main(["-Z", "--install-dir", install_dir, lib_path + 'pycrypto-2.6.win32-py2.7.exe'])
+            elif (8 * struct.calcsize("P")) == 64:  # for 64bit python compiler
+                easy_install.main(["-Z", "--install-dir", install_dir, lib_path + 'pycrypto-2.6.win-amd64-py2.7.exe'])
+        else:
+            easy_install.main(["-Z", "--install-dir", install_dir, lib_path + lib])            
     else :
         easy_install.main(["-Z", "--install-dir", install_dir, lib_path + lib])
 
