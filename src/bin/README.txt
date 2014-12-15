@@ -19,7 +19,6 @@ Table Of Contents
        2.1.1 Pre-requisites
              - Python 2.7.8 should be installed on the system.
              - Python Path should be set under system environment variables.
-             - Microsoft Visual C++ compiler for Python 2.7 should be installed (Download link - http://aka.ms/vcpython27).
 
        2.1.2 Installation Steps
              - Unzip the HealthCheck-1.0.0 package.
