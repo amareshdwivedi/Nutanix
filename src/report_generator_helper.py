@@ -217,7 +217,13 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return actual_value,True, 'alert'
             else:
                 return actual_value,True, 'warning'
-            
+    if check_name == "Storage DRS":
+        if actual_value == 'False':
+            return "Datastore ["+entity+"] is in DRS cluster ["+cluster+"] where DRS autmation is enabled", True, 'alert'
+        elif actual_value == 'True':
+            return "Datastore ["+entity+"] is in DRS cluster ["+cluster+"] where DRS autmation is enabled", False, 'info'
+        else:
+            return "Storage Cluster not found", False, 'info'      
             
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
