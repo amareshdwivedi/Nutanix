@@ -207,9 +207,10 @@ class VCenterServerConf:
                 out = '%s completed successfully.' % actionName
                 print out
         else:
-            out = '%s did not complete successfully: %s' % (actionName, task.info.error)
-            raise task.info.error
+            out = '%s did not complete successfully ( %s )' % (actionName, task.info.error.msg)
+            #raise task.info.error
             print out
+            sys.exit(1)
 
         return task.info.result
     
