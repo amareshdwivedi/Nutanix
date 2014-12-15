@@ -28,10 +28,6 @@ def console_msg(message=None):
        print "\n"+message+"\n"+"+"+"-"*100+"+"
 
 def main():   
-    confFile = os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + "input.json"
-    fp = open(confFile,"r")
-    inputData = json.load(fp)
-
     options = sys.argv[1:]
     if len(options) == 0:
         usage()
@@ -43,6 +39,19 @@ def main():
     
     if options[0] == "run_all":
         options = availOptions
+    
+    confFile = os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + "input.json"
+    fp = open(confFile,"r")
+    inputData = json.load(fp)
+    
+    print "Configuration File:",confFile
+    print "Did you configured all the necessary Parameters; If not exit (n), update input file & then continue(y)"
+    choice = raw_input('Do You want to Continue(y/n) ?')
+    if choice[0].lower() == 'n':
+        sys.exit(0)
+    if choice[0].lower() != 'y':
+        print " Invalid Choice"
+        sys.exit(0)
 
     if 'foundation' in options:
         #Foundation Process

@@ -5,7 +5,8 @@ Table Of Contents
     01 Overview
     02 Installation Instructions
     03 How to Run HealthCheck
-    04 Known Issues
+    04 How to run IaaS Provisioning
+    05 Known Issues
 
 01 Overview
     Nutanix Healthcheck tool connects to vCenter, Nutanix OS and collects configuration of health parameters. It verifies these parameters against best practice values and comes out with a report indicating health check status.
@@ -65,11 +66,29 @@ Table Of Contents
        PDF/CSV reports are generated and stored under 'reports' directory which is created at the location from where 'webhealthchek.py' is run.
 
 04 How to run IaaS Provisioning
+   4.1 Configuring the input
+       Conf file  : install_dir_path\src\conf\input.json
+       The input file has three sections Foundation, Prism and vCenter Configurations.
+       The user has to update the values(key-pair) in the file.
+      
+      For example
+          For Foundation:
+            The user has to enter the ip-address of the foundation server & the restInputs(several details) in the file.
+            "foundation":
+              {
+                  "server": "Enter value here in these quotes.",
+                  "restInput":
+                   {
+                     "cluster_external_ip":"Enter value here in these quotes.",
+                   }   
+              }
+     
+   4.2 Running the provisioning script
        Run script 'iaasProvisioning.py'.
-       This will provide all the necessary options to perform provisioning ( all steps or explicitely perticular step)
-       Options provided includes - ['foundation','cluster_config','vcenter_server_config','run_all']
+       This will provide all the necessary options to perform provisioning ( all steps or explicitely particular step)
+       Options provided includes - foundation, cluster_config, vcenter_server_config and run_all.
 
-04 Known issues
+05 Known issues
    
    <TBD>
 
