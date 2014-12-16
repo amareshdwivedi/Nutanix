@@ -1137,6 +1137,70 @@ class VCChecker(CheckerBase):
                 passed_all = passed_all and passed
         return passed_all , message,path
     
+    @checkgroup("cluster_checks", "Verify reserved memory and cpu capacity versus Admission control policy set",["performance"],"Cluster Failover Resources %")
+    def check_cluster_validate_reserverdMemory_and_reservedCPU_vs_acp(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity'
+        clusters_map= self.get_vc_property(path)
+        message = ""
+        passed_all = True
+         
+        for clusters_key, clusters in clusters_map.iteritems():
+            passed = True
+            
+            if clusters == "Not-Configured":
+                continue
+            
+            for cluster in clusters:
+                
+                if not isinstance(cluster, vim.ClusterComputeResource):
+                    #condition to check if host directly attached to cluster
+                    continue
+                cluster_name= cluster.name
+                
+                if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            #print "skipping "+cluster_name
+                            continue
+                
+                
+                acp_enabled=cluster.configuration.dasConfig.admissionControlEnabled
+                if not acp_enabled:
+                    
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=ACP is disabled (Expected: =Cluster Failover Resources %)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=ACP is disabled (Expected: =Cluster Failover Resources %)#"+(False and "PASS" or "FAIL")
+                    continue
+                
+                admissionControlPolicy=cluster.configuration.dasConfig.admissionControlPolicy
+                if not isinstance(admissionControlPolicy, vim.cluster.FailoverResourcesAdmissionControlPolicy):
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=ACP is set to different policy than percentage based (Expected: =Cluster Failover Resources %)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=ACP is set to different policy than percentage based (Expected: =Cluster Failover Resources %)#"+(False and "PASS" or "FAIL")
+                    continue
+                
+                cpuFailoverResourcesPercent=cluster.configuration.dasConfig.admissionControlPolicy.cpuFailoverResourcesPercent
+                memoryFailoverResourcesPercent=cluster.configuration.dasConfig.admissionControlPolicy.memoryFailoverResourcesPercent        
+                
+                currentCpuFailoverResourcesPercent=cluster.summary.admissionControlInfo.currentCpuFailoverResourcesPercent
+                currentMemoryFailoverResourcesPercent=cluster.summary.admissionControlInfo.currentMemoryFailoverResourcesPercent
+                
+                cpu_diff=currentCpuFailoverResourcesPercent - cpuFailoverResourcesPercent
+                memory_diff=currentMemoryFailoverResourcesPercent - memoryFailoverResourcesPercent
+                
+                      
+                if (cpu_diff > 25 ) and (memory_diff > 25):
+                    passed = True
+                else:
+                    passed = False
+                
+                msg="cpuFailoverResourcesPercent:"+str(cpuFailoverResourcesPercent)+",currentCpuFailoverResourcesPercent:"+str(currentCpuFailoverResourcesPercent)+",memoryFailoverResourcesPercent:"+str(memoryFailoverResourcesPercent)+",currentMemoryFailoverResourcesPercent:"+str(currentMemoryFailoverResourcesPercent)
+                
+                self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+msg+" (Expected: =Cluster Failover Resources %)", (passed and "PASS" or "FAIL"))
+                message += ", "+clusters_key+"@" +cluster_name+ "="+msg+" (Expected: =Cluster Failover Resources %)#"+(passed and "PASS" or "FAIL")
+
+                passed_all = passed_all and passed
+        return passed_all , message,path
+    
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
     def check_directory_service_set_to_active_directory(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig'

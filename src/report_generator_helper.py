@@ -1,5 +1,6 @@
 import datetime
 from validation import Validate
+from distutils.log import info
 
 
 def diff_dates(licencedate):
@@ -214,9 +215,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     if check_name =="Admission control policy - Percentage Based on Nodes in the Cluster":
         if status == 'FAIL':
             if actual_value == "ACP is disabled":
-                return actual_value,True, 'alert'
+                return "For Cluster["+cluster+"],"+actual_value,True, 'alert'
             else:
-                return actual_value,True, 'warning'
+                return "For Cluster["+cluster+"],"+actual_value,True, 'warning'
     if check_name == "Storage DRS":
         if actual_value == 'False':
             return "Datastore ["+entity+"] is in DRS cluster ["+cluster+"] where DRS autmation is enabled", True, 'alert'
@@ -233,6 +234,25 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if status == 'FAIL':
             if actual_value != "Not-Configured":
                 return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Reservation is "+str(actual_value), True, 'info'       
+    
+    if check_name == "Verify reserved memory and cpu capacity versus Admission control policy set":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        if 'cpuFailoverResourcesPercent' in actual_value:
+            cpuFailoverResourcesPercent,currentCpuFailoverResourcesPercent,memoryFailoverResourcesPercent,currentMemoryFailoverResourcesPercent=actual_value.split(',')
+            cpu=float(cpuFailoverResourcesPercent.split(":")[1])
+            current_cpu=float(currentCpuFailoverResourcesPercent.split(":")[1])
+            memory=float(memoryFailoverResourcesPercent.split(":")[1])
+            current_memory=float(currentMemoryFailoverResourcesPercent.split(":")[1])
+            stat='info'
+            if current_cpu-cpu > 25 or current_memory-memory > 25:
+                stat='info'
+            else: stat='warning'
+            return "For Cluster["+cluster+"], <br/>"+str(actual_value).replace(',','<br/>'), True, stat
+        if actual_value == "ACP is disabled":
+                return "For Cluster["+cluster+"],"+actual_value,True, 'alert'
+        else:
+                return "For Cluster["+cluster+"],"+actual_value,True, 'warning'
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
         if actual_value == "Not-Configured":
