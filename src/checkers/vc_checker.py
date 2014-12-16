@@ -906,7 +906,7 @@ class VCChecker(CheckerBase):
         
         return passed_all , message,path_curr
     
-    @checkgroup("cluster_checks", "Storage DRS",["performance"],"false")
+    @checkgroup("cluster_checks", "Storage DRS",["performance"],"False")
     def check_cluster_storgae_drs(self):
         path_curr='content.rootFolder.childEntity.datastoreFolder.childEntity'
         storage_clusters_map = self.get_vc_property(path_curr)
@@ -962,7 +962,7 @@ class VCChecker(CheckerBase):
         
         return passed_all , message,path_curr+".datastore"
     
-    @checkgroup("cluster_checks", "Number of DRS Faults",["performance"],"No. of Faults")
+    @checkgroup("cluster_checks", "Number of DRS Faults",["performance"],"Number of DRS Faults")
     def check_cluster_drs_fault_count(self):
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.drsFault'
         clusters_map = self.get_vc_property(path_curr)
@@ -970,12 +970,12 @@ class VCChecker(CheckerBase):
         message = ""
         passed_all = True
         
-        for datacenter, clusters_drf_faults in clusters_map.iteritems():
+        for datacenter, clusters_drs_faults in clusters_map.iteritems():
             
-            if clusters_drf_faults == "Not-Configured":
+            if clusters_drs_faults == "Not-Configured":
                 continue
             
-            count=len(clusters_drf_faults) if clusters_drf_faults !=None else 0                
+            count=len(clusters_drs_faults) if clusters_drs_faults !=None else 0                
             self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "="+str(count)+" (Expected: =0)", ((True if count ==0 else False) and "PASS" or "FAIL"))
             message += ", "+datacenter + "="+str(count)+" (Expected: =0)#"+((True if count ==0 else False) and "PASS" or "FAIL") 
             passed = (True if count ==0 else False)
@@ -983,7 +983,28 @@ class VCChecker(CheckerBase):
         
         return passed_all , message,path_curr
     
-    @checkgroup("cluster_checks", "Cluster Memory utilization %",["performance"],"memory consumed %")
+    @checkgroup("cluster_checks", "Number of Cluster Events",["performance"],"Number of Cluster Events")
+    def check_cluster_events_count(self):
+        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.configIssue'
+        clusters_map = self.get_vc_property(path_curr)
+        
+        message = ""
+        passed_all = True
+        
+        for datacenter, clusters_events in clusters_map.iteritems():
+            
+            if clusters_events == "Not-Configured":
+                continue
+            
+            count=len(clusters_events) if clusters_events !=None else 0                
+            self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "="+str(count)+" (Expected: =0)", ((True if count ==0 else False) and "PASS" or "FAIL"))
+            message += ", "+datacenter + "="+str(count)+" (Expected: =0)#"+((True if count ==0 else False) and "PASS" or "FAIL") 
+            passed = (True if count ==0 else False)
+            passed_all = passed_all and passed
+        
+        return passed_all , message,path_curr    
+    
+    @checkgroup("cluster_checks", "Cluster Memory Utilization %",["performance"],"Memory Consumed %")
     def check_cluster_memory_utilization(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.summary'
         clusters_summary = self.get_vc_property(path)
@@ -1008,7 +1029,7 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Cluster Memory Overcommitment",["performance"],"memory oversubscrption %")
+    @checkgroup("cluster_checks", "Cluster Memory Overcommitment",["performance"],"Memory Oversubscrption %")
     def check_cluster_memory_overcommitment(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
@@ -1045,7 +1066,7 @@ class VCChecker(CheckerBase):
         passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Ratio pCPU/vCPU",["performance"],"pCPU/vCPU")
+    @checkgroup("cluster_checks", "Ratio pCPU/vCPU",["performance"],"pCPU/vCPU ratio")
     def check_cluster_ratio_pCPU_vCPU(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
@@ -1079,7 +1100,7 @@ class VCChecker(CheckerBase):
                 passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Admission control policy - Percentage Based on Nodes in the Cluster",["performance"],"true")
+    @checkgroup("cluster_checks", "Admission Control Policy - Percentage Based on Nodes in the Cluster",["performance"],"True")
     def check_cluster_acpPercentage_basedOn_nodes(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)

@@ -93,22 +93,6 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return 'powerOff', False, ''
         else: 
             return 'Isolation Response on cluster ['+cluster+'] is ['+actual_value+']', True, 'alert'
-        
-    if check_name == "VM Monitoring For CVMs":
-        if actual_value == "Not-Configured":
-            return 'Not-Configured', False, ''
-        elif actual_value == "vmMonitoringDisabled":
-            return actual_value, False, ''
-        else: 
-            return 'VM monitoring on CVM ['+entity+'] is not [Disabled]', True, 'alert'
-        
-    if check_name == "VM Restart Priority For CVMs":
-        if actual_value == "Not-Configured":
-            return 'Not-Configured', False, ''
-        elif actual_value == "disabled":
-            return 'VM restart Priority on CVM['+entity+'] is [Disabled]', False, ''
-        else: 
-            return 'VM restart Priority on CVM['+entity+'] is [Not Disabled]', True, 'alert' 
             
     if check_name == "Validate Datastore Heartbeat":
         if actual_value == "Not-Configured":
@@ -203,28 +187,33 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     if check_name =="Number of DRS Faults":
         return "On Cluster["+cluster+"] | Number of DRS faults are ["+actual_value+"]", True, ''
     
-    if check_name =="Cluster Memory utilization %":
-        return "On Cluster["+cluster+"] | memory consumed is ["+actual_value+"]", True, ''
+    if check_name =="Number of Cluster Events":
+        return "On Cluster["+cluster+"] | Number of Events are ["+actual_value+"]", True, ''    
+    
+    if check_name =="Cluster Memory Utilization %":
+        return "On Cluster["+cluster+"] | Memory Consumed is ["+actual_value+"]", True, ''
     
     if check_name =="Cluster Memory Overcommitment":
-        return "On Cluster["+cluster+"] | memory oversubscrption is ["+actual_value+"]", True, ''
+        return "On Cluster["+cluster+"] | Memory Oversubscrption is ["+actual_value+"]", True, ''
     
     if check_name =="Ratio pCPU/vCPU":
         return "On Cluster["+cluster+"] | Ratio pCPU/vCPU is  ["+actual_value+"]", True, ''
     
-    if check_name =="Admission control policy - Percentage Based on Nodes in the Cluster":
+    if check_name =="Admission Control Policy - Percentage Based on Nodes in the Cluster":
         if status == 'FAIL':
             if actual_value == "ACP is disabled":
                 return "For Cluster["+cluster+"],"+actual_value,True, 'alert'
             else:
                 return "For Cluster["+cluster+"],"+actual_value,True, 'warning'
+            
     if check_name == "Storage DRS":
         if actual_value == 'False':
             return "Datastore ["+entity+"] is in DRS cluster ["+cluster+"] where DRS autmation is enabled", True, 'alert'
         elif actual_value == 'True':
             return "Datastore ["+entity+"] is in DRS cluster ["+cluster+"] where DRS autmation is enabled", False, 'info'
         else:
-            return "Storage Cluster not found", False, 'info'      
+            return "Storage Cluster not found", False, 'info'
+              
     if check_name == "Resource Pool Memory Limits (in MB)" or check_name=="Resource Pool CPU Limits (in MHz)":
         if status == 'FAIL':
             if actual_value != "Not-Configured":
@@ -253,6 +242,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "For Cluster["+cluster+"],"+actual_value,True, 'alert'
         else:
                 return "For Cluster["+cluster+"],"+actual_value,True, 'warning'
+            
+            
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
         if actual_value == "Not-Configured":
@@ -280,7 +271,31 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
             return 'Policy['+actual_value+'] set to cluster['+cluster+']', True ,'info'
         
+    if check_name == "VM Monitoring For CVMs":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value == "vmMonitoringDisabled":
+            return actual_value, False, ''
+        else: 
+            return 'VM monitoring on CVM ['+entity+'] is not [Disabled]', True, 'alert'
         
+    if check_name == "VM Restart Priority For CVMs":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value == "disabled":
+            return 'VM restart Priority on CVM['+entity+'] is [Disabled]', False, ''
+        else: 
+            return 'VM restart Priority on CVM['+entity+'] is [Not Disabled]', True, 'alert' 
+        
+    if check_name == "CPU Reservation Per CVM(MHz)":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "10000":
+            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", True ,"alert"
+        else:
+            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", False ,"alert"
+        
+                                
     # Start of storage_and_vm Checks 
     if check_name == "VMware Tools Status on VMs":
         if actual_value == "toolsOk":
@@ -344,9 +359,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return "Not-Configured", False, ''
         elif actual_value != "0":
-            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", True ,"alert"
+            return "On VM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", True ,"info"
         else:
-            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", False ,"alert"
+            return "On VM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", False ,"info"
         
     if check_name == "Memory Reservation Per VM(MB)":
         if actual_value == "Not-Configured":
