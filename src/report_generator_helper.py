@@ -8,7 +8,7 @@ def diff_dates(licencedate):
     licenceDate = datetime.datetime.strptime(licencedate, "%Y-%m-%d").date()
     return  (licenceDate - today).days
     
-def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,cluster,host,status,exp_value_from_msg,vCenterServerIP):
+def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,cluster,host,status,message,exp_value_from_msg,vCenterServerIP):
     actual_value=actual_value.strip()
     exp_value_from_msg=exp_value_from_msg.strip()
     
@@ -404,6 +404,23 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is set to ["+actual_value+"]", True, 'info'
         else:
             return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is set to ["+actual_value+"]", False, 'info'
+        
+    if check_name ==  "VM Snapshot":
+        if actual_value == "Not-Configured":
+            return actual_value, False, ''
+        elif actual_value is not None:
+             if message is not None :
+                 messageList = message.split('@')
+                 vm_name = messageList[7]             
+             actual_date , actual_time = actual_value.split()
+             days = abs(diff_dates(actual_date))
+             if days > 14:
+               return  "Virtual machine ["+vm_name+"] has snapshot which is ["+str(days)+"] days old", True, 'alert'
+             elif days > 7 and days < 14:  
+               return  "Virtual machine ["+vm_name+"] has snapshot which is ["+str(days)+"] days old", True, 'warning'           
+             else:
+                 return "Virtual machine ["+vm_name+"] has snapshot which is ["+str(days)+"] days old", True, 'info'   
+                           
 
         
     # Start of vcenter_server Checks 
