@@ -1214,7 +1214,7 @@ class VCChecker(CheckerBase):
                 else:
                     passed = False
                 
-                msg="cpuFailoverResourcesPercent:"+str(cpuFailoverResourcesPercent)+",currentCpuFailoverResourcesPercent:"+str(currentCpuFailoverResourcesPercent)+",memoryFailoverResourcesPercent:"+str(memoryFailoverResourcesPercent)+",currentMemoryFailoverResourcesPercent:"+str(currentMemoryFailoverResourcesPercent)
+                msg="Reserved-Cpu:"+str(cpuFailoverResourcesPercent)+"; Current-Cpu:"+str(currentCpuFailoverResourcesPercent)+"; Reserved-Memory:"+str(memoryFailoverResourcesPercent)+"; Current-Memory:"+str(currentMemoryFailoverResourcesPercent)
                 
                 self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+msg+" (Expected: =Cluster Failover Resources %)", (passed and "PASS" or "FAIL"))
                 message += ", "+clusters_key+"@" +cluster_name+ "="+msg+" (Expected: =Cluster Failover Resources %)#"+(passed and "PASS" or "FAIL")

@@ -227,8 +227,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     if check_name == "Verify reserved memory and cpu capacity versus Admission control policy set":
         if actual_value == "Not-Configured":
             return 'Not-Configured', False, ''
-        if 'cpuFailoverResourcesPercent' in actual_value:
-            cpuFailoverResourcesPercent,currentCpuFailoverResourcesPercent,memoryFailoverResourcesPercent,currentMemoryFailoverResourcesPercent=actual_value.split(',')
+        if 'Reserved-Cpu' in actual_value:
+            cpuFailoverResourcesPercent,currentCpuFailoverResourcesPercent,memoryFailoverResourcesPercent,currentMemoryFailoverResourcesPercent=actual_value.split(';')
             cpu=float(cpuFailoverResourcesPercent.split(":")[1])
             current_cpu=float(currentCpuFailoverResourcesPercent.split(":")[1])
             memory=float(memoryFailoverResourcesPercent.split(":")[1])
@@ -237,11 +237,11 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             if current_cpu-cpu > 25 or current_memory-memory > 25:
                 stat='info'
             else: stat='warning'
-            return "For Cluster["+cluster+"], <br/>"+str(actual_value).replace(',','<br/>'), True, stat
+            return "For Cluster["+cluster+"], <br/>"+str(actual_value).replace(';','<br/>'), True, stat
         if actual_value == "ACP is disabled":
-                return "For Cluster["+cluster+"],"+actual_value,True, 'alert'
+                return "For Cluster["+cluster+"], "+actual_value,True, 'alert'
         else:
-                return "For Cluster["+cluster+"],"+actual_value,True, 'warning'
+                return "For Cluster["+cluster+"], "+actual_value,True, 'warning'
             
             
     # Start of CVM Checks
