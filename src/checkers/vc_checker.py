@@ -1448,6 +1448,51 @@ class VCChecker(CheckerBase):
         
         return pass_all, message, path
     
+    @checkgroup("network_and_switch_checks", "Check if vSwitchNutanix has no physical adapters",["performance"],"None")
+    def check_vswitch_no_physical_nic(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
+        host_networks = self.get_vc_property(path)
+       
+        message = ""
+        pass_all=True
+        
+        for key, network in host_networks.iteritems():
+            passed = True
+            if network == "Not-Configured":
+                continue
+            
+            vswitchs=network.vswitch
+            if vswitchs is None:
+                continue
+            vSwitchNutanix_found=False
+            for vswitch in vswitchs:
+                if vswitch.name == "vSwitchNutanix":
+                     vSwitchNutanix_found=True
+                     if len(vswitch.pnic)==0:
+                         #print vswitch.name+" as no pnic"
+                         message += ", " +key+"@"+vswitch.name+"=None (Expected: =None)"+"#"+(True and "PASS" or "FAIL")
+                         self.reporter.notify_progress(self.reporter.notify_checkLog,key+"@"+vswitch.name+"=None (Expected: =None)",(True and "PASS" or "FAIL"))
+                     else:
+                         passed = False
+                         pnic_dict={}
+                         for nic in network.pnic:
+                               pnic_dict[nic.key]=nic.device
+                         nic_names=[]                        
+                         for pnic in vswitch.pnic:
+                             nic_names.append(pnic_dict[pnic])
+                             
+                         #print vswitch.name+"="+(','.join(nic_names))
+                         message += ", " +key+"@"+vswitch.name+"="+(','.join(nic_names))+" (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
+                         self.reporter.notify_progress(self.reporter.notify_checkLog,key+"@"+vswitch.name+"="+(','.join(nic_names))+" (Expected: =None)",(False and "PASS" or "FAIL"))
+                     
+            if vSwitchNutanix_found==False:
+                passed = False
+                message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=vSwitchNutanix-Not-Found (Expected: =None)",(True and "PASS" or "FAIL"))
+            pass_all = passed and pass_all    
+ 
+        return pass_all, message, path
+    
     @checkgroup("storage_and_vm_checks", "Hardware Acceleration of Datastores", ["performance"], "Supported")
     def check_vStorageSupport(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity'

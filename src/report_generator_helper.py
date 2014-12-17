@@ -763,6 +763,12 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "MTU size on vSwitch["+entity+"] on host["+host+"] has MTU["+actual_value+"]", False,''                       
         else:
             return "MTU size on vSwitch["+entity+"] on host["+host+"] has MTU["+actual_value+"]", True,'info'
-        
-        
+    
+    if check_name == "Check if vSwitchNutanix has no physical adapters":
+        if actual_value == "vSwitchNutanix-Not-Found":
+            return "On host ["+host+"] vSwitchNutanix not found", True,'alert'
+        elif actual_value == "None":
+            return "On host ["+host+"] vSwitchNutanix has no physical nic attached", False,''                       
+        else:
+            return "On host ["+host+"] vSwitchNutanix has physical nics ["+actual_value+"] attached", True,'info'    
     return str(actual_value), False,'info'
