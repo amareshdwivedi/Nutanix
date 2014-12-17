@@ -295,6 +295,14 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
             return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", False ,"alert"
         
+    if check_name == "Memory Reservation Per CVM(MB)":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "0":
+            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", True ,'alert'
+        else:
+            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'        
+        
                                 
     # Start of storage_and_vm Checks 
     if check_name == "VMware Tools Status on VMs":
