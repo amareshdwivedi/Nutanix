@@ -1487,8 +1487,8 @@ class VCChecker(CheckerBase):
                      
             if vSwitchNutanix_found==False:
                 passed = False
-                message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=vSwitchNutanix-Not-Found (Expected: =None)",(True and "PASS" or "FAIL"))
+                message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=vSwitchNutanix-Not-Found (Expected: =None)",(False and "PASS" or "FAIL"))
             pass_all = passed and pass_all    
  
         return pass_all, message, path
