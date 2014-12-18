@@ -894,13 +894,13 @@ class VCChecker(CheckerBase):
             
             passed = True
             if (current_balance[current_key]<=target_balance[current_key]) and (current_balance[current_key] != -1000) and (target_balance[current_key]!=-1000) and (current_balance[current_key] != "Not-Configured") and (target_balance[current_key]!="Not-Configured") :
-                self.reporter.notify_progress(self.reporter.notify_checkLog,  current_key + "="+str(current_balance[current_key])+" (Expected: <="+str(target_balance[current_key])+" )", ("PASS"))
-                message += ", "+current_key + "="+str(current_balance[current_key])+" (Expected: <="+str(target_balance[current_key])+")#PASS"
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  current_key + "="+str(current_balance[current_key])+" (Expected: =Less than "+str(target_balance[current_key])+" )", ("PASS"))
+                message += ", "+current_key + "="+str(current_balance[current_key])+" (Expected: =Less than "+str(target_balance[current_key])+")#PASS"
             else:
                 cur_bal= "NA" if current_balance[current_key]== -1000 else current_balance[current_key]
-                tar_bal= "Load balanced"if (target_balance[current_key]==-1000 or target_balance[current_key]=="Not-Configured") else target_balance[current_key]  
-                self.reporter.notify_progress(self.reporter.notify_checkLog, current_key + "="+str(cur_bal)+" (Expected: <="+str(tar_bal)+" )", ("FAIL"))
-                message += ", "+current_key + "="+str(cur_bal)+" (Expected: <="+str(tar_bal)+")#FAIL"             
+                tar_bal= "NA"if (target_balance[current_key]==-1000 or target_balance[current_key]=="Not-Configured") else target_balance[current_key]  
+                self.reporter.notify_progress(self.reporter.notify_checkLog, current_key + "="+str(cur_bal)+" (Expected: =Less than "+str(tar_bal)+" )", ("FAIL"))
+                message += ", "+current_key + "="+str(cur_bal)+" (Expected: =Less than "+str(tar_bal)+")#FAIL"             
             
             passed_all = passed_all and passed
         
@@ -1629,7 +1629,7 @@ class VCChecker(CheckerBase):
             pass_all= pass_all and passed
         return pass_all, message,path
     
-    @checkgroup("storage_and_vm_checks", "VM CPU limit", ["manageability"], "CPU Limit")
+    @checkgroup("storage_and_vm_checks", "CPU Limit per VM", ["manageability"], "vCPU * Host Clock Speed")
     def check_vm_cpu_limit(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name!=NTNX*CVM].summary'
         vms_map= self.get_vc_property(path)
@@ -1643,42 +1643,43 @@ class VCChecker(CheckerBase):
                 continue
             passed=True
             vms_key='@'.join(vms_key.split('@')[0:-1])
+ 
             maxCpuUsage=vm.runtime.maxCpuUsage
             
             if maxCpuUsage == None:
                 passed=False
-                message += ", " +vms_key+"=maxCpuUsage-Not-Configured (Expected: =False)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage-Not-Configured (Expected: =False)", (False and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
                 continue
             
             numCpu=vm.config.numCpu
             if numCpu == None:
                 passed=False
-                message += ", " +vms_key+"=numCpu-Not-Configured (Expected: =False)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu-Not-Configured (Expected: =False)", (False and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=numCpu is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
                 continue
             
             cpuMhz=vm.runtime.host.summary.hardware.cpuMhz
             if cpuMhz == None:
                 passed=False
-                message += ", " +vms_key+"=cpuMhz-Not-Configured (Expected: =False)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz-Not-Configured (Expected: =False)", (False and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
                 continue
                 
             if maxCpuUsage == (cpuMhz*numCpu):
-                message += ", " +vms_key+"=true (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=true (Expected: =False)", (True and "PASS" or "FAIL"))
+                message += ", " +vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
                 
             else:
                 passed=False
-                message += ", " +vms_key+"=true (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=true (Expected: =False)", (True and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=" + str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
                 
             pass_all= pass_all and passed
   
         return pass_all, message,path
     
-    @checkgroup("cvm_checks", "CPU limit per CVM", ["manageability"], "CPU Limit")
+    @checkgroup("cvm_checks", "CPU Limit per CVM", ["manageability"], "vCPU * Host Clock Speed")
     def check_cvm_cpu_limit(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name=NTNX*CVM].summary'
         vms_map= self.get_vc_property(path)
@@ -1698,37 +1699,37 @@ class VCChecker(CheckerBase):
             
             if maxCpuUsage == None:
                 passed=False
-                message += ", " +vms_key+"=maxCpuUsage-Not-Configured (Expected: =False)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage-Not-Configured (Expected: =False)", (False and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
                 continue
             
             numCpu=vm.config.numCpu
             if numCpu == None:
                 passed=False
-                message += ", " +vms_key+"=numCpu-Not-Configured (Expected: =False)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu-Not-Configured (Expected: =False)", (False and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=numCpu is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
                 continue
             
             cpuMhz=vm.runtime.host.summary.hardware.cpuMhz
             if cpuMhz == None:
                 passed=False
-                message += ", " +vms_key+"=cpuMhz-Not-Configured (Expected: =False)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz-Not-Configured (Expected: =False)", (False and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
                 continue
                 
             if maxCpuUsage == (cpuMhz*numCpu):
-                message += ", " +vms_key+"=true (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=true (Expected: =False)", (True and "PASS" or "FAIL"))
+                message += ", " +vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
                 
             else:
                 passed=False
-                message += ", " +vms_key+"=true (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=true (Expected: =False)", (True and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=" + str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) +"(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
                 
             pass_all= pass_all and passed
   
         return pass_all, message,path
-    
+      
     @checkgroup("storage_and_vm_checks", "VM using the VMXNET3 virtual network device",["performance"], "Vmxnet3")
     def check_vm_using_vmxnet3(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config'
