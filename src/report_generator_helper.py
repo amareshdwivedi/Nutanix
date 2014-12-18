@@ -305,6 +305,11 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         
                                 
     # Start of storage_and_vm Checks 
+    if check_name == "VM using the VMXNET3 virtual network device":
+        if status == 'FAIL':
+            return "Virtual machine ["+entity+"] has virtual adapter ["+actual_value+"]",True, 'info'
+        else : 
+            return "Virtual machine ["+entity+"] has virtual adapter ["+actual_value+"]",False, 'info'
     if check_name == "VMware Tools Status on VMs":
         if actual_value == "toolsOk":
             return actual_value, False, ''

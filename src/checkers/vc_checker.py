@@ -1728,3 +1728,46 @@ class VCChecker(CheckerBase):
             pass_all= pass_all and passed
   
         return pass_all, message,path
+    
+    @checkgroup("storage_and_vm_checks", "VM using the VMXNET3 virtual network device",["performance"], "Vmxnet3")
+    def check_vm_using_vmxnet3(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config'
+        vms= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vm_key, vm in vms.iteritems():
+            if vm == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            
+            #vm version
+            version=vm.version
+            
+            #Version Number from version string 
+            version_no=int(version.replace("vmx-",""))
+            
+            if version_no < 7 :
+                #print vm_key , version_no ,"Skipping check"
+                #skip check if version is less then 7 as need to check version above 7
+                continue
+            
+            passed =True
+            
+            adapter=set()
+            #Device used by VM 
+            #print vm_key , version_no
+            for device in vm.hardware.device:
+                if isinstance(device, vim.vm.device.VirtualEthernetCard):
+                    #print "\t",type(device).__class__
+                    adapter.add(((type(device).__name__).split('.')[-1]).replace("Virtual",""))
+            #print "\t\t", ','.join(adapter)
+            if 'Vmxnet3' in adapter:
+                passed = True
+            else : 
+                passed= False
+            
+            message += ", " +vm_key+"="+(','.join(adapter))+" (Expected: =Vmxnet3)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,vm_key+"="+(','.join(adapter))+" (Expected: =Vmxnet3)", (passed and "PASS" or "FAIL"))     
+            pass_all= pass_all and passed
+        return pass_all, message,path
