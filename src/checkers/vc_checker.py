@@ -1730,6 +1730,38 @@ class VCChecker(CheckerBase):
   
         return pass_all, message,path
       
+    @checkgroup("cvm_checks", "Memory Reservation Per CVM(MB)", ["performance"], "Equal to size of VM memory")
+    def check_memory_reservation_of_cvm(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name=NTNX*CVM].summary'
+        vms_map= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vms_key, vm in vms_map.iteritems():
+              
+            if vm == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            passed=True
+            
+            vms_key='@'.join(vms_key.split('@')[0:-1])
+            
+            memory_reservation=vm.config.memoryReservation
+            vm_memory=vm.config.memorySizeMB
+            
+            if memory_reservation == vm_memory:
+                message += ", " +vms_key+"="+ str(memory_reservation) + "(Expected: ="+str(vm_memory)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) + "(Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
+                
+            else:
+                passed=False
+                message += ", " +vms_key+"=" + str(memory_reservation) + "(Expected: ="+str(vm_memory)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) +"(Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
+                
+            pass_all= pass_all and passed
+  
+        return pass_all, message,path    
+          
     @checkgroup("storage_and_vm_checks", "VM using the VMXNET3 virtual network device",["performance"], "Vmxnet3")
     def check_vm_using_vmxnet3(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config'
