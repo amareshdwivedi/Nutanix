@@ -1750,13 +1750,13 @@ class VCChecker(CheckerBase):
             vm_memory=vm.config.memorySizeMB
             
             if memory_reservation == vm_memory:
-                message += ", " +vms_key+"="+ str(memory_reservation) + "(Expected: ="+str(vm_memory)+")"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) + "(Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
+                message += ", " +vms_key+"="+ str(memory_reservation) + " (Expected: ="+str(vm_memory)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) + " (Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
                 
             else:
                 passed=False
-                message += ", " +vms_key+"=" + str(memory_reservation) + "(Expected: ="+str(vm_memory)+")"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) +"(Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
+                message += ", " +vms_key+"=" + str(memory_reservation) + " (Expected: ="+str(vm_memory)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) +" (Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
                 
             pass_all= pass_all and passed
   
