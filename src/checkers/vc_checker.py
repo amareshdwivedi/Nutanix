@@ -1771,3 +1771,62 @@ class VCChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkLog,vm_key+"="+(','.join(adapter))+" (Expected: =Vmxnet3)", (passed and "PASS" or "FAIL"))     
             pass_all= pass_all and passed
         return pass_all, message,path
+    
+    @checkgroup("storage_and_vm_checks", "VM hardware version is the most up to date with the ESXI version",["performance"], "VM hardware version should be in the latest version supported by ESXi in the cluster")
+    def check_vm_hardware_version_ailing_with_esxi_version(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity' #.host.vm.config
+        clusters_map= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for cluster_key, clusters in clusters_map.iteritems():
+            if clusters == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            
+            for cluster in clusters:
+                
+                cluster_name=cluster.name
+                host_version=[]
+                for host in cluster.host:
+                    if host.config.product.version not in host_version:
+                        host_version.append(host.config.product.version)
+                
+                if len(host_version) == 0:
+                    # No Host found in cluster
+                    #print "No Host found in cluster"
+                    continue
+                elif len(host_version)>1:
+                    # multiple host version found hence skipping check
+                    #print "multiple host version found hence skipping check"
+                    continue
+                else:
+                    allhost_version='.'.join((host_version[0]).split('.')[0:-1])
+   
+                    allvm_version=None
+                    if allhost_version == "5.1":
+                        allvm_version=10
+                    elif allhost_version == "5.5":
+                        allvm_version = 9
+                    else:
+                        continue
+                        
+                    for host in cluster.host:
+                        passed= True
+                        host_name=host.name
+                        for vm in host.vm:
+                            vm_name=vm.name
+                            version=vm.config.version
+                            #Version Number from version string 
+                            version_no=int(version.replace("vmx-",""))
+                            if allvm_version >=version_no:
+                                #print cluster_name, host_name, vm_name, version
+                                message += ", " +cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: <=vmx-"+str(allvm_version)+")"+"#"+(True and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: <=vmx-"+str(allvm_version)+")", (True and "PASS" or "FAIL"))
+                            else:
+                                passed= False
+                                message += ", " +cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: <=vmx-"+str(allvm_version)+")"+"#"+(False and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: <=vmx-"+str(allvm_version)+")", (False and "PASS" or "FAIL"))
+   
+                            pass_all= pass_all and passed
+        return pass_all, message,path+".host.vm"

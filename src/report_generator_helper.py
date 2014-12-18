@@ -304,7 +304,13 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'        
         
                                 
-    # Start of storage_and_vm Checks 
+    # Start of storage_and_vm Checks
+    if check_name == "VM hardware version is the most up to date with the ESXI version":
+        if status == 'FAIL':
+            return "Virtual Machine ["+entity+"] has virtual hardware in version ["+actual_value+"] which is lower then latest supported version",True, 'info'
+        else:
+            return "Virtual Machine ["+entity+"] has virtual hardware in version ["+actual_value+"] which is lower then latest supported version",False, 'info'
+     
     if check_name == "VM using the VMXNET3 virtual network device":
         if status == 'FAIL':
             return "Virtual machine ["+entity+"] has virtual adapter ["+actual_value+"]",True, 'info'
