@@ -1493,6 +1493,59 @@ class VCChecker(CheckerBase):
  
         return pass_all, message, path
     
+    @checkgroup("network_and_switch_checks", "vSwitchNutanix Connected to CVM only",["performance"],"CVM")
+    def check_vswitchnutanix_connected_to_only_CVM(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
+        host_networks = self.get_vc_property(path)
+       
+        message = ""
+        pass_all=True
+        portgrp=set()
+        for key, network in host_networks.iteritems():
+            passed = True
+            if network == "Not-Configured":
+                continue
+            
+            vswitchs=network.vswitch
+            if vswitchs is None:
+                continue
+            vSwitchNutanix_found=False
+            
+            vSwitchNutanix_key=None
+            for vswitch in vswitchs:
+                if vswitch.name == "vSwitchNutanix":
+                     vSwitchNutanix_found=True
+                     vSwitchNutanix_key=vswitch.key
+                     break
+                         
+            if vSwitchNutanix_found==False:
+                passed = False
+                message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=vSwitchNutanix-Not-Found (Expected: =None)",(False and "PASS" or "FAIL"))
+            else:
+                for portgroup in network.portgroup:
+                    if portgroup.vswitch == vSwitchNutanix_key:
+                        portgrp.add(portgroup.spec.name)
+
+        passed= True
+        for port_grp_name in portgrp:
+            vm_names=self.get_vc_property("content.rootFolder.childEntity.hostFolder.childEntity.network[name="+port_grp_name+"].vm.name")
+            for vmkey, name in vm_names.iteritems():
+                if name == "Not-Configured":
+                    continue
+                else:
+                    vmkey=vmkey.replace(name,"")
+                    if fnmatch.fnmatch(name,"NTNX*CVM"):
+                        passed= True
+                        message += ", " +vmkey+"="+name+" (Expected: =CVM)"+"#"+(True and "PASS" or "FAIL")
+                        self.reporter.notify_progress(self.reporter.notify_checkLog,vmkey+"="+name+" (Expected: =CVM)",(True and "PASS" or "FAIL"))
+                    else:
+                        passed= False
+                        message += ", " +vmkey+"="+name+" (Expected: =CVM)"+"#"+(False and "PASS" or "FAIL")
+                        self.reporter.notify_progress(self.reporter.notify_checkLog,vmkey+"="+name+" (Expected: =CVM)",(False and "PASS" or "FAIL"))
+                    pass_all = passed and pass_all    
+        return pass_all, message, "content.rootFolder.childEntity.hostFolder.childEntity.network.vm"
+    
     @checkgroup("storage_and_vm_checks", "Hardware Acceleration of Datastores", ["performance"], "Supported")
     def check_vStorageSupport(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity'

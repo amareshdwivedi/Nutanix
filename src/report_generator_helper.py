@@ -634,7 +634,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "Host["+host+"] NTP servers["+str(actual_value)+"] are configured " , False, '' 
             
                  
-    # Start of network_and_switch Checks           
+    # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
         if actual_value == "Not-Configured":
             return "Not-Configured", False,''
@@ -790,4 +790,14 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "On host ["+host+"], vSwitchNutanix has no physical nic attached", False,''                       
         else:
             return "On host ["+host+"], vSwitchNutanix has physical nics ["+actual_value+"] attached", True,'info'    
+    
+    if check_name == "vSwitchNutanix Connected to CVM only":
+        if status == 'FAIL':
+            if actual_value == "vSwitchNutanix-Not-Found":
+                return "On Cluster ["+cluster+"], vSwitchNutanix not found", True,'alert'
+            else:
+                return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'info'
+    
+    #Default return
     return str(actual_value), False,'info'
+ 
