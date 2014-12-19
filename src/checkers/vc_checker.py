@@ -1025,6 +1025,10 @@ class VCChecker(CheckerBase):
                 cpu_utilization_percentage= round((effectiveMemory_to_bytes*100)/totalMemory,2)
                 self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key + "="+str(cpu_utilization_percentage)+"% (Expected: =memory-consumed-%)", (True and "PASS" or "FAIL"))
                 message += ", "+clusters_key + "="+str(cpu_utilization_percentage)+"% (Expected: =memory-consumed-%)#"+(True and "PASS" or "FAIL")
+            else:
+                passed = False
+                self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key + "=total_memory_is_zero (Expected: =memory-consumed-%)", (False and "PASS" or "FAIL"))
+                message += ", "+clusters_key + "=total_memory_is_zero (Expected: =memory-consumed-%)#"+(False and "PASS" or "FAIL")
              
             passed_all = passed_all and passed
         return passed_all , message,path
@@ -1062,6 +1066,10 @@ class VCChecker(CheckerBase):
                     #print   cluster_name,   cluster_total_memory , vRam , memory_overcommitment, memory_overcommitment_percentage
                     self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)", (True and "PASS" or "FAIL"))
                     message += ", "+clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)#"+(True and "PASS" or "FAIL")
+                else:
+                    passed= False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=total_memory_is_zero (Expected: =memory-oversubscrption-%)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=total_memory_is_zero (Expected: =memory-oversubscrption-%)#"+(False and "PASS" or "FAIL")
                     
         passed_all = passed_all and passed
         return passed_all , message,path
@@ -1096,7 +1104,10 @@ class VCChecker(CheckerBase):
                     ratio= "1:"+str(int(round(vCPU/pCPU)))                    
                     self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+str(ratio)+" (Expected: =pCPU/vCPU)", (True and "PASS" or "FAIL"))
                     message += ", "+clusters_key+"@" +cluster_name+ "="+str(ratio)+" (Expected: =pCPU/vCPU)#"+(True and "PASS" or "FAIL")
-                    
+                else:
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=pCPU_is_zero (Expected: =pCPU/vCPU)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=pCPU_is_zero (Expected: =pCPU/vCPU)#"+(False and "PASS" or "FAIL")
                 passed_all = passed_all and passed
         return passed_all , message,path
     

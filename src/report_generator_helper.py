@@ -191,12 +191,18 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         return "On Cluster["+cluster+"] | Number of Events are ["+actual_value+"]", True, ''    
     
     if check_name =="Cluster Memory Utilization %":
+        if actual_value == "total_memory_is_zero":
+            return "On Cluster["+cluster+"] | Total Memory is [0]", True, 'alert'
         return "On Cluster["+cluster+"] | Memory Consumed is ["+actual_value+"]", True, ''
     
     if check_name =="Cluster Memory Overcommitment":
+        if actual_value == "total_memory_is_zero":
+            return "On Cluster["+cluster+"] | Total Memory is [0]", True, 'alert'
         return "On Cluster["+cluster+"] | Memory Oversubscrption is ["+actual_value+"]", True, ''
     
     if check_name =="Ratio pCPU/vCPU":
+        if actual_value == "pCPU_is_zero":
+            return "On Cluster["+cluster+"] | pCPU is 0", True, 'alert'
         return "On Cluster["+cluster+"] | Ratio pCPU/vCPU is  ["+actual_value+"]", True, ''
     
     if check_name =="Admission Control Policy - Percentage Based on Nodes in the Cluster":
