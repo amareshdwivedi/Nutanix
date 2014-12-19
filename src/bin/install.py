@@ -29,6 +29,7 @@ else :
 
 returncode = 0
 print "Starting HealthCheck Installation..."
+depInstalled = 0
 def progress_bar():
     for i in range(21):
         sys.stdout.write('\r')
@@ -92,7 +93,7 @@ if returncode == 0:
     web_health_check_pyfile.close()
     time.sleep(2)
 
-    print "Creating iaasProvisioning script..."
+    print "Creating IaaSProvisioning script..."
 
     healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
     'lib_path = ' + "'" + default_install + "'",
@@ -108,10 +109,24 @@ if returncode == 0:
     provisioning_pyfile.close()
     time.sleep(2)
 
+    print "Creating DPaaSProvisioning script..."
+    healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
+    'lib_path = ' + "'" + default_install + "'",
+    'os.environ["PYTHONPATH"] = lib_path',
+    'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"foundation"+os.path.sep+"DPaaSOperations.pyc"',
+    'os.system(executable_path+ " ".join(sys.argv[1:]))']
+
+    dpass_pyfile=open(default_install+os.path.sep+"dpaasProvisioning.py","wb")
+    for line in healthchecklines:
+        dpass_pyfile.writelines(line+"\n")
+    dpass_pyfile.close()
+    time.sleep(2)
+
 
     shutil.copy(default_install+os.path.sep+"healthcheck.py",os.path.abspath(os.path.dirname(__file__)))
     shutil.copy(default_install+os.path.sep+"webhealthcheck.py",os.path.abspath(os.path.dirname(__file__)))
     shutil.copy(default_install+os.path.sep+"iaasProvisioning.py",os.path.abspath(os.path.dirname(__file__)))
+    shutil.copy(default_install+os.path.sep+"dpaasProvisioning.py",os.path.abspath(os.path.dirname(__file__)))
 
 
     if sys.platform.startswith("linux"):

@@ -29,29 +29,44 @@ def console_msg(message=None):
 
 def main():   
     options = sys.argv[1:]
+    print "Options :",options
     if len(options) == 0:
         usage()
-
+   
     availOptions = ['foundation','cluster_config','vcenter_server_config','run_all']
+    '''
     for item in options:
         if item not in availOptions:
             usage()
-    
+    '''
+    if (options[0] not in availOptions) and (options[0] != "foundationProgress"):
+        usage()
+
     if options[0] == "run_all":
         options = availOptions
     
-    confFile = os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + "input.json"
-    fp = open(confFile,"r")
-    inputData = json.load(fp)
-    
-    print "Configuration File:",confFile
-    print "Did you configured all the necessary Parameters; If not exit (n), update input file & then continue(y)."
-    choice = raw_input('Do You want to Continue(y/n) ?')
-    if choice[0].lower() == 'n':
-        sys.exit(0)
-    if choice[0].lower() != 'y':
-        print " Invalid Choice"
-        sys.exit(0)
+    if len(options) > 2:
+        usage()
+    elif len(options) == 2:
+        try :
+            print "Arguement Json is :",options[1]
+            inputData = json.loads(options[1])
+        except:
+            print "Invalid Input"
+            sys.exit(1)
+    else:
+        confFile = os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + "input.json"
+        fp = open(confFile,"r")
+        inputData = json.load(fp)
+        
+        print "Configuration File:",confFile
+        print "Did you configured all the necessary Parameters; If not exit (n), update input file & then continue(y)."
+        choice = raw_input('Do You want to Continue(y/n) ?')
+        if choice[0].lower() == 'n':
+            sys.exit(0)
+        if choice[0].lower() != 'y':
+            print " Invalid Choice"
+            sys.exit(0)
 
     if 'foundation' in options:
         #Foundation Process
@@ -77,7 +92,11 @@ def main():
         print "\n"
         console_msg("Fondation Process Complete.")
         
-    
+    if "foundationProgress" in options:
+        fProcess = FoundationProvision(inputData['foundation'])
+        progPercent = fProcess.get_progress()
+        print progPercent
+
     if "cluster_config"    in options:
         #Prism Configuration
         console_msg("Cluster configuration started using Prism API..")
@@ -88,8 +107,9 @@ def main():
         status = prismObj.create_container()
         console_msg(status)
         
-    if "vcenter_server_config"    in options:
+    if "vcenter_server_config" in options:
         #vCenterServer Configuration
+        print "inside vceserv config"
         console_msg('VCenter Server Configuration started ..')
         vServer = VCenterServerConf(inputData['vCenterConf'])
         vServer.do_configuration()
