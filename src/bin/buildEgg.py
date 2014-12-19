@@ -19,7 +19,7 @@ if err:
 print "Removing Temporary Files..."
 
 shutil.rmtree(os.getcwd()+os.path.sep+"build", ignore_errors=True)
-shutil.rmtree(os.getcwd()+os.path.sep+"HealthCheck.egg-info", ignore_errors=True)
+shutil.rmtree(os.getcwd()+os.path.sep+"service_toolkit.egg-info", ignore_errors=True)
 time.sleep(2)
 
 print "Egg Created Successfully at: " + os.getcwd()+os.path.sep+"dist"

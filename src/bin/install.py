@@ -23,12 +23,12 @@ if not os.path.exists(default_install):
     print "Installation directory does not exists"
     exit()
 else :
-    shutil.rmtree(default_install + os.path.sep + "healthcheck", ignore_errors=True)
-    default_install+=os.path.sep+'healthcheck'
+    shutil.rmtree(default_install + os.path.sep + "service_toolkit", ignore_errors=True)
+    default_install+=os.path.sep+'service_toolkit'
     os.makedirs(default_install)    
 
 returncode = 0
-print "Starting HealthCheck Installation..."
+print "Starting Nutanix Service Toolkit Installation..."
 depInstalled = 0
 def progress_bar():
     for i in range(21):
@@ -66,7 +66,7 @@ if returncode == 0:
     'os.environ["PYTHONPATH"] = lib_path',
     'if not os.path.exists(os.getcwd() + os.path.sep +"reports"):',
     '     os.mkdir("reports")',
-    'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"health_check.pyc "',
+    'executable_path="python "+lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"health_check.pyc "',
     'os.system(executable_path+ " ".join(sys.argv[1:]))']
 
     health_check_pyfile=open(default_install+os.path.sep+"healthcheck.py","wb")
@@ -83,7 +83,7 @@ if returncode == 0:
     'cur_dir = os.getcwd()',
     'if not os.path.exists(cur_dir + os.path.sep +"reports"):',
     '     os.mkdir("reports")',
-    'os.chdir(lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep)',
+    'os.chdir(lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep)',
     'executable_path="python web_health_check.pyc 8080 " + cur_dir',
     'os.system(executable_path)']
 
@@ -100,7 +100,7 @@ if returncode == 0:
     'os.environ["PYTHONPATH"] = lib_path',
     'if not os.path.exists(os.getcwd() + os.path.sep +"reports"):',
     '     os.mkdir("reports")',
-    'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"iaasProvisioning.pyc "',
+    'executable_path="python "+lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"iaasProvisioning.pyc "',
     'os.system(executable_path+ " ".join(sys.argv[1:]))']
 
     provisioning_pyfile=open(default_install+os.path.sep+"iaasProvisioning.py","wb")
@@ -113,7 +113,7 @@ if returncode == 0:
     healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
     'lib_path = ' + "'" + default_install + "'",
     'os.environ["PYTHONPATH"] = lib_path',
-    'executable_path="python "+lib_path+os.path.sep+"HealthCheck-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"foundation"+os.path.sep+"DPaaSOperations.pyc"',
+    'executable_path="python "+lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"foundation"+os.path.sep+"DPaaSOperations.pyc"',
     'os.system(executable_path+ " ".join(sys.argv[1:]))']
 
     dpass_pyfile=open(default_install+os.path.sep+"dpaasProvisioning.py","wb")
@@ -155,7 +155,7 @@ if returncode == 0:
     'os.remove(\'/bin/healthcheck.py\')' if sys.platform.startswith("linux") else '',
     'os.remove(\'/bin/webhealthcheck.py\')' if sys.platform.startswith("linux") else '',
     'time.sleep(2)',
-    'print "HealthCheck Un-installation Successfull..."']
+    'print "Nutanix Service Toolkit Un-installation Successfull..."']
 
     uninstall_pyfile=open(default_install+os.path.sep+"uninstall.py","wb")
     for line in uninstall_lines:
@@ -163,7 +163,7 @@ if returncode == 0:
     uninstall_pyfile.close()
     time.sleep(2)
 
-    print "HealthCheck Installation Successfull..."
+    print "Nutanix Service Toolkit Installation Successfull..."
 
 else:
     print "Exception occured during installation process..."
