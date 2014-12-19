@@ -1274,9 +1274,9 @@ class VCChecker(CheckerBase):
                         passed = False
                         message += ", " +datacenter+"@"+host.name+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ ((ruleset_enable and service_running) and "PASS" or "FAIL")
             except AttributeError:
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )" , ((ruleset_enable and service_running) and "PASS" or "FAIL"))
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )" , (False and "PASS" or "FAIL"))
                     passed = False
-                    message += ", " +datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ ((ruleset_enable and service_running) and "PASS" or "FAIL")
+                    message += ", " +datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ (False and "PASS" or "FAIL")
         
         return passed, message, path
     
