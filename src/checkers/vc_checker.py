@@ -1916,14 +1916,15 @@ class VCChecker(CheckerBase):
                             version=vm.config.version
                             #Version Number from version string 
                             version_no=int(version.replace("vmx-",""))
-                            if allvm_version >=version_no:
+                            #if allvm_version > version_no:
+                            if version_no >= allvm_version:    
                                 #print cluster_name, host_name, vm_name, version
-                                message += ", " +cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: <=vmx-"+str(allvm_version)+")"+"#"+(True and "PASS" or "FAIL")
-                                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: <=vmx-"+str(allvm_version)+")", (True and "PASS" or "FAIL"))
+                                message += ", " +cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")"+"#"+(True and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")", (True and "PASS" or "FAIL"))
                             else:
                                 passed= False
-                                message += ", " +cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: <=vmx-"+str(allvm_version)+")"+"#"+(False and "PASS" or "FAIL")
-                                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: <=vmx-"+str(allvm_version)+")", (False and "PASS" or "FAIL"))
+                                message += ", " +cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")"+"#"+(False and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")", (False and "PASS" or "FAIL"))
    
                             pass_all= pass_all and passed
         return pass_all, message,path+".host.vm"
