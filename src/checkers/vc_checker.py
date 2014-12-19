@@ -949,8 +949,8 @@ class VCChecker(CheckerBase):
                     message += ", "+datacenter +"@"+storage_cluster_name+"@"+datastore_name+ "="+str(storage_drs)+" (Expected: =false)#"+((not storage_drs) and "PASS" or "FAIL")            
                         
             if storage_clusters_found == False:
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "=Storage-Cluster-not-found (Expected: =false)", (True and "PASS" or "FAIL"))
-                message += ", "+datacenter + "=No-Storage-Cluster-found (Expected: =false)#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "=Storage-Cluster-not-found (Expected: =false)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter + "=No-Storage-Cluster-found (Expected: =false)#"+(False and "PASS" or "FAIL")
                 passed=False
             elif ntnx_datastore_found==False:
                 self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "@"+storage_cluster_name+"=NTNX-Datastore-not-found (Expected: =false)", (True and "PASS" or "FAIL"))
