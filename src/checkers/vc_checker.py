@@ -694,8 +694,8 @@ class VCChecker(CheckerBase):
                 
             except AttributeError:
                 passed_all=False
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =Among:"+str(cluster_all_ips)+")", (False and "PASS" or "FAIL"))
-                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =Among:["+cluster_str+"])#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =IP Address of any Nutanix CVM)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             passed_all = passed_all and passed
         return passed_all , message,path
     
@@ -759,8 +759,8 @@ class VCChecker(CheckerBase):
 
             except AttributeError:
                 passed_all=False
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =Among:"+str(cluster_all_ips)+")", (False and "PASS" or "FAIL"))
-                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =Among:["+cluster_str+"])#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =IP Address of any Nutanix CVM)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             
             passed_all = passed_all and passed
         return passed_all , message,path
@@ -825,8 +825,8 @@ class VCChecker(CheckerBase):
 
             except AttributeError:
                 passed_all=False
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =Among:"+str(cluster_all_ips)+")", (False and "PASS" or "FAIL"))
-                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =Among:["+cluster_str+"])#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =IP Address of any Nutanix CVM)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             
             passed_all = passed_all and passed
         return passed_all , message,path
