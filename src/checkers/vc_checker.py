@@ -694,8 +694,8 @@ class VCChecker(CheckerBase):
                 
             except AttributeError:
                 passed_all=False
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =Among:"+str(cluster_all_ips)+")", (False and "PASS" or "FAIL"))
-                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =Among:["+cluster_str+"])#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =IP Address of any Nutanix CVM)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             passed_all = passed_all and passed
         return passed_all , message,path
     
@@ -759,8 +759,8 @@ class VCChecker(CheckerBase):
 
             except AttributeError:
                 passed_all=False
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =Among:"+str(cluster_all_ips)+")", (False and "PASS" or "FAIL"))
-                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =Among:["+cluster_str+"])#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =IP Address of any Nutanix CVM)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             
             passed_all = passed_all and passed
         return passed_all , message,path
@@ -825,8 +825,8 @@ class VCChecker(CheckerBase):
 
             except AttributeError:
                 passed_all=False
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =Among:"+str(cluster_all_ips)+")", (False and "PASS" or "FAIL"))
-                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =Among:["+cluster_str+"])#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =IP Address of any Nutanix CVM)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             
             passed_all = passed_all and passed
         return passed_all , message,path
@@ -894,19 +894,19 @@ class VCChecker(CheckerBase):
             
             passed = True
             if (current_balance[current_key]<=target_balance[current_key]) and (current_balance[current_key] != -1000) and (target_balance[current_key]!=-1000) and (current_balance[current_key] != "Not-Configured") and (target_balance[current_key]!="Not-Configured") :
-                self.reporter.notify_progress(self.reporter.notify_checkLog,  current_key + "="+str(current_balance[current_key])+" (Expected: <="+str(target_balance[current_key])+" )", ("PASS"))
-                message += ", "+current_key + "="+str(current_balance[current_key])+" (Expected: <="+str(target_balance[current_key])+")#PASS"
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  current_key + "="+str(current_balance[current_key])+" (Expected: =Less than "+str(target_balance[current_key])+" )", ("PASS"))
+                message += ", "+current_key + "="+str(current_balance[current_key])+" (Expected: =Less than "+str(target_balance[current_key])+")#PASS"
             else:
                 cur_bal= "NA" if current_balance[current_key]== -1000 else current_balance[current_key]
-                tar_bal= "Load balanced"if (target_balance[current_key]==-1000 or target_balance[current_key]=="Not-Configured") else target_balance[current_key]  
-                self.reporter.notify_progress(self.reporter.notify_checkLog, current_key + "="+str(cur_bal)+" (Expected: <="+str(tar_bal)+" )", ("FAIL"))
-                message += ", "+current_key + "="+str(cur_bal)+" (Expected: <="+str(tar_bal)+")#FAIL"             
+                tar_bal= "NA"if (target_balance[current_key]==-1000 or target_balance[current_key]=="Not-Configured") else target_balance[current_key]  
+                self.reporter.notify_progress(self.reporter.notify_checkLog, current_key + "="+str(cur_bal)+" (Expected: =Less than "+str(tar_bal)+" )", ("FAIL"))
+                message += ", "+current_key + "="+str(cur_bal)+" (Expected: =Less than "+str(tar_bal)+")#FAIL"             
             
             passed_all = passed_all and passed
         
         return passed_all , message,path_curr
     
-    @checkgroup("cluster_checks", "Storage DRS",["performance"],"false")
+    @checkgroup("cluster_checks", "Storage DRS",["performance"],"False")
     def check_cluster_storgae_drs(self):
         path_curr='content.rootFolder.childEntity.datastoreFolder.childEntity'
         storage_clusters_map = self.get_vc_property(path_curr)
@@ -949,8 +949,8 @@ class VCChecker(CheckerBase):
                     message += ", "+datacenter +"@"+storage_cluster_name+"@"+datastore_name+ "="+str(storage_drs)+" (Expected: =false)#"+((not storage_drs) and "PASS" or "FAIL")            
                         
             if storage_clusters_found == False:
-                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "=Storage-Cluster-not-found (Expected: =false)", (True and "PASS" or "FAIL"))
-                message += ", "+datacenter + "=No-Storage-Cluster-found (Expected: =false)#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "=Storage-Cluster-not-found (Expected: =false)", (False and "PASS" or "FAIL"))
+                message += ", "+datacenter + "=No-Storage-Cluster-found (Expected: =false)#"+(False and "PASS" or "FAIL")
                 passed=False
             elif ntnx_datastore_found==False:
                 self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "@"+storage_cluster_name+"=NTNX-Datastore-not-found (Expected: =false)", (True and "PASS" or "FAIL"))
@@ -962,7 +962,7 @@ class VCChecker(CheckerBase):
         
         return passed_all , message,path_curr+".datastore"
     
-    @checkgroup("cluster_checks", "Number of DRS Faults",["performance"],"No. of Faults")
+    @checkgroup("cluster_checks", "Number of DRS Faults",["performance"],"Number of DRS Faults")
     def check_cluster_drs_fault_count(self):
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.drsFault'
         clusters_map = self.get_vc_property(path_curr)
@@ -970,12 +970,12 @@ class VCChecker(CheckerBase):
         message = ""
         passed_all = True
         
-        for datacenter, clusters_drf_faults in clusters_map.iteritems():
+        for datacenter, clusters_drs_faults in clusters_map.iteritems():
             
-            if clusters_drf_faults == "Not-Configured":
+            if clusters_drs_faults == "Not-Configured":
                 continue
             
-            count=len(clusters_drf_faults) if clusters_drf_faults !=None else 0                
+            count=len(clusters_drs_faults) if clusters_drs_faults !=None else 0                
             self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "="+str(count)+" (Expected: =0)", ((True if count ==0 else False) and "PASS" or "FAIL"))
             message += ", "+datacenter + "="+str(count)+" (Expected: =0)#"+((True if count ==0 else False) and "PASS" or "FAIL") 
             passed = (True if count ==0 else False)
@@ -983,7 +983,28 @@ class VCChecker(CheckerBase):
         
         return passed_all , message,path_curr
     
-    @checkgroup("cluster_checks", "Cluster Memory utilization %",["performance"],"memory consumed %")
+    @checkgroup("cluster_checks", "Number of Cluster Events",["performance"],"Number of Cluster Events")
+    def check_cluster_events_count(self):
+        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.configIssue'
+        clusters_map = self.get_vc_property(path_curr)
+        
+        message = ""
+        passed_all = True
+        
+        for datacenter, clusters_events in clusters_map.iteritems():
+            
+            if clusters_events == "Not-Configured":
+                continue
+            
+            count=len(clusters_events) if clusters_events !=None else 0                
+            self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter + "="+str(count)+" (Expected: =0)", ((True if count ==0 else False) and "PASS" or "FAIL"))
+            message += ", "+datacenter + "="+str(count)+" (Expected: =0)#"+((True if count ==0 else False) and "PASS" or "FAIL") 
+            passed = (True if count ==0 else False)
+            passed_all = passed_all and passed
+        
+        return passed_all , message,path_curr    
+    
+    @checkgroup("cluster_checks", "Cluster Memory Utilization %",["performance"],"Memory Consumed %")
     def check_cluster_memory_utilization(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.summary'
         clusters_summary = self.get_vc_property(path)
@@ -1004,11 +1025,15 @@ class VCChecker(CheckerBase):
                 cpu_utilization_percentage= round((effectiveMemory_to_bytes*100)/totalMemory,2)
                 self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key + "="+str(cpu_utilization_percentage)+"% (Expected: =memory-consumed-%)", (True and "PASS" or "FAIL"))
                 message += ", "+clusters_key + "="+str(cpu_utilization_percentage)+"% (Expected: =memory-consumed-%)#"+(True and "PASS" or "FAIL")
+            else:
+                passed = False
+                self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key + "=total_memory_is_zero (Expected: =memory-consumed-%)", (False and "PASS" or "FAIL"))
+                message += ", "+clusters_key + "=total_memory_is_zero (Expected: =memory-consumed-%)#"+(False and "PASS" or "FAIL")
              
             passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Cluster Memory Overcommitment",["performance"],"memory oversubscrption %")
+    @checkgroup("cluster_checks", "Cluster Memory Overcommitment",["performance"],"Memory Oversubscrption %")
     def check_cluster_memory_overcommitment(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
@@ -1041,11 +1066,15 @@ class VCChecker(CheckerBase):
                     #print   cluster_name,   cluster_total_memory , vRam , memory_overcommitment, memory_overcommitment_percentage
                     self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)", (True and "PASS" or "FAIL"))
                     message += ", "+clusters_key+"@" +cluster_name+ "="+str(memory_overcommitment_percentage)+"% (Expected: =memory-oversubscrption-%)#"+(True and "PASS" or "FAIL")
+                else:
+                    passed= False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=total_memory_is_zero (Expected: =memory-oversubscrption-%)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=total_memory_is_zero (Expected: =memory-oversubscrption-%)#"+(False and "PASS" or "FAIL")
                     
         passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Ratio pCPU/vCPU",["performance"],"pCPU/vCPU")
+    @checkgroup("cluster_checks", "Ratio pCPU/vCPU",["performance"],"pCPU/vCPU ratio")
     def check_cluster_ratio_pCPU_vCPU(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
@@ -1075,11 +1104,14 @@ class VCChecker(CheckerBase):
                     ratio= "1:"+str(int(round(vCPU/pCPU)))                    
                     self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+str(ratio)+" (Expected: =pCPU/vCPU)", (True and "PASS" or "FAIL"))
                     message += ", "+clusters_key+"@" +cluster_name+ "="+str(ratio)+" (Expected: =pCPU/vCPU)#"+(True and "PASS" or "FAIL")
-                    
+                else:
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=pCPU_is_zero (Expected: =pCPU/vCPU)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=pCPU_is_zero (Expected: =pCPU/vCPU)#"+(False and "PASS" or "FAIL")
                 passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Admission control policy - Percentage Based on Nodes in the Cluster",["performance"],"true")
+    @checkgroup("cluster_checks", "Admission Control Policy - Percentage Based on Nodes in the Cluster",["performance"],"True")
     def check_cluster_acpPercentage_basedOn_nodes(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
@@ -1137,6 +1169,70 @@ class VCChecker(CheckerBase):
                 passed_all = passed_all and passed
         return passed_all , message,path
     
+    @checkgroup("cluster_checks", "Verify reserved memory and cpu capacity versus Admission control policy set",["performance"],"Cluster Failover Resources %")
+    def check_cluster_validate_reserverdMemory_and_reservedCPU_vs_acp(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity'
+        clusters_map= self.get_vc_property(path)
+        message = ""
+        passed_all = True
+         
+        for clusters_key, clusters in clusters_map.iteritems():
+            passed = True
+            
+            if clusters == "Not-Configured":
+                continue
+            
+            for cluster in clusters:
+                
+                if not isinstance(cluster, vim.ClusterComputeResource):
+                    #condition to check if host directly attached to cluster
+                    continue
+                cluster_name= cluster.name
+                
+                if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            #print "skipping "+cluster_name
+                            continue
+                
+                
+                acp_enabled=cluster.configuration.dasConfig.admissionControlEnabled
+                if not acp_enabled:
+                    
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=ACP is disabled (Expected: =Cluster Failover Resources %)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=ACP is disabled (Expected: =Cluster Failover Resources %)#"+(False and "PASS" or "FAIL")
+                    continue
+                
+                admissionControlPolicy=cluster.configuration.dasConfig.admissionControlPolicy
+                if not isinstance(admissionControlPolicy, vim.cluster.FailoverResourcesAdmissionControlPolicy):
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=ACP is set to different policy than percentage based (Expected: =Cluster Failover Resources %)", (False and "PASS" or "FAIL"))
+                    message += ", "+clusters_key+"@" +cluster_name+ "=ACP is set to different policy than percentage based (Expected: =Cluster Failover Resources %)#"+(False and "PASS" or "FAIL")
+                    continue
+                
+                cpuFailoverResourcesPercent=cluster.configuration.dasConfig.admissionControlPolicy.cpuFailoverResourcesPercent
+                memoryFailoverResourcesPercent=cluster.configuration.dasConfig.admissionControlPolicy.memoryFailoverResourcesPercent        
+                
+                currentCpuFailoverResourcesPercent=cluster.summary.admissionControlInfo.currentCpuFailoverResourcesPercent
+                currentMemoryFailoverResourcesPercent=cluster.summary.admissionControlInfo.currentMemoryFailoverResourcesPercent
+                
+                cpu_diff=currentCpuFailoverResourcesPercent - cpuFailoverResourcesPercent
+                memory_diff=currentMemoryFailoverResourcesPercent - memoryFailoverResourcesPercent
+                
+                      
+                if (cpu_diff > 25 ) and (memory_diff > 25):
+                    passed = True
+                else:
+                    passed = False
+                
+                msg="Reserved-Cpu:"+str(cpuFailoverResourcesPercent)+"; Current-Cpu:"+str(currentCpuFailoverResourcesPercent)+"; Reserved-Memory:"+str(memoryFailoverResourcesPercent)+"; Current-Memory:"+str(currentMemoryFailoverResourcesPercent)
+                
+                self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "="+msg+" (Expected: =Cluster Failover Resources %)", (passed and "PASS" or "FAIL"))
+                message += ", "+clusters_key+"@" +cluster_name+ "="+msg+" (Expected: =Cluster Failover Resources %)#"+(passed and "PASS" or "FAIL")
+
+                passed_all = passed_all and passed
+        return passed_all , message,path
+    
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
     def check_directory_service_set_to_active_directory(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig'
@@ -1189,9 +1285,9 @@ class VCChecker(CheckerBase):
                         passed = False
                         message += ", " +datacenter+"@"+host.name+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ ((ruleset_enable and service_running) and "PASS" or "FAIL")
             except AttributeError:
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )" , ((ruleset_enable and service_running) and "PASS" or "FAIL"))
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )" , (False and "PASS" or "FAIL"))
                     passed = False
-                    message += ", " +datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ ((ruleset_enable and service_running) and "PASS" or "FAIL")
+                    message += ", " +datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ (False and "PASS" or "FAIL")
         
         return passed, message, path
     
@@ -1363,6 +1459,104 @@ class VCChecker(CheckerBase):
         
         return pass_all, message, path
     
+    @checkgroup("network_and_switch_checks", "Check if vSwitchNutanix has no physical adapters",["performance"],"None")
+    def check_vswitch_no_physical_nic(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
+        host_networks = self.get_vc_property(path)
+       
+        message = ""
+        pass_all=True
+        
+        for key, network in host_networks.iteritems():
+            passed = True
+            if network == "Not-Configured":
+                continue
+            
+            vswitchs=network.vswitch
+            if vswitchs is None:
+                continue
+            vSwitchNutanix_found=False
+            for vswitch in vswitchs:
+                if vswitch.name == "vSwitchNutanix":
+                     vSwitchNutanix_found=True
+                     if len(vswitch.pnic)==0:
+                         #print vswitch.name+" as no pnic"
+                         message += ", " +key+"@"+vswitch.name+"=None (Expected: =None)"+"#"+(True and "PASS" or "FAIL")
+                         self.reporter.notify_progress(self.reporter.notify_checkLog,key+"@"+vswitch.name+"=None (Expected: =None)",(True and "PASS" or "FAIL"))
+                     else:
+                         passed = False
+                         pnic_dict={}
+                         for nic in network.pnic:
+                               pnic_dict[nic.key]=nic.device
+                         nic_names=[]                        
+                         for pnic in vswitch.pnic:
+                             nic_names.append(pnic_dict[pnic])
+                             
+                         #print vswitch.name+"="+(','.join(nic_names))
+                         message += ", " +key+"@"+vswitch.name+"="+(','.join(nic_names))+" (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
+                         self.reporter.notify_progress(self.reporter.notify_checkLog,key+"@"+vswitch.name+"="+(','.join(nic_names))+" (Expected: =None)",(False and "PASS" or "FAIL"))
+                     
+            if vSwitchNutanix_found==False:
+                passed = False
+                message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=vSwitchNutanix-Not-Found (Expected: =None)",(False and "PASS" or "FAIL"))
+            pass_all = passed and pass_all    
+ 
+        return pass_all, message, path
+    
+    @checkgroup("network_and_switch_checks", "vSwitchNutanix Connected to CVM only",["performance"],"CVM")
+    def check_vswitchnutanix_connected_to_only_CVM(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
+        host_networks = self.get_vc_property(path)
+       
+        message = ""
+        pass_all=True
+        portgrp=set()
+        for key, network in host_networks.iteritems():
+            passed = True
+            if network == "Not-Configured":
+                continue
+            
+            vswitchs=network.vswitch
+            if vswitchs is None:
+                continue
+            vSwitchNutanix_found=False
+            
+            vSwitchNutanix_key=None
+            for vswitch in vswitchs:
+                if vswitch.name == "vSwitchNutanix":
+                     vSwitchNutanix_found=True
+                     vSwitchNutanix_key=vswitch.key
+                     break
+                         
+            if vSwitchNutanix_found==False:
+                passed = False
+                message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=vSwitchNutanix-Not-Found (Expected: =None)",(False and "PASS" or "FAIL"))
+            else:
+                for portgroup in network.portgroup:
+                    if portgroup.vswitch == vSwitchNutanix_key:
+                        portgrp.add(portgroup.spec.name)
+
+        passed= True
+        for port_grp_name in portgrp:
+            vm_names=self.get_vc_property("content.rootFolder.childEntity.hostFolder.childEntity.network[name="+port_grp_name+"].vm.name")
+            for vmkey, name in vm_names.iteritems():
+                if name == "Not-Configured":
+                    continue
+                else:
+                    vmkey=vmkey.replace(name,"")
+                    if fnmatch.fnmatch(name,"NTNX*CVM"):
+                        passed= True
+                        message += ", " +vmkey+"="+name+" (Expected: =CVM)"+"#"+(True and "PASS" or "FAIL")
+                        self.reporter.notify_progress(self.reporter.notify_checkLog,vmkey+"="+name+" (Expected: =CVM)",(True and "PASS" or "FAIL"))
+                    else:
+                        passed= False
+                        message += ", " +vmkey+"="+name+" (Expected: =CVM)"+"#"+(False and "PASS" or "FAIL")
+                        self.reporter.notify_progress(self.reporter.notify_checkLog,vmkey+"="+name+" (Expected: =CVM)",(False and "PASS" or "FAIL"))
+                    pass_all = passed and pass_all    
+        return pass_all, message, "content.rootFolder.childEntity.hostFolder.childEntity.network.vm"
+    
     @checkgroup("storage_and_vm_checks", "Hardware Acceleration of Datastores", ["performance"], "Supported")
     def check_vStorageSupport(self):
         path ='content.rootFolder.childEntity.hostFolder.childEntity'
@@ -1498,3 +1692,239 @@ class VCChecker(CheckerBase):
                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Not-Attached (Expected: =False)", (True and "PASS" or "FAIL"))     
             pass_all= pass_all and passed
         return pass_all, message,path
+    
+    @checkgroup("storage_and_vm_checks", "CPU Limit per VM", ["manageability"], "vCPU * Host Clock Speed")
+    def check_vm_cpu_limit(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name!=NTNX*CVM].summary'
+        vms_map= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vms_key, vm in vms_map.iteritems():
+              
+            if vm == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            passed=True
+            vms_key='@'.join(vms_key.split('@')[0:-1])
+ 
+            maxCpuUsage=vm.runtime.maxCpuUsage
+            
+            if maxCpuUsage == None:
+                passed=False
+                message += ", " +vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+                continue
+            
+            numCpu=vm.config.numCpu
+            if numCpu == None:
+                passed=False
+                message += ", " +vms_key+"=numCpu is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+                continue
+            
+            cpuMhz=vm.runtime.host.summary.hardware.cpuMhz
+            if cpuMhz == None:
+                passed=False
+                message += ", " +vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+                continue
+                
+            if maxCpuUsage == (cpuMhz*numCpu):
+                message += ", " +vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
+                
+            else:
+                passed=False
+                message += ", " +vms_key+"=" + str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
+                
+            pass_all= pass_all and passed
+  
+        return pass_all, message,path
+    
+    @checkgroup("cvm_checks", "CPU Limit per CVM", ["manageability"], "vCPU * Host Clock Speed")
+    def check_cvm_cpu_limit(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name=NTNX*CVM].summary'
+        vms_map= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vms_key, vm in vms_map.iteritems():
+              
+            if vm == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            passed=True
+            
+            vms_key='@'.join(vms_key.split('@')[0:-1])
+            
+            maxCpuUsage=vm.runtime.maxCpuUsage
+            
+            if maxCpuUsage == None:
+                passed=False
+                message += ", " +vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+                continue
+            
+            numCpu=vm.config.numCpu
+            if numCpu == None:
+                passed=False
+                message += ", " +vms_key+"=numCpu is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+                continue
+            
+            cpuMhz=vm.runtime.host.summary.hardware.cpuMhz
+            if cpuMhz == None:
+                passed=False
+                message += ", " +vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+                continue
+                
+            if maxCpuUsage == (cpuMhz*numCpu):
+                message += ", " +vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
+                
+            else:
+                passed=False
+                message += ", " +vms_key+"=" + str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) +"(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
+                
+            pass_all= pass_all and passed
+  
+        return pass_all, message,path
+      
+    @checkgroup("cvm_checks", "Memory Reservation Per CVM(MB)", ["performance"], "Equal to size of VM memory")
+    def check_memory_reservation_of_cvm(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name=NTNX*CVM].summary'
+        vms_map= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vms_key, vm in vms_map.iteritems():
+              
+            if vm == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            passed=True
+            
+            vms_key='@'.join(vms_key.split('@')[0:-1])
+            
+            memory_reservation=vm.config.memoryReservation
+            vm_memory=vm.config.memorySizeMB
+            
+            if memory_reservation == vm_memory:
+                message += ", " +vms_key+"="+ str(memory_reservation) + " (Expected: ="+str(vm_memory)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) + " (Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
+                
+            else:
+                passed=False
+                message += ", " +vms_key+"=" + str(memory_reservation) + " (Expected: ="+str(vm_memory)+")"+"#"+(True and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) +" (Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
+                
+            pass_all= pass_all and passed
+  
+        return pass_all, message,path    
+          
+    @checkgroup("storage_and_vm_checks", "VM using the VMXNET3 virtual network device",["performance"], "Vmxnet3")
+    def check_vm_using_vmxnet3(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config'
+        vms= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for vm_key, vm in vms.iteritems():
+            if vm == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            
+            #vm version
+            version=vm.version
+            
+            #Version Number from version string 
+            version_no=int(version.replace("vmx-",""))
+            
+            if version_no < 7 :
+                #print vm_key , version_no ,"Skipping check"
+                #skip check if version is less then 7 as need to check version above 7
+                continue
+            
+            passed =True
+            
+            adapter=set()
+            #Device used by VM 
+            #print vm_key , version_no
+            for device in vm.hardware.device:
+                if isinstance(device, vim.vm.device.VirtualEthernetCard):
+                    #print "\t",type(device).__class__
+                    adapter.add(((type(device).__name__).split('.')[-1]).replace("Virtual",""))
+            #print "\t\t", ','.join(adapter)
+            if 'Vmxnet3' in adapter:
+                passed = True
+            else : 
+                passed= False
+            
+            message += ", " +vm_key+"="+(','.join(adapter))+" (Expected: =Vmxnet3)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,vm_key+"="+(','.join(adapter))+" (Expected: =Vmxnet3)", (passed and "PASS" or "FAIL"))     
+            pass_all= pass_all and passed
+        return pass_all, message,path
+    
+    @checkgroup("storage_and_vm_checks", "VM hardware version is the most up to date with the ESXI version",["performance"], "VM hardware version should be in the latest version supported by ESXi in the cluster")
+    def check_vm_hardware_version_ailing_with_esxi_version(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity' #.host.vm.config
+        clusters_map= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        
+        for cluster_key, clusters in clusters_map.iteritems():
+            if clusters == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            
+            for cluster in clusters:
+                
+                cluster_name=cluster.name
+                host_version=[]
+                for host in cluster.host:
+                    if host.config.product.version not in host_version:
+                        host_version.append(host.config.product.version)
+                
+                if len(host_version) == 0:
+                    # No Host found in cluster
+                    #print "No Host found in cluster"
+                    continue
+                elif len(host_version)>1:
+                    # multiple host version found hence skipping check
+                    #print "multiple host version found hence skipping check"
+                    continue
+                else:
+                    allhost_version='.'.join((host_version[0]).split('.')[0:-1])
+   
+                    allvm_version=None
+                    if allhost_version == "5.1":
+                        allvm_version=10
+                    elif allhost_version == "5.5":
+                        allvm_version = 9
+                    else:
+                        continue
+                        
+                    for host in cluster.host:
+                        passed= True
+                        host_name=host.name
+                        for vm in host.vm:
+                            vm_name=vm.name
+                            version=vm.config.version
+                            #Version Number from version string 
+                            version_no=int(version.replace("vmx-",""))
+                            #if allvm_version > version_no:
+                            if version_no >= allvm_version:    
+                                #print cluster_name, host_name, vm_name, version
+                                message += ", " +cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")"+"#"+(True and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")", (True and "PASS" or "FAIL"))
+                            else:
+                                passed= False
+                                message += ", " +cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")"+"#"+(False and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")", (False and "PASS" or "FAIL"))
+   
+                            pass_all= pass_all and passed
+        return pass_all, message,path+".host.vm"

@@ -134,6 +134,7 @@ def vc_report(story, checks_list,vCenterIP):
                                                                                                  properties.get('Cluster'),
                                                                                                  properties.get('Host'),
                                                                                                  properties.get('Status'),
+                                                                                                 properties.get('Message'),
                                                                                                  xprop_exp.strip(')'),
                                                                                                  vCenterIP)
                     
@@ -289,6 +290,7 @@ def CSVReportGenerator(resultJson,curdir=None):
                                                                                                  prop['Cluster'],
                                                                                                  prop['Host'],
                                                                                                  prop['Status'],
+                                                                                                 prop['Message'],
                                                                                                  xprop_exp.strip(')'),
                                                                                                  allChecks['ip'])
                         if is_prop_include == False:

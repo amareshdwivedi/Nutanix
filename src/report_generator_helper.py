@@ -1,5 +1,6 @@
 import datetime
 from validation import Validate
+from distutils.log import info
 
 
 def diff_dates(licencedate):
@@ -7,7 +8,7 @@ def diff_dates(licencedate):
     licenceDate = datetime.datetime.strptime(licencedate, "%Y-%m-%d").date()
     return  (licenceDate - today).days
     
-def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,cluster,host,status,exp_value_from_msg,vCenterServerIP):
+def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,cluster,host,status,message,exp_value_from_msg,vCenterServerIP):
     actual_value=actual_value.strip()
     exp_value_from_msg=exp_value_from_msg.strip()
     
@@ -92,22 +93,6 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return 'powerOff', False, ''
         else: 
             return 'Isolation Response on cluster ['+cluster+'] is ['+actual_value+']', True, 'alert'
-        
-    if check_name == "VM Monitoring For CVMs":
-        if actual_value == "Not-Configured":
-            return 'Not-Configured', False, ''
-        elif actual_value == "vmMonitoringDisabled":
-            return actual_value, False, ''
-        else: 
-            return 'VM monitoring on CVM ['+entity+'] is not [Disabled]', True, 'alert'
-        
-    if check_name == "VM Restart Priority For CVMs":
-        if actual_value == "Not-Configured":
-            return 'Not-Configured', False, ''
-        elif actual_value == "disabled":
-            return 'VM restart Priority on CVM['+entity+'] is [Disabled]', False, ''
-        else: 
-            return 'VM restart Priority on CVM['+entity+'] is [Not Disabled]', True, 'alert' 
             
     if check_name == "Validate Datastore Heartbeat":
         if actual_value == "Not-Configured":
@@ -202,28 +187,39 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     if check_name =="Number of DRS Faults":
         return "On Cluster["+cluster+"] | Number of DRS faults are ["+actual_value+"]", True, ''
     
-    if check_name =="Cluster Memory utilization %":
-        return "On Cluster["+cluster+"] | memory consumed is ["+actual_value+"]", True, ''
+    if check_name =="Number of Cluster Events":
+        return "On Cluster["+cluster+"] | Number of Events are ["+actual_value+"]", True, ''    
+    
+    if check_name =="Cluster Memory Utilization %":
+        if actual_value == "total_memory_is_zero":
+            return "On Cluster["+cluster+"] | Total Memory is [0]", True, 'alert'
+        return "On Cluster["+cluster+"] | Memory Consumed is ["+actual_value+"]", True, ''
     
     if check_name =="Cluster Memory Overcommitment":
-        return "On Cluster["+cluster+"] | memory oversubscrption is ["+actual_value+"]", True, ''
+        if actual_value == "total_memory_is_zero":
+            return "On Cluster["+cluster+"] | Total Memory is [0]", True, 'alert'
+        return "On Cluster["+cluster+"] | Memory Oversubscrption is ["+actual_value+"]", True, ''
     
     if check_name =="Ratio pCPU/vCPU":
+        if actual_value == "pCPU_is_zero":
+            return "On Cluster["+cluster+"] | pCPU is 0", True, 'alert'
         return "On Cluster["+cluster+"] | Ratio pCPU/vCPU is  ["+actual_value+"]", True, ''
     
-    if check_name =="Admission control policy - Percentage Based on Nodes in the Cluster":
+    if check_name =="Admission Control Policy - Percentage Based on Nodes in the Cluster":
         if status == 'FAIL':
             if actual_value == "ACP is disabled":
-                return actual_value,True, 'alert'
+                return "For Cluster["+cluster+"],"+actual_value,True, 'alert'
             else:
-                return actual_value,True, 'warning'
+                return "For Cluster["+cluster+"],"+actual_value,True, 'warning'
+            
     if check_name == "Storage DRS":
         if actual_value == 'False':
             return "Datastore ["+entity+"] is in DRS cluster ["+cluster+"] where DRS autmation is enabled", True, 'alert'
         elif actual_value == 'True':
             return "Datastore ["+entity+"] is in DRS cluster ["+cluster+"] where DRS autmation is enabled", False, 'info'
         else:
-            return "Storage Cluster not found", False, 'info'      
+            return "Storage Cluster not found", False, 'info'
+              
     if check_name == "Resource Pool Memory Limits (in MB)" or check_name=="Resource Pool CPU Limits (in MHz)":
         if status == 'FAIL':
             if actual_value != "Not-Configured":
@@ -233,6 +229,27 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if status == 'FAIL':
             if actual_value != "Not-Configured":
                 return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Reservation is "+str(actual_value), True, 'info'       
+    
+    if check_name == "Verify reserved memory and cpu capacity versus Admission control policy set":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        if 'Reserved-Cpu' in actual_value:
+            cpuFailoverResourcesPercent,currentCpuFailoverResourcesPercent,memoryFailoverResourcesPercent,currentMemoryFailoverResourcesPercent=actual_value.split(';')
+            cpu=float(cpuFailoverResourcesPercent.split(":")[1])
+            current_cpu=float(currentCpuFailoverResourcesPercent.split(":")[1])
+            memory=float(memoryFailoverResourcesPercent.split(":")[1])
+            current_memory=float(currentMemoryFailoverResourcesPercent.split(":")[1])
+            stat='info'
+            if current_cpu-cpu > 25 or current_memory-memory > 25:
+                stat='info'
+            else: stat='warning'
+            return "For Cluster["+cluster+"], <br/>"+str(actual_value).replace(';','<br/>'), True, stat
+        if actual_value == "ACP is disabled":
+                return "For Cluster["+cluster+"], "+actual_value,True, 'alert'
+        else:
+                return "For Cluster["+cluster+"], "+actual_value,True, 'warning'
+            
+            
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
         if actual_value == "Not-Configured":
@@ -260,8 +277,56 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
             return 'Policy['+actual_value+'] set to cluster['+cluster+']', True ,'info'
         
+    if check_name == "VM Monitoring For CVMs":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value == "vmMonitoringDisabled":
+            return actual_value, False, ''
+        else: 
+            return 'VM monitoring on CVM ['+entity+'] is not [Disabled]', True, 'alert'
         
-    # Start of storage_and_vm Checks 
+    if check_name == "VM Restart Priority For CVMs":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value == "disabled":
+            return 'VM restart Priority on CVM['+entity+'] is [Disabled]', False, ''
+        else: 
+            return 'VM restart Priority on CVM['+entity+'] is [Not Disabled]', True, 'alert' 
+        
+    if check_name == "CPU Reservation Per CVM(MHz)":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "10000":
+            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", True ,"alert"
+        else:
+            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", False ,"alert"
+        
+    if check_name == "Memory Reservation Per CVM(MB)":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value is not None:
+             if message is not None :
+                 messageList = message.split('(Expected: =')
+                 expected_result = messageList[1].split(')')[0]             
+        if actual_value == expected_result:
+            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'
+        else:
+            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'        
+        
+                                
+    # Start of storage_and_vm Checks
+    if check_name == "VM hardware version is the most up to date with the ESXI version":
+        if status == 'FAIL':
+            return "Virtual Machine ["+entity+"] has virtual hardware in version ["+actual_value+"] which is lower then latest supported version",True, 'info'
+        else:
+            return "Virtual Machine ["+entity+"] has virtual hardware in version ["+actual_value+"] which is lower then latest supported version",False, 'info'
+     
+    if check_name == "VM using the VMXNET3 virtual network device":
+        if status == 'FAIL':
+            return "Virtual machine ["+entity+"] has virtual adapter ["+actual_value+"]",True, 'info'
+        else : 
+            return "Virtual machine ["+entity+"] has virtual adapter ["+actual_value+"]",False, 'info'
+        
     if check_name == "VMware Tools Status on VMs":
         if actual_value == "toolsOk":
             return actual_value, False, ''
@@ -324,9 +389,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return "Not-Configured", False, ''
         elif actual_value != "0":
-            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", True ,"alert"
+            return "On VM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", True ,"info"
         else:
-            return "On CVM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", False ,"alert"
+            return "On VM ["+entity+"] CPU reservation is set to ["+actual_value+"] MHz", False ,"info"
         
     if check_name == "Memory Reservation Per VM(MB)":
         if actual_value == "Not-Configured":
@@ -384,6 +449,23 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is set to ["+actual_value+"]", True, 'info'
         else:
             return "On virtual machine ["+entity+"] advance setting [RemoteDisplay.maxConnections] is set to ["+actual_value+"]", False, 'info'
+        
+    if check_name ==  "VM Snapshot":
+        if actual_value == "Not-Configured":
+            return actual_value, False, ''
+        elif actual_value is not None:
+             if message is not None :
+                 messageList = message.split('@')
+                 vm_name = messageList[7]             
+             actual_date , actual_time = actual_value.split()
+             days = abs(diff_dates(actual_date))
+             if days > 14:
+               return  "Virtual machine ["+vm_name+"] has snapshot which is ["+str(days)+"] days old", True, 'alert'
+             elif days > 7 and days < 14:  
+               return  "Virtual machine ["+vm_name+"] has snapshot which is ["+str(days)+"] days old", True, 'warning'           
+             else:
+                 return "Virtual machine ["+vm_name+"] has snapshot which is ["+str(days)+"] days old", True, 'info'   
+                           
 
         
     # Start of vcenter_server Checks 
@@ -563,7 +645,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "Host["+host+"] NTP servers["+str(actual_value)+"] are configured " , False, '' 
             
                  
-    # Start of network_and_switch Checks           
+    # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
         if actual_value == "Not-Configured":
             return "Not-Configured", False,''
@@ -711,6 +793,22 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "MTU size on vSwitch["+entity+"] on host["+host+"] has MTU["+actual_value+"]", False,''                       
         else:
             return "MTU size on vSwitch["+entity+"] on host["+host+"] has MTU["+actual_value+"]", True,'info'
-        
-        
+    
+    if check_name == "Check if vSwitchNutanix has no physical adapters":
+        if actual_value == "vSwitchNutanix-Not-Found":
+            return "On host ["+host+"], vSwitchNutanix not found", True,'alert'
+        elif actual_value == "None":
+            return "On host ["+host+"], vSwitchNutanix has no physical nic attached", False,''                       
+        else:
+            return "On host ["+host+"], vSwitchNutanix has physical nics ["+actual_value+"] attached", True,'info'    
+    
+    if check_name == "vSwitchNutanix Connected to CVM only":
+        if status == 'FAIL':
+            if actual_value == "vSwitchNutanix-Not-Found":
+                return "On Cluster ["+cluster+"], vSwitchNutanix not found", True,'alert'
+            else:
+                return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'info'
+    
+    #Default return
     return str(actual_value), False,'info'
+ 
