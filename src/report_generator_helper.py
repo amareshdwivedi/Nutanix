@@ -298,8 +298,12 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     if check_name == "Memory Reservation Per CVM(MB)":
         if actual_value == "Not-Configured":
             return "Not-Configured", False, ''
-        elif actual_value == "0":
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", True ,'alert'
+        elif actual_value is not None:
+             if message is not None :
+                 messageList = message.split('(Expected: =')
+                 expected_result = messageList[1].split(')')[0]             
+        if actual_value == expected_result:
+            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'
         else:
             return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'        
         
@@ -316,6 +320,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "Virtual machine ["+entity+"] has virtual adapter ["+actual_value+"]",True, 'info'
         else : 
             return "Virtual machine ["+entity+"] has virtual adapter ["+actual_value+"]",False, 'info'
+        
     if check_name == "VMware Tools Status on VMs":
         if actual_value == "toolsOk":
             return actual_value, False, ''
