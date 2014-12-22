@@ -29,7 +29,7 @@ def console_msg(message=None):
 
 def main():   
     options = sys.argv[1:]
-    print "Options :",options
+    #print "Options :",options
     if len(options) == 0:
         usage()
    
@@ -49,7 +49,7 @@ def main():
         usage()
     elif len(options) == 2:
         try :
-            print "Arguement Json is :",options[1]
+            #print "Arguement Json is :",options[1]
             inputData = json.loads(options[1])
         except:
             print "Invalid Input"
