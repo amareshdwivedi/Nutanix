@@ -4,7 +4,7 @@ Nutanix GSO Toolkit V0.1
 Table of Contents
     01 Overview
     02 Installation Instructions
-    03 How to run deployer scripts
+    03 How to Run IaaS Provisioning
     04 How to Run HealthCheck
     05 Known Issues
 
@@ -25,7 +25,6 @@ Table of Contents
              - Python 2.7.8 should be installed on the system. (Python 3.0 is not tested)
              - Python Path should be set under system environment variables
              - Verify python command can be executed by typing 'python --version'. It should display version of python installed.
-             - Microsoft Visual C++ compiler for Python 2.7 should be installed (Download link - http://aka.ms/vcpython27)
 
        2.1.2 Installation Steps
              - Extract the content of Zip file
@@ -38,7 +37,7 @@ Table of Contents
              - This release include only command line version of deployer toolkit, 'iaasProvisioning.py'.
 
        2.1.3 Un-installation Instructions(Windows 32-bit and 64-bit)
-             - Open command prompt and navigate to Healthcheck install folder - PYTHON_HOME/Lib/site-packages/healthcheck.
+             - Open command prompt and navigate to install folder - PYTHON_HOME\Lib\site-packages\service_toolkit.
              - Execute script - 'uninstall.py',this will uninstall and remove all the files which were installed as part of install process.
 
     2.2 Linux
@@ -46,7 +45,7 @@ Table of Contents
        2.1.1 Pre-requisites
              - Python 2.7.8 should be installed on the system.
              - Python Path should be set under system environment variables.
-             - To install healthcheck make sure you have SUDO or ROOT permission on install system. 
+             - To install service_toolkit make sure you have SUDO or ROOT permission on install system. 
 
        2.1.2 Installation Steps
              - Extract the content of Zip file
@@ -60,18 +59,18 @@ Table of Contents
              - This release include only command line version of deployer toolkit, 'iaasProvisioning.py'.
 
        2.1.3 Un-installation Instructions()
-             - Open command prompt and navigate to folder python package folder(for Centos: /usr/lib/python2.7/site-packages/healthcheck)
+             - Open command prompt and navigate to folder python package folder(for Centos: /usr/lib/python2.7/site-packages/service_toolkit)
              - Execute script - 'uninstall.py',this will uninstall and remove all the files which were installed as part of install process.
 
     2.3 Apple Mac
          <TBD>
 
-03 How to run IaaS Provisioning (Deployer tool kit)
+03 How to Run IaaS Provisioning (Deployer Toolkit)
 
    3.1 Configuring input parameters
 
-       This script accepts input in the form of JSON file. JSON file has key value pairs. Input file is located at, <install_dir_path>\src\conf\input.json.
-       On windows, this file is located at, PYTHON_HOME\Lib\site-packages\healthcheck\src\conf\input.json
+       This script accepts input in the form of JSON file. JSON file has key value pairs. Input file is located at, <install_dir_path>service_toolkit-1.0.0-py2.7.egg\src\conf\input.json.
+       On windows, this file is located at, PYTHON_HOME\Lib\site-packages\service_toolkit\service_toolkit-1.0.0-py2.7.egg\src\conf
 
        The input file has three sections Foundation, Prism and vCenter Configurations. Update the file by entering values for respective keys.
 
