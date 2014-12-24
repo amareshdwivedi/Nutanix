@@ -808,6 +808,15 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "On Cluster ["+cluster+"], vSwitchNutanix not found", True,'alert'
             else:
                 return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'info'
+            
+    #hardware_and_bios_checks
+    if check_name == "VT-Extensions":
+        if actual_value == "Not-Configured":
+            return "Host Not Added to cluster", False,'info'
+        elif actual_value == "True":
+            return "On Host["+host+"], VT-Extensions is [Enabled]", False, 'info'
+        else:
+            return "On Host["+host+"], VT-Extensions is [Disabled]", True, 'info'
     
     #Default return
     return str(actual_value), False,'info'
