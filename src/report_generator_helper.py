@@ -541,7 +541,22 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                return  "vCenter Server ["+vCenterServerIP+"] license expiration date is ["+actual_date+"]", True, 'alert'
              else:
                  return actual_date, False, '' 
-             
+
+    if check_name == "vCenter Server Role Based Access":
+        if actual_value == "Not-Configured":
+            return actual_value, False, ''
+        elif actual_value == "True":
+            return "Role Based Access on vCenter Server ["+vCenterServerIP+"] is Enabled", False, 'info'
+        else:
+            return "Role Based Access on vCenter Server ["+vCenterServerIP+"] is Disabled", True, 'info' 
+        
+    if check_name == "vCenter Server Plugins":
+        if actual_value == "Not-Configured":
+            return actual_value, True, ''
+        elif status == "PASS":
+            return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", True, 'info'
+        else:
+            return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", False, 'info'                    
               
     # Start of ESXI Checks      
     if check_name == "Host's HyperThreading Status":

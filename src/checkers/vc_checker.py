@@ -1375,7 +1375,7 @@ class VCChecker(CheckerBase):
          
         return passed,message,''
     #{"name" : "vCenter Server Plugins", "path" : "content.extensionManager.extensionList.description.key", "operator":"=", "ref-value": "", "category": ["security"],"expectedresult": "Plugin is Registered"}
-    @checkgroup("vcenter_server_checks", "VCenter Server Plugins",["performance"],"List of plugins")
+    @checkgroup("vcenter_server_checks", "vCenter Server Plugins",["performance"],"List of plugins")
     def check_vcenter_server_plugins(self):
         vcenter_plugins_map = self.get_vc_property('content.extensionManager.extensionList')
                
@@ -1390,13 +1390,36 @@ class VCChecker(CheckerBase):
             
         if len(plug_list) > 0:
             self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= [" + ','.join(set(plug_list)) + "] (Expected: =Plugin List)" , (True and "PASS" or "FAIL"))
-            message += ", "+"License Expiration Validation = " + ','.join(set(plug_list)) + " (Expected: =Plugin List) "+"#"+((True) and "PASS" or "FAIL")
+            message += ", "+"vCenter Plugins = " + ','.join(set(plug_list)) + " (Expected: =Plugin List) "+"#"+((True) and "PASS" or "FAIL")
         else:
             passed = False
             self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= Plugins-Not-Found (Expected: =Plugin List)" , (False and "PASS" or "FAIL"))
-            message += ", "+"License Expiration Validation = Plugins-Not-Found (Expected: =Plugin List) "+"#"+((False) and "PASS" or "FAIL")
+            message += ", "+"vCenter Plugins = Plugins-Not-Found (Expected: =Plugin List) "+"#"+((False) and "PASS" or "FAIL")
          
         return passed,message,''
+    
+    @checkgroup("vcenter_server_checks", "vCenter Server Role Based Access",["performance"],"Role Based Access is Implemented")
+    def check_vcenter_role_based_access(self):
+        vcenter_roleList = self.get_vc_property('content.authorizationManager.roleList')
+               
+        message = ""
+        passed = True
+        role_list=[]
+        for key, roles in vcenter_roleList.iteritems():
+            if roles ==None:
+                continue
+            for role in roles:
+                role_list.append(role.name)
+            
+        if len(role_list) > 0:
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Role Based Access= True (Expected: =True) " , (True and "PASS" or "FAIL"))
+            message += ", "+"vCenter Server Role Based Access= True (Expected: =True) " +"#"+((True) and "PASS" or "FAIL")
+        else:
+            passed = False
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Role Based Access= False (Expected: =True) " , (False and "PASS" or "FAIL"))
+            message += ", "+"vCenter Server Role Based Access= False (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
+         
+        return passed,message,''    
     
     @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - Network IO Control",["performance"],"Enabled")
     def check_virtual_distributed_switch_networ_io_control(self):
