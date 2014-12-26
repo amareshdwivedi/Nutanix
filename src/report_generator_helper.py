@@ -832,7 +832,12 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "On Host["+host+"], VT-Extensions is [Enabled]", False, 'info'
         else:
             return "On Host["+host+"], VT-Extensions is [Disabled]", True, 'info'
-    
+    if check_name == "XD Enabled":
+        if actual_value == "True":
+            return "On Host["+host+"], XD is enabled", True, 'info'
+        else:
+            return "On Host["+host+"], XD is disabled", True, 'alert'
+            
     #Default return
     return str(actual_value), False,'info'
  

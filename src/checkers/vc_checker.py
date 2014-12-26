@@ -1951,3 +1951,35 @@ class VCChecker(CheckerBase):
    
                             pass_all= pass_all and passed
         return pass_all, message,path+".host.vm"
+
+    @checkgroup("hardware_and_bios_checks", "XD Enabled",["performance"],"True")
+    def check_XD_enabled(self):
+        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host.hardware.cpuFeature'
+        host_map = self.get_vc_property(path_curr)
+         
+        message = ""
+        passed_all = True
+         
+        for key, host_cpuFeatures in host_map.iteritems():
+            passed = True
+            
+            if host_cpuFeatures == "Not-Configured":
+                continue
+             
+            for cpuFeature in host_cpuFeatures:
+                if cpuFeature.level==-2147483647 :
+                    edx=cpuFeature.edx
+                    xd_enabled=False
+                    
+                    # Bit operation
+                    # if  edx=0010:1100:0001:0000:0000:1000:0000:0000, to check XD 20th bit should set to 1
+                    if list(edx.split(':')[2])[-1] == '1':
+                        xd_enabled=True
+                    
+                    message += ", " +key+"="+str(xd_enabled)+" (Expected: =True)"+"#"+(xd_enabled and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,key+"="+str(xd_enabled)+" (Expected: =True)",(xd_enabled and "PASS" or "FAIL"))
+                    passed=xd_enabled
+                    continue   
+            passed_all = passed_all and passed
+        
+        return passed_all , message,path_curr
