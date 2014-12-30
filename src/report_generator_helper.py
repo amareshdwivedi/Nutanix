@@ -658,7 +658,25 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "Host["+host+"] has only one NTP server["+str(actual_value)+"] configured" , True, 'alert'
             else:
                 return "Host["+host+"] NTP servers["+str(actual_value)+"] are configured " , False, '' 
-            
+    
+    if check_name=="Management VMkernel adapter has only Management Traffic enabled":
+        if status == 'FAIL':
+            if actual_value == "Management-Adapter-Not-Found":
+                return "On Host["+host+"], Management-Adapter-Not-Found", True , 'info'
+            else:
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info'  
+    if check_name=="vMotion VMkernel adapter has only vMotion Traffic enabled":
+        if status == 'FAIL':
+            if actual_value == "vMotion-Adapter-Not-Found":
+                return "On Host["+host+"], vMotion-Adapter-Not-Found", True , 'info'
+            else:
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info'
+    if check_name=="FTLogging VMkernel adapter has only FTLogging enabled":
+        if status == 'FAIL':
+            if actual_value == "FTLogging-Adapter-Not-Found":
+                return "On Host["+host+"], FTLogging-Adapter-Not-Found", True , 'info'
+            else:
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info' 
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
