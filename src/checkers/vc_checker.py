@@ -1333,6 +1333,210 @@ class VCChecker(CheckerBase):
         
         return passed_all,message,path
 
+    
+    @checkgroup("esxi_checks", "Management VMkernel adapter has only Management Traffic enabled",["security"],"vMotionTraffic:disabled<br/> ManagementTraffic:enabled<br/> FTLogging:disabled")
+    def check_management_vmkernel_has_management_traffic(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
+        virtual_nic_mgrs = self.get_vc_property(path)
+       
+        message = ""
+        passed = True
+        
+        for host, netConfig_list in virtual_nic_mgrs.iteritems():
+            #print host
+            if netConfig_list == "Not-Configured":
+                continue
+            else:
+                service_list=[]
+                vmkernal_nic_and_portgrp={}
+                nic_selected_service={}
+                
+                for netConfig in netConfig_list:
+                    service_list.append(netConfig.nicType)
+                    
+                    candidateVnic_list=netConfig.candidateVnic
+                    for candidateVnic in candidateVnic_list:
+                        device=candidateVnic.device
+                        
+                        if candidateVnic.key in netConfig.selectedVnic:
+                            if device not in nic_selected_service.keys():
+                                nic_selected_service[device]=list()
+                            (nic_selected_service[device]).append(netConfig.nicType)
+                        
+                        if device not in vmkernal_nic_and_portgrp.keys():
+                            vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
+                    
+                #print "\t\t",service_list, '\n\t\t',vmkernal_nic_and_portgrp,"\n\t\t",nic_selected_service
+                vmkernal_adapter=vmkernal_nic_and_portgrp.get('management network')
+                enabled_management_service= nic_selected_service.get(vmkernal_adapter)
+                
+                status = True
+                excepted_result="vMotionTraffic:disabled; ManagementTraffic:enabled; FTLogging:disabled"
+                
+                if enabled_management_service != None:
+                    result=''
+                    if 'vmotion' in enabled_management_service:
+                        status= False
+                        result+="vMotionTraffic:enabled;"
+                    else:
+                        result+="vMotionTraffic:disabled;"
+                    
+                    if 'management' in enabled_management_service:
+                        result+=" ManagementTraffic:enabled;"
+                    else:
+                        result+=" ManagementTraffic:disabled;"
+                    
+                    if 'faultToleranceLogging' in enabled_management_service:
+                        status= False
+                        result+=" FTLogging:enabled"
+                    else:
+                        result+=" FTLogging:disabled"
+                    
+                    passed= passed and status
+                    message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
+                else:
+                    status= False
+                    message += ", " +host+"=Management-Adapter-Not-Found (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=Management-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
+                passed= passed and status
+        return passed, message,path
+    
+    @checkgroup("esxi_checks", "vMotion VMkernel adapter has only vMotion Traffic enabled",["security"],"vMotionTraffic:enabled<br/> ManagementTraffic:disabled<br/> FTLogging:disabled")
+    def check_vmotion_vmkernel_has_management_traffic(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
+        virtual_nic_mgrs = self.get_vc_property(path)
+       
+        message = ""
+        passed = True
+        
+        for host, netConfig_list in virtual_nic_mgrs.iteritems():
+            #print host
+            if netConfig_list == "Not-Configured":
+                continue
+            else:
+                service_list=[]
+                vmkernal_nic_and_portgrp={}
+                nic_selected_service={}
+                
+                for netConfig in netConfig_list:
+                    service_list.append(netConfig.nicType)
+                    
+                    candidateVnic_list=netConfig.candidateVnic
+                    for candidateVnic in candidateVnic_list:
+                        device=candidateVnic.device
+                        
+                        if candidateVnic.key in netConfig.selectedVnic:
+                            if device not in nic_selected_service.keys():
+                                nic_selected_service[device]=list()
+                            (nic_selected_service[device]).append(netConfig.nicType)
+                        
+                        if device not in vmkernal_nic_and_portgrp.keys():
+                            vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
+                    
+                vmkernal_adapter=vmkernal_nic_and_portgrp.get('vmotion')
+                enabled_management_service= nic_selected_service.get(vmkernal_adapter)
+                
+                status = True
+                excepted_result="vMotionTraffic:enabled; ManagementTraffic:disabled; FTLogging:disabled"
+                if enabled_management_service !=None :
+                    result=''
+                    if 'vmotion' in enabled_management_service:
+                        result+="vMotionTraffic:enabled;"
+                    else:
+                        result+="vMotionTraffic:disabled;"
+                    
+                    if 'management' in enabled_management_service:
+                        status= False
+                        result+=" ManagementTraffic:enabled;"
+                    else:
+                        result+=" ManagementTraffic:disabled;"
+                    
+                    if 'faultToleranceLogging' in enabled_management_service:
+                        status= False
+                        result+=" FTLogging:enabled"
+                    else:
+                        result+=" FTLogging:disabled"
+                    
+                    message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
+                else:
+                    status= False
+                    message += ", " +host+"=vMotion-Adapter-Not-Found (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=vMotion-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
+                passed= passed and status
+
+        return passed, message,path
+    
+     
+    @checkgroup("esxi_checks", "FTLogging VMkernel adapter has only FTLogging enabled",["security"],"vMotionTraffic:disabled<br/> ManagementTraffic:disabled<br/> FTLogging:enabled")
+    def check_ftlogging_vmkernel_has_management_traffic(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
+        virtual_nic_mgrs = self.get_vc_property(path)
+         
+        message = ""
+        passed = True
+          
+        for host, netConfig_list in virtual_nic_mgrs.iteritems():
+            #print host
+            if netConfig_list == "Not-Configured":
+                continue
+            else:
+                service_list=[]
+                vmkernal_nic_and_portgrp={}
+                nic_selected_service={}
+                  
+                for netConfig in netConfig_list:
+                    service_list.append(netConfig.nicType)
+                      
+                    candidateVnic_list=netConfig.candidateVnic
+                    for candidateVnic in candidateVnic_list:
+                        device=candidateVnic.device
+                          
+                        if candidateVnic.key in netConfig.selectedVnic:
+                            if device not in nic_selected_service.keys():
+                                nic_selected_service[device]=list()
+                            (nic_selected_service[device]).append(netConfig.nicType)
+                          
+                        if device not in vmkernal_nic_and_portgrp.keys():
+                            vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
+                      
+                #print "\t\t",service_list, '\n\t\t',vmkernal_nic_and_portgrp,"\n\t\t",nic_selected_service
+                vmkernal_adapter=vmkernal_nic_and_portgrp.get('faulttolerancelogging')
+                enabled_management_service= nic_selected_service.get(vmkernal_adapter)
+                  
+                status = True
+                excepted_result="vMotionTraffic:disabled; ManagementTraffic:disabled; FTLogging:enabled"
+                
+                if enabled_management_service !=None:
+                
+                    result=''
+                    if 'vmotion' in enabled_management_service:
+                        status= False
+                        result+="vMotionTraffic:enabled;"
+                    else:
+                        result+="vMotionTraffic:disabled;"
+                      
+                    if 'management' in enabled_management_service:
+                        status= False
+                        result+=" ManagementTraffic:enabled;"
+                    else:
+                        result+=" ManagementTraffic:disabled;"
+                      
+                    if 'faultToleranceLogging' in enabled_management_service:
+                        result+=" FTLogging:enabled"
+                    else:
+                        result+=" FTLogging:disabled"
+                    
+                    message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
+                else:
+                    status= False
+                    message += ", " +host+"=FTLogging-Adapter-Not-Found (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=FTLogging-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
+                passed= passed and status
+        return passed, message,path
+
     @checkgroup("vcenter_server_checks", "Validate vCenter Server License Expiration Date",["availability"],"No expiration date or expiration date less than 60 days")
     def check_vcenter_server_license_expiry(self):
         expirationDate = self.get_vc_property('content.licenseManager.evaluation.properties[key=expirationDate].value')
