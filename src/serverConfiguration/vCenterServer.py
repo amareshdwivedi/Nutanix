@@ -254,10 +254,15 @@ class VCenterServerConf:
         dasConfig.admissionControlEnabled = True
         dasConfig.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
         clusterSpec.dasConfig = dasConfig
+        
         #dasVmConfig
         settings = []
         vms = self.get_all_vms(dc)
         for xvm in vms:
+
+            if not xvm.name.startswith('NTNX-'):
+                continue
+
             dasVmConfigSpec = vim.cluster.DasVmConfigSpec()
             dasVmConfigSpec.operation = vim.option.ArrayUpdateSpec.Operation.add
 
@@ -271,7 +276,7 @@ class VCenterServerConf:
             monitor.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
             monitor.clusterSettings = False
             vm_settings.vmToolsMonitoringSettings = monitor
-            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.none
+            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.powerOff
             dasVmConfigInfo.dasSettings = vm_settings
             dasVmConfigSpec.info = dasVmConfigInfo
             
@@ -291,6 +296,10 @@ class VCenterServerConf:
         settings = []
         vms = self.get_all_vms(dc)
         for xvm in vms:
+            
+            if not xvm.name.startswith('NTNX-'):
+                continue
+
             drsVmConfigSpec = vim.cluster.DrsVmConfigSpec()
             drsVmConfigSpec.operation = vim.option.ArrayUpdateSpec.Operation.add
 
@@ -345,10 +354,18 @@ class VCenterServerConf:
         #time.sleep(90)
         print "+"+"-"*100+"+"+"\n"
         print "Configuring VMs"
+        vmNum = 1
         for xhost in clusterObj.host:
             for xvm in xhost.vm:
-
+                print "\n%d. Configuring VM :%s"%(vmNum,xvm.name)
+                vmNum += 1
                 vmObj = self.si.content.searchIndex.FindByUuid(None, xvm.config.uuid, True)
+                
+                '''
+                xGuest = vim.vm.GuestInfo()
+                xGuest.toolsStatus = vim.vm.GuestInfo.ToolsStatus.toolsOk
+                vmObj.guest = xGuest
+                '''
                 
                 spec = vim.vm.ConfigSpec()
                 res = vim.ResourceAllocationInfo()
