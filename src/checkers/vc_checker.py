@@ -2227,8 +2227,8 @@ class VCChecker(CheckerBase):
                     clustersize+=value
                 
                 passed=status = mix_model_not_found and ( True if clustersize <= 8 else False)
-                message += ", " +datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020];Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020];Cluster-Size<=8)",(status and "PASS" or "FAIL"))
+                message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020]; Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020]; Cluster-Size<=8)",(status and "PASS" or "FAIL"))
             elif 'NX-1050' in node_model.keys():
                 mix_model_not_found=True
                 if len(node_model.keys())>1: 
@@ -2241,8 +2241,8 @@ class VCChecker(CheckerBase):
                     clustersize+=value
                 
                 passed=status = mix_model_not_found and ( True if clustersize <= 8 else False)
-                message += ", " +datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050];Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050];Cluster-Size<=8)",(status and "PASS" or "FAIL"))
+                message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050]; Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050]; Cluster-Size<=8)",(status and "PASS" or "FAIL"))
             elif 'NX-6000' in node_model.keys():
                 nx2000_model_not_found=True
                 if 'NX-2000' in node_model.keys(): 
@@ -2256,15 +2256,15 @@ class VCChecker(CheckerBase):
                 
                 passed=status = nx2000_model_not_found 
                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])"+"#"+(status and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])",(status and "PASS" or "FAIL"))
+                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])",(status and "PASS" or "FAIL"))
             else:
                 clustersize=0
                 for n_model,value in node_model.iteritems():
                     clustersize+=value
                 
                 passed=status = True 
-                message += ", " +datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Models"+"#"+(status and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Models)",(status and "PASS" or "FAIL"))
+                message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Models"+"#"+(status and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Models)",(status and "PASS" or "FAIL"))
                                 
             passed_all = passed_all and passed
       
