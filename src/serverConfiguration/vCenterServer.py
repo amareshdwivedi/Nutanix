@@ -338,6 +338,23 @@ class VCenterServerConf:
             if xhost.runtime.connectionState is 'disconnected':
                 xhost.ReconnectHost_Task()
 
+        #time.sleep(90)
+        print "+"+"-"*100+"+"+"\n"
+        print "Configuring VMs"
+        for xhost in clusterObj.host:
+            for xvm in xhost.vm:
+                
+                spec = vim.vm.ConfigSpec()
+                
+                res = vim.ResourceAllocationInfo()
+                res.limit = -1L
+                res.reservation = 0L
+                spec.cpuAllocation = res
+                spec.memoryAllocation  = res
+                
+                task = xvm.ReconfigVM_Task(spec)
+                self.wait_for_task(task)
+        
         print "+"+"-"*100+"+"+"\n"
         self.disConnectVC()
 
