@@ -854,8 +854,12 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "True":
             return "On Host["+host+"], XD is enabled", True, 'info'
         else:
-            return "On Host["+host+"], XD is disabled", True, 'alert'
-            
+            return "On Host["+host+"], XD is disabled", True, 'alert' 
+    if check_name == "Node Models and cluster size":
+        if status == 'FAIL':
+            return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'alert'
+        else:
+            return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'info'
     #Default return
     return str(actual_value), False,'info'
  
