@@ -240,13 +240,12 @@ class VCenterServerConf:
         
         #Add hosts to the cluster :
         self.add_host(newc)
-        print "+"+"-"*100+"+"+"\n"
 
+        #dasConfig
         clusterObj = self.get_cluster(dc,self.confDetails['cluster'])
         clusterSpec = vim.cluster.ConfigSpec()
         
-        #dasConfig
-        print "Configuring vSphere HA"
+        print "Configuring vSphere HA (das-Setting)"
         dasConfig = vim.cluster.DasConfigInfo()
         dasConfig.dynamicType = ""
         dasConfig.enabled = True
@@ -254,8 +253,15 @@ class VCenterServerConf:
         dasConfig.admissionControlEnabled = True
         dasConfig.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
         clusterSpec.dasConfig = dasConfig
-        
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
+
         #dasVmConfig
+        #dasConfig
+        print "+"+"-"*100+"+"+"\n"
+        print "Configuring vSphere dasVm-Setting"
+        clusterSpec = vim.cluster.ConfigSpec()
+        
         settings = []
         vms = self.get_all_vms(dc)
         for xvm in vms:
@@ -267,7 +273,7 @@ class VCenterServerConf:
             dasVmConfigSpec.operation = vim.option.ArrayUpdateSpec.Operation.add
 
             dasVmConfigInfo = vim.cluster.DasVmConfigInfo()
-            dasVmConfigInfo.key = vms[0]
+            dasVmConfigInfo.key = xvm
             dasVmConfigInfo.restartPriority = vim.cluster.DasVmConfigInfo.Priority.disabled
             
             vm_settings = vim.cluster.DasVmSettings()
@@ -276,22 +282,30 @@ class VCenterServerConf:
             monitor.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
             monitor.clusterSettings = False
             vm_settings.vmToolsMonitoringSettings = monitor
-            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.powerOff
+            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.none
             dasVmConfigInfo.dasSettings = vm_settings
             dasVmConfigSpec.info = dasVmConfigInfo
-            
             settings.append(dasVmConfigSpec)
+            break
         clusterSpec.dasVmConfigSpec = settings
-        
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
+
         #drsConfig
         print "+"+"-"*100+"+"+"\n"
         print "Configuring vSphere DRS"
+        clusterSpec = vim.cluster.ConfigSpec()
         drsConfig = vim.cluster.DrsConfigInfo()
         drsConfig.enabled = True
         #possible values : fullyAutomated/manual/partiallyAutomated
         drsConfig.defaultVmBehavior = vim.cluster.DrsConfigInfo.DrsBehavior.fullyAutomated
         clusterSpec.drsConfig = drsConfig
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
 
+        print "+"+"-"*100+"+"+"\n"
+        print "Configuring vSphere DRS VM Config"
+        clusterSpec = vim.cluster.ConfigSpec()
         #drsVmConfig
         settings = []
         vms = self.get_all_vms(dc)
@@ -310,16 +324,19 @@ class VCenterServerConf:
             
             drsVmConfigSpec.info = drsVmConfigInfo
             settings.append(drsVmConfigSpec)
+            break
         clusterSpec.drsVmConfigSpec = settings
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
 
         #dpmConfigSpec
         
         
         #Reconfigure cluster with above configuration
-        print "+"+"-"*100+"+"+"\n"
-        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
-        print "Reconfigured cluster for Health Check Properties"
-        self.wait_for_task(task)
+        #print "+"+"-"*100+"+"+"\n"
+        #print "Reconfigured cluster for Health Check Properties"
+        #task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        #self.wait_for_task(task)
         
         #Reconfigure Host Properties
         #START
