@@ -18,6 +18,7 @@ import warnings
 import sys,os,json,time
 import requests
 import paramiko
+import fnmatch
 
 class VCenterServerConf:
     def __init__(self,confDetails):
@@ -30,6 +31,9 @@ class VCenterServerConf:
         try:
             self.si = connect.SmartConnect(host=self.confDetails['host'],user=self.confDetails['user'],pwd=self.confDetails['password'],port=self.confDetails['port'])
             print "Connection to vCenter Server(%s) is Successful"%(self.confDetails['host'])
+
+            atexit.register(connect.Disconnect, self.si)
+
         except vim.fault.InvalidLogin:
             print "Error : Invalid Username and Password Combination."
             sys.exit(2)
@@ -343,18 +347,34 @@ class VCenterServerConf:
         print "Configuring VMs"
         for xhost in clusterObj.host:
             for xvm in xhost.vm:
+
+                vmObj = self.si.content.searchIndex.FindByUuid(None, xvm.config.uuid, True)
                 
                 spec = vim.vm.ConfigSpec()
-                
                 res = vim.ResourceAllocationInfo()
                 res.limit = -1L
-                res.reservation = 0L
+                #res.reservation = 0L
                 spec.cpuAllocation = res
                 spec.memoryAllocation  = res
-                
-                task = xvm.ReconfigVM_Task(spec)
+
+                opt = vim.option.OptionValue()
+                spec.extraConfig = []
+                options_values = {
+                    "isolation.tools.diskWiper.disable": "true",
+                    "isolation.tools.diskShrink.disable": "true",
+                    "isolation.tools.copy.disable": "true",
+                    "isolation.tools.paste.disable": "true",
+                    "log.keepOld": 8,
+                    "RemoteDisplay.maxConnections": 1 }
+                for k, v in options_values.iteritems():
+                    opt.key = k
+                    opt.value = v
+                    spec.extraConfig.append(opt)
+                    opt = vim.option.OptionValue()
+
+                task = vmObj.ReconfigVM_Task(spec)
                 self.wait_for_task(task)
-        
+                
         print "+"+"-"*100+"+"+"\n"
         self.disConnectVC()
 
