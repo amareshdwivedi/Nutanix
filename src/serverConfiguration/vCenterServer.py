@@ -18,6 +18,7 @@ import warnings
 import sys,os,json,time
 import requests
 import paramiko
+import fnmatch
 
 class VCenterServerConf:
     def __init__(self,confDetails):
@@ -30,6 +31,9 @@ class VCenterServerConf:
         try:
             self.si = connect.SmartConnect(host=self.confDetails['host'],user=self.confDetails['user'],pwd=self.confDetails['password'],port=self.confDetails['port'])
             print "Connection to vCenter Server(%s) is Successful"%(self.confDetails['host'])
+
+            atexit.register(connect.Disconnect, self.si)
+
         except vim.fault.InvalidLogin:
             print "Error : Invalid Username and Password Combination."
             sys.exit(2)
@@ -236,29 +240,58 @@ class VCenterServerConf:
         
         #Add hosts to the cluster :
         self.add_host(newc)
-        print "+"+"-"*100+"+"+"\n"
 
+        #dasConfig
         clusterObj = self.get_cluster(dc,self.confDetails['cluster'])
         clusterSpec = vim.cluster.ConfigSpec()
         
-        #dasConfig
-        print "Configuring vSphere HA"
+        print "Configuring vSphere HA (das-Setting)"
         dasConfig = vim.cluster.DasConfigInfo()
         dasConfig.dynamicType = ""
         dasConfig.enabled = True
-        #dasConfig.hostMonitoring = "enabled"
+        dasConfig.hostMonitoring = "enabled"
         dasConfig.admissionControlEnabled = True
         dasConfig.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
+
+        vm_settings = vim.cluster.DasVmSettings()
+        vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.powerOff
+        dasConfig.defaultVmSettings = vm_settings
         clusterSpec.dasConfig = dasConfig
+
+        opt = vim.option.OptionValue()
+        dasConfig.option = []
+        options_values = {
+            "das.useDefaultIsolationAddress": "false",
+            "das.ignoreInsufficientHbDatastore": "true",
+            }
+        for k, v in options_values.iteritems():
+            opt.key = k
+            opt.value = v
+            dasConfig.option.append(opt)
+            opt = vim.option.OptionValue()
+
+
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
+
         #dasVmConfig
+        #dasConfig
+        print "+"+"-"*100+"+"+"\n"
+        print "Configuring vSphere dasVm-Setting"
+        clusterSpec = vim.cluster.ConfigSpec()
+        
         settings = []
         vms = self.get_all_vms(dc)
         for xvm in vms:
+
+            if not xvm.name.startswith('NTNX-'):
+                continue
+
             dasVmConfigSpec = vim.cluster.DasVmConfigSpec()
             dasVmConfigSpec.operation = vim.option.ArrayUpdateSpec.Operation.add
 
             dasVmConfigInfo = vim.cluster.DasVmConfigInfo()
-            dasVmConfigInfo.key = vms[0]
+            dasVmConfigInfo.key = xvm
             dasVmConfigInfo.restartPriority = vim.cluster.DasVmConfigInfo.Priority.disabled
             
             vm_settings = vim.cluster.DasVmSettings()
@@ -267,26 +300,38 @@ class VCenterServerConf:
             monitor.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
             monitor.clusterSettings = False
             vm_settings.vmToolsMonitoringSettings = monitor
-            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.none
+            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.powerOff
             dasVmConfigInfo.dasSettings = vm_settings
             dasVmConfigSpec.info = dasVmConfigInfo
-            
             settings.append(dasVmConfigSpec)
+            break
         clusterSpec.dasVmConfigSpec = settings
-        
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
+
         #drsConfig
         print "+"+"-"*100+"+"+"\n"
         print "Configuring vSphere DRS"
+        clusterSpec = vim.cluster.ConfigSpec()
         drsConfig = vim.cluster.DrsConfigInfo()
         drsConfig.enabled = True
         #possible values : fullyAutomated/manual/partiallyAutomated
         drsConfig.defaultVmBehavior = vim.cluster.DrsConfigInfo.DrsBehavior.fullyAutomated
         clusterSpec.drsConfig = drsConfig
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
 
+        print "+"+"-"*100+"+"+"\n"
+        print "Configuring vSphere DRS VM Config"
+        clusterSpec = vim.cluster.ConfigSpec()
         #drsVmConfig
         settings = []
         vms = self.get_all_vms(dc)
         for xvm in vms:
+            
+            if not xvm.name.startswith('NTNX-'):
+                continue
+
             drsVmConfigSpec = vim.cluster.DrsVmConfigSpec()
             drsVmConfigSpec.operation = vim.option.ArrayUpdateSpec.Operation.add
 
@@ -297,17 +342,22 @@ class VCenterServerConf:
             
             drsVmConfigSpec.info = drsVmConfigInfo
             settings.append(drsVmConfigSpec)
+            break
         clusterSpec.drsVmConfigSpec = settings
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
 
         #dpmConfigSpec
-        
-        
-        #Reconfigure cluster with above configuration
         print "+"+"-"*100+"+"+"\n"
-        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
-        print "Reconfigured cluster for Health Check Properties"
+        print "Configuring  VMware DPM service"
+        clusterSpecEx = vim.cluster.ConfigSpecEx()
+        dpmConfig = vim.cluster.DpmConfigInfo()
+        dpmConfig.enabled = True
+        clusterSpecEx.dpmConfig = dpmConfig
+        clusterSpecEx.vmSwapPlacement = "vmDirectory"
+        task = clusterObj.ReconfigureEx(clusterSpecEx, True)
         self.wait_for_task(task)
-        
+
         #Reconfigure Host Properties
         #START
         #ESXi Checks
@@ -338,6 +388,47 @@ class VCenterServerConf:
             if xhost.runtime.connectionState is 'disconnected':
                 xhost.ReconnectHost_Task()
 
+        #time.sleep(90)
+        print "+"+"-"*100+"+"+"\n"
+        print "Configuring VMs"
+        vmNum = 1
+        for xhost in clusterObj.host:
+            for xvm in xhost.vm:
+                print "\n%d. Configuring VM :%s"%(vmNum,xvm.name)
+                vmNum += 1
+                vmObj = self.si.content.searchIndex.FindByUuid(None, xvm.config.uuid, True)
+                
+                '''
+                xGuest = vim.vm.GuestInfo()
+                xGuest.toolsStatus = vim.vm.GuestInfo.ToolsStatus.toolsOk
+                vmObj.guest = xGuest
+                '''
+                
+                spec = vim.vm.ConfigSpec()
+                res = vim.ResourceAllocationInfo()
+                res.limit = -1L
+                #res.reservation = 0L
+                spec.cpuAllocation = res
+                spec.memoryAllocation  = res
+
+                opt = vim.option.OptionValue()
+                spec.extraConfig = []
+                options_values = {
+                    "isolation.tools.diskWiper.disable": "true",
+                    "isolation.tools.diskShrink.disable": "true",
+                    "isolation.tools.copy.disable": "true",
+                    "isolation.tools.paste.disable": "true",
+                    "log.keepOld": 8,
+                    "RemoteDisplay.maxConnections": 1 }
+                for k, v in options_values.iteritems():
+                    opt.key = k
+                    opt.value = v
+                    spec.extraConfig.append(opt)
+                    opt = vim.option.OptionValue()
+
+                task = vmObj.ReconfigVM_Task(spec)
+                self.wait_for_task(task)
+                
         print "+"+"-"*100+"+"+"\n"
         self.disConnectVC()
 

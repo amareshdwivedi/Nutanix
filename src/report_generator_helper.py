@@ -541,7 +541,22 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                return  "vCenter Server ["+vCenterServerIP+"] license expiration date is ["+actual_date+"]", True, 'alert'
              else:
                  return actual_date, False, '' 
-             
+
+    if check_name == "vCenter Server Role Based Access":
+        if actual_value == "Not-Configured":
+            return actual_value, False, ''
+        elif actual_value == "True":
+            return "Role Based Access on vCenter Server ["+vCenterServerIP+"] is Enabled", False, 'info'
+        else:
+            return "Role Based Access on vCenter Server ["+vCenterServerIP+"] is Disabled", True, 'info' 
+        
+    if check_name == "vCenter Server Plugins":
+        if actual_value == "Not-Configured":
+            return actual_value, True, ''
+        elif status == "PASS":
+            return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", True, 'info'
+        else:
+            return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", False, 'info'                    
               
     # Start of ESXI Checks      
     if check_name == "Host's HyperThreading Status":
@@ -643,7 +658,25 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "Host["+host+"] has only one NTP server["+str(actual_value)+"] configured" , True, 'alert'
             else:
                 return "Host["+host+"] NTP servers["+str(actual_value)+"] are configured " , False, '' 
-            
+    
+    if check_name=="Management VMkernel adapter has only Management Traffic enabled":
+        if status == 'FAIL':
+            if actual_value == "Management-Adapter-Not-Found":
+                return "On Host["+host+"], Management-Adapter-Not-Found", True , 'info'
+            else:
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info'  
+    if check_name=="vMotion VMkernel adapter has only vMotion Traffic enabled":
+        if status == 'FAIL':
+            if actual_value == "vMotion-Adapter-Not-Found":
+                return "On Host["+host+"], vMotion-Adapter-Not-Found", True , 'info'
+            else:
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info'
+    if check_name=="FTLogging VMkernel adapter has only FTLogging enabled":
+        if status == 'FAIL':
+            if actual_value == "FTLogging-Adapter-Not-Found":
+                return "On Host["+host+"], FTLogging-Adapter-Not-Found", True , 'info'
+            else:
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info' 
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
@@ -808,7 +841,25 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "On Cluster ["+cluster+"], vSwitchNutanix not found", True,'alert'
             else:
                 return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'info'
-    
+            
+    #hardware_and_bios_checks
+    if check_name == "VT-Extensions":
+        if actual_value == "Not-Configured":
+            return "Host Not Added to cluster", False,'info'
+        elif actual_value == "True":
+            return "On Host["+host+"], VT-Extensions is [Enabled]", False, 'info'
+        else:
+            return "On Host["+host+"], VT-Extensions is [Disabled]", True, 'info'
+    if check_name == "XD Enabled":
+        if actual_value == "True":
+            return "On Host["+host+"], XD is enabled", True, 'info'
+        else:
+            return "On Host["+host+"], XD is disabled", True, 'alert' 
+    if check_name == "Node Models and cluster size":
+        if status == 'FAIL':
+            return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'alert'
+        else:
+            return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'info'
     #Default return
     return str(actual_value), False,'info'
  
