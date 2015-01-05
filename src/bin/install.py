@@ -101,7 +101,7 @@ if returncode == 0:
     'if not os.path.exists(os.getcwd() + os.path.sep +"reports"):',
     '     os.mkdir("reports")',
     'executable_path="python "+lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"iaasProvisioning.pyc "',
-    'os.system(executable_path+ " ".join(sys.argv[1:]))']
+    'os.system(executable_path+sys.argv[1]+" \'"+sys.argv[2]+"\'")']
 
     provisioning_pyfile=open(default_install+os.path.sep+"iaasProvisioning.py","wb")
     for line in healthchecklines:
@@ -113,8 +113,8 @@ if returncode == 0:
     healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
     'lib_path = ' + "'" + default_install + "'",
     'os.environ["PYTHONPATH"] = lib_path',
-    'executable_path="python "+lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"foundation"+os.path.sep+"DPaaSOperations.pyc"',
-    'os.system(executable_path+ " ".join(sys.argv[1:]))']
+    'executable_path="python "+lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"foundation"+os.path.sep+"DPaaSOperations.pyc "',
+    'os.system(executable_path+" \'"+sys.argv[1]+"\'")']
 
     dpass_pyfile=open(default_install+os.path.sep+"dpaasProvisioning.py","wb")
     for line in healthchecklines:

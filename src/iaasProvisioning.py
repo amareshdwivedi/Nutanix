@@ -33,6 +33,7 @@ def main():
     if len(options) == 0:
         usage()
    
+    
     availOptions = ['foundation','cluster_config','vcenter_server_config','run_all']
     '''
     for item in options:
@@ -74,24 +75,26 @@ def main():
         fProcess.init_foundation()
         console_msg("Foundation is successfully initialised.")
         print "-- Please be patient.  This could take 30-60 minutes --"
-        while True:
-            progPercent = fProcess.get_progress()
-            num = int(progPercent.split('.')[0])
 
-            if num == -1:
-                console_msg("Error Occurred !")
-                sys.exit(1)
+        if len(options) != 2:
+            while True:
+                progPercent = fProcess.get_progress()
+                num = int(progPercent.split('.')[0])
 
-            sys.stdout.write('\r')
-            sys.stdout.write("[ "+"#"*num+"."*(100-num)+" ] %s%%"%(num))
-            time.sleep(1)
+                if num == -1:
+                    console_msg("Error Occurred !")
+                    sys.exit(1)
+
+                sys.stdout.write('\r')
+                sys.stdout.write("[ "+"#"*num+"."*(100-num)+" ] %s%%"%(num))
+                time.sleep(1)
+                
+                if num == 100:
+                    break
+            time.sleep(20)
+            print "\n"
+            console_msg("Fondation Process Complete.")
             
-            if num == 100:
-                break
-        time.sleep(20)
-        print "\n"
-        console_msg("Fondation Process Complete.")
-        
     if "foundationProgress" in options:
         fProcess = FoundationProvision(inputData['foundation'])
         progPercent = fProcess.get_progress()
