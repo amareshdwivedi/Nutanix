@@ -249,10 +249,28 @@ class VCenterServerConf:
         dasConfig = vim.cluster.DasConfigInfo()
         dasConfig.dynamicType = ""
         dasConfig.enabled = True
-        #dasConfig.hostMonitoring = "enabled"
+        dasConfig.hostMonitoring = "enabled"
         dasConfig.admissionControlEnabled = True
         dasConfig.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
+
+        vm_settings = vim.cluster.DasVmSettings()
+        vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.powerOff
+        dasConfig.defaultVmSettings = vm_settings
         clusterSpec.dasConfig = dasConfig
+
+        opt = vim.option.OptionValue()
+        dasConfig.option = []
+        options_values = {
+            "das.useDefaultIsolationAddress": "false",
+            "das.ignoreInsufficientHbDatastore": "true",
+            }
+        for k, v in options_values.iteritems():
+            opt.key = k
+            opt.value = v
+            dasConfig.option.append(opt)
+            opt = vim.option.OptionValue()
+
+
         task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
 
@@ -282,7 +300,7 @@ class VCenterServerConf:
             monitor.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
             monitor.clusterSettings = False
             vm_settings.vmToolsMonitoringSettings = monitor
-            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.none
+            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.powerOff
             dasVmConfigInfo.dasSettings = vm_settings
             dasVmConfigSpec.info = dasVmConfigInfo
             settings.append(dasVmConfigSpec)
@@ -330,14 +348,16 @@ class VCenterServerConf:
         self.wait_for_task(task)
 
         #dpmConfigSpec
-        
-        
-        #Reconfigure cluster with above configuration
-        #print "+"+"-"*100+"+"+"\n"
-        #print "Reconfigured cluster for Health Check Properties"
-        #task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
-        #self.wait_for_task(task)
-        
+        print "+"+"-"*100+"+"+"\n"
+        print "Configuring  VMware DPM service"
+        clusterSpecEx = vim.cluster.ConfigSpecEx()
+        dpmConfig = vim.cluster.DpmConfigInfo()
+        dpmConfig.enabled = True
+        clusterSpecEx.dpmConfig = dpmConfig
+        clusterSpecEx.vmSwapPlacement = "vmDirectory"
+        task = clusterObj.ReconfigureEx(clusterSpecEx, True)
+        self.wait_for_task(task)
+
         #Reconfigure Host Properties
         #START
         #ESXi Checks
