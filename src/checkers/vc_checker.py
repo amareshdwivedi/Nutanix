@@ -1537,6 +1537,31 @@ class VCChecker(CheckerBase):
                 passed= passed and status
         return passed, message,path
 
+
+    @checkgroup("esxi_checks", "Host Profiles are Configured",["performance"],"True")
+    def check_hostprofiles_configuration(self):
+        hostprofile_list = self.get_vc_property('content.hostProfileManager.profile')
+               
+        message = ""
+        passed = True
+        profiles_list=[]
+        for key, profiles in hostprofile_list.iteritems():
+            if profiles ==None:
+                continue
+            for profile in profiles:
+                profiles_list.append(profile.name)
+            
+        if len(profiles_list) > 0:
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Host Profiles are Configured= True (Expected: =True) " , (True and "PASS" or "FAIL"))
+            message += ", "+"Host Profiles are Configured= True (Expected: =True) " +"#"+((True) and "PASS" or "FAIL")
+        else:
+            passed = False
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Host Profiles are Configured= False (Expected: =True) " , (False and "PASS" or "FAIL"))
+            message += ", "+"Host Profiles are Configured= False (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
+         
+        return passed,message,''   
+
+
     @checkgroup("vcenter_server_checks", "Validate vCenter Server License Expiration Date",["availability"],"No expiration date or expiration date less than 60 days")
     def check_vcenter_server_license_expiry(self):
         expirationDate = self.get_vc_property('content.licenseManager.evaluation.properties[key=expirationDate].value')
