@@ -699,7 +699,7 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2",["availability","post-install"],"IP Address of any Nutanix CVM")
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2",["availability"],"IP Address of any Nutanix CVM")
     def check_cluster_das_isolationaddress2(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         all_cluster = self.get_vc_property(path) or {}
@@ -765,7 +765,7 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3",["availability","post-install"],"IP Address of any Nutanix CVM")
+    @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3",["availability"],"IP Address of any Nutanix CVM")
     def check_cluster_das_isolationaddress3(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         all_cluster = self.get_vc_property(path) or {}

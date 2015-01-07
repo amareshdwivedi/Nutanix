@@ -278,12 +278,13 @@ class VCenterServerConf:
                 cvmIP = xvm.guest.ipAddress
                 break
 
+        #differ isolation addresses needs differ ip Addresses
         options_values = {
             "das.useDefaultIsolationAddress": "false",
             "das.ignoreInsufficientHbDatastore": "true",
-            #"das.isolationaddress1":"10.1.222.63",
-            #"das.isolationaddress2":"10.1.222.63",
-            #"das.isolationaddress3":"10.1.222.63"
+            "das.isolationaddress1":cvmIP,
+            #"das.isolationaddress2":cvmIP,
+            #"das.isolationaddress3":cvmIP,
             }
         
         for k, v in options_values.iteritems():
