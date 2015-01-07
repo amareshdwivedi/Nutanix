@@ -274,7 +274,7 @@ class VCenterServerConf:
         vms = self.get_all_vms(dc)
         cvmIP = ''
         for xvm in vms:
-            if xvm.name.startswith('NTNX-'):
+            if fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
                 cvmIP = xvm.guest.ipAddress
                 break
 
@@ -307,7 +307,7 @@ class VCenterServerConf:
         vms = self.get_all_vms(dc)
         for xvm in vms:
 
-            if not xvm.name.startswith('NTNX-'):
+            if not fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
                 continue
 
             dasVmConfigSpec = vim.cluster.DasVmConfigSpec()
@@ -352,7 +352,7 @@ class VCenterServerConf:
         vms = self.get_all_vms(dc)
         for xvm in vms:
             
-            if not xvm.name.startswith('NTNX-'):
+            if not fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
                 continue
 
             drsVmConfigSpec = vim.cluster.DrsVmConfigSpec()
@@ -418,7 +418,7 @@ class VCenterServerConf:
         '''
         vms = self.get_all_vms(dc)
         for xvm in vms: 
-            if not xvm.name.startswith('NTNX-'):
+            if not fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
                 continue
             
             relocateSpec = vim.vm.RelocateSpec()
@@ -452,6 +452,7 @@ class VCenterServerConf:
                 spec = vim.vm.ConfigSpec()
                 res = vim.ResourceAllocationInfo()
                 res.limit = -1L
+                res.expandableReservation = True
                 #res.reservation = 0L
                 
                 shares = vim.SharesInfo()
