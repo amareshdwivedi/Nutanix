@@ -282,7 +282,7 @@ class VCenterServerConf:
         options_values = {
             "das.useDefaultIsolationAddress": "false",
             "das.ignoreInsufficientHbDatastore": "true",
-            "das.isolationaddress1":cvmIP,
+            "das.isolationaddress1":cvmIP
             #"das.isolationaddress2":cvmIP,
             #"das.isolationaddress3":cvmIP,
             }
@@ -327,7 +327,7 @@ class VCenterServerConf:
             dasVmConfigInfo.dasSettings = vm_settings
             dasVmConfigSpec.info = dasVmConfigInfo
             settings.append(dasVmConfigSpec)
-            break
+        
         clusterSpec.dasVmConfigSpec = settings
         task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
@@ -365,7 +365,7 @@ class VCenterServerConf:
             
             drsVmConfigSpec.info = drsVmConfigInfo
             settings.append(drsVmConfigSpec)
-            break
+            
         clusterSpec.drsVmConfigSpec = settings
         task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
@@ -460,7 +460,7 @@ class VCenterServerConf:
                 shares.level =level
                 res.shares = shares
                 spec.cpuAllocation = res
-                spec.memoryAllocation  = res
+                spec.memoryAllocation = res
 
                 opt = vim.option.OptionValue()
                 spec.extraConfig = []
