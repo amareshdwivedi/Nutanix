@@ -234,10 +234,11 @@ class VCenterServerConf:
         print "Running version %s of the Nutanix GSO cluster provisioning script"%(version)
         print "+"+"-"*100+"+"+"\n"
         dc = self.create_datacenter()
+        
         print "+"+"-"*100+"+"+"\n"
         newc = self.create_cluster(dc)
-        print "+"+"-"*100+"+"+"\n"
         
+        print "+"+"-"*100+"+"+"\n"
         #Add hosts to the cluster :
         self.add_host(newc)
 
@@ -251,25 +252,46 @@ class VCenterServerConf:
         dasConfig.enabled = True
         dasConfig.hostMonitoring = "enabled"
         dasConfig.admissionControlEnabled = True
-        dasConfig.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
 
+        admissionControlPolicy = vim.cluster.FailoverResourcesAdmissionControlPolicy()
+        admissionControlPolicy.cpuFailoverResourcesPercent = 50
+        admissionControlPolicy.memoryFailoverResourcesPercent = 50
+        dasConfig.admissionControlPolicy = admissionControlPolicy
+        
+        dasConfig.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
+        clusterSpec.dasConfig = dasConfig
+        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        self.wait_for_task(task)
+
+        clusterSpec = vim.cluster.ConfigSpec()
+        dasConfig = vim.cluster.DasConfigInfo()
         vm_settings = vim.cluster.DasVmSettings()
         vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.powerOff
         dasConfig.defaultVmSettings = vm_settings
-        clusterSpec.dasConfig = dasConfig
-
+        
         opt = vim.option.OptionValue()
         dasConfig.option = []
+        vms = self.get_all_vms(dc)
+        cvmIP = ''
+        for xvm in vms:
+            if xvm.name.startswith('NTNX-'):
+                cvmIP = xvm.guest.ipAddress
+                break
+
         options_values = {
             "das.useDefaultIsolationAddress": "false",
             "das.ignoreInsufficientHbDatastore": "true",
+            #"das.isolationaddress1":"10.1.222.63",
+            #"das.isolationaddress2":"10.1.222.63",
+            #"das.isolationaddress3":"10.1.222.63"
             }
+        
         for k, v in options_values.iteritems():
             opt.key = k
             opt.value = v
             dasConfig.option.append(opt)
             opt = vim.option.OptionValue()
-
+        clusterSpec.dasConfig = dasConfig
 
         task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
@@ -300,7 +322,7 @@ class VCenterServerConf:
             monitor.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
             monitor.clusterSettings = False
             vm_settings.vmToolsMonitoringSettings = monitor
-            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.powerOff
+            vm_settings.isolationResponse = vim.cluster.DasVmSettings.IsolationResponse.none
             dasVmConfigInfo.dasSettings = vm_settings
             dasVmConfigSpec.info = dasVmConfigInfo
             settings.append(dasVmConfigSpec)
@@ -358,30 +380,52 @@ class VCenterServerConf:
         task = clusterObj.ReconfigureEx(clusterSpecEx, True)
         self.wait_for_task(task)
 
-        #Reconfigure Host Properties
-        #START
-        #ESXi Checks
-        '''
-        #1 host - set hyperthreading enabled 
-        #https://github.com/vmware/pyvmomi/blob/master/docs/vim/host/ConfigInfo.rst
-        vim.host.ConfigInfo
+        #Configure ResourcePool
+        print "+"+"-"*100+"+"+"\n"
+        print "Creating & Configuring ResourcePool (_NTNX_) "
+        resourcePoolSpec = vim.ResourceConfigSpec()
         
-        #2. host - set power management information
-        vim.host.ConfigInfo
+        cpuAllocation = vim.ResourceAllocationInfo()
+        cpuAllocation.reservation = 0L
+        cpuAllocation.limit = -1L
+        cpuAllocation.expandableReservation = True
         
-        #3. host - set ntp client to enabled
-        vim.host.ConfigInfo
-        
-        #4. Configure ntp servers
+        shares = vim.SharesInfo()
+        shares.shares = 4000
+        level = vim.SharesInfo.Level().normal
+        shares.level =level
+        cpuAllocation.shares = shares
+        resourcePoolSpec.cpuAllocation = cpuAllocation
 
-        #5. dns & Routing settings-
-        #https://github.com/vmware/pyvmomi/blob/master/docs/vim/host/NetworkInfo.rst
-
-        #6. Authentication inforamtion -
-        #https://github.com/vmware/pyvmomi/blob/master/docs/vim/host/AuthenticationManagerInfo.rst
-        '''
-        #END
+        memoryAllocation = vim.ResourceAllocationInfo()
+        memoryAllocation.reservation = 0L
+        memoryAllocation.limit = -1L
+        memoryAllocation.expandableReservation = True
         
+        shares = vim.SharesInfo()
+        shares.shares = 4000
+        level = vim.SharesInfo.Level().normal
+        shares.level =level
+        memoryAllocation.shares = shares
+        resourcePoolSpec.memoryAllocation = memoryAllocation
+        #print "Resource dir:",dir(clusterObj.resourcePool)
+        clusterObj.resourcePool.CreateResourcePool('_NTNX_',resourcePoolSpec)
+        print "ResourcePool Successfully Created."
+        
+        print "Moving CVMs to the ResourcePool (_NTNX_) "
+        #Code for relocating CVM to the _NTNX_ resourcePool
+        '''
+        vms = self.get_all_vms(dc)
+        for xvm in vms: 
+            if not xvm.name.startswith('NTNX-'):
+                continue
+            
+            relocateSpec = vim.vm.RelocateSpec()
+            relocateSpec.pool = clusterObj.resourcePool.resourcePool[0]
+            task = xvm.RelocateVM_Task(relocateSpec,vim.VirtualMachine.MovePriority.defaultPriority)
+            self.wait_for_task(task)
+        '''
+
         #Confirm all ESXi hosts in the cluster has a 'connected' status.
         cluster_hosts = clusterObj.host
         for xhost in cluster_hosts:
@@ -408,6 +452,12 @@ class VCenterServerConf:
                 res = vim.ResourceAllocationInfo()
                 res.limit = -1L
                 #res.reservation = 0L
+                
+                shares = vim.SharesInfo()
+                shares.shares = 4000
+                level = vim.SharesInfo.Level().normal
+                shares.level =level
+                res.shares = shares
                 spec.cpuAllocation = res
                 spec.memoryAllocation  = res
 
