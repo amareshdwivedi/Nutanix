@@ -2294,3 +2294,33 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
       
         return passed_all , message,path_curr
+    
+    
+    @checkgroup("hardware_and_bios_checks", "Bios Boot Order",["manageability","reliability"], "False")
+    def check_boot_order(self):
+        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.bootOptions.bootOrder'
+        vms_devices= self.get_vc_property(path)
+        message = ""
+        pass_all=True
+        embedded_boot_device=False
+        for vms_key, vms_boot_devices in vms_devices.iteritems():
+            if vms_boot_devices == 'Not-Configured' :
+                #condition to check if any clusters not found 
+                continue
+            passed =True
+            for device in vms_boot_devices:
+                if isinstance(device, vim.vm.BootOptions.BootableDiskDevice):
+                    embedded_boot_device=True
+                    message += ", " +vms_key+"=Embedded Disk First (Expected: =Embedded Disk First)"+"#"+((embedded_boot_device) and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Embedded Disk First (Expected: =Embedded Disk First)", ((embedded_boot_device) and "PASS" or "FAIL"))
+                    break
+                elif not isinstance(device, vim.vm.BootOptions.BootableDiskDevice):
+                     embedded_boot_device=False
+                     message += ", " +vms_key+"=Embedded Disk is not First (Expected: =Embedded Disk First)"+"#"+((embedded_boot_device) and "PASS" or "FAIL")
+                     self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Embedded Disk is not First (Expected: =Embedded Disk First)", ((embedded_boot_device) and "PASS" or "FAIL"))
+                     break
+            if embedded_boot_device==False:
+                message += ", " +vms_key+"=No Boot Options Present (Expected: =Embedded Disk First)"+"#"+(embedded_boot_device and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=No Boot Options Present (Expected: =Embedded Disk First)", (embedded_boot_device and "PASS" or "FAIL"))     
+            pass_all= pass_all and passed
+        return pass_all, message,path    
