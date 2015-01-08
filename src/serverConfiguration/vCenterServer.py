@@ -234,7 +234,6 @@ class VCenterServerConf:
         print "Running version %s of the Nutanix GSO cluster provisioning script"%(version)
         print "+"+"-"*100+"+"+"\n"
         dc = self.create_datacenter()
-        
         print "+"+"-"*100+"+"+"\n"
         newc = self.create_cluster(dc)
         
@@ -415,18 +414,17 @@ class VCenterServerConf:
         
         print "Moving CVMs to the ResourcePool (_NTNX_) "
         #Code for relocating CVM to the _NTNX_ resourcePool
-        '''
-        vms = self.get_all_vms(dc)
-        for xvm in vms: 
-            if not fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
-                continue
+        
+        #vms = self.get_all_vms(dc)
+        #for xvm in vms: 
+        #    if not fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
+        #        continue
             
-            relocateSpec = vim.vm.RelocateSpec()
-            relocateSpec.pool = clusterObj.resourcePool.resourcePool[0]
-            task = xvm.RelocateVM_Task(relocateSpec,vim.VirtualMachine.MovePriority.defaultPriority)
-            self.wait_for_task(task)
-        '''
-
+        #    relocateSpec = vim.vm.RelocateSpec()
+        #    relocateSpec.pool = clusterObj.resourcePool.resourcePool[0]
+        #    task = xvm.RelocateVM_Task(relocateSpec,vim.VirtualMachine.MovePriority.defaultPriority)
+        #    self.wait_for_task(task)
+        
         #Confirm all ESXi hosts in the cluster has a 'connected' status.
         cluster_hosts = clusterObj.host
         for xhost in cluster_hosts:
@@ -443,11 +441,10 @@ class VCenterServerConf:
                 vmNum += 1
                 vmObj = self.si.content.searchIndex.FindByUuid(None, xvm.config.uuid, True)
                 
-                '''
-                xGuest = vim.vm.GuestInfo()
-                xGuest.toolsStatus = vim.vm.GuestInfo.ToolsStatus.toolsOk
-                vmObj.guest = xGuest
-                '''
+                #print "xvm Dir :",dir(xvm)
+                #xGuest = vim.vm.GuestInfo()
+                #xGuest.toolsStatus = vim.vm.GuestInfo.ToolsStatus.toolsOk
+                #vmObj.guest = xGuest
                 
                 spec = vim.vm.ConfigSpec()
                 res = vim.ResourceAllocationInfo()
@@ -480,7 +477,32 @@ class VCenterServerConf:
 
                 task = vmObj.ReconfigVM_Task(spec)
                 self.wait_for_task(task)
+        
+        print "+"+"-"*100+"+"+"\n"
+        print "Configuring Network & Switch .."
+        clusterObj = self.get_cluster(dc,self.confDetails['cluster'])
+        for xhost in clusterObj.host:
+            networkConfig = vim.host.NetworkConfig()
+            
+            for item in xhost.configManager.networkSystem.networkConfig.vswitch:
+                if item.name == 'vSwitchNutanix':
+                    continue
                 
+                item.changeOperation = "edit"
+                item.spec.mtu = 1500
+                item.spec.policy.nicTeaming.rollingOrder = True
+                item.spec.policy.nicTeaming.notifySwitches = True
+                item.spec.policy.nicTeaming.failureCriteria.checkBeacon = False
+                item.spec.policy.nicTeaming.policy = 'loadbalance_srcid'
+
+                item.spec.policy.security.allowPromiscuous = False
+                item.spec.policy.security.macChanges = False
+                item.spec.policy.security.forgedTransmits = False
+                networkConfig.vswitch.append(item)
+
+            xhost.configManager.networkSystem.UpdateNetworkConfig(networkConfig,"modify")
+            print "Host :"+xhost.name+" - Network Parameters Updated."
+        
         print "+"+"-"*100+"+"+"\n"
         self.disConnectVC()
 
