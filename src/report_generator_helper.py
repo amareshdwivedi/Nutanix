@@ -309,11 +309,28 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                  messageList = message.split('(Expected: =')
                  expected_result = messageList[1].split(')')[0]             
         if actual_value == expected_result:
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'
-        else:
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'        
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory reservation set to ["+actual_value+"] MB", False ,'alert'
+        elif actual_value < expected_result:
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory reservation Not Equal to Memory Size", True ,'alert' 
+        elif actual_value == "0":
+             return "CVM ["+entity+"] on Cluster ["+cluster+"] has No Memory reservation", True ,'alert'   
         
-                                
+    if check_name == "CPU Limit per CVM":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "-1":
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has CPU limit set to ["+actual_value+"]", True ,"alert"
+        else:
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has CPU limit set to ["+actual_value+"]", False ,"alert"
+        
+    if check_name == "Memory Limit per CVM":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "-1":
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", True ,"alert"
+        else:
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", False ,"alert"          
+                                        
     # Start of storage_and_vm Checks
     if check_name == "VM hardware version is the most up to date with the ESXI version":
         if status == 'FAIL':
@@ -397,9 +414,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return "Not-Configured", False, ''
         elif actual_value != "0":
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", True ,'alert'
+            return "On VM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", True ,'info'
         else:
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'
+            return "On VM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'info'
 
     if check_name == "VM Advance Setting[isolation.tools.diskWiper.disable]":
         if actual_value == "Not-Configured" and entity != host:
@@ -466,7 +483,21 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
              else:
                  return "Virtual machine ["+vm_name+"] has snapshot which is ["+str(days)+"] days old", True, 'info'   
                            
-
+    if check_name == "CPU Limit per VM":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "-1":
+            return "On VM ["+entity+"] CPU limit is set to ["+actual_value+"]", True ,"warning"
+        else:
+            return "On VM ["+entity+"] CPU limit is set to ["+actual_value+"]", False ,"warning"
+        
+    if check_name == "Memory Limit per VM":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "-1":
+            return "VM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", True ,"warning"
+        else:
+            return "VM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", False ,"warning"        
         
     # Start of vcenter_server Checks 
     if check_name == "Validate vCenter Server has VMware Tools installed and is up to date":
