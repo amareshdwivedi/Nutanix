@@ -227,22 +227,7 @@ class VCenterServerConf:
                 vms = [ vm for vm in container.view]
         return vms
 
-    
-    def do_configuration(self):
-        #Specify which version to run
-        version = "1.0"
-        print "Running version %s of the Nutanix GSO cluster provisioning script"%(version)
-        print "+"+"-"*100+"+"+"\n"
-        dc = self.create_datacenter()
-        print "+"+"-"*100+"+"+"\n"
-        newc = self.create_cluster(dc)
-        
-        print "+"+"-"*100+"+"+"\n"
-        #Add hosts to the cluster :
-        self.add_host(newc)
-
-        #dasConfig
-        clusterObj = self.get_cluster(dc,self.confDetails['cluster'])
+    def configureDas(self):
         clusterSpec = vim.cluster.ConfigSpec()
         
         print "Configuring vSphere HA (das-Setting)"
@@ -259,7 +244,7 @@ class VCenterServerConf:
         
         dasConfig.vmMonitoring = vim.cluster.DasConfigInfo.VmMonitoringState.vmMonitoringDisabled
         clusterSpec.dasConfig = dasConfig
-        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        task = self.clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
 
         clusterSpec = vim.cluster.ConfigSpec()
@@ -270,7 +255,7 @@ class VCenterServerConf:
         
         opt = vim.option.OptionValue()
         dasConfig.option = []
-        vms = self.get_all_vms(dc)
+        vms = self.get_all_vms(self.dc)
         cvmIP = ''
         for xvm in vms:
             if fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
@@ -293,17 +278,15 @@ class VCenterServerConf:
             opt = vim.option.OptionValue()
         clusterSpec.dasConfig = dasConfig
 
-        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        task = self.clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
 
-        #dasVmConfig
-        #dasConfig
+    def configureDasVM(self):
         print "+"+"-"*100+"+"+"\n"
         print "Configuring vSphere dasVm-Setting"
         clusterSpec = vim.cluster.ConfigSpec()
-        
         settings = []
-        vms = self.get_all_vms(dc)
+        vms = self.get_all_vms(self.dc)
         for xvm in vms:
 
             if not fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
@@ -328,10 +311,10 @@ class VCenterServerConf:
             settings.append(dasVmConfigSpec)
         
         clusterSpec.dasVmConfigSpec = settings
-        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        task = self.clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
 
-        #drsConfig
+    def configureDrs(self):
         print "+"+"-"*100+"+"+"\n"
         print "Configuring vSphere DRS"
         clusterSpec = vim.cluster.ConfigSpec()
@@ -340,15 +323,16 @@ class VCenterServerConf:
         #possible values : fullyAutomated/manual/partiallyAutomated
         drsConfig.defaultVmBehavior = vim.cluster.DrsConfigInfo.DrsBehavior.fullyAutomated
         clusterSpec.drsConfig = drsConfig
-        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        task = self.clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
 
+    def configureDrsVM(self):
         print "+"+"-"*100+"+"+"\n"
         print "Configuring vSphere DRS VM Config"
         clusterSpec = vim.cluster.ConfigSpec()
         #drsVmConfig
         settings = []
-        vms = self.get_all_vms(dc)
+        vms = self.get_all_vms(self.dc)
         for xvm in vms:
             
             if not fnmatch.fnmatch(xvm.name,"NTNX*CVM"):
@@ -366,10 +350,10 @@ class VCenterServerConf:
             settings.append(drsVmConfigSpec)
             
         clusterSpec.drsVmConfigSpec = settings
-        task = clusterObj.ReconfigureCluster_Task(clusterSpec, True)
+        task = self.clusterObj.ReconfigureCluster_Task(clusterSpec, True)
         self.wait_for_task(task)
 
-        #dpmConfigSpec
+    def configureDpmServices(self):
         print "+"+"-"*100+"+"+"\n"
         print "Configuring  VMware DPM service"
         clusterSpecEx = vim.cluster.ConfigSpecEx()
@@ -377,10 +361,10 @@ class VCenterServerConf:
         dpmConfig.enabled = True
         clusterSpecEx.dpmConfig = dpmConfig
         clusterSpecEx.vmSwapPlacement = "vmDirectory"
-        task = clusterObj.ReconfigureEx(clusterSpecEx, True)
+        task = self.clusterObj.ReconfigureEx(clusterSpecEx, True)
         self.wait_for_task(task)
 
-        #Configure ResourcePool
+    def configureResourcePool(self):
         print "+"+"-"*100+"+"+"\n"
         print "Creating & Configuring ResourcePool (_NTNX_) "
         resourcePoolSpec = vim.ResourceConfigSpec()
@@ -409,7 +393,7 @@ class VCenterServerConf:
         memoryAllocation.shares = shares
         resourcePoolSpec.memoryAllocation = memoryAllocation
         #print "Resource dir:",dir(clusterObj.resourcePool)
-        clusterObj.resourcePool.CreateResourcePool('_NTNX_',resourcePoolSpec)
+        self.clusterObj.resourcePool.CreateResourcePool('_NTNX_',resourcePoolSpec)
         print "ResourcePool Successfully Created."
         
         print "Moving CVMs to the ResourcePool (_NTNX_) "
@@ -424,18 +408,12 @@ class VCenterServerConf:
         #    relocateSpec.pool = clusterObj.resourcePool.resourcePool[0]
         #    task = xvm.RelocateVM_Task(relocateSpec,vim.VirtualMachine.MovePriority.defaultPriority)
         #    self.wait_for_task(task)
-        
-        #Confirm all ESXi hosts in the cluster has a 'connected' status.
-        cluster_hosts = clusterObj.host
-        for xhost in cluster_hosts:
-            if xhost.runtime.connectionState is 'disconnected':
-                xhost.ReconnectHost_Task()
 
-        #time.sleep(90)
+    def configureVMs(self):
         print "+"+"-"*100+"+"+"\n"
         print "Configuring VMs"
         vmNum = 1
-        for xhost in clusterObj.host:
+        for xhost in self.clusterObj.host:
             for xvm in xhost.vm:
                 print "\n%d. Configuring VM :%s"%(vmNum,xvm.name)
                 vmNum += 1
@@ -478,30 +456,72 @@ class VCenterServerConf:
                 task = vmObj.ReconfigVM_Task(spec)
                 self.wait_for_task(task)
         
+    def configureNetworkSwitch(self):
         print "+"+"-"*100+"+"+"\n"
         print "Configuring Network & Switch .."
-        clusterObj = self.get_cluster(dc,self.confDetails['cluster'])
-        for xhost in clusterObj.host:
+        #clusterObj = self.get_cluster(dc,self.confDetails['cluster'])
+        for xhost in self.clusterObj.host:
             networkConfig = vim.host.NetworkConfig()
             
             for item in xhost.configManager.networkSystem.networkConfig.vswitch:
-                if item.name == 'vSwitchNutanix':
-                    continue
-                
                 item.changeOperation = "edit"
+                
+                if item.name == 'vSwitchNutanix':
+                    item.spec.policy.nicTeaming.policy = 'loadbalance_srcid'
+                else:
+                    item.spec.policy.nicTeaming.policy = 'loadbalance_srcid'
+                
                 item.spec.mtu = 1500
                 item.spec.policy.nicTeaming.rollingOrder = True
                 item.spec.policy.nicTeaming.notifySwitches = True
                 item.spec.policy.nicTeaming.failureCriteria.checkBeacon = False
-                item.spec.policy.nicTeaming.policy = 'loadbalance_srcid'
-
+                
                 item.spec.policy.security.allowPromiscuous = False
                 item.spec.policy.security.macChanges = False
                 item.spec.policy.security.forgedTransmits = False
                 networkConfig.vswitch.append(item)
-
             xhost.configManager.networkSystem.UpdateNetworkConfig(networkConfig,"modify")
             print "Host :"+xhost.name+" - Network Parameters Updated."
+
+    def do_configuration(self):
+        #Specify which version to run
+        version = "1.0"
+        print "Running version %s of the Nutanix GSO cluster provisioning script"%(version)
+        print "+"+"-"*100+"+"+"\n"
+        self.dc = self.create_datacenter()
+        print "+"+"-"*100+"+"+"\n"
+        newc = self.create_cluster(self.dc)
+        
+        print "+"+"-"*100+"+"+"\n"
+        #Add hosts to the cluster :
+        self.add_host(newc)
+
+        self.clusterObj = self.get_cluster(self.dc,self.confDetails['cluster'])
+        #dasConfig
+        self.configureDas()        
+
+        #dasVmConfig
+        self.configureDasVM()
+
+        #drsConfig
+        self.configureDrs()
+        self.configureDrsVM()
+
+        #dpmConfigSpec
+        self.configureDpmServices()
+
+        #Configure ResourcePool
+        self.configureResourcePool()
+        #Confirm all ESXi hosts in the cluster has a 'connected' status.
+        cluster_hosts = self.clusterObj.host
+        for xhost in cluster_hosts:
+            if xhost.runtime.connectionState is 'disconnected':
+                xhost.ReconnectHost_Task()
+
+        #time.sleep(90)
+        self.configureVMs()
+        
+        self.configureNetworkSwitch()
         
         print "+"+"-"*100+"+"+"\n"
         self.disConnectVC()
