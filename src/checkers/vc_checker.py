@@ -4,6 +4,8 @@ __author__ = 'subash atreya'
 from requests.exceptions import ConnectionError
 import string
 import warnings
+import paramiko
+import socket
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 from base_checker import *
@@ -2239,25 +2241,91 @@ class VCChecker(CheckerBase):
             passed_all = passed_all and passed
          
         return passed_all , message,path_curr
-    
+
+    @checkgroup("hardware_and_bios_checks", "VT-Extensions",["performance"],"3")
+    def check_VT_extensions(self):
+        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
+        clusters_map = self.get_vc_property(path_curr)
+           
+        message = ""
+        passed_all = True
+        VT_extension_level = False
+        for datacenter, host_list in clusters_map.iteritems():
+            passed = True
+            #print datacenter
+             
+            if host_list == "Not-Configured" :
+                continue
+            elif len(host_list)==0: 
+                #condtion to Check if no host found
+                continue
+                  
+            for host in host_list:
+                host_ip=host.name
+                ssh=None
+                try:
+                    ssh = paramiko.SSHClient()
+                    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    ssh.connect(host_ip, username="root", password="nutanix/4u")
+                     
+                except paramiko.AuthenticationException:
+                    message += ", " +datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
+                    continue
+                except paramiko.SSHException, e:
+                    message += ", " +datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
+                    continue
+                except socket.error, e:
+                    message += ", " +datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
+                    continue
+     
+                cmd = "esxcfg-info|grep \"HV Support\""    
+                stdin, stdout, stderr =  ssh.exec_command(cmd)     
+                 
+ 
+                for line in stdout:
+                    line = ''.join(e for e in line if e.isalnum())
+                    
+                    if line.startswith('HVSupport'):
+                        level = line[-1:]
+                        
+                        if level is not None and level == "3":
+                            VT_extension_level = True
+                            message += ", " +datacenter+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
+                            self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
+                            passed=VT_extension_level
+                            continue 
+                        
+                        elif level is not None and level != "3":  
+                            message += ", " +datacenter+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
+                            self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
+                            passed=VT_extension_level
+                            continue 
+                        
+            passed_all = passed_all and passed
+          
+        return passed_all , message,path_curr
+        
 #     @checkgroup("hardware_and_bios_checks", "Node Models and cluster size",["performance"],"Node Models and cluster size")
 #     def check_hardwareNbios_node_model_and_cluster_size(self):
 #         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
 #         clusters_map = self.get_vc_property(path_curr)
-#          
+#           
 #         message = ""
 #         passed_all = True
-#          
+#           
 #         for datacenter, host_list in clusters_map.iteritems():
 #             passed = True
 #             #print datacenter
-#            
+#             
 #             if host_list == "Not-Configured" :
 #                 continue
 #             elif len(host_list)==0: 
 #                 #condtion to Check if no host found
 #                 continue
-#                 
+#                  
 #             node_model={} 
 #             for host in host_list:
 #                 host_name=host.name
@@ -2266,18 +2334,18 @@ class VCChecker(CheckerBase):
 #                     node_model[model_name]+=1
 #                 else:
 #                      node_model[model_name]=1
-#                     
+#                      
 #             if 'NX-1020' in node_model.keys():
 #                 mix_model_not_found=True
 #                 if len(node_model.keys())>1: 
 #                     # condition to check if any model other than NX-1020 found 
 #                     # if yes status will be failed 
 #                     mix_model_not_found = False
-#                     
+#                      
 #                 clustersize=0
 #                 for n_model,value in node_model.iteritems():
 #                     clustersize+=value
-#                 
+#                  
 #                 passed=status = mix_model_not_found and ( True if clustersize <= 8 else False)
 #                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020]; Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
 #                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020]; Cluster-Size<=8)",(status and "PASS" or "FAIL"))
@@ -2287,11 +2355,11 @@ class VCChecker(CheckerBase):
 #                     # condition to check if any model other than NX-1050 found 
 #                     # if yes status will be failed 
 #                     mix_model_not_found = False
-#                     
+#                      
 #                 clustersize=0
 #                 for n_model,value in node_model.iteritems():
 #                     clustersize+=value
-#                 
+#                  
 #                 passed=status = mix_model_not_found and ( True if clustersize <= 8 else False)
 #                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050]; Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
 #                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050]; Cluster-Size<=8)",(status and "PASS" or "FAIL"))
@@ -2301,11 +2369,11 @@ class VCChecker(CheckerBase):
 #                     # condition to check if NX-2000 found
 #                     # if yes status will be failed 
 #                     nx2000_model_not_found = False
-#                     
+#                      
 #                 clustersize=0
 #                 for n_model,value in node_model.iteritems():
 #                     clustersize+=value
-#                 
+#                  
 #                 passed=status = nx2000_model_not_found 
 #                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])"+"#"+(status and "PASS" or "FAIL")
 #                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])",(status and "PASS" or "FAIL"))
@@ -2313,13 +2381,13 @@ class VCChecker(CheckerBase):
 #                 clustersize=0
 #                 for n_model,value in node_model.iteritems():
 #                     clustersize+=value
-#                 
+#                  
 #                 passed=status = True 
 #                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Models"+"#"+(status and "PASS" or "FAIL")
 #                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Models)",(status and "PASS" or "FAIL"))
-#                                 
+#                                  
 #             passed_all = passed_all and passed
-#       
+#        
 #         return passed_all , message,path_curr
     
     

@@ -249,6 +249,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
                 return "For Cluster["+cluster+"], "+actual_value,True, 'warning'
             
+
             
     # Start of CVM Checks
     if check_name == "CVM's Isolation Response":
@@ -330,6 +331,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", True ,"alert"
         else:
             return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", False ,"alert"          
+
+
+
                                         
     # Start of storage_and_vm Checks
     if check_name == "VM hardware version is the most up to date with the ESXI version":
@@ -506,6 +510,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "VM ["+entity+"] on Cluster ["+cluster+"] has Guest OS ["+actual_value+"] but hardware baseline is set to ["+exp_value_from_msg+"]", True ,"warning"
         else:
             return "VM ["+entity+"] on Cluster ["+cluster+"] has Guest OS ["+actual_value+"] but hardware baseline is set to ["+exp_value_from_msg+"]", False ,"warning"
+
+
                 
     # Start of vcenter_server Checks 
     if check_name == "Validate vCenter Server has VMware Tools installed and is up to date":
@@ -596,6 +602,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", True, 'info'
         else:
             return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", False, 'info'                    
+
+
               
     # Start of ESXI Checks      
     if check_name == "Host's HyperThreading Status":
@@ -609,6 +617,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     if check_name == "Host's Power Management Setting":
         if actual_value == "Not-Configured":
             return 'Not-Configured', False, ''
+        elif actual_value == "Not supported":
+            return "On host ["+host+"] power management settings in BIOS are not set to OS Controlled" , True , "alert"
         else: 
             return "Host Power management policy on host ["+host+"] is set to ["+actual_value+"]", True, "info" if actual_value=="Balanced" else "alert"
         
@@ -716,6 +726,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "On Host["+host+"], FTLogging-Adapter-Not-Found", True , 'info'
             else:
                 return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info' 
+
+
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
@@ -880,15 +892,17 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "On Cluster ["+cluster+"], vSwitchNutanix not found", True,'alert'
             else:
                 return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'info'
+
+
             
     #hardware_and_bios_checks
     if check_name == "VT-D(Virtualization Tech for Direct I/O)":
         if actual_value == "Not-Configured":
             return "On Host["+host+"], VT-D is Not-Configured in BIOS", False, 'info'
         elif actual_value == "False":
-            return "On Host["+host+"], VT-D is disabled in BIOS", True, 'alert'
+            return "On Host["+host+"], VT-D is Disabled in BIOS", True, 'alert'
         else:
-            return "On Host["+host+"], VT-D is enabled in BIOS", False, 'info'
+            return "On Host["+host+"], VT-D is Enabled in BIOS", False, 'info'
         
     if check_name == "XD-Execute Disabled":
         if actual_value == "Not-Configured":
@@ -902,14 +916,23 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return "Host ["+host+"] has BIOS Version Not-Configured", False, ''
         else:
-            return  "Host ["+host+"] has BIOS Version["+actual_value+"]", True, 'info'         
+            return  "Host ["+host+"] has BIOS Version["+actual_value+"]", True, 'info'  
         
+    if check_name == "VT-Extensions":
+        if actual_value == "Not-Configured" or "SSH Connection Failed":
+            return "Host ["+host+"] has either VT-Extensions Not-Configured or SSH Connection to Host Failed", False, ''
+        elif actual_value == "0":
+            return  "On host ["+host+"] VT support is not available for this hardware", True, 'alert'                
+        elif actual_value == "1":
+            return  "On host ["+host+"] VT might be available but it is not supported for this hardware", True, 'alert'                
+        elif actual_value == "2":
+            return  "On host ["+host+"]  VT is available but is currently not enabled in the BIOS", True, 'alert' 
+        else:
+            return  "On host ["+host+"] VT support is  available", False, '' 
+                           
         
-#     if check_name == "Node Models and cluster size":
-#         if status == 'FAIL':
-#             return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'alert'
-#         else:
-#             return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'info'
+
+
     #Default return
     return str(actual_value), False,'info'
  
