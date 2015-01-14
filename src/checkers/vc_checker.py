@@ -1945,106 +1945,133 @@ class VCChecker(CheckerBase):
             pass_all= pass_all and passed
         return pass_all, message,path
     
-    @checkgroup("storage_and_vm_checks", "CPU Limit per VM", ["manageability"], "vCPU * Host Clock Speed")
-    def check_vm_cpu_limit(self):
-        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name!=NTNX*CVM].summary'
-        vms_map= self.get_vc_property(path)
+    @checkgroup("storage_and_vm_checks", "VM OS Version same as Guest OS Version",["performance","manageability","configurability"],"OS Versions Should Match")
+    def check_VM_OS_Versions(self):
+        path='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.summary'
+        vm_list = self.get_vc_property(path)
         message = ""
-        pass_all=True
+        passed_all = True
         
-        for vms_key, vm in vms_map.iteritems():
-              
+        for vms_key, vm in vm_list.iteritems():
             if vm == 'Not-Configured' :
                 #condition to check if any clusters not found 
                 continue
             passed=True
-            vms_key='@'.join(vms_key.split('@')[0:-1])
- 
-            maxCpuUsage=vm.runtime.maxCpuUsage
+                        
+            vm_OS_version = vm.config.guestFullName
+            guest_OS_version= vm.guest.guestFullName
             
-            if maxCpuUsage == None:
-                passed=False
-                message += ", " +vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
-                continue
-            
-            numCpu=vm.config.numCpu
-            if numCpu == None:
-                passed=False
-                message += ", " +vms_key+"=numCpu is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
-                continue
-            
-            cpuMhz=vm.runtime.host.summary.hardware.cpuMhz
-            if cpuMhz == None:
-                passed=False
-                message += ", " +vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
-                continue
-                
-            if maxCpuUsage == (cpuMhz*numCpu):
-                message += ", " +vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
-                
+            if str(vm_OS_version) == str(guest_OS_version):
+                self.reporter.notify_progress(self.reporter.notify_checkLog,  vms_key + "="+str(guest_OS_version)+" (Expected: ="+str(vm_OS_version)+" )", ("PASS"))
+                message += ", "+vms_key + "="+str(guest_OS_version)+" (Expected: = "+str(vm_OS_version)+")#PASS"
             else:
-                passed=False
-                message += ", " +vms_key+"=" + str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
-                
-            pass_all= pass_all and passed
-  
-        return pass_all, message,path
-    
-    @checkgroup("cvm_checks", "CPU Limit per CVM", ["manageability"], "vCPU * Host Clock Speed")
-    def check_cvm_cpu_limit(self):
-        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name=NTNX*CVM].summary'
-        vms_map= self.get_vc_property(path)
-        message = ""
-        pass_all=True
+                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key + "="+str(guest_OS_version)+" (Expected: ="+str(vm_OS_version)+" )", ("FAIL"))
+                message += ", "+vms_key+ "="+str(guest_OS_version)+" (Expected: ="+str(vm_OS_version)+")#FAIL"             
+            
+            passed_all = passed_all and passed
         
-        for vms_key, vm in vms_map.iteritems():
-              
-            if vm == 'Not-Configured' :
-                #condition to check if any clusters not found 
-                continue
-            passed=True
-            
-            vms_key='@'.join(vms_key.split('@')[0:-1])
-            
-            maxCpuUsage=vm.runtime.maxCpuUsage
-            
-            if maxCpuUsage == None:
-                passed=False
-                message += ", " +vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
-                continue
-            
-            numCpu=vm.config.numCpu
-            if numCpu == None:
-                passed=False
-                message += ", " +vms_key+"=numCpu is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
-                continue
-            
-            cpuMhz=vm.runtime.host.summary.hardware.cpuMhz
-            if cpuMhz == None:
-                passed=False
-                message += ", " +vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
-                continue
-                
-            if maxCpuUsage == (cpuMhz*numCpu):
-                message += ", " +vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
-                
-            else:
-                passed=False
-                message += ", " +vms_key+"=" + str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) +"(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
-                
-            pass_all= pass_all and passed
-  
-        return pass_all, message,path
+        return passed_all , message,path
+        
+#     @checkgroup("storage_and_vm_checks", "CPU Limit per VM", ["manageability"], "vCPU * Host Clock Speed")
+#     def check_vm_cpu_limit(self):
+#         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name!=NTNX*CVM].summary'
+#         vms_map= self.get_vc_property(path)
+#         message = ""
+#         pass_all=True
+#         
+#         for vms_key, vm in vms_map.iteritems():
+#               
+#             if vm == 'Not-Configured' :
+#                 #condition to check if any clusters not found 
+#                 continue
+#             passed=True
+#             vms_key='@'.join(vms_key.split('@')[0:-1])
+#  
+#             maxCpuUsage=vm.runtime.maxCpuUsage
+#             
+#             if maxCpuUsage == None:
+#                 passed=False
+#                 message += ", " +vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+#                 continue
+#             
+#             numCpu=vm.config.numCpu
+#             if numCpu == None:
+#                 passed=False
+#                 message += ", " +vms_key+"=numCpu is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+#                 continue
+#             
+#             cpuMhz=vm.runtime.host.summary.hardware.cpuMhz
+#             if cpuMhz == None:
+#                 passed=False
+#                 message += ", " +vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+#                 continue
+#                 
+#             if maxCpuUsage == (cpuMhz*numCpu):
+#                 message += ", " +vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
+#                 
+#             else:
+#                 passed=False
+#                 message += ", " +vms_key+"=" + str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
+#                 
+#             pass_all= pass_all and passed
+#   
+#         return pass_all, message,path
+#     
+#     @checkgroup("cvm_checks", "CPU Limit per CVM", ["manageability"], "vCPU * Host Clock Speed")
+#     def check_cvm_cpu_limit(self):
+#         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name=NTNX*CVM].summary'
+#         vms_map= self.get_vc_property(path)
+#         message = ""
+#         pass_all=True
+#         
+#         for vms_key, vm in vms_map.iteritems():
+#               
+#             if vm == 'Not-Configured' :
+#                 #condition to check if any clusters not found 
+#                 continue
+#             passed=True
+#             
+#             vms_key='@'.join(vms_key.split('@')[0:-1])
+#             
+#             maxCpuUsage=vm.runtime.maxCpuUsage
+#             
+#             if maxCpuUsage == None:
+#                 passed=False
+#                 message += ", " +vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=maxCpuUsage is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+#                 continue
+#             
+#             numCpu=vm.config.numCpu
+#             if numCpu == None:
+#                 passed=False
+#                 message += ", " +vms_key+"=numCpu is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=numCpu is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+#                 continue
+#             
+#             cpuMhz=vm.runtime.host.summary.hardware.cpuMhz
+#             if cpuMhz == None:
+#                 passed=False
+#                 message += ", " +vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)"+"#"+(False and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=cpuMhz is Not-Configured (Expected: =Configured)", (False and "PASS" or "FAIL"))
+#                 continue
+#                 
+#             if maxCpuUsage == (cpuMhz*numCpu):
+#                 message += ", " +vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) + "(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
+#                 
+#             else:
+#                 passed=False
+#                 message += ", " +vms_key+"=" + str(maxCpuUsage) + "(Expected: ="+str(maxCpuUsage)+")"+"#"+(True and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(maxCpuUsage) +"(Expected: ="+str(cpuMhz*numCpu)+")", (True and "PASS" or "FAIL"))
+#                 
+#             pass_all= pass_all and passed
+#   
+#         return pass_all, message,path
       
     @checkgroup("cvm_checks", "Memory Reservation Per CVM(MB)", ["performance"], "Equal to size of VM memory")
     def check_memory_reservation_of_cvm(self):
@@ -2181,7 +2208,7 @@ class VCChecker(CheckerBase):
                             pass_all= pass_all and passed
         return pass_all, message,path+".host.vm"
 
-    @checkgroup("hardware_and_bios_checks", "XD Enabled",["performance"],"True")
+    @checkgroup("hardware_and_bios_checks", "XD-Execute Disabled",["performance"],"True")
     def check_XD_enabled(self):
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host.hardware.cpuFeature'
         host_map = self.get_vc_property(path_curr)
@@ -2213,114 +2240,114 @@ class VCChecker(CheckerBase):
          
         return passed_all , message,path_curr
     
-    @checkgroup("hardware_and_bios_checks", "Node Models and cluster size",["performance"],"Node Models and cluster size")
-    def check_hardwareNbios_node_model_and_cluster_size(self):
-        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
-        clusters_map = self.get_vc_property(path_curr)
-         
-        message = ""
-        passed_all = True
-         
-        for datacenter, host_list in clusters_map.iteritems():
-            passed = True
-            #print datacenter
-           
-            if host_list == "Not-Configured" :
-                continue
-            elif len(host_list)==0: 
-                #condtion to Check if no host found
-                continue
-                
-            node_model={} 
-            for host in host_list:
-                host_name=host.name
-                model_name=host.summary.hardware.model
-                if model_name in node_model.keys():
-                    node_model[model_name]+=1
-                else:
-                     node_model[model_name]=1
-                    
-            if 'NX-1020' in node_model.keys():
-                mix_model_not_found=True
-                if len(node_model.keys())>1: 
-                    # condition to check if any model other than NX-1020 found 
-                    # if yes status will be failed 
-                    mix_model_not_found = False
-                    
-                clustersize=0
-                for n_model,value in node_model.iteritems():
-                    clustersize+=value
-                
-                passed=status = mix_model_not_found and ( True if clustersize <= 8 else False)
-                message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020]; Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020]; Cluster-Size<=8)",(status and "PASS" or "FAIL"))
-            elif 'NX-1050' in node_model.keys():
-                mix_model_not_found=True
-                if len(node_model.keys())>1: 
-                    # condition to check if any model other than NX-1050 found 
-                    # if yes status will be failed 
-                    mix_model_not_found = False
-                    
-                clustersize=0
-                for n_model,value in node_model.iteritems():
-                    clustersize+=value
-                
-                passed=status = mix_model_not_found and ( True if clustersize <= 8 else False)
-                message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050]; Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050]; Cluster-Size<=8)",(status and "PASS" or "FAIL"))
-            elif 'NX-6000' in node_model.keys():
-                nx2000_model_not_found=True
-                if 'NX-2000' in node_model.keys(): 
-                    # condition to check if NX-2000 found
-                    # if yes status will be failed 
-                    nx2000_model_not_found = False
-                    
-                clustersize=0
-                for n_model,value in node_model.iteritems():
-                    clustersize+=value
-                
-                passed=status = nx2000_model_not_found 
-                message += ", " +datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])"+"#"+(status and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])",(status and "PASS" or "FAIL"))
-            else:
-                clustersize=0
-                for n_model,value in node_model.iteritems():
-                    clustersize+=value
-                
-                passed=status = True 
-                message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Models"+"#"+(status and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Models)",(status and "PASS" or "FAIL"))
-                                
-            passed_all = passed_all and passed
-      
-        return passed_all , message,path_curr
+#     @checkgroup("hardware_and_bios_checks", "Node Models and cluster size",["performance"],"Node Models and cluster size")
+#     def check_hardwareNbios_node_model_and_cluster_size(self):
+#         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
+#         clusters_map = self.get_vc_property(path_curr)
+#          
+#         message = ""
+#         passed_all = True
+#          
+#         for datacenter, host_list in clusters_map.iteritems():
+#             passed = True
+#             #print datacenter
+#            
+#             if host_list == "Not-Configured" :
+#                 continue
+#             elif len(host_list)==0: 
+#                 #condtion to Check if no host found
+#                 continue
+#                 
+#             node_model={} 
+#             for host in host_list:
+#                 host_name=host.name
+#                 model_name=host.summary.hardware.model
+#                 if model_name in node_model.keys():
+#                     node_model[model_name]+=1
+#                 else:
+#                      node_model[model_name]=1
+#                     
+#             if 'NX-1020' in node_model.keys():
+#                 mix_model_not_found=True
+#                 if len(node_model.keys())>1: 
+#                     # condition to check if any model other than NX-1020 found 
+#                     # if yes status will be failed 
+#                     mix_model_not_found = False
+#                     
+#                 clustersize=0
+#                 for n_model,value in node_model.iteritems():
+#                     clustersize+=value
+#                 
+#                 passed=status = mix_model_not_found and ( True if clustersize <= 8 else False)
+#                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020]; Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1020]; Cluster-Size<=8)",(status and "PASS" or "FAIL"))
+#             elif 'NX-1050' in node_model.keys():
+#                 mix_model_not_found=True
+#                 if len(node_model.keys())>1: 
+#                     # condition to check if any model other than NX-1050 found 
+#                     # if yes status will be failed 
+#                     mix_model_not_found = False
+#                     
+#                 clustersize=0
+#                 for n_model,value in node_model.iteritems():
+#                     clustersize+=value
+#                 
+#                 passed=status = mix_model_not_found and ( True if clustersize <= 8 else False)
+#                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050]; Cluster-Size less than 8)"+"#"+(status and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-1050]; Cluster-Size<=8)",(status and "PASS" or "FAIL"))
+#             elif 'NX-6000' in node_model.keys():
+#                 nx2000_model_not_found=True
+#                 if 'NX-2000' in node_model.keys(): 
+#                     # condition to check if NX-2000 found
+#                     # if yes status will be failed 
+#                     nx2000_model_not_found = False
+#                     
+#                 clustersize=0
+#                 for n_model,value in node_model.iteritems():
+#                     clustersize+=value
+#                 
+#                 passed=status = nx2000_model_not_found 
+#                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+";Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])"+"#"+(status and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Model:[NX-6000])",(status and "PASS" or "FAIL"))
+#             else:
+#                 clustersize=0
+#                 for n_model,value in node_model.iteritems():
+#                     clustersize+=value
+#                 
+#                 passed=status = True 
+#                 message += ", " +datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Models"+"#"+(status and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"=Model:"+str(node_model.keys())+"; Cluster-Size:"+str(clustersize)+" (Expected: =Models)",(status and "PASS" or "FAIL"))
+#                                 
+#             passed_all = passed_all and passed
+#       
+#         return passed_all , message,path_curr
     
     
-    @checkgroup("hardware_and_bios_checks", "Bios Boot Order",["manageability","reliability"], "False")
-    def check_boot_order(self):
-        path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.bootOptions.bootOrder'
-        vms_devices= self.get_vc_property(path)
-        message = ""
-        pass_all=True
-        embedded_boot_device=False
-        for vms_key, vms_boot_devices in vms_devices.iteritems():
-            if vms_boot_devices == 'Not-Configured' :
-                #condition to check if any clusters not found 
-                continue
-            passed =True
-            for device in vms_boot_devices:
-                if isinstance(device, vim.vm.BootOptions.BootableDiskDevice):
-                    embedded_boot_device=True
-                    message += ", " +vms_key+"=Embedded Disk First (Expected: =Embedded Disk First)"+"#"+((embedded_boot_device) and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Embedded Disk First (Expected: =Embedded Disk First)", ((embedded_boot_device) and "PASS" or "FAIL"))
-                    break
-                elif not isinstance(device, vim.vm.BootOptions.BootableDiskDevice):
-                     embedded_boot_device=False
-                     message += ", " +vms_key+"=Embedded Disk is not First (Expected: =Embedded Disk First)"+"#"+((embedded_boot_device) and "PASS" or "FAIL")
-                     self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Embedded Disk is not First (Expected: =Embedded Disk First)", ((embedded_boot_device) and "PASS" or "FAIL"))
-                     break
-            if embedded_boot_device==False:
-                message += ", " +vms_key+"=No Boot Options Present (Expected: =Embedded Disk First)"+"#"+(embedded_boot_device and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=No Boot Options Present (Expected: =Embedded Disk First)", (embedded_boot_device and "PASS" or "FAIL"))     
-            pass_all= pass_all and passed
-        return pass_all, message,path    
+#     @checkgroup("hardware_and_bios_checks", "Bios Boot Order",["manageability","reliability"], "False")
+#     def check_boot_order(self):
+#         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.bootOptions.bootOrder'
+#         vms_devices= self.get_vc_property(path)
+#         message = ""
+#         pass_all=True
+#         embedded_boot_device=False
+#         for vms_key, vms_boot_devices in vms_devices.iteritems():
+#             if vms_boot_devices == 'Not-Configured' :
+#                 #condition to check if any clusters not found 
+#                 continue
+#             passed =True
+#             for device in vms_boot_devices:
+#                 if isinstance(device, vim.vm.BootOptions.BootableDiskDevice):
+#                     embedded_boot_device=True
+#                     message += ", " +vms_key+"=Embedded Disk First (Expected: =Embedded Disk First)"+"#"+((embedded_boot_device) and "PASS" or "FAIL")
+#                     self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Embedded Disk First (Expected: =Embedded Disk First)", ((embedded_boot_device) and "PASS" or "FAIL"))
+#                     break
+#                 elif not isinstance(device, vim.vm.BootOptions.BootableDiskDevice):
+#                      embedded_boot_device=False
+#                      message += ", " +vms_key+"=Embedded Disk is not First (Expected: =Embedded Disk First)"+"#"+((embedded_boot_device) and "PASS" or "FAIL")
+#                      self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Embedded Disk is not First (Expected: =Embedded Disk First)", ((embedded_boot_device) and "PASS" or "FAIL"))
+#                      break
+#             if embedded_boot_device==False:
+#                 message += ", " +vms_key+"=No Boot Options Present (Expected: =Embedded Disk First)"+"#"+(embedded_boot_device and "PASS" or "FAIL")
+#                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=No Boot Options Present (Expected: =Embedded Disk First)", (embedded_boot_device and "PASS" or "FAIL"))     
+#             pass_all= pass_all and passed
+#         return pass_all, message,path    

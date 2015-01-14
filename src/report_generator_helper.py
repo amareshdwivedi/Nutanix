@@ -309,11 +309,28 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                  messageList = message.split('(Expected: =')
                  expected_result = messageList[1].split(')')[0]             
         if actual_value == expected_result:
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'
-        else:
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'        
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory reservation set to ["+actual_value+"] MB", False ,'alert'
+        elif actual_value < expected_result:
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory reservation Not Equal to Memory Size", True ,'alert' 
+        elif actual_value == "0":
+             return "CVM ["+entity+"] on Cluster ["+cluster+"] has No Memory reservation", True ,'alert'   
         
-                                
+    if check_name == "CPU Limit per CVM":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "-1":
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has CPU limit set to ["+actual_value+"]", True ,"alert"
+        else:
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has CPU limit set to ["+actual_value+"]", False ,"alert"
+        
+    if check_name == "Memory Limit per CVM":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "-1":
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", True ,"alert"
+        else:
+            return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", False ,"alert"          
+                                        
     # Start of storage_and_vm Checks
     if check_name == "VM hardware version is the most up to date with the ESXI version":
         if status == 'FAIL':
@@ -397,9 +414,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return "Not-Configured", False, ''
         elif actual_value != "0":
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", True ,'alert'
+            return "On VM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", True ,'info'
         else:
-            return "On CVM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'alert'
+            return "On VM ["+entity+"] memory reservation is set to ["+actual_value+"] MB", False ,'info'
 
     if check_name == "VM Advance Setting[isolation.tools.diskWiper.disable]":
         if actual_value == "Not-Configured" and entity != host:
@@ -466,8 +483,30 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
              else:
                  return "Virtual machine ["+vm_name+"] has snapshot which is ["+str(days)+"] days old", True, 'info'   
                            
-
+    if check_name == "CPU Limit per VM":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "-1":
+            return "On VM ["+entity+"] CPU limit is set to ["+actual_value+"]", True ,"warning"
+        else:
+            return "On VM ["+entity+"] CPU limit is set to ["+actual_value+"]", False ,"warning"
         
+    if check_name == "Memory Limit per VM":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value != "-1":
+            return "VM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", True ,"warning"
+        else:
+            return "VM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", False ,"warning"        
+
+    if check_name == "VM OS Version same as Guest OS Version":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif status == "FAIL":
+            return "VM ["+entity+"] on Cluster ["+cluster+"] has Guest OS ["+actual_value+"] but hardware baseline is set to ["+exp_value_from_msg+"]", True ,"warning"
+        else:
+            return "VM ["+entity+"] on Cluster ["+cluster+"] has Guest OS ["+actual_value+"] but hardware baseline is set to ["+exp_value_from_msg+"]", False ,"warning"
+                
     # Start of vcenter_server Checks 
     if check_name == "Validate vCenter Server has VMware Tools installed and is up to date":
         if actual_value == "toolsOk":
@@ -843,23 +882,34 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'info'
             
     #hardware_and_bios_checks
-    if check_name == "VT-Extensions":
+    if check_name == "VT-D(Virtualization Tech for Direct I/O)":
         if actual_value == "Not-Configured":
-            return "Host Not Added to cluster", False,'info'
-        elif actual_value == "True":
-            return "On Host["+host+"], VT-Extensions is [Enabled]", False, 'info'
+            return "On Host["+host+"], VT-D is Not-Configured in BIOS", False, 'info'
+        elif actual_value == "False":
+            return "On Host["+host+"], VT-D is disabled in BIOS", True, 'alert'
         else:
-            return "On Host["+host+"], VT-Extensions is [Disabled]", True, 'info'
-    if check_name == "XD Enabled":
-        if actual_value == "True":
-            return "On Host["+host+"], XD is enabled", True, 'info'
+            return "On Host["+host+"], VT-D is enabled in BIOS", False, 'info'
+        
+    if check_name == "XD-Execute Disabled":
+        if actual_value == "Not-Configured":
+            return "Host ["+host+"] has XD Not-Configured in BIOS", False, ''
+        elif actual_value == "False":
+            return "Host ["+host+"] has XD disabled in BIOS", True, 'warning'
         else:
-            return "On Host["+host+"], XD is disabled", True, 'alert' 
-    if check_name == "Node Models and cluster size":
-        if status == 'FAIL':
-            return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'alert'
+            return  "Host ["+host+"] has XD enabled in BIOS", False, '' 
+        
+    if check_name == "Host BIOS Version":
+        if actual_value == "Not-Configured":
+            return "Host ["+host+"] has BIOS Version Not-Configured", False, ''
         else:
-            return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'info'
+            return  "Host ["+host+"] has BIOS Version["+actual_value+"]", True, 'info'         
+        
+        
+#     if check_name == "Node Models and cluster size":
+#         if status == 'FAIL':
+#             return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'alert'
+#         else:
+#             return "For Cluster["+cluster+"],<br/>"+actual_value.replace(';','<br/>'), True, 'info'
     #Default return
     return str(actual_value), False,'info'
  
