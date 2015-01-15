@@ -6,11 +6,9 @@ import sys
 import shutil
 import platform
 
-# version = platform.python_version()
-# 
-# if version != "2.7.8":
-#    print "Python Version Should be 2.7.8"
-#    sys.exit(1)
+if sys.version_info[0] != 2 or sys.version_info[1] < 6:
+    print "Python Version Should be 2.7.Please upgrade to 2.7 and run the installation again."
+    sys.exit(1)
    
 cmd = 'python '+os.path.abspath(os.path.dirname(__file__))+os.path.sep +'scripts'+ os.path.sep +'get_pip.py'
 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
@@ -84,7 +82,7 @@ if returncode == 0:
     'if not os.path.exists(cur_dir + os.path.sep +"reports"):',
     '     os.mkdir("reports")',
     'os.chdir(lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep)',
-    'executable_path="python web_health_check.pyc 8080 " + cur_dir',
+    'executable_path="python web_health_check.pyc 127.0.0.1:8080 " + cur_dir',
     'os.system(executable_path)']
 
     web_health_check_pyfile=open(default_install+os.path.sep+"webhealthcheck.py","wb")
