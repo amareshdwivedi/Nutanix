@@ -6,6 +6,7 @@ import string
 import warnings
 import paramiko
 import socket
+import requests
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 from base_checker import *
@@ -19,6 +20,7 @@ from security import Security
 from colorama import Fore
 import web
 from web import form
+
 
 
 def exit_with_message(message):
@@ -516,6 +518,29 @@ class VCChecker(CheckerBase):
         return self.retrieve_vc_property(string.split(path, '.'), self.si, [])
 
 
+
+    def get_nutanix_cluster_info(self):
+        
+        ncc_auth_conf_path=os.path.abspath(os.path.dirname("src"))+os.path.sep +"conf" + os.path.sep + "auth.conf"
+        fp = open(ncc_auth_conf_path, 'r')
+        ncc_auth_config = json.load(fp)
+        fp.close()
+        
+        ncc_config = ncc_auth_config["ncc"]      
+        current_cvm_ip = ncc_config["cvm_ip"]
+
+        restURL = "https://"+current_cvm_ip+":9440/PrismGateway/services/rest/v1/hosts/"
+        headers = {'content-type': 'application/json'}
+        try:
+            response = requests.get(restURL, headers=headers,auth=("admin", "admin"), verify=False)
+            if response.status_code != 200:
+                return None
+            responseJson = json.loads(response.text)
+            return responseJson["entities"]
+        except requests.ConnectionError, e:
+            pass
+        except:
+            pass 
 
     # Manual checks
    
@@ -2214,52 +2239,52 @@ class VCChecker(CheckerBase):
     def check_XD_enabled(self):
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host.hardware.cpuFeature'
         host_map = self.get_vc_property(path_curr)
-          
+           
         message = ""
         passed_all = True
-          
+           
         for key, host_cpuFeatures in host_map.iteritems():
             passed = True
-             
+              
             if host_cpuFeatures == "Not-Configured":
                 continue
-              
+               
             for cpuFeature in host_cpuFeatures:
                 if cpuFeature.level==-2147483647 :
                     edx=cpuFeature.edx
                     xd_enabled=False
-                     
+                      
                     # Bit operation
                     # if  edx=0010:1100:0001:0000:0000:1000:0000:0000, to check XD 20th bit should set to 1
                     if list(edx.split(':')[2])[-1] == '1':
                         xd_enabled=True
-                     
+                      
                     message += ", " +key+"="+str(xd_enabled)+" (Expected: =True)"+"#"+(xd_enabled and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,key+"="+str(xd_enabled)+" (Expected: =True)",(xd_enabled and "PASS" or "FAIL"))
                     passed=xd_enabled
                     continue   
             passed_all = passed_all and passed
-         
+          
         return passed_all , message,path_curr
-
+ 
     @checkgroup("hardware_and_bios_checks", "VT-Extensions",["performance"],"3")
     def check_VT_extensions(self):
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
         clusters_map = self.get_vc_property(path_curr)
-           
+            
         message = ""
         passed_all = True
         VT_extension_level = False
         for datacenter, host_list in clusters_map.iteritems():
             passed = True
             #print datacenter
-             
+              
             if host_list == "Not-Configured" :
                 continue
             elif len(host_list)==0: 
                 #condtion to Check if no host found
                 continue
-                  
+                   
             for host in host_list:
                 host_ip=host.name
                 ssh=None
@@ -2267,7 +2292,7 @@ class VCChecker(CheckerBase):
                     ssh = paramiko.SSHClient()
                     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                     ssh.connect(host_ip, username="root", password="nutanix/4u")
-                     
+                      
                 except paramiko.AuthenticationException:
                     message += ", " +datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
@@ -2280,33 +2305,203 @@ class VCChecker(CheckerBase):
                     message += ", " +datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
                     continue
-     
+      
                 cmd = "esxcfg-info|grep \"HV Support\""    
                 stdin, stdout, stderr =  ssh.exec_command(cmd)     
-                 
- 
+                  
+  
                 for line in stdout:
                     line = ''.join(e for e in line if e.isalnum())
-                    
+                     
                     if line.startswith('HVSupport'):
                         level = line[-1:]
-                        
+                         
                         if level is not None and level == "3":
                             VT_extension_level = True
                             message += ", " +datacenter+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
                             self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
                             passed=VT_extension_level
                             continue 
-                        
+                         
                         elif level is not None and level != "3":  
                             message += ", " +datacenter+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
                             self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
                             passed=VT_extension_level
                             continue 
-                        
+                         
             passed_all = passed_all and passed
-          
+           
         return passed_all , message,path_curr
+
+    @checkgroup("hardware_and_bios_checks", "NX-1020 Maximum Cluster Size",["configurability","supportability"],"Less than 8")
+    def check_NX1020_Cluster_Size(self):
+        entities = self.get_nutanix_cluster_info()
+        model_map = {}
+        model_count = 0;
+        message = ""
+        passed_all = True
+        for entity in entities:
+            if entity["blockModel"] == "NX1020":
+                model_map[model_count] = entity["blockModel"]
+                model_count+=1
+                
+        if len(model_map) > 8:
+            passed=False
+            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+ 
+        elif len(model_map) == 0:    
+            passed=True
+            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+        
+        else :
+            passed=True
+            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+            
+        passed_all = passed_all and passed    
+              
+        return passed_all,message,''   
+
+
+    @checkgroup("hardware_and_bios_checks", "NX-1020 Nodes Cannot be Mixed with other Nodes within Same Cluster",["configurability","performance","supportability"],"Mixed Nodes Not Present")
+    def check_NX1020_Mixed_Nodes_Not_Present(self):
+        entities = self.get_nutanix_cluster_info()
+        model_map = {}
+        nx1020_model_count = 0;
+        other_model_count = 0;
+        message = ""
+        passed_all = True
+        
+        for entity in entities:
+            if entity["blockModel"] == "NX1020":
+                model_map[nx1020_model_count] = entity["blockModel"]
+                nx1020_model_count+=1
+            else:
+                other_model_count+=1
+                    
+        if other_model_count > 0 and nx1020_model_count > 0:
+            passed=False
+            message += ", " +"Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
+     
+        elif other_model_count == 0 and nx1020_model_count > 0:    
+            passed=True
+            message += ", " +"Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
+            
+        elif other_model_count > 0 and nx1020_model_count == 0:
+            passed=True
+            message += ", " +"NX-1020 Node Count ="+str(nx1020_model_count)+" (Expected: =NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"NX-1020 Node Count ="+str(nx1020_model_count)+" (Expected: =NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
+            
+        passed_all = passed_all and passed    
+              
+        return passed_all,message,''   
+
+
+    @checkgroup("hardware_and_bios_checks", "NX-6000 Nodes Cannot be Mixed with NX-2000 Nodes within Same Cluster",["configurability","supportability"],"Mixed Nodes Not Present")
+    def check_NX6000_mixed_with_NX2000(self):
+        entities = self.get_nutanix_cluster_info()
+        model_map = {}
+        nx6000_model_count = 0;
+        nx2000_model_count = 0;
+        message = ""
+        passed_all = True
+        
+        for entity in entities:
+            if entity["blockModel"] == "NX6000":
+                model_map[nx6000_model_count] = entity["blockModel"]
+                nx6000_model_count+=1
+            elif entity["blockModel"] == "NX2000":
+                model_map[nx2000_model_count] = entity["blockModel"]
+                nx2000_model_count+=1    
+                    
+        if nx6000_model_count > 0 and nx2000_model_count > 0:
+            passed=False
+            message += ", " +"Non NX-6000 Node Count ="+str(nx2000_model_count)+" (Expected: =Non NX-6000 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-6000 Node Count ="+str(nx2000_model_count)+" (Expected: =Non NX-6000 Node Count 0)",(passed and "PASS" or "FAIL"))
+     
+        elif nx6000_model_count > 0 and nx2000_model_count == 0:    
+            passed=True
+            message += ", " +"NX-6000 Node Count ="+str(nx6000_model_count)+" (Expected: =NX-6000 Node Count > 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-6000 Node Count ="+str(nx6000_model_count)+" (Expected: =Non NX-6000 Node Count > 0)",(passed and "PASS" or "FAIL"))
+            
+        elif nx6000_model_count == 0 and nx2000_model_count == 0:
+            passed=True
+            message += ", " +"NX-6000,NX-2000 Node Count =0 (Expected: =NX-6000,NX-2000 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"NX-6000,NX-2000 Node Count =0 (Expected: =NX-6000,NX-2000 Node Count 0)",(passed and "PASS" or "FAIL"))
+            
+        passed_all = passed_all and passed    
+              
+        return passed_all,message,''   
+
+    @checkgroup("hardware_and_bios_checks", "NX-1050 Maximum Cluster Size on 1GbE Networking",["configurability","supportability","performance"],"Less than 8")
+    def check_NX1050_Cluster_Size(self):
+        entities = self.get_nutanix_cluster_info()
+        model_map = {}
+        model_count = 0;
+        message = ""
+        passed_all = True
+        for entity in entities:
+            if entity["blockModel"] == "NX1050":
+                model_map[model_count] = entity["blockModel"]
+                model_count+=1
+                
+        if len(model_map) <= 5:
+            passed=True
+            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+ 
+        elif len(model_map) > 5:    
+            passed=True
+            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+        
+        else :
+            passed=False
+            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+            
+        passed_all = passed_all and passed    
+              
+        return passed_all,message,''   
+
+    @checkgroup("hardware_and_bios_checks", "NX-1050 Nodes Cannot be Mixed with Other Nodes on 1GbE Networking",["configurability","supportability"],"Mixed Nodes Not Present")
+    def check_NX1050_mixed_with_other_nodes(self):
+        entities = self.get_nutanix_cluster_info()
+        model_map = {}
+        nx1050_model_count = 0;
+        other_model_count = 0;
+        message = ""
+        passed_all = True
+        
+        for entity in entities:
+            if entity["blockModel"] == "NX1050":
+                model_map[nx1050_model_count] = entity["blockModel"]
+                nx1050_model_count+=1
+            else: 
+                other_model_count+=1    
+                    
+        if nx1050_model_count > 0 and other_model_count > 0:
+            passed=False
+            message += ", " +"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)",(passed and "PASS" or "FAIL"))
+     
+        elif nx1050_model_count > 0 and other_model_count == 0:    
+            passed=True
+            message += ", " +"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count > 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count > 0)",(passed and "PASS" or "FAIL"))
+            
+        elif nx1050_model_count == 0 and other_model_count == 0:
+            passed=False
+            message += ", " +"NX-1050 Node Count =0 (Expected: =NX-1050 Node Count > 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"NX-1050 Node Count =0 (Expected: =NX-1050 Node Count > 0)",(passed and "PASS" or "FAIL"))
+            
+        passed_all = passed_all and passed    
+              
+        return passed_all,message,''   
         
 #     @checkgroup("hardware_and_bios_checks", "Node Models and cluster size",["performance"],"Node Models and cluster size")
 #     def check_hardwareNbios_node_model_and_cluster_size(self):

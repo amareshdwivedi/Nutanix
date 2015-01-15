@@ -714,12 +714,14 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
                 return "On Host["+host+"], Management-Adapter-Not-Found", True , 'info'
             else:
                 return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info'  
+            
     if check_name=="vMotion VMkernel adapter has only vMotion Traffic enabled":
         if status == 'FAIL':
             if actual_value == "vMotion-Adapter-Not-Found":
                 return "On Host["+host+"], vMotion-Adapter-Not-Found", True , 'info'
             else:
                 return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info'
+            
     if check_name=="FTLogging VMkernel adapter has only FTLogging enabled":
         if status == 'FAIL':
             if actual_value == "FTLogging-Adapter-Not-Found":
@@ -727,7 +729,13 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             else:
                 return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info' 
 
-
+    if check_name == "CVM in Autostart":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value != "PowerOn":
+            return "On host ["+host+"] CVM ["+entity+"] is not in host Autostart", True, 'alert'
+        elif actual_value == "PowerOn": 
+            return "On host ["+host+"] CVM ["+entity+"] is in host Autostart", False, 'alert'
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
