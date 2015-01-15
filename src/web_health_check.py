@@ -12,7 +12,7 @@ from operator import itemgetter
 import csv, time
 import sys
 import os
-
+import httplib
 import paramiko
 import socket
 from security import Security
@@ -20,6 +20,10 @@ import warnings
 from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
 from requests.exceptions import ConnectionError
+from deployer_web import initiate_deployment
+import api
+
+
 
 if (len(sys.argv) > 1):
     cur_dir=sys.argv[2]
@@ -27,8 +31,18 @@ else:
     cur_dir = None
     
 urls = (
+
+
+ '/v1/deployer/customers/$','api.customers' ,       
+ '/v1/deployer/customers/(\d+)/$','api.customers',   
+ '/v1/deployer/customers/(\d+)/tasks/$','api.customertasks',
+ '/v1/deployer/customers/(\d+)/tasks/(\d+)/$','api.customertasks',   
+ '/v1/deployer/utils/nodedetails/$','api.nodedetails',
+ '/v1/deployer/utils/foundationprogress/$','api.foundationprogress',
+ '/v1/deployer/action/$','api.customeraction',
+ '/v1/deployer/customers/(\d+)/tasks/(\d+)/status/$','api.deploymentstatus',
+
   '/', 'index'
-  #'/(.*)', 'index'
 )
 
 app = web.application(urls, globals())
