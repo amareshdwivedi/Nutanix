@@ -82,13 +82,13 @@ $def with (checkers,msg="")
 		    jQuery("#runchecks").click(function() {
 		    	
 		    	function fetch_data(){
-		    		cont_run = [];
-			        cont_run.push({name: 'operation', value: 'refresh_logs'});
+		    		//cont_run = [];
+			        //cont_run.push({name: 'operation', value: 'refresh_logs'});
                     
                         jQuery.ajax({
-                            url: '/',
-                            type: "POST",
-                            data: cont_run,
+                            url: '/refresh',
+                            type: "GET",
+                            //data: cont_run,
                             success: function(data) {
                                 var obj = jQuery.parseJSON(data);
                                 if(category == "ncc"){
@@ -150,7 +150,7 @@ $def with (checkers,msg="")
 		    	
 		    	var inputElements = document.getElementsByClassName('run');
 		        checks = [] ;
-		        checks.push({name: 'operation', value: 'exec_checks'}); 
+		        //checks.push({name: 'operation', value: 'exec_checks'}); 
 		        var category = $$("#category_select").val();
 		        var group = $$("#group_select").val();
 		       jQuery("#logs").empty();
@@ -159,7 +159,7 @@ $def with (checkers,msg="")
 		         
 		        console.log(checks)
 		        jQuery.ajax({
-		            url: '/',
+		            url: '/run',
 		            type: "POST",
 		            data: checks,
 		            success: function(data) {
@@ -187,11 +187,12 @@ $def with (checkers,msg="")
 		    jQuery(".conf").click(function() {
 		        if ($$(this).attr('id')=="config_vc") {
 		            var form_data = $$("#vc").serializeArray();
-		            form_data.push({name: 'operation', value: 'config_vc'});
+		            form_data.push({name: 'checker', value: 'vc'});
 		            console.log(form_data)
 		                jQuery.ajax({
-		                //url: '/',
+		                url: '/config',
 		                type: "POST",
+		                //contentType: 'application/json',
 		                dataType: "json",
 		                data: form_data,
 		                success: function(value) {
@@ -204,11 +205,11 @@ $def with (checkers,msg="")
 		        if ($$(this).attr('id')=="config_ncc") {
 		            
 		            var form_data = $$("#ncc").serializeArray();
-		            form_data.push({name: 'operation', value: 'config_ncc'});
+		            form_data.push({name: 'checker', value: 'ncc'});
 		            jQuery.ajax({
-		                //url: '/',
+		                url: '/config',
 		                type: "POST",
-		                //contentType: 'application/x-www-form-urlencoded',
+		                //contentType: 'application/json',
 		                dataType: "json",
 		                data: form_data,
 		                success: function(data) {
@@ -224,10 +225,10 @@ $def with (checkers,msg="")
 		    jQuery(".conn").click(function() {
 		        if ($$(this).attr('id')=="connect_vc") {
 		            var form_data = $$("#vc").serializeArray();
-		            form_data.push({name: 'operation', value: 'connect_vc'});
+		            form_data.push({name: 'checker', value: 'vc'});
 		
 		                jQuery.ajax({
-		                //url: '/',
+		                url: '/connect',
 		                type: "POST",
 		                //contentType: 'application/x-www-form-urlencoded',
 		                dataType: "json",
@@ -244,10 +245,10 @@ $def with (checkers,msg="")
 		        }
 		        if ($$(this).attr('id')=="connect_ncc") {
 		            var form_data = $$("#ncc").serializeArray();
-		            form_data.push({name: 'operation', value: 'connect_ncc'});
+		            form_data.push({name: 'checker', value: 'ncc'});
 		
 		            jQuery.ajax({
-		                //url: '/',
+		                url: '/connect',
 		                type: "POST",
 		                //contentType: 'application/x-www-form-urlencoded',
 		                dataType: "json",

@@ -32,23 +32,26 @@ else:
     
 urls = (
 
-
- '/v1/deployer/customers/$','api.customers' ,       
- '/v1/deployer/customers/(\d+)/$','api.customers',   
- '/v1/deployer/customers/(\d+)/tasks/$','api.customertasks',
- '/v1/deployer/customers/(\d+)/tasks/(\d+)/$','api.customertasks',   
- '/v1/deployer/utils/nodedetails/$','api.nodedetails',
- '/v1/deployer/utils/foundationprogress/$','api.foundationprogress',
- '/v1/deployer/action/$','api.customeraction',
- '/v1/deployer/customers/(\d+)/tasks/(\d+)/status/$','api.deploymentstatus',
-
-  '/', 'index'
+    '/v1/deployer/customers/$','api.customers' ,       
+    '/v1/deployer/customers/(\d+)/$','api.customers',   
+    '/v1/deployer/customers/(\d+)/tasks/$','api.customertasks',
+    '/v1/deployer/customers/(\d+)/tasks/(\d+)/$','api.customertasks',   
+    '/v1/deployer/utils/nodedetails/$','api.nodedetails',
+    '/v1/deployer/utils/foundationprogress/$','api.foundationprogress',
+    '/v1/deployer/action/$','api.customeraction',
+    '/v1/deployer/customers/(\d+)/tasks/(\d+)/status/$','api.deploymentstatus',
+    '/config', 'config',
+    '/connect', 'connect',
+    '/run', 'runChecks',
+    '/refresh', 'refresh',
+    '/', 'index'
 )
 
 app = web.application(urls, globals())
 #web.header('Content-Type', 'applicaton/json')
 #render = web.template.render('templates/')
 render = web.template.render('templates/')
+
 
 class index:
     def __init__(self):
@@ -70,8 +73,78 @@ class index:
     def GET(self):
         #print self.checkers
         return render.index(self.checkers)
+    
+class config:
+    def __init__(self):
+        pass
+
+    def POST(self):
+        data = web.input()
+        if data['checker'] == "vc":
+            conf_data = { "vc_port": data['Port'], 
+                          "vc_user": data['User'], 
+                          "vc_ip": data['Server'], 
+                          "cluster": data['Cluster'], 
+                          "host": data['Host'],  
+                          "vc_pwd": Security.encrypt(data['Password'])
+                        }
+            CheckerBase.save_auth_into_auth_config("vc",conf_data)
+            status = {"Configuration": "Success"}
+            return json.dumps(status)
+
+        if data['checker'] == "ncc":
+            conf_data = { "cvm_ip": data['Server'], 
+                          "cvm_pwd": Security.encrypt(data['Password']), 
+                          "cvm_user": data['User']
+                          }
+
+            CheckerBase.save_auth_into_auth_config("ncc",conf_data)
+            status = {"Configuration": "Success"}        
+            return json.dumps(status)
+
+class connect:
+    def __init__(self):
+        self.checkers = {}
+        self.callback_name = ''
+        for checker_class in CheckerBase.__subclasses__():
+            checker = checker_class()
+            self.checkers[checker.get_name()] = checker
+
+    def POST(self):
+        data = web.input()
         
-    def run_checks(self,data):
+        status = {"Connection": "Failed"}
+        if data['checker'] == "vc":
+            ret , msg = self.checkers['vc'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']),data['Port'])
+            if ret:
+                status['Connection'] = "Success"
+            return json.dumps(status)
+    
+        if data['checker'] == "ncc":
+            ret , msg = self.checkers['ncc'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
+            if ret:
+                status['Connection'] = "Success"
+            return json.dumps(status)
+    
+class runChecks:
+    def __init__(self):
+        self.checkers = {}
+        self.callback_name = ''
+        for checker_class in CheckerBase.__subclasses__():
+            checker = checker_class()
+            self.checkers[checker.get_name()] = checker
+        
+        for checker in self.checkers.keys():
+            checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
+            fp = open(checker_conf_path, 'r')
+            checker_config = json.load(fp)
+            fp.close()
+            checker_module = self.checkers[checker]
+            self.reporter = DefaultConsoleReporter(checker)
+            checker_module.configure(checker_config, self.reporter)
+
+    def POST(self):
+        data = web.input()
         results = {}
         run_logs = {}
         
@@ -80,7 +153,7 @@ class index:
             checkers_list = self.checkers.keys()
             for item in checkers_list:
                 run_logs[item] = {'checks': []}
-            
+
         if data['category'] == "ncc":
             checkers_list = ['ncc']
             run_logs['ncc'] = {'checks': []}
@@ -99,6 +172,7 @@ class index:
         
         with open("display_json.json", "w") as myfile:
             json.dump(run_logs, myfile)
+
         for checker in checkers_list:
             checker_module = self.checkers[checker]
             
@@ -111,13 +185,6 @@ class index:
             
             results[checker] = result.to_dict()
             
-            # This is to sort the checks in given checker based on the severity ( asc order )
-            #try :
-            #    results[checker]['checks'] = sorted(results[checker]['checks'], key=itemgetter('Severity'))
-            #except KeyError:
-                # It means no checks are executed for given checker
-            #   continue
-
         #Generate Json Reports 
         outfile = open(os.getcwd() + os.path.sep +"reports"+os.path.sep+"results.json", 'w')
         json.dump(results, outfile, indent=2)
@@ -130,66 +197,18 @@ class index:
         PDFReportGenerator(results,cur_dir)
             
         return True
-    
-    def do_config(self,data):
-        if data['operation'].split('_')[1] == "vc":
-            conf_data = { "vc_port": data['Port'], 
-                          "vc_user": data['User'], 
-                          "vc_ip": data['Server'], 
-                          "cluster": data['Cluster'], 
-                          "host": data['Host'],  
-                          "vc_pwd": Security.encrypt(data['Password'])
-                        }
-            CheckerBase.save_auth_into_auth_config("vc",conf_data)
-            status = {"Configuration": "Success"}
-            return json.dumps(status)
 
-        if data['operation'].split('_')[1] == "ncc":
-            conf_data = { "cvm_ip": data['Server'], 
-                          "cvm_pwd": Security.encrypt(data['Password']), 
-                          "cvm_user": data['User']
-                          }
+class refresh:
+    def __init__(self):
+        pass
 
-            CheckerBase.save_auth_into_auth_config("ncc",conf_data)
-            status = {"Configuration": "Success"}        
-            return json.dumps(status)
-    
-    def check_connect(self,data):
-        status = {"Connection": "Failed"}
-        if data['operation'].split('_')[1] == "vc":
-            ret , msg = self.checkers['vc'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']),data['Port'])
-            
-            if ret:
-                status['Connection'] = "Success"
-            return json.dumps(status)
-    
-        if data['operation'].split('_')[1] == "ncc":
-            ret , msg = self.checkers['ncc'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
-            if ret:
-                status['Connection'] = "Success"
-            return json.dumps(status)
-
-    def POST(self): 
-        data = web.input()
-        #print "Post Received Data:",data,type(data)
-        
-        if data['operation'].split('_')[0] == "config":
-            return(self.do_config(data))
-            
-        if data['operation'].split('_')[0] == "connect":
-            return(self.check_connect(data))
-
-        if data['operation'] == "exec_checks":
-            if(self.run_checks(data)):
-                return "Execution Completed"
-
-        if data['operation'] == "refresh_logs":
-            try:
-                f = open("display_json.json", 'r')
-                return f.read()
-            except:
-                return True
-            
+    def GET(self):
+        try:
+            f = open("display_json.json", 'r')
+            return f.read()
+        except:
+            return True
+      
 if __name__ == "__main__":
     web.internalerror = web.debugerror
     app.run()
