@@ -6,8 +6,10 @@ import sys
 import shutil
 import platform
 
-if sys.version_info[0] != 2 or sys.version_info[1] < 6:
-    print "Python Version Should be 2.7.Please upgrade to 2.7 and run the installation again."
+if sys.version_info[0] != 2 or sys.version_info[1] < 7:
+    print "You are running python version - " + platform.python_version()
+    print "Please un-install this version and install version 2.7." 
+    print "Once version 2.7 in installed, unzip the installation zip to a new folder and run the installation again."
     sys.exit(1)
    
 cmd = 'python '+os.path.abspath(os.path.dirname(__file__))+os.path.sep +'scripts'+ os.path.sep +'get_pip.py'
