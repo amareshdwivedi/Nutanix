@@ -30,9 +30,9 @@ class NCCChecker(CheckerBase):
         
         pwd = Security.decrypt(self.authconfig['cvm_pwd'])
         self.config_form =  form.Form( 
-                form.Textbox('Server',value=self.authconfig['cvm_ip']), 
-                form.Textbox('User',value=self.authconfig['cvm_user']),
-                form.Password('Password',value=pwd))() 
+                form.Textbox('CVM IP',value=self.authconfig['cvm_ip']), 
+                form.Textbox('CVM SSH Host Username',value=self.authconfig['cvm_user']),
+                form.Password('CVM SSH Host Password',value=pwd))() 
         
     def get_name(self):
         return NCCChecker._NAME_

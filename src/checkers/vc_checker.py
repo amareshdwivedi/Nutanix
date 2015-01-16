@@ -48,13 +48,13 @@ class VCChecker(CheckerBase):
     def __init__(self):
         super(VCChecker, self).__init__(VCChecker._NAME_)
         self.config_form =  form.Form( 
-                form.Textbox("Server",value=self.authconfig['vc_ip']),
-                form.Textbox("Port",value=self.authconfig['vc_port']),
-                form.Textbox("User",value=self.authconfig['vc_user']),
-                form.Password("Password",value=Security.decrypt(self.authconfig['vc_pwd'])),
+                form.Textbox("vCenter Server IP",value=self.authconfig['vc_ip']),
+                form.Textbox("vCenter Server Port",value=self.authconfig['vc_port']),
+                form.Textbox("vCenter Server Username",value=self.authconfig['vc_user']),
+                form.Password("vCenter Server Password",value=Security.decrypt(self.authconfig['vc_pwd'])),
                 #form.Password("Retype_Password",value=Security.decrypt(self.authconfig['vc_pwd'])), 
-                form.Textbox("Cluster",value=self.authconfig['cluster']),
-                form.Textbox("Host",value=self.authconfig['host']))() 
+                form.Textbox("Clusters(Comma Seperated List)",value=self.authconfig['cluster']),
+                form.Textbox("Hosts(Comma Seperated List)",value=self.authconfig['host']))() 
 
         self.si = None
         self.categories=['security','performance','availability','manageability','recoverability','reliability','post-install']

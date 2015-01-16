@@ -81,21 +81,21 @@ class config:
     def POST(self):
         data = web.input()
         if data['checker'] == "vc":
-            conf_data = { "vc_port": data['Port'], 
-                          "vc_user": data['User'], 
-                          "vc_ip": data['Server'], 
-                          "cluster": data['Cluster'], 
-                          "host": data['Host'],  
-                          "vc_pwd": Security.encrypt(data['Password'])
+            conf_data = { "vc_port": data['vCenter Server Port'], 
+                          "vc_user": data['vCenter Server Username'], 
+                          "vc_ip": data['vCenter Server IP'], 
+                          "cluster": data['Clusters(Comma Seperated List)'], 
+                          "host": data['Hosts(Comma Seperated List)'],  
+                          "vc_pwd": Security.encrypt(data['vCenter Server Password'])
                         }
             CheckerBase.save_auth_into_auth_config("vc",conf_data)
             status = {"Configuration": "Success"}
             return json.dumps(status)
 
         if data['checker'] == "ncc":
-            conf_data = { "cvm_ip": data['Server'], 
-                          "cvm_pwd": Security.encrypt(data['Password']), 
-                          "cvm_user": data['User']
+            conf_data = { "cvm_ip": data['CVM IP'], 
+                          "cvm_pwd": Security.encrypt(data['CVM SSH Host Password']), 
+                          "cvm_user": data['CVM SSH Host Username']
                           }
 
             CheckerBase.save_auth_into_auth_config("ncc",conf_data)
@@ -115,13 +115,13 @@ class connect:
         
         status = {"Connection": "Failed"}
         if data['checker'] == "vc":
-            ret , msg = self.checkers['vc'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']),data['Port'])
+            ret , msg = self.checkers['vc'].check_connectivity(data['vCenter Server IP'],data['vCenter Server Username'],Security.encrypt(data['vCenter Server Password']),data['vCenter Server Port'])
             if ret:
                 status['Connection'] = "Success"
             return json.dumps(status)
     
         if data['checker'] == "ncc":
-            ret , msg = self.checkers['ncc'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
+            ret , msg = self.checkers['ncc'].check_connectivity(data['CVM IP'],data['CVM SSH Host Username'],Security.encrypt(data['CVM SSH Host Password']))
             if ret:
                 status['Connection'] = "Success"
             return json.dumps(status)
