@@ -521,7 +521,7 @@ class VCChecker(CheckerBase):
 
     def get_nutanix_cluster_info(self):
         
-        ncc_auth_conf_path=os.path.abspath(os.path.dirname("src"))+os.path.sep +"conf" + os.path.sep + "auth.conf"
+        ncc_auth_conf_path=os.path.abspath(os.path.dirname(__file__)) + os.path.sep + ".." + os.path.sep +"conf" + os.path.sep + "auth.conf"
         fp = open(ncc_auth_conf_path, 'r')
         ncc_auth_config = json.load(fp)
         fp.close()
@@ -2365,7 +2365,7 @@ class VCChecker(CheckerBase):
         return passed_all,message,''   
 
 
-    @checkgroup("hardware_and_bios_checks", "NX-1020 Nodes Cannot be Mixed with other Nodes within Same Cluster",["configurability","performance","supportability"],"Mixed Nodes Not Present")
+    @checkgroup("hardware_and_bios_checks", "NX-1020 Nodes mixed with Other Nodes",["configurability","performance","supportability"],"Mixed Nodes Not Present")
     def check_NX1020_Mixed_Nodes_Not_Present(self):
         entities = self.get_nutanix_cluster_info()
         model_map = {}
@@ -2401,7 +2401,7 @@ class VCChecker(CheckerBase):
         return passed_all,message,''   
 
 
-    @checkgroup("hardware_and_bios_checks", "NX-6000 Nodes Cannot be Mixed with NX-2000 Nodes within Same Cluster",["configurability","supportability"],"Mixed Nodes Not Present")
+    @checkgroup("hardware_and_bios_checks", "NX-6000 Nodes mixed with NX-2000 Nodes",["configurability","supportability"],"Mixed Nodes Not Present")
     def check_NX6000_mixed_with_NX2000(self):
         entities = self.get_nutanix_cluster_info()
         model_map = {}
@@ -2437,7 +2437,7 @@ class VCChecker(CheckerBase):
               
         return passed_all,message,''   
 
-    @checkgroup("hardware_and_bios_checks", "NX-1050 Maximum Cluster Size on 1GbE Networking",["configurability","supportability","performance"],"Less than 8")
+    @checkgroup("hardware_and_bios_checks", "NX-1050 Maximum Cluster Size",["configurability","supportability","performance"],"Less than 8")
     def check_NX1050_Cluster_Size(self):
         entities = self.get_nutanix_cluster_info()
         model_map = {}
@@ -2468,7 +2468,7 @@ class VCChecker(CheckerBase):
               
         return passed_all,message,''   
 
-    @checkgroup("hardware_and_bios_checks", "NX-1050 Nodes Cannot be Mixed with Other Nodes on 1GbE Networking",["configurability","supportability"],"Mixed Nodes Not Present")
+    @checkgroup("hardware_and_bios_checks", "NX-1050 Nodes mixed with Other Nodes",["configurability","supportability"],"Mixed Nodes Not Present")
     def check_NX1050_mixed_with_other_nodes(self):
         entities = self.get_nutanix_cluster_info()
         model_map = {}
@@ -2491,8 +2491,8 @@ class VCChecker(CheckerBase):
      
         elif nx1050_model_count > 0 and other_model_count == 0:    
             passed=True
-            message += ", " +"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count > 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count > 0)",(passed and "PASS" or "FAIL"))
+            message += ", " +"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)",(passed and "PASS" or "FAIL"))
             
         elif nx1050_model_count == 0 and other_model_count == 0:
             passed=False
