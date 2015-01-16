@@ -13,7 +13,13 @@ from serverConfiguration.vCenterServer import VCenterServerConf
 
 
 class initiate_deployment:
+        """
+            This class would be providing an interface 
+            where user can initiate foundation ,prism and vcenter
+            .We can also monitor the foundation progress by using this
+            class api.
         
+        """
 
         def __init__(self,json_input):
 

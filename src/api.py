@@ -1,3 +1,8 @@
+'''
+Created on Jan 2, 2015
+
+@author: RohitD
+'''
 import web
 import httplib
 from model import DataModel       
@@ -9,6 +14,12 @@ db = web.database(dbn='sqlite', db='deployer')
 model = DataModel(db) 
 
 class customers:
+    """
+        This class expose  restfull api's 
+        related to customer.We can get list of customers 
+        ,details of specific   customer .
+    """
+
     def GET(self,id = None):
         final_data = {}
         if id:
@@ -61,6 +72,12 @@ class customers:
                 return json.dumps(final_data)                   
 
 class customertasks:
+    """
+        This class expose  restfull api's 
+        related to customer task.Customer can create  task 
+        get the details of tasks using this api.
+    """    
+    
     def POST(self,cid):
         final_data = {}
         data =  web.data()
@@ -116,7 +133,11 @@ class customertasks:
         
         
 class nodedetails:
-    
+    """
+        Will be using this api to get the number of 
+        nodes requeired for a perticular model.
+        model number will be input to get blocks.
+    """     
     def POST(self):
         final_data = {}
         try:
@@ -145,7 +166,11 @@ class nodedetails:
 
 
 class customeraction:
-    
+    """
+        This class expose  restfull api's 
+        related to customer action.We are initiating and monitoring
+        progress of foundation ,vcener and prism .
+    """   
     def POST(self):
         final_data = {}
         customer_id = None
@@ -176,7 +201,6 @@ class customeraction:
                         model.create_task_module_status(task_id,'vcenter','Not started')
                    
                     if module_id == "foundation":
-                        print "I am on foundation"
                         model.update_task_module_status(task_id,'foundation','started')
                         resp = deploy.initiate_foundation()
                         final_data['response'] = httplib.OK

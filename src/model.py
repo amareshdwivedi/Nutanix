@@ -1,8 +1,20 @@
+'''
+Created on Jan 7, 2015
+
+@author: RohitD
+'''
+
+
 import datetime
 
 # This is a model - a class dealing with data representation of an object
 # This example demonstrates usage of a web.py API
 class DataModel:
+    """
+    This class will be the model class for deployer database
+    we are performing all db activity here.
+    
+    """
     def __init__(self, db):
         self._db = db
 
