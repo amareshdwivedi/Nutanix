@@ -116,11 +116,11 @@ class VCChecker(CheckerBase):
             exit_with_message("\nError: Invalid vCenter Server IP address")
                 
         current_vc_user=self.authconfig['vc_user'] if ('vc_user' in self.authconfig.keys()) else "Not Set"
-        vc_user=raw_input("Enter vCenter Server User Name [default: "+current_vc_user+"]: ")
+        vc_user=raw_input("Enter vCenter Server Username [default: "+current_vc_user+"]: ")
         vc_user=vc_user.strip()
         if vc_user == "":
             if(current_vc_user == "Not Set"):
-                exit_with_message("Error: Set vCenter Server User Name.")
+                exit_with_message("Error: Set vCenter Server Username.")
             vc_user=current_vc_user
             
             
