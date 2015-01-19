@@ -1604,7 +1604,7 @@ class VCChecker(CheckerBase):
             passed = passed and valid_60_days
             message += ", "+"License Expiration Validation = " + str(expiry_date) + " (Expected: =Not within next 60 days or always valid) "+"#"+((valid_60_days) and "PASS" or "FAIL")
         return passed, message,''
-    
+ 
     @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date",["performance"],"Tools Ok")
     def check_vcenter_server_tool_status(self):
         vcenter_ipv4 = self.get_vc_property('content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value')
@@ -1615,21 +1615,30 @@ class VCChecker(CheckerBase):
          
         message = ""
         passed = True
+        ip_present = False
         for vm in vms.keys():
             guest_info=vms[vm]
-            if guest_info != "Not-Configured":
-                if guest_info.ipAddress == vcenter_ip:
-                    toolsStatus=guest_info.toolsStatus
-                    toolsStatus_expected="toolsOk"
-                    if toolsStatus == toolsStatus_expected :
-                        self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (True and "PASS" or "FAIL"))
-                    else:
-                        passed = False
-                        self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
-                    message += ", "+"vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " +"#"+((toolsStatus == toolsStatus_expected) and "PASS" or "FAIL")
-                    break
+            if guest_info == "Not-Configured":
+                continue
+                       
+            if guest_info.ipAddress == vcenter_ip:
+                ip_present = True
+                toolsStatus=guest_info.toolsStatus
+                toolsStatus_expected="toolsOk"
+                if toolsStatus == toolsStatus_expected :
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (True and "PASS" or "FAIL"))
+                else:
+                    passed = False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
+                message += ", "+"vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " +"#"+((toolsStatus == toolsStatus_expected) and "PASS" or "FAIL")
+                break
          
-        return passed,message,''
+        if ip_present == False:
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+"Cannot Determine"  + " (Expected: =toolsOk) " , (False and "PASS" or "FAIL"))
+            message += ", "+"vCenter Server VMware Tools installed Status="+"Cannot Determine"  + " (Expected: =toolsOk) " +"#"+(False and "PASS" or "FAIL")
+                
+        return passed,message,''    
+    
     #{"name" : "vCenter Server Plugins", "path" : "content.extensionManager.extensionList.description.key", "operator":"=", "ref-value": "", "category": ["security"],"expectedresult": "Plugin is Registered"}
     @checkgroup("vcenter_server_checks", "vCenter Server Plugins",["performance"],"List of plugins")
     def check_vcenter_server_plugins(self):
