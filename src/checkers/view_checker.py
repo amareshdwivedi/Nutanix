@@ -294,7 +294,7 @@ class HorizonViewChecker(CheckerBase):
             raise RuntimeError("Unexpected operator " + operator)
     
     @checkgroup("view_components_checks", "Verify View Connection Brokers runs on a supported operating system",["Availability"],"[Windows Server 2008 R2 (64 bit),Windows Server 2008 R2 SP1 (64 bit),Windows 2012 R2 (64 bit)]")
-    def check_cluster_drs_fault_count(self):
+    def check_connectionbroker_os(self):
         powershell_cmd="(Get-WmiObject Win32_OperatingSystem ).Caption + (Get-WmiObject -class Win32_OperatingSystem).OSArchitecture"
         output=self.get_view_property(powershell_cmd)
         
@@ -309,3 +309,73 @@ class HorizonViewChecker(CheckerBase):
         #passed_all = passed_all and passed
         
         return passed_all , message,None
+    
+    @checkgroup("view_components_checks", "View Connection Brokers has correct CPUs",["Performance"],"For 1-50 Desktop; CB cpu >=2 ,for 51-2000 Desktop; CB cpu >=4, for 2001-5000 Desktop; CB CPU >=6")
+    def check_connectionbroker_cpu(self):
+        
+        cpu_powershell='$cpu=0;ForEach ($obj in  Get-WmiObject -class win32_processor) { $cpu+=$obj.NumberOfCores}; $cpu'
+        cpu=self.get_view_property(cpu_powershell)
+        vms=self.get_view_property('(Get-DesktopVM).length')
+                
+        message = ""
+        passed= True
+        actual=None
+        expected=None
+        if cpu == 'command-error' or  vms == 'command-error':
+            return None, None,None
+        else:
+            cpu=int(cpu)
+            vms=int(vms)
+        if vms >0 and vms <= 50: 
+            if cpu <2:
+                 passed= False
+            expected = "For 1-50 Desktops, Number of Cpu:>=6"
+        elif vms >50 and vms <=2000: 
+            if cpu <4:
+                 passed= False
+            expected = "For 51-2000 Desktops, Number of Cpu:>=4"
+        elif vms >2000 and vms <=5000: 
+            if cpu <6:
+                 passed= False
+            expected = "For 2001-5000 Desktops, number of Cpu:>=6"
+        actual= "Number of Cpu:"+str(cpu)+"; Number of Desktop:"+str(vms)
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message = "Result="+actual+" (Expected: ="+str(expected)+")#"+(True and "PASS" or "FAIL")
+        #passed_all = passed_all and passed
+        
+        return passed , message,None
+    
+    @checkgroup("view_components_checks", "View Connection Brokers has correct Memory",["Performance"],"For 1-50 Desktop; CB Memory >=4GB ,for 51-2000 Desktop; CB cpu >=10GB, for 2001-5000 Desktop; CB CPU >=12GB")
+    def check_connectionbroker_memory(self):
+        
+        memory_powershell='(Get-WmiObject CIM_PhysicalMemory).Capacity / 1GB'
+        memory=self.get_view_property(memory_powershell)
+        vms=self.get_view_property('(Get-DesktopVM).length')
+                
+        message = ""
+        passed= True
+        actual=None
+        expected=None
+        if memory == 'command-error' or  vms == 'command-error':
+            return None, None,None
+        else:
+            memory=int(memory)
+            vms=int(vms)
+        if vms >0 and vms <= 50: 
+            if memory <4:
+                 passed= False
+            expected = "For 1-50 Desktops, Memory:>=4GB"
+        elif vms >50 and vms <=2000: 
+            if memory <10:
+                 passed= False
+            expected = "For 51-2000 Desktops, Memory:>=10GB"
+        elif vms >2000 and vms <=5000: 
+            if memory <12:
+                 passed= False
+            expected = "For 2001-5000 Desktops, Memory:>=12GB"
+        actual= "Memory:"+str(memory)+"GB; Number of Desktop:"+str(vms)
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message = "Result="+actual+" (Expected: ="+str(expected)+")#"+(True and "PASS" or "FAIL")
+        #passed_all = passed_all and passed
+        
+        return passed , message,None
