@@ -471,7 +471,7 @@ class VCChecker(CheckerBase):
         except AttributeError:
             return {"@".join(name): "Not-Configured"}
         except:
-            print "Unknow error"     
+            return {"@".join(name): "Not-Configured"}     
         
 
         name_added = False
@@ -1264,7 +1264,7 @@ class VCChecker(CheckerBase):
     def check_directory_service_set_to_active_directory(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig'
         authenticationStoreInfo = self.get_vc_property(path)
-       
+        
         message = ""
         passed = True
         for hostname,store in authenticationStoreInfo.iteritems():
@@ -1275,9 +1275,9 @@ class VCChecker(CheckerBase):
                         self.reporter.notify_progress(self.reporter.notify_checkLog, hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) " , (is_active_dir_enabled and "PASS" or "FAIL"))
                         passed = passed and (is_active_dir_enabled and True or False)
                         message += ", " +hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) "+"#"+((is_active_dir_enabled) and "PASS" or "FAIL") 
-       
+        
         return passed, message,path
-    
+     
     @checkgroup("esxi_checks", "Validate NTP client is set to Enabled and is in the running state",["reliability"],"NTP client is enabled and running.")
     def check_ntp_client_enable_running(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host'
@@ -1300,7 +1300,7 @@ class VCChecker(CheckerBase):
                         for ruleset in rulesets:
                             if ruleset.key=="ntpClient":
                                 ruleset_enable=ruleset.enabled
-                                 
+                                  
                                 for service in host_services:
                                     if service.key == "ntpd":
                                         service_running=service.running
@@ -1315,19 +1315,19 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )" , (False and "PASS" or "FAIL"))
                     passed = False
                     message += ", " +datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ (False and "PASS" or "FAIL")
-        
+         
         return passed, message, path
-    
+     
     @checkgroup("esxi_checks", "NTP Servers Configured",["availability"],"NTP Servers are configured")
     def check_ntp_servers_configured(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host'
         all_hosts = self.get_vc_property(path)
         message = ""
         passed_all = True
-        
+         
         for cluster, hostObject in all_hosts.iteritems():
             try:
-                
+                 
                 if len(hostObject) == 0:
                     pass
                     #self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+" = No Hosts are configured ( Expected: = At-least 2 NTP Servers are configured )","FAIL")
@@ -1350,25 +1350,25 @@ class VCChecker(CheckerBase):
                         else:
                             self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+"."+host.name+" = NTP Servers configured ["+','.join(ntp_servers)+"]  (Expected: = at-least 2 NTP Servers are configured )","PASS")
                             message += ", " +cluster+"@"+host.name+"="+','.join(ntp_servers)+" (Expected: =At-least 2 NTP Servers are configured ) #PASS"     
-                        
+                         
                         passed_all = passed_all and passed
             except AttributeError:
                     self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+"=Not-Configured (Expected: =At-least 2 NTP Servers are configured )","FAIL")
                     message += ", " +cluster+"=Not-Configured (Expected: =At-least 2 NTP Servers are configured ) #FAIL"     
                     passed = False
-                    
-        
+                     
+         
         return passed_all,message,path
-
-    
+ 
+     
     @checkgroup("esxi_checks", "Management VMkernel adapter has only Management Traffic enabled",["security"],"vMotionTraffic:disabled<br/> ManagementTraffic:enabled<br/> FTLogging:disabled")
     def check_management_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
-       
+        
         message = ""
         passed = True
-        
+         
         for host, netConfig_list in virtual_nic_mgrs.iteritems():
             #print host
             if netConfig_list == "Not-Configured":
@@ -1377,29 +1377,29 @@ class VCChecker(CheckerBase):
                 service_list=[]
                 vmkernal_nic_and_portgrp={}
                 nic_selected_service={}
-                
+                 
                 for netConfig in netConfig_list:
                     service_list.append(netConfig.nicType)
-                    
+                     
                     candidateVnic_list=netConfig.candidateVnic
                     for candidateVnic in candidateVnic_list:
                         device=candidateVnic.device
-                        
+                         
                         if candidateVnic.key in netConfig.selectedVnic:
                             if device not in nic_selected_service.keys():
                                 nic_selected_service[device]=list()
                             (nic_selected_service[device]).append(netConfig.nicType)
-                        
+                         
                         if device not in vmkernal_nic_and_portgrp.keys():
                             vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
-                    
+                     
                 #print "\t\t",service_list, '\n\t\t',vmkernal_nic_and_portgrp,"\n\t\t",nic_selected_service
                 vmkernal_adapter=vmkernal_nic_and_portgrp.get('management network')
                 enabled_management_service= nic_selected_service.get(vmkernal_adapter)
-                
+                 
                 status = True
                 excepted_result="vMotionTraffic:disabled; ManagementTraffic:enabled; FTLogging:disabled"
-                
+                 
                 if enabled_management_service != None:
                     result=''
                     if 'vmotion' in enabled_management_service:
@@ -1407,18 +1407,18 @@ class VCChecker(CheckerBase):
                         result+="vMotionTraffic:enabled;"
                     else:
                         result+="vMotionTraffic:disabled;"
-                    
+                     
                     if 'management' in enabled_management_service:
                         result+=" ManagementTraffic:enabled;"
                     else:
                         result+=" ManagementTraffic:disabled;"
-                    
+                     
                     if 'faultToleranceLogging' in enabled_management_service:
                         status= False
                         result+=" FTLogging:enabled"
                     else:
                         result+=" FTLogging:disabled"
-                    
+                     
                     passed= passed and status
                     message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
@@ -1428,15 +1428,15 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=Management-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 passed= passed and status
         return passed, message,path
-    
+     
     @checkgroup("esxi_checks", "vMotion VMkernel adapter has only vMotion Traffic enabled",["security"],"vMotionTraffic:enabled<br/> ManagementTraffic:disabled<br/> FTLogging:disabled")
     def check_vmotion_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
-       
+        
         message = ""
         passed = True
-        
+         
         for host, netConfig_list in virtual_nic_mgrs.iteritems():
             #print host
             if netConfig_list == "Not-Configured":
@@ -1445,25 +1445,25 @@ class VCChecker(CheckerBase):
                 service_list=[]
                 vmkernal_nic_and_portgrp={}
                 nic_selected_service={}
-                
+                 
                 for netConfig in netConfig_list:
                     service_list.append(netConfig.nicType)
-                    
+                     
                     candidateVnic_list=netConfig.candidateVnic
                     for candidateVnic in candidateVnic_list:
                         device=candidateVnic.device
-                        
+                         
                         if candidateVnic.key in netConfig.selectedVnic:
                             if device not in nic_selected_service.keys():
                                 nic_selected_service[device]=list()
                             (nic_selected_service[device]).append(netConfig.nicType)
-                        
+                         
                         if device not in vmkernal_nic_and_portgrp.keys():
                             vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
-                    
+                     
                 vmkernal_adapter=vmkernal_nic_and_portgrp.get('vmotion')
                 enabled_management_service= nic_selected_service.get(vmkernal_adapter)
-                
+                 
                 status = True
                 excepted_result="vMotionTraffic:enabled; ManagementTraffic:disabled; FTLogging:disabled"
                 if enabled_management_service !=None :
@@ -1472,19 +1472,19 @@ class VCChecker(CheckerBase):
                         result+="vMotionTraffic:enabled;"
                     else:
                         result+="vMotionTraffic:disabled;"
-                    
+                     
                     if 'management' in enabled_management_service:
                         status= False
                         result+=" ManagementTraffic:enabled;"
                     else:
                         result+=" ManagementTraffic:disabled;"
-                    
+                     
                     if 'faultToleranceLogging' in enabled_management_service:
                         status= False
                         result+=" FTLogging:enabled"
                     else:
                         result+=" FTLogging:disabled"
-                    
+                     
                     message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 else:
@@ -1492,18 +1492,18 @@ class VCChecker(CheckerBase):
                     message += ", " +host+"=vMotion-Adapter-Not-Found (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=vMotion-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 passed= passed and status
-
+ 
         return passed, message,path
-    
      
+      
     @checkgroup("esxi_checks", "FTLogging VMkernel adapter has only FTLogging enabled",["security"],"vMotionTraffic:disabled<br/> ManagementTraffic:disabled<br/> FTLogging:enabled")
     def check_ftlogging_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
-         
+          
         message = ""
         passed = True
-          
+           
         for host, netConfig_list in virtual_nic_mgrs.iteritems():
             #print host
             if netConfig_list == "Not-Configured":
@@ -1512,49 +1512,49 @@ class VCChecker(CheckerBase):
                 service_list=[]
                 vmkernal_nic_and_portgrp={}
                 nic_selected_service={}
-                  
+                   
                 for netConfig in netConfig_list:
                     service_list.append(netConfig.nicType)
-                      
+                       
                     candidateVnic_list=netConfig.candidateVnic
                     for candidateVnic in candidateVnic_list:
                         device=candidateVnic.device
-                          
+                           
                         if candidateVnic.key in netConfig.selectedVnic:
                             if device not in nic_selected_service.keys():
                                 nic_selected_service[device]=list()
                             (nic_selected_service[device]).append(netConfig.nicType)
-                          
+                           
                         if device not in vmkernal_nic_and_portgrp.keys():
                             vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
-                      
+                       
                 #print "\t\t",service_list, '\n\t\t',vmkernal_nic_and_portgrp,"\n\t\t",nic_selected_service
                 vmkernal_adapter=vmkernal_nic_and_portgrp.get('faulttolerancelogging')
                 enabled_management_service= nic_selected_service.get(vmkernal_adapter)
-                  
+                   
                 status = True
                 excepted_result="vMotionTraffic:disabled; ManagementTraffic:disabled; FTLogging:enabled"
-                
+                 
                 if enabled_management_service !=None:
-                
+                 
                     result=''
                     if 'vmotion' in enabled_management_service:
                         status= False
                         result+="vMotionTraffic:enabled;"
                     else:
                         result+="vMotionTraffic:disabled;"
-                      
+                       
                     if 'management' in enabled_management_service:
                         status= False
                         result+=" ManagementTraffic:enabled;"
                     else:
                         result+=" ManagementTraffic:disabled;"
-                      
+                       
                     if 'faultToleranceLogging' in enabled_management_service:
                         result+=" FTLogging:enabled"
                     else:
                         result+=" FTLogging:disabled"
-                    
+                     
                     message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 else:
@@ -1568,16 +1568,16 @@ class VCChecker(CheckerBase):
     @checkgroup("esxi_checks", "Host Profiles are Configured",["performance"],"True")
     def check_hostprofiles_configuration(self):
         hostprofile_list = self.get_vc_property('content.hostProfileManager.profile')
-               
+                
         message = ""
         passed = True
         profiles_list=[]
         for key, profiles in hostprofile_list.iteritems():
-            if profiles ==None:
+            if profiles == None or profiles == "Not-Configured":
                 continue
             for profile in profiles:
                 profiles_list.append(profile.name)
-            
+             
         if len(profiles_list) > 0:
             self.reporter.notify_progress(self.reporter.notify_checkLog,"Host Profiles are Configured= True (Expected: =True) " , (True and "PASS" or "FAIL"))
             message += ", "+"Host Profiles are Configured= True (Expected: =True) " +"#"+((True) and "PASS" or "FAIL")
@@ -1585,7 +1585,7 @@ class VCChecker(CheckerBase):
             passed = False
             self.reporter.notify_progress(self.reporter.notify_checkLog,"Host Profiles are Configured= False (Expected: =True) " , (False and "PASS" or "FAIL"))
             message += ", "+"Host Profiles are Configured= False (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
-         
+          
         return passed,message,''   
 
 
