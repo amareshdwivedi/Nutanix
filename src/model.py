@@ -31,8 +31,11 @@ class DataModel:
         self._db.query('''
             CREATE TABLE customer_data (
             customer_name TEXT NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            phone VARCHAR(100) NOT NULL,
             customer_id VARCHAR(30) NOT NULL PRIMARY KEY,
             date_created default current_timestamp )
+
            ''')        
 
     def init_history_schema(self):
@@ -67,10 +70,10 @@ class DataModel:
         now = str(datetime.datetime.now())
         return self._db.insert('deployer_record', json_data=data, date_created=now)
 
-    def add_customer(self, cust_name,cust_id):
+    def add_customer(self, cust_name,cust_id,email,phone):
     
         now = str(datetime.datetime.now())
-        return self._db.insert('customer_data', customer_name=cust_name, customer_id=cust_id,date_created=now)
+        return self._db.insert('customer_data', customer_name=cust_name, customer_id=cust_id,date_created=now,email=email,phone=phone)
 
 
     def get_all_customers(self):
