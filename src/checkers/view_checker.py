@@ -1,5 +1,6 @@
 from __future__ import division
 from bdb import effective
+from test.test_pydoc import expected_data_docstrings
 __author__ = 'anand nevase'
 from requests.exceptions import ConnectionError
 import string
@@ -340,7 +341,7 @@ class HorizonViewChecker(CheckerBase):
             expected = "For 2001-5000 Desktops, number of Cpu:>=6"
         actual= "Number of Cpu:"+str(cpu)+"; Number of Desktop:"+str(vms)
         self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message = "Result="+actual+" (Expected: ="+str(expected)+")#"+(True and "PASS" or "FAIL")
+        message = "Result="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         #passed_all = passed_all and passed
         
         return passed , message,None
@@ -375,7 +376,34 @@ class HorizonViewChecker(CheckerBase):
             expected = "For 2001-5000 Desktops, Memory:>=12GB"
         actual= "Memory:"+str(memory)+"GB; Number of Desktop:"+str(vms)
         self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message = "Result="+actual+" (Expected: ="+str(expected)+")#"+(True and "PASS" or "FAIL")
+        message = "Result="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         #passed_all = passed_all and passed
         
         return passed , message,None
+    
+    @checkgroup("view_components_checks", "Verify that the Maximum number of desktops in a pool is no more than 1000",["Availability"],"<=1000 Desktops")
+    def check_connectionbroker_os(self):
+        powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.maximumCount}'
+        output=self.get_view_property(powershell_cmd)
+        
+        if output == 'command-error':
+            return None,None,None
+        
+        pools= output.split("\n")
+        message = ""
+        passed_all = True
+        for pool in pools:
+            pool_name, max_vm_in_pool= pool.split("=")
+            pool_name=pool_name.strip()
+            max_vm_in_pool=int(max_vm_in_pool.strip())
+            flag=True
+            if max_vm_in_pool >1000:
+                flag=False
+            output="Pool["+pool_name + "],Max Desktop :"+str(max_vm_in_pool)
+            expected="Max Desktop <=10000"
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (flag and "PASS" or "FAIL"))
+            message = "Result="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+        
+        #passed_all = passed_all and passed
+        
+        return passed_all , message,None
