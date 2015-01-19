@@ -30,9 +30,9 @@ class NCCChecker(CheckerBase):
         
         pwd = Security.decrypt(self.authconfig['cvm_pwd'])
         self.config_form =  form.Form( 
-                form.Textbox('Server',value=self.authconfig['cvm_ip']), 
-                form.Textbox('User',value=self.authconfig['cvm_user']),
-                form.Password('Password',value=pwd))() 
+                form.Textbox('CVM IP',value=self.authconfig['cvm_ip']), 
+                form.Textbox('CVM SSH Host Username',value=self.authconfig['cvm_user']),
+                form.Password('CVM SSH Host Password',value=pwd))() 
         
     def get_name(self):
         return NCCChecker._NAME_
@@ -149,23 +149,23 @@ class NCCChecker(CheckerBase):
         
         
         current_cvm_user=self.authconfig['cvm_user'] if ('cvm_user' in self.authconfig.keys()) else "Not Set"
-        cvm_user=raw_input("Enter CVM User Name [default: "+current_cvm_user+"]: ")
+        cvm_user=raw_input("Enter CVM SSH Host Username [default: "+current_cvm_user+"]: ")
         cvm_user=cvm_user.strip()
         if cvm_user == "":
             if(current_cvm_user == "Not Set"):
-                current_cvm_user("Error: Set vCenter Server User Name.")
+                current_cvm_user("Error: Set CVM SSH Host Username.")
             cvm_user=current_cvm_user
         #cvm_user=raw_input("Enter CVM User Name : ")
         
         current_pass=self.authconfig['cvm_pwd'] if ('cvm_pwd' in self.authconfig.keys()) else "Not Set"      
-        new_pass=getpass.getpass('Please Enter a CVM Password [Press enter to use previous password]: ')
+        new_pass=getpass.getpass('Enter CVM SSH Host Password [Press enter to use previous password]: ')
         cvm_pwd=None
         if new_pass == "":
             if(current_pass == "Not Set"):
-                exit_with_message("Error: Set vCenter Server Password.")
+                exit_with_message("Error: Set CVM SSH Host Password.")
             cvm_pwd = current_pass
         else:
-            confirm_pass=getpass.getpass('Please Re-Enter a CVM Password: ')
+            confirm_pass=getpass.getpass('Re-Enter CVM SSH Host Password: ')
             if new_pass !=confirm_pass :
                 exit_with_message("\nError :Password miss-match. Please run \"ncc setup\" command again")
             cvm_pwd=Security.encrypt(new_pass)
