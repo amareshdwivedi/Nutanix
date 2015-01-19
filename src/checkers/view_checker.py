@@ -382,7 +382,7 @@ class HorizonViewChecker(CheckerBase):
         return passed , message,None
     
     @checkgroup("view_components_checks", "Verify that the Maximum number of desktops in a pool is no more than 1000",["Availability"],"<=1000 Desktops")
-    def check_connectionbroker_os(self):
+    def check_max_desktop_per_pool(self):
         powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.maximumCount}'
         output=self.get_view_property(powershell_cmd)
         
