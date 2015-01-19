@@ -407,3 +407,30 @@ class HorizonViewChecker(CheckerBase):
         #passed_all = passed_all and passed
         
         return passed_all , message,None
+    
+    @checkgroup("view_components_checks", "Verify Desktop Pool Status",["Availability"],"true")
+    def check_desktop_pool_enabled(self):
+        powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.enabled}'
+        output=self.get_view_property(powershell_cmd)
+        
+        if output == 'command-error':
+            return None,None,None
+        
+        pools= output.split("\n")
+        message = ""
+        passed_all = True
+        for pool in pools:
+            pool_name, pool_status= pool.split("=")
+            pool_name=pool_name.strip()
+            pool_status=pool_status.strip()
+            flag=True
+            if pool_status == 'false':
+                flag=False
+            output="Pool["+pool_name + "],Enabled:"+pool_status
+            expected="true"
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (flag and "PASS" or "FAIL"))
+            message = "Result="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+        
+        #passed_all = passed_all and passed
+        
+        return passed_all , message,None
