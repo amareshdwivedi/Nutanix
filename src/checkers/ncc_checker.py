@@ -80,9 +80,17 @@ class NCCChecker(CheckerBase):
         except socket.error, e:
             exit_with_message(str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
 
-        self.result = CheckerResult("ncc",self.authconfig)
-        
+        self.result = CheckerResult("ncc",self.authconfig)    
+
         ntnx_env = "source /etc/profile.d/zookeeper_env.sh && source /usr/local/nutanix/profile.d/nutanix_env.sh && "
+        
+        #check if ncc is installed on the CVM
+        stdin, stdout, stderr =  ssh.exec_command(ntnx_env + "ncc")
+
+        for line in stderr:
+             if ("ncc: not found" in line) or ("ncc: command not found" in line) or ("can\'t open \'/etc/profile.d/zookeeper_env.sh\'" in line) or ("can\'t open \'/usr/local/nutanix/profile.d/nutanix_env.sh'" in line):
+                 exit_with_message("NCC is not installed on this CVM\nPlease login to CVM,install NCC and then run Healthcheck again.")
+            
         #new command that run only health_checks for ncc
         cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false health_checks " + " ".join(args) or self.config['ncc_path']+" health_checks "
         #old command
