@@ -19,7 +19,8 @@ from colorama import Fore
 import web
 from web import form
 import os
-
+import re
+import base64
 
 def exit_with_message(message):
     print message
@@ -258,20 +259,41 @@ class HorizonViewChecker(CheckerBase):
         actual=HorizonViewChecker.run_powershell(self.authconfig['view_ip'],self.authconfig['view_user'],Security.decrypt(self.authconfig['view_pwd']),powershell_cmd)
         return actual
         
+    @staticmethod
+    def powershell_encode(data):
+        # blank command will store our fixed unicode variable
+        blank_command = ""
+        powershell_command = ""
+        # Remove weird chars that could have been added by ISE
+        n = re.compile(u'(\xef|\xbb|\xbf)')
+        # loop through each character and insert null byte
+        for char in (n.sub("", data)):
+            # insert the nullbyte
+            blank_command += char + "\x00"
+        # assign powershell command as the new one
+        powershell_command = blank_command
+        # base64 encode the powershell command
+        powershell_command = base64.b64encode(powershell_command)
+        return powershell_command
     
     @staticmethod
     def run_powershell(host_ip,host_username,host_password,powershell_cmd):
-        #print host_ip,host_username,host_password,command
-        power_shell_text = """winrs -r:{0} -u:{1} -p:{2} powershell Add-PSSnapin VMware.View.Broker ;{3} 2>&1\"""".format(
-                            host_ip,host_username,host_password,powershell_cmd)
-        proc= os.popen(power_shell_text)
-        output=proc.read()
-        exit_code=proc.close()
-        #print output , exit_code
-        if exit_code == None:
-            return output.strip()
-        else:
-            return "command-error"
+            #print host_ip,host_username,host_password,command
+            #powershell_cmd = powershell_cmd.replace('"', '\'')
+    #         power_shell_text = """winrs -r:{0} -u:{1} -p:{2} powershell Add-PSSnapin VMware.View.Broker ;{3} 2>&1""".format(
+    #                             host_ip,host_username,host_password,powershell_cmd)
+            powershell_cmd=HorizonViewChecker.powershell_encode("Add-PSSnapin VMware.View.Broker ;"+powershell_cmd)
+            power_shell_text = """winrs -r:{0} -u:{1} -p:{2} powershell -EncodedCommand {3} 2>&1""".format(
+                                 host_ip,host_username,host_password,powershell_cmd)
+            #print power_shell_text
+            proc= os.popen(power_shell_text)
+            output=proc.read()
+            exit_code=proc.close()
+            #print output , exit_code
+            if exit_code == None:
+                return output.strip()
+            else:
+                return "command-error"
     
     @staticmethod
     def apply_operator(actual, expected, operator):
@@ -428,6 +450,33 @@ class HorizonViewChecker(CheckerBase):
                 flag=False
             output="Pool["+pool_name + "],Enabled:"+pool_status
             expected="true"
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (flag and "PASS" or "FAIL"))
+            message = "Result="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+        
+        #passed_all = passed_all and passed
+        
+        return passed_all , message,None
+    
+    @checkgroup("view_components_checks", "Verify Connection Broker Server configured with static IP",["Availability"],"true")
+    def check_connection_broker_has_static_ip(self):
+        powershell_cmd='ForEach ( $NIC in Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE  ) { Write-Host $NIC.IPAddress = (-NOT $NIC.DHCPEnabled) }'
+        output=self.get_view_property(powershell_cmd)
+        
+        if output == 'command-error':
+            return None,None,None
+        
+        nics= output.split("\n")
+        message = ""
+        passed_all = True
+        for nic in nics:
+            nic_ip, is_status= nic.split("=")
+            nic_ip=nic_ip.strip()
+            is_status=is_status.strip()
+            flag=True
+            if is_status == 'False':
+                flag=False
+            output="IP["+nic_ip + "],isStaticIP:"+is_status
+            expected="True"
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (flag and "PASS" or "FAIL"))
             message = "Result="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
         
