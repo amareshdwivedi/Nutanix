@@ -57,7 +57,7 @@ class VCChecker(CheckerBase):
                 form.Textbox("Hosts(Comma Seperated List)",value=self.authconfig['host']))() 
 
         self.si = None
-        self.categories=['security','performance','availability','manageability','recoverability','reliability','post-install']
+        self.categories=['security','performance','availability','manageability','recoverability','reliability','configurability','supportability','post-install']
         self.category=None
 
     def get_name(self):
@@ -529,18 +529,26 @@ class VCChecker(CheckerBase):
         ncc_config = ncc_auth_config["ncc"]      
         current_cvm_ip = ncc_config["cvm_ip"]
 
-        restURL = "https://"+current_cvm_ip+":9440/PrismGateway/services/rest/v1/hosts/"
+        restURLHosts = "https://"+current_cvm_ip+":9440/PrismGateway/services/rest/v1/hosts/"
+        restURLCluster = "https://"+current_cvm_ip+":9440/PrismGateway/services/rest/v1/cluster/"
+        
         headers = {'content-type': 'application/json'}
         try:
-            response = requests.get(restURL, headers=headers,auth=("admin", "admin"), verify=False)
-            if response.status_code != 200:
+            responseHosts = requests.get(restURLHosts, headers=headers,auth=("admin", "admin"), verify=False)
+            responseCluster = requests.get(restURLCluster, headers=headers,auth=("admin", "admin"), verify=False)
+            
+            if (responseHosts.status_code != 200) and (responseCluster.status_code != 200):
                 return None
-            responseJson = json.loads(response.text)
-            return responseJson["entities"]
+            
+            responseHostsJson = json.loads(responseHosts.text)
+            responseClusterJson = json.loads(responseCluster.text)
+            
+            return responseHostsJson["entities"] , responseClusterJson["name"] , True
+        
         except requests.ConnectionError, e:
-            pass
+             return '' , '' , False
         except:
-            pass 
+             return '' , '' , False 
 
     # Manual checks
    
@@ -2344,31 +2352,37 @@ class VCChecker(CheckerBase):
 
     @checkgroup("hardware_and_bios_checks", "NX-1020 Maximum Cluster Size",["configurability","supportability"],"Less than 8")
     def check_NX1020_Cluster_Size(self):
-        entities = self.get_nutanix_cluster_info()
+        entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         model_count = 0;
         message = ""
         passed_all = True
-        for entity in entities:
-            if entity["blockModel"] == "NX1020":
-                model_map[model_count] = entity["blockModel"]
-                model_count+=1
-                
-        if len(model_map) > 8:
-            passed=False
-            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
- 
-        elif len(model_map) == 0:    
-            passed=True
-            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
-        
-        else :
-            passed=True
-            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+        if status ==True:        
+            for entity in entities:
+                if entity["blockModel"] == "NX1020":
+                    model_map[model_count] = entity["blockModel"]
+                    model_count+=1
+                    
+            if len(model_map) > 8:
+                passed=False
+                message += ", " +"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+     
+            elif len(model_map) == 0:    
+                passed=True
+                message += ", " +"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
             
+            else :
+                passed=True
+                message += ", " +"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+       
+        elif status == False:
+             passed = False
+             message += ", " +"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Cluster size less than 8)"+"#"+("FAIL")
+             self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Cluster size less than 8)",("FAIL"))
+       
         passed_all = passed_all and passed    
               
         return passed_all,message,''   
@@ -2376,34 +2390,40 @@ class VCChecker(CheckerBase):
 
     @checkgroup("hardware_and_bios_checks", "NX-1020 Nodes mixed with Other Nodes",["configurability","performance","supportability"],"Mixed Nodes Not Present")
     def check_NX1020_Mixed_Nodes_Not_Present(self):
-        entities = self.get_nutanix_cluster_info()
+        entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         nx1020_model_count = 0;
         other_model_count = 0;
         message = ""
         passed_all = True
         
-        for entity in entities:
-            if entity["blockModel"] == "NX1020":
-                model_map[nx1020_model_count] = entity["blockModel"]
-                nx1020_model_count+=1
-            else:
-                other_model_count+=1
-                    
-        if other_model_count > 0 and nx1020_model_count > 0:
-            passed=False
-            message += ", " +"Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
-     
-        elif other_model_count == 0 and nx1020_model_count > 0:    
-            passed=True
-            message += ", " +"Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
-            
-        elif other_model_count > 0 and nx1020_model_count == 0:
-            passed=True
-            message += ", " +"NX-1020 Node Count ="+str(nx1020_model_count)+" (Expected: =NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"NX-1020 Node Count ="+str(nx1020_model_count)+" (Expected: =NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
+        if status ==True:        
+            for entity in entities:
+                if entity["blockModel"] == "NX1020":
+                    model_map[nx1020_model_count] = entity["blockModel"]
+                    nx1020_model_count+=1
+                else:
+                    other_model_count+=1
+                        
+            if other_model_count > 0 and nx1020_model_count > 0:
+                passed=False
+                message += ", " +"On Nutanix Cluster["+cluster+"] Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"On Nutanix Cluster["+cluster+"] Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
+         
+            elif other_model_count == 0 and nx1020_model_count > 0:    
+                passed=True
+                message += ", " +"On Nutanix Cluster["+cluster+"] Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"On Nutanix Cluster["+cluster+"] Non NX-1020 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
+                
+            elif other_model_count > 0 and nx1020_model_count == 0:
+                passed=True
+                message += ", " +"On Nutanix Cluster["+cluster+"] NX-1020 Node Count ="+str(nx1020_model_count)+" (Expected: =NX-1020 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"On Nutanix Cluster["+cluster+"] NX-1020 Node Count ="+str(nx1020_model_count)+" (Expected: =NX-1020 Node Count 0)",(passed and "PASS" or "FAIL"))
+
+        elif status == False:
+             passed = False
+             message += ", " +"Check Status"+"="+"SSH Connection Failed"+" (Expected: =NX-1020 Node Count 0)"+"#"+("FAIL")
+             self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =NX-1020 Node Count 0)",("FAIL"))
             
         passed_all = passed_all and passed    
               
@@ -2412,35 +2432,41 @@ class VCChecker(CheckerBase):
 
     @checkgroup("hardware_and_bios_checks", "NX-6000 Nodes mixed with NX-2000 Nodes",["configurability","supportability"],"Mixed Nodes Not Present")
     def check_NX6000_mixed_with_NX2000(self):
-        entities = self.get_nutanix_cluster_info()
+        entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         nx6000_model_count = 0;
         nx2000_model_count = 0;
         message = ""
         passed_all = True
-        
-        for entity in entities:
-            if entity["blockModel"] == "NX6000":
-                model_map[nx6000_model_count] = entity["blockModel"]
-                nx6000_model_count+=1
-            elif entity["blockModel"] == "NX2000":
-                model_map[nx2000_model_count] = entity["blockModel"]
-                nx2000_model_count+=1    
-                    
-        if nx6000_model_count > 0 and nx2000_model_count > 0:
-            passed=False
-            message += ", " +"Non NX-6000 Node Count ="+str(nx2000_model_count)+" (Expected: =Non NX-6000 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-6000 Node Count ="+str(nx2000_model_count)+" (Expected: =Non NX-6000 Node Count 0)",(passed and "PASS" or "FAIL"))
-     
-        elif nx6000_model_count > 0 and nx2000_model_count == 0:    
-            passed=True
-            message += ", " +"NX-6000 Node Count ="+str(nx6000_model_count)+" (Expected: =NX-6000 Node Count > 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-6000 Node Count ="+str(nx6000_model_count)+" (Expected: =Non NX-6000 Node Count > 0)",(passed and "PASS" or "FAIL"))
-            
-        elif nx6000_model_count == 0 and nx2000_model_count == 0:
-            passed=True
-            message += ", " +"NX-6000,NX-2000 Node Count =0 (Expected: =NX-6000,NX-2000 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"NX-6000,NX-2000 Node Count =0 (Expected: =NX-6000,NX-2000 Node Count 0)",(passed and "PASS" or "FAIL"))
+
+        if status ==True:        
+            for entity in entities:
+                if entity["blockModel"] == "NX6000":
+                    model_map[nx6000_model_count] = entity["blockModel"]
+                    nx6000_model_count+=1
+                elif entity["blockModel"] == "NX2000":
+                    model_map[nx2000_model_count] = entity["blockModel"]
+                    nx2000_model_count+=1    
+                        
+            if nx6000_model_count > 0 and nx2000_model_count > 0:
+                passed=False
+                message += ", " +"Nutanix Cluster["+cluster+"] has Non NX-6000 Node Count ="+str(nx2000_model_count)+" (Expected: =Non NX-6000 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Non NX-6000 Node Count ="+str(nx2000_model_count)+" (Expected: =Non NX-6000 Node Count 0)",(passed and "PASS" or "FAIL"))
+         
+            elif nx6000_model_count > 0 and nx2000_model_count == 0:    
+                passed=True
+                message += ", " +"Nutanix Cluster["+cluster+"] has NX-6000 Node Count ="+str(nx6000_model_count)+" (Expected: =NX-6000 Node Count > 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Non NX-6000 Node Count ="+str(nx6000_model_count)+" (Expected: =Non NX-6000 Node Count > 0)",(passed and "PASS" or "FAIL"))
+                
+            elif nx6000_model_count == 0 and nx2000_model_count == 0:
+                passed=True
+                message += ", " +"Nutanix Cluster["+cluster+"] has NX-6000,NX-2000 Node Count =0 (Expected: =NX-6000,NX-2000 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has NX-6000,NX-2000 Node Count =0 (Expected: =NX-6000,NX-2000 Node Count 0)",(passed and "PASS" or "FAIL"))
+
+        elif status == False:
+             passed = False
+             message += ", " +"Check Status"+"="+"SSH Connection Failed"+" (Expected: =NX-6000,NX-2000 Node Count 0)"+"#"+("FAIL")
+             self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =NX-6000,NX-2000 Node Count 0)",("FAIL"))
             
         passed_all = passed_all and passed    
               
@@ -2448,30 +2474,37 @@ class VCChecker(CheckerBase):
 
     @checkgroup("hardware_and_bios_checks", "NX-1050 Maximum Cluster Size",["configurability","supportability","performance"],"Less than 8")
     def check_NX1050_Cluster_Size(self):
-        entities = self.get_nutanix_cluster_info()
+        entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         model_count = 0;
         message = ""
         passed_all = True
-        for entity in entities:
-            if entity["blockModel"] == "NX1050":
-                model_map[model_count] = entity["blockModel"]
-                model_count+=1
-                
-        if len(model_map) <= 5:
-            passed=True
-            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
- 
-        elif len(model_map) > 5:    
-            passed=True
-            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
-        
-        else :
-            passed=False
-            message += ", " +"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+
+        if status ==True:        
+            for entity in entities:
+                if entity["blockModel"] == "NX1050":
+                    model_map[model_count] = entity["blockModel"]
+                    model_count+=1
+                    
+            if len(model_map) <= 5:
+                passed=True
+                message += ", " +"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+     
+            elif len(model_map) > 5:    
+                passed=True
+                message += ", " +"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+            
+            else :
+                passed=False
+                message += ", " +"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Cluster_Size ="+str(len(model_map))+" (Expected: =Cluster size less than 8)",(passed and "PASS" or "FAIL"))
+
+        elif status == False:
+             passed = False
+             message += ", " +"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Cluster size less than 8)"+"#"+("FAIL")
+             self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Cluster size less than 8)",("FAIL"))
             
         passed_all = passed_all and passed    
               
@@ -2479,34 +2512,40 @@ class VCChecker(CheckerBase):
 
     @checkgroup("hardware_and_bios_checks", "NX-1050 Nodes mixed with Other Nodes",["configurability","supportability"],"Mixed Nodes Not Present")
     def check_NX1050_mixed_with_other_nodes(self):
-        entities = self.get_nutanix_cluster_info()
+        entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         nx1050_model_count = 0;
         other_model_count = 0;
         message = ""
         passed_all = True
-        
-        for entity in entities:
-            if entity["blockModel"] == "NX1050":
-                model_map[nx1050_model_count] = entity["blockModel"]
-                nx1050_model_count+=1
-            else: 
-                other_model_count+=1    
-                    
-        if nx1050_model_count > 0 and other_model_count > 0:
-            passed=False
-            message += ", " +"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)",(passed and "PASS" or "FAIL"))
-     
-        elif nx1050_model_count > 0 and other_model_count == 0:    
-            passed=True
-            message += ", " +"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)",(passed and "PASS" or "FAIL"))
-            
-        elif nx1050_model_count == 0 and other_model_count == 0:
-            passed=False
-            message += ", " +"NX-1050 Node Count =0 (Expected: =NX-1050 Node Count > 0)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"NX-1050 Node Count =0 (Expected: =NX-1050 Node Count > 0)",(passed and "PASS" or "FAIL"))
+
+        if status ==True:                
+            for entity in entities:
+                if entity["blockModel"] == "NX1050":
+                    model_map[nx1050_model_count] = entity["blockModel"]
+                    nx1050_model_count+=1
+                else: 
+                    other_model_count+=1    
+                        
+            if nx1050_model_count > 0 and other_model_count > 0:
+                passed=False
+                message += ", " +"Nutanix Cluster["+cluster+"] has Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)",(passed and "PASS" or "FAIL"))
+         
+            elif nx1050_model_count > 0 and other_model_count == 0:    
+                passed=True
+                message += ", " +"Nutanix Cluster["+cluster+"] has Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has Non NX-1050 Node Count ="+str(other_model_count)+" (Expected: =Non NX-1050 Node Count 0)",(passed and "PASS" or "FAIL"))
+                
+            elif nx1050_model_count == 0 and other_model_count == 0:
+                passed=False
+                message += ", " +"Nutanix Cluster["+cluster+"] has NX-1050 Node Count =0 (Expected: =NX-1050 Node Count > 0)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Nutanix Cluster["+cluster+"] has NX-1050 Node Count =0 (Expected: =NX-1050 Node Count > 0)",(passed and "PASS" or "FAIL"))
+
+        elif status == False:
+             passed = False
+             message += ", " +"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Non NX-1050 Node Count 0)"+"#"+("FAIL")
+             self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Non NX-1050 Node Count 0)",("FAIL"))
             
         passed_all = passed_all and passed    
               

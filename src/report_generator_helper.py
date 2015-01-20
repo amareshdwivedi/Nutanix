@@ -938,8 +938,60 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
             return  "On host ["+host+"] VT support is  available", False, '' 
                            
-        
+    if check_name == "NX-1020 Nodes mixed with Other Nodes":
+        if actual_value == "Not-Configured" or "SSH Connection Failed":
+            return  actual_value, False,'' 
+        elif status == "FAIL":
+            if message is not None :
+                 messageList = message.split(']')
+                 cluster_string = messageList[0]
+            return  cluster_string + "]" + " NX-1020 are mixed with other Nutanix models, which is unsupported configuration", True, 'alert' 
+        else:
+             return actual_value, False,''       
 
+    if check_name == "NX-1020 Maximum Cluster Size":
+        if actual_value == "Not-Configured" or "SSH Connection Failed":
+            return  actual_value, False,'' 
+        elif status == "FAIL":
+            if message is not None :
+                 messageList = message.split(']')
+                 cluster_string = messageList[0]
+            return  cluster_string + "]" + " has ["+actual_value+"] NX-1020 Nodes.Maximum supported number of NX-1020 in single Nutanix cluster is 8", True, 'alert' 
+        else:
+             return actual_value, False,'' 
+         
+    if check_name == "NX-6000 Nodes mixed with NX-2000 Nodes":
+        if actual_value == "Not-Configured" or "SSH Connection Failed":
+            return  actual_value, False,'' 
+        elif status == "FAIL":
+            if message is not None :
+                 messageList = message.split(']')
+                 cluster_string = messageList[0]
+            return  cluster_string + "]" + " has NX-6000 and NX-2000 in single Nutanix cluster which is unsupported configuration", True, 'alert' 
+        else:
+             return actual_value, False,'' 
+         
+    if check_name == "NX-1050 Maximum Cluster Size":
+        if actual_value == "Not-Configured" or "SSH Connection Failed":
+            return  actual_value, False,'' 
+        elif status == "FAIL":
+            if message is not None :
+                 messageList = message.split(']')
+                 cluster_string = messageList[0]
+            return  cluster_string + "]" + " all Nodes are connected to 1Gbps network - consider 10Gbps connectivity for this cluster", True, 'alert' 
+        else:
+             return actual_value, False,'' 
+         
+    if check_name == "NX-1050 Nodes mixed with Other Nodes":
+        if actual_value == "Not-Configured" or "SSH Connection Failed":
+            return  actual_value, False,'' 
+        elif status == "FAIL":
+            if message is not None :
+                 messageList = message.split(']')
+                 cluster_string = messageList[0]
+            return  cluster_string + "]" + " has NX-1050 mixed with other Nutnaix models and all Hosts are connected over 1Gbps which is unsupported configuration.", True, 'alert' 
+        else:
+             return actual_value, False,''                            
 
     #Default return
     return str(actual_value), False,'info'
