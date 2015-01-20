@@ -185,30 +185,30 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "VSphere Cluster Nodes in same version ["+actual_value+"]", False, ''
     
     if check_name =="Number of DRS Faults":
-        return "On Cluster["+cluster+"] | Number of DRS faults are ["+actual_value+"]", True, ''
+        return "On Cluster["+cluster+"] | Number of DRS faults are ["+actual_value+"]", True, 'warning'
     
     if check_name =="Number of Cluster Events":
-        return "On Cluster["+cluster+"] | Number of Events are ["+actual_value+"]", True, ''    
+        return "On Cluster["+cluster+"] | Number of Events are ["+actual_value+"]", True, 'warning'    
     
     if check_name =="Cluster Memory Utilization %":
         if actual_value == "total_memory_is_zero":
-            return "On Cluster["+cluster+"] | Total Memory is [0]", True, 'alert'
-        return "On Cluster["+cluster+"] | Memory Consumed is ["+actual_value+"]", True, ''
+            return "On Cluster["+cluster+"] | Total Memory is [0]", True, 'warning'
+        return "On Cluster["+cluster+"] | Memory Consumed is ["+actual_value+"]", True, 'warning'
     
     if check_name =="Cluster Memory Overcommitment":
         if actual_value == "total_memory_is_zero":
-            return "On Cluster["+cluster+"] | Total Memory is [0]", True, 'alert'
-        return "On Cluster["+cluster+"] | Memory Oversubscrption is ["+actual_value+"]", True, ''
+            return "On Cluster["+cluster+"] | Total Memory is [0]", True, 'warning'
+        return "On Cluster["+cluster+"] | Memory Oversubscrption is ["+actual_value+"]", True, 'warning'
     
     if check_name =="Ratio pCPU/vCPU":
         if actual_value == "pCPU_is_zero":
-            return "On Cluster["+cluster+"] | pCPU is 0", True, 'alert'
-        return "On Cluster["+cluster+"] | Ratio pCPU/vCPU is  ["+actual_value+"]", True, ''
+            return "On Cluster["+cluster+"] | pCPU is 0", True, 'warning'
+        return "On Cluster["+cluster+"] | Ratio pCPU/vCPU is  ["+actual_value+"]", True, 'warning'
     
     if check_name =="Admission Control Policy - Percentage Based on Nodes in the Cluster":
         if status == 'FAIL':
             if actual_value == "ACP is disabled":
-                return "For Cluster["+cluster+"],"+actual_value,True, 'alert'
+                return "For Cluster["+cluster+"],"+actual_value,True, 'warning'
             else:
                 return "For Cluster["+cluster+"],"+actual_value,True, 'warning'
             
@@ -223,12 +223,12 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     if check_name == "Resource Pool Memory Limits (in MB)" or check_name=="Resource Pool CPU Limits (in MHz)":
         if status == 'FAIL':
             if actual_value != "Not-Configured":
-                return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Limit is "+str(actual_value), True, 'info'
+                return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Limit is "+str(actual_value), True, 'warning'
     
     if check_name == "Resource Pool CPU Reservation (in MHz)" or check_name=="Resource Pool Memory Reservation (in MB)":
         if status == 'FAIL':
             if actual_value != "Not-Configured":
-                return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Reservation is "+str(actual_value), True, 'info'       
+                return "Cluster["+cluster+"] | Resource Pool["+entity+"] | Reservation is "+str(actual_value), True, 'warning'       
     
     if check_name == "Verify reserved memory and cpu capacity versus Admission control policy set":
         if actual_value == "Not-Configured":
@@ -892,14 +892,14 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "None":
             return "On host ["+host+"], vSwitchNutanix has no physical nic attached", False,''                       
         else:
-            return "On host ["+host+"], vSwitchNutanix has physical nics ["+actual_value+"] attached", True,'info'    
+            return "On host ["+host+"], vSwitchNutanix has physical nics ["+actual_value+"] attached", True,'warning'    
     
     if check_name == "vSwitchNutanix Connected to CVM only":
         if status == 'FAIL':
             if actual_value == "vSwitchNutanix-Not-Found":
                 return "On Cluster ["+cluster+"], vSwitchNutanix not found", True,'alert'
             else:
-                return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'info'
+                return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'warning'
 
 
             

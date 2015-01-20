@@ -1018,7 +1018,7 @@ class VCChecker(CheckerBase):
         
         return passed_all , message,path_curr
     
-    @checkgroup("cluster_checks", "Number of Cluster Events",["performance"],"Number of Cluster Events")
+    @checkgroup("cluster_checks", "Number of Cluster Events",["availability","manageability"],"Number of Cluster Events")
     def check_cluster_events_count(self):
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.configIssue'
         clusters_map = self.get_vc_property(path_curr)
@@ -1146,7 +1146,7 @@ class VCChecker(CheckerBase):
                 passed_all = passed_all and passed
         return passed_all , message,path
     
-    @checkgroup("cluster_checks", "Admission Control Policy - Percentage Based on Nodes in the Cluster",["performance"],"True")
+    @checkgroup("cluster_checks", "Admission Control Policy - Percentage Based on Nodes in the Cluster",["performance","availability"],"True")
     def check_cluster_acpPercentage_basedOn_nodes(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
@@ -1369,7 +1369,7 @@ class VCChecker(CheckerBase):
         return passed_all,message,path
  
      
-    @checkgroup("esxi_checks", "Management VMkernel adapter has only Management Traffic enabled",["security"],"vMotionTraffic:disabled<br/> ManagementTraffic:enabled<br/> FTLogging:disabled")
+    @checkgroup("esxi_checks", "Management VMkernel adapter has only Management Traffic enabled",["performance"],"vMotionTraffic:disabled<br/> ManagementTraffic:enabled<br/> FTLogging:disabled")
     def check_management_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
@@ -1437,7 +1437,7 @@ class VCChecker(CheckerBase):
                 passed= passed and status
         return passed, message,path
      
-    @checkgroup("esxi_checks", "vMotion VMkernel adapter has only vMotion Traffic enabled",["security"],"vMotionTraffic:enabled<br/> ManagementTraffic:disabled<br/> FTLogging:disabled")
+    @checkgroup("esxi_checks", "vMotion VMkernel adapter has only vMotion Traffic enabled",["performance"],"vMotionTraffic:enabled<br/> ManagementTraffic:disabled<br/> FTLogging:disabled")
     def check_vmotion_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
@@ -1504,7 +1504,7 @@ class VCChecker(CheckerBase):
         return passed, message,path
      
       
-    @checkgroup("esxi_checks", "FTLogging VMkernel adapter has only FTLogging enabled",["security"],"vMotionTraffic:disabled<br/> ManagementTraffic:disabled<br/> FTLogging:enabled")
+    @checkgroup("esxi_checks", "FTLogging VMkernel adapter has only FTLogging enabled",["performance"],"vMotionTraffic:disabled<br/> ManagementTraffic:disabled<br/> FTLogging:enabled")
     def check_ftlogging_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
@@ -1755,7 +1755,7 @@ class VCChecker(CheckerBase):
         
         return pass_all, message, path
     
-    @checkgroup("network_and_switch_checks", "Check if vSwitchNutanix has no physical adapters",["performance"],"None")
+    @checkgroup("network_and_switch_checks", "Check if vSwitchNutanix has no physical adapters",["security","performance"],"None")
     def check_vswitch_no_physical_nic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
         host_networks = self.get_vc_property(path)
@@ -1800,7 +1800,7 @@ class VCChecker(CheckerBase):
  
         return pass_all, message, path
     
-    @checkgroup("network_and_switch_checks", "vSwitchNutanix Connected to CVM only",["performance"],"CVM")
+    @checkgroup("network_and_switch_checks", "vSwitchNutanix Connected to CVM only",["manageability","availability","performance"],"CVM")
     def check_vswitchnutanix_connected_to_only_CVM(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
         host_networks = self.get_vc_property(path)
