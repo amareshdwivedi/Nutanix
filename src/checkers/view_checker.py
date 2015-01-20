@@ -306,9 +306,12 @@ class HorizonViewChecker(CheckerBase):
 
         elif operator == "<":
             return int(actual) < int(expected)
-
         elif operator == "<=":
             return int(actual) <= int(expected)
+        elif operator == ">=":
+            return int(actual) >= int(expected)
+        elif operator == ">":
+            return int(actual) > int(expected)
         elif operator == "!=":
             return expected != str(actual)
 
@@ -483,3 +486,26 @@ class HorizonViewChecker(CheckerBase):
         #passed_all = passed_all and passed
         
         return passed_all , message,None
+    
+    @checkgroup("view_components_checks", "Verify number of Desktop configured in View",["Availability"],"Number of desktop < 10000 or (2000 x number of brokers) ")
+    def check_desktop_configured(self):
+        connection_broker_cmd='((get-connectionbroker | where {$_.type -like "Connection Server"}) | measure).count'
+        no_of_connection_broker=self.get_view_property(connection_broker_cmd)
+        
+        desktop_cmd='(Get-DesktopVM).length'
+        no_of_desktop=self.get_view_property(desktop_cmd)
+        if no_of_desktop == 'command-error' or no_of_connection_broker == 'command-error':
+            return None,None,None
+        
+        no_of_desktop=int(no_of_desktop)
+        no_of_connection_broker=int(no_of_connection_broker)
+        
+        passed=False
+        if (no_of_desktop < 1000) or (no_of_desktop < (2000* no_of_connection_broker)):
+            passed = True
+        output="No. of Desktops:"+str(no_of_desktop)+"; No. of Connection Brokers:"+str(no_of_connection_broker)
+        expected="No. of desktop < 10000 or (2000 x No. of Connection Brokers)"
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message = "Result="+output+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL") 
+     
+        return passed , message,None
