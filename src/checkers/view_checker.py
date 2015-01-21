@@ -131,17 +131,17 @@ class HorizonViewChecker(CheckerBase):
                 exit_with_message("\nError: Password miss-match.Please run \"vc setup\" command again")
             vc_pwd=Security.encrypt(new_vc_pwd)
        
-#         #Test Connection Status
-#         print "Checking Vmware Horizon View Server Connection Status:",
-#         
+        #Test Connection Status
+        print "Checking Vmware Horizon View Server Connection Status:",
+         
 #         if not sys.platform.startswith("win"):
 #             exit_with_message("Plateform Not supported \n Windows system required to run Vmware Horizon View Checks")
-#         status, message = self.check_connectivity(vc_ip, vc_user, vc_pwd, vc_port)
-#         if status == True:
-#             print Fore.GREEN+" Connection successful"+Fore.RESET
-#         else:
-#            print Fore.RED+" Connection failure"+Fore.RESET
-#            exit_with_message(message)
+        status, message = self.check_connectivity(vc_ip, vc_user, vc_pwd)
+        if status == True:
+            print Fore.GREEN+" Connection successful"+Fore.RESET
+        else:
+           print Fore.RED+" Connection failure"+Fore.RESET
+           exit_with_message(message)
            
         #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+str(vc_port)+" cluster : "+cluster+" host : "+hosts
  
@@ -154,8 +154,46 @@ class HorizonViewChecker(CheckerBase):
         exit_with_message("Vmware Horizon View Server is configured Successfully ")
         return
     
-    def check_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port):
-        from subprocess import check_output  
+    def run_local_command(self,cmd):
+         proc= os.popen(cmd)
+         output=proc.read()
+         exit_code=proc.close()
+         return output.strip().lower(),exit_code
+         
+    def check_connectivity(self,host_ip,host_username,host_password):
+            
+            #check winrm running on local machine
+            output,exit_code=self.run_local_command("powershell (get-service winrm).status")
+            if output != 'running':
+                #print 'Starting winrm service'
+                output,exit_code=self.run_local_command("powershell (start-service winrm)")
+                if exit_code!=None:
+                    return False, 'winrm clinet not installed or configured properly on this machine'
+            
+            #get trusted host
+            trustedhost,exit_code=self.run_local_command('POWERSHELL "Get-WSManInstance -ResourceURI winrm/config/client | select -ExpandProperty TrustedHosts"')
+            if host_ip not in  trustedhost.split(','):
+                #print 'Adding '+host_ip+' to trsuted list'
+                knows_host='winrm s winrm/config/client @{TrustedHosts="'+trustedhost+','+host_ip+'"}'
+                output,exit_code=self.run_local_command(knows_host)
+                
+                if exit_code != None:
+                    return False,output.strip()
+            
+            powershell_cmd=HorizonViewChecker.powershell_encode("Add-PSSnapin VMware.View.Broker ;echo test")
+            power_shell_text = """winrs -r:{0} -u:{1} -p:{2} powershell -EncodedCommand {3} 2>&1""".format(
+                                 host_ip,host_username,Security.decrypt(host_password),powershell_cmd)
+            #print power_shell_text
+            proc= os.popen(power_shell_text)
+            output=proc.read()
+            exit_code=proc.close()
+            #print output , exit_code
+            if exit_code == None:
+                return True,output.strip()
+            else:
+                knows_host='winrm s winrm/config/client @{TrustedHosts="'+trustedhost+'"}'
+                test_output,exit_code=self.run_local_command(knows_host)
+                return False,output.strip()
     
     def execute(self, args):
 
@@ -200,15 +238,12 @@ class HorizonViewChecker(CheckerBase):
                 else:
                     check_functions[group_name] = [func_obj]
         
-#         print check_functions
-#         exit()
-#         try:
-#             self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=Security.decrypt(self.authconfig['vc_pwd']), port=self.authconfig['vc_port'])
-#         except vim.fault.InvalidLogin:
-#             exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command to configure vc")
-#         except ConnectionError as e:
-#             exit_with_message("Error : Connection Error"+"\n\nPlease run \"vc setup\" command to configure vc")
-#         
+        #check view server connectivity
+        status, message = self.check_connectivity(self.authconfig['view_ip'],self.authconfig['view_user'],self.authconfig['view_pwd'])
+        if status == False:
+           exit_with_message("Error : Connection Error"+"\n\nPlease run \"view setup\" command to configure Vmware Horizon View Server")
+                   
+        
         passed_all = True
         
         for check_group in check_groups_run:          
