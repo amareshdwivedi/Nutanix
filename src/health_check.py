@@ -100,11 +100,11 @@ def main():
     json.dump(results, outfile, indent=2)
     outfile.close()
     
-#     #Generate CSV Reports
-#     CSVReportGenerator(results)
-#         
-#     #Generate PDF Report based on results. 
-#     PDFReportGenerator(results)
+    #Generate CSV Reports
+    CSVReportGenerator(results)
+        
+    #Generate PDF Report based on results. 
+    PDFReportGenerator(results)
      
 
 if __name__ == "__main__":

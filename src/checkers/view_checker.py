@@ -241,6 +241,8 @@ class HorizonViewChecker(CheckerBase):
                         if self.category not in check_function.category:
                             continue                      
                     passed, message,path = check_function()
+                    self.result.add_check_result(CheckerResult(check_function.descr,None, passed, message))
+
                     #self.result.add_check_result(CheckerResult(check_name,None, passed, message))
                     #self.result.add_check_result(CheckerResult(check_name,authconfig=self.authconfig, message=message,category=check_function.category,path=None,expected_result=check_function.expected_result))
                     #self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.category, path,check_function.expected_result))
@@ -324,13 +326,13 @@ class HorizonViewChecker(CheckerBase):
         powershell_cmd="(Get-WmiObject Win32_OperatingSystem ).Caption + (Get-WmiObject -class Win32_OperatingSystem).OSArchitecture"
         output=self.get_view_property(powershell_cmd)
         
-        expected = [ 'Windows Server 2008 R2','Windows Server 2008 R2 SP1','Windows 2012 R2']
+        expected = 'Windows Server 2008 R2 or Windows Server 2008 R2 SP1 or Windows 2012 R2'
         
         message = ""
         passed_all = True
         
         self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (True and "PASS" or "FAIL"))
-        message = "Actual="+output+" (Expected: ="+str(expected)+")#"+(True and "PASS" or "FAIL") 
+        message+="Actual="+output+" (Expected: ="+str(expected)+")#"+(True and "PASS" or "FAIL") 
         
         #passed_all = passed_all and passed
         
@@ -338,11 +340,11 @@ class HorizonViewChecker(CheckerBase):
     
     @checkgroup("view_components_checks", "View Connection Brokers has correct CPUs",["Performance"],"For 1-50 Desktop; CB cpu >=2 ,for 51-2000 Desktop; CB cpu >=4, for 2001-5000 Desktop; CB CPU >=6")
     def check_connectionbroker_cpu(self):
-        
+         
         cpu_powershell='$cpu=0;ForEach ($obj in  Get-WmiObject -class win32_processor) { $cpu+=$obj.NumberOfCores}; $cpu'
         cpu=self.get_view_property(cpu_powershell)
         vms=self.get_view_property('(Get-DesktopVM).length')
-                
+                 
         message = ""
         passed= True
         actual=None
@@ -355,29 +357,30 @@ class HorizonViewChecker(CheckerBase):
         if vms >0 and vms <= 50: 
             if cpu <2:
                  passed= False
-            expected = "For 1-50 Desktops, Number of Cpu:>=6"
+            expected = "For 1-50 Desktops Number of Cpu:>=6"
         elif vms >50 and vms <=2000: 
             if cpu <4:
                  passed= False
-            expected = "For 51-2000 Desktops, Number of Cpu:>=4"
+            expected = "For 51-2000 Desktops Number of Cpu:>=4"
         elif vms >2000 and vms <=5000: 
             if cpu <6:
                  passed= False
-            expected = "For 2001-5000 Desktops, number of Cpu:>=6"
+            expected = "For 2001-5000 Desktops Number of Cpu:>=6"
         actual= "Number of Cpu:"+str(cpu)+"; Number of Desktop:"+str(vms)
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message = "Result="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
-        #passed_all = passed_all and passed
         
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message = "Actual="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
+        #passed_all = passed_all and passed
+         
         return passed , message,None
-    
+     
     @checkgroup("view_components_checks", "View Connection Brokers has correct Memory",["Performance"],"For 1-50 Desktop; CB Memory >=4GB ,for 51-2000 Desktop; CB cpu >=10GB, for 2001-5000 Desktop; CB CPU >=12GB")
     def check_connectionbroker_memory(self):
-        
+         
         memory_powershell='(Get-WmiObject CIM_PhysicalMemory).Capacity / 1GB'
         memory=self.get_view_property(memory_powershell)
         vms=self.get_view_property('(Get-DesktopVM).length')
-                
+                 
         message = ""
         passed= True
         actual=None
@@ -390,30 +393,30 @@ class HorizonViewChecker(CheckerBase):
         if vms >0 and vms <= 50: 
             if memory <4:
                  passed= False
-            expected = "For 1-50 Desktops, Memory:>=4GB"
+            expected = "For 1-50 Desktops Memory:>=4GB"
         elif vms >50 and vms <=2000: 
             if memory <10:
                  passed= False
-            expected = "For 51-2000 Desktops, Memory:>=10GB"
+            expected = "For 51-2000 Desktops Memory:>=10GB"
         elif vms >2000 and vms <=5000: 
             if memory <12:
                  passed= False
-            expected = "For 2001-5000 Desktops, Memory:>=12GB"
+            expected = "For 2001-5000 Desktops Memory:>=12GB"
         actual= "Memory:"+str(memory)+"GB; Number of Desktop:"+str(vms)
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message = "Result="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message+= "Actual="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         #passed_all = passed_all and passed
-        
+         
         return passed , message,None
-    
+     
     @checkgroup("view_components_checks", "Verify that the Maximum number of desktops in a pool is no more than 1000",["Availability"],"<=1000 Desktops")
     def check_max_desktop_per_pool(self):
         powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.maximumCount}'
         output=self.get_view_property(powershell_cmd)
-        
+          
         if output == 'command-error':
             return None,None,None
-        
+          
         pools= output.split("\n")
         message = ""
         passed_all = True
@@ -424,23 +427,23 @@ class HorizonViewChecker(CheckerBase):
             flag=True
             if max_vm_in_pool >1000:
                 flag=False
-            output="Pool["+pool_name + "],Max Desktop :"+str(max_vm_in_pool)
+            output="Pool :"+pool_name + " Max Desktop :"+str(max_vm_in_pool)
             expected="Max Desktop <=10000"
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (flag and "PASS" or "FAIL"))
-            message = "Result="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
-        
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
+            message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+          
         #passed_all = passed_all and passed
-        
+          
         return passed_all , message,None
-    
+     
     @checkgroup("view_components_checks", "Verify Desktop Pool Status",["Availability"],"true")
     def check_desktop_pool_enabled(self):
         powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.enabled}'
         output=self.get_view_property(powershell_cmd)
-        
+          
         if output == 'command-error':
             return None,None,None
-        
+          
         pools= output.split("\n")
         message = ""
         passed_all = True
@@ -451,23 +454,23 @@ class HorizonViewChecker(CheckerBase):
             flag=True
             if pool_status == 'false':
                 flag=False
-            output="Pool["+pool_name + "],Enabled:"+pool_status
+            output="Pool :"+pool_name + " Enabled:"+pool_status
             expected="true"
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (flag and "PASS" or "FAIL"))
-            message = "Result="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
-        
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
+            message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+          
         #passed_all = passed_all and passed
-        
+          
         return passed_all , message,None
-    
+     
     @checkgroup("view_components_checks", "Verify Connection Broker Server configured with static IP",["Availability"],"true")
     def check_connection_broker_has_static_ip(self):
         powershell_cmd='ForEach ( $NIC in Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE  ) { Write-Host $NIC.IPAddress = (-NOT $NIC.DHCPEnabled) }'
         output=self.get_view_property(powershell_cmd)
-        
+         
         if output == 'command-error':
             return None,None,None
-        
+         
         nics= output.split("\n")
         message = ""
         passed_all = True
@@ -478,34 +481,34 @@ class HorizonViewChecker(CheckerBase):
             flag=True
             if is_status == 'False':
                 flag=False
-            output="IP["+nic_ip + "],isStaticIP:"+is_status
+            output="IP :"+nic_ip +" isStaticIP:"+is_status
             expected="True"
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (flag and "PASS" or "FAIL"))
-            message = "Result="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
-        
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
+            message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+         
         #passed_all = passed_all and passed
-        
+         
         return passed_all , message,None
-    
+     
     @checkgroup("view_components_checks", "Verify number of Desktop configured in View",["Availability"],"Number of desktop < 10000 or (2000 x number of brokers) ")
     def check_desktop_configured(self):
         connection_broker_cmd='((get-connectionbroker | where {$_.type -like "Connection Server"}) | measure).count'
         no_of_connection_broker=self.get_view_property(connection_broker_cmd)
-        
+        message = "" 
         desktop_cmd='(Get-DesktopVM).length'
         no_of_desktop=self.get_view_property(desktop_cmd)
         if no_of_desktop == 'command-error' or no_of_connection_broker == 'command-error':
             return None,None,None
-        
+         
         no_of_desktop=int(no_of_desktop)
         no_of_connection_broker=int(no_of_connection_broker)
-        
+         
         passed=False
         if (no_of_desktop < 1000) or (no_of_desktop < (2000* no_of_connection_broker)):
             passed = True
-        output="No. of Desktops:"+str(no_of_desktop)+"; No. of Connection Brokers:"+str(no_of_connection_broker)
-        expected="No. of desktop < 10000 or (2000 x No. of Connection Brokers)"
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Result="+output+" (Expected: = "+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message = "Result="+output+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL") 
-     
+        output="No.of Desktops: "+str(no_of_desktop)+"; No.of Connection Brokers: "+str(no_of_connection_broker)
+        expected="No.of desktop < 10000 or (2000 x No.of Connection Brokers)"
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL") 
+      
         return passed , message,None

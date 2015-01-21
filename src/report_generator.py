@@ -195,6 +195,33 @@ def ncc_report(story, checks_list):
     story.append(Spacer(1, 0.3 * inch))
 
 
+# Function to generate report for NCC
+def view_report(story, checks_list):
+    property_lenght = len(checks_list)
+    checks_property_data = [['Properties Tested', 'Status']]
+    for checks in checks_list:
+    
+            status = checks.get('Status')
+            msg = checks.get('Name')
+            checks_property_data.append([Paragraph(msg, NormalMessageStyle), Paragraph(status, getFontColor(status))])
+          
+            
+                   
+    checks_property_table = LongTable(checks_property_data, colWidths=[6 * inch, 0.75 * inch])
+    # style sheet for table
+    checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (1, 0), colors.fidlightblue),
+                                                       ('ALIGN', (0, 0), (1, property_lenght), 'LEFT'),
+                                        ('INNERGRID', (0, 0), (2, -1), 0.25, colors.black),
+                                        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                        ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                        ('TEXTFONT', (0, 0), (1, 0), 'Times-Roman'),
+                                        ('FONTSIZE', (0, 0), (1, 0), 10)]))
+            
+           
+            # story.append(checks_para_table)
+    story.append(Spacer(1, 0.05 * inch))
+    story.append(checks_property_table)
+    story.append(Spacer(1, 0.3 * inch))
     
 def PDFReportGenerator(resultJson,curdir=None):   
     # Adding timestamp to the report name  
@@ -228,6 +255,9 @@ def PDFReportGenerator(resultJson,curdir=None):
         elif checkers == 'vc':
             checkers_table_data = [["vCenter"+ " ["+resultJson[checkers].get('ip')+"] "+" Health Check Results"]]
             checkers_table_data.append([Paragraph("Username:" + resultJson[checkers].get('user'), NormalMessageStyle)])
+        elif checkers == 'view':
+            checkers_table_data = [["VMware View"+ " ["+resultJson[checkers].get('ip')+"] "+" Check Results"]]
+            checkers_table_data.append([Paragraph("Username:" + resultJson[checkers].get('user'), NormalMessageStyle)])        
         
         checkers_table = LongTable(checkers_table_data)
         # style sheet for table
@@ -244,6 +274,8 @@ def PDFReportGenerator(resultJson,curdir=None):
             vc_report(story, resultJson[checkers].get('checks'),resultJson[checkers].get('ip'))
         if checkers == 'ncc':
             ncc_report(story, resultJson[checkers].get('checks'))
+        if checkers == 'view':
+            view_report(story, resultJson[checkers].get('checks'))            
     doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
     
     if curdir is None:

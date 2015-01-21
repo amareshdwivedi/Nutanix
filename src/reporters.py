@@ -21,6 +21,9 @@ class CheckerResult:
             elif self.name == "ncc":
                 self.ip = authconfig['cvm_ip']
                 self.user = authconfig['cvm_user']
+            elif self.name == "view":
+                self.ip = authconfig['view_ip']
+                self.user = authconfig['view_user']    
                 
         self.steps = []
         self.path = path
