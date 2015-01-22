@@ -51,7 +51,7 @@ class HorizonViewChecker(CheckerBase):
                 form.Password("Password",value=Security.decrypt(self.authconfig['view_pwd'])))() 
 
         self.si = None
-        self.categories=['security','performance','availability','manageability','recoverability','reliability','post-install']
+        self.categories=['performance','availability']
         self.category=None
 
     def get_name(self):
@@ -86,8 +86,8 @@ class HorizonViewChecker(CheckerBase):
         for checks in checks_list:
             x.add_row([checks,"Run "+checks])
         
-#         for category in self.categories:
-#             x.add_row([category,"Run "+category+' category'])
+        for category in self.categories:
+            x.add_row([category,"Run "+category+' category'])
         x.add_row(["run_all", "Run all Horizon View checks"])
         x.add_row(["setup", "Set Vmware Horizon View Configuration"])
         message = message is None and str(x) or "\nERROR: "+ message + "\n\n" + str(x)
@@ -264,7 +264,7 @@ class HorizonViewChecker(CheckerBase):
                     passed=HorizonViewChecker.apply_operator(actual, expected, operator)
                     message="Actual="+actual + " (Expected: " + operator + expected+ ") "
                     self.reporter.notify_progress(self.reporter.notify_checkLog,message, passed and "PASS" or "FAIL")
-                    self.result.add_check_result(CheckerResult(check_name,None, passed, message))
+                    self.result.add_check_result(CheckerResult(check_name,None, passed, message,category=self.category))
                     #self.reporter.notify_one_line(check_name, str(passed))
                 #self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'],None,check['expectedresult']))
              
@@ -285,7 +285,7 @@ class HorizonViewChecker(CheckerBase):
                         if self.category not in check_function.category:
                             continue                      
                     passed, message,path = check_function()
-                    self.result.add_check_result(CheckerResult(check_function.descr,None, passed, message))
+                    self.result.add_check_result(CheckerResult(check_function.descr,None, passed, message,category=self.category))
 
                     try:
                         self.realtime_results = json.load(open("display_json.json","r"))
@@ -370,7 +370,7 @@ class HorizonViewChecker(CheckerBase):
         else:
             raise RuntimeError("Unexpected operator " + operator)
     
-    @checkgroup("view_components_checks", "Verify View Connection Brokers runs on a supported operating system",["Availability"],"[Windows Server 2008 R2 (64 bit),Windows Server 2008 R2 SP1 (64 bit),Windows 2012 R2 (64 bit)]")
+    @checkgroup("view_components_checks", "Verify View Connection Brokers runs on a supported operating system",["availability"],"[Windows Server 2008 R2 (64 bit),Windows Server 2008 R2 SP1 (64 bit),Windows 2012 R2 (64 bit)]")
     def check_connectionbroker_os(self):
         powershell_cmd="(Get-WmiObject Win32_OperatingSystem ).Caption + (Get-WmiObject -class Win32_OperatingSystem).OSArchitecture"
         output=self.get_view_property(powershell_cmd)
@@ -387,7 +387,7 @@ class HorizonViewChecker(CheckerBase):
         
         return passed_all , message,None
     
-    @checkgroup("view_components_checks", "View Connection Brokers has correct CPUs",["Performance"],"For 1-50 Desktop; CB cpu >=2 ,for 51-2000 Desktop; CB cpu >=4, for 2001-5000 Desktop; CB CPU >=6")
+    @checkgroup("view_components_checks", "View Connection Brokers has correct CPUs",["performance"],"For 1-50 Desktop; CB cpu >=2 ,for 51-2000 Desktop; CB cpu >=4, for 2001-5000 Desktop; CB CPU >=6")
     def check_connectionbroker_cpu(self):
          
         cpu_powershell='$cpu=0;ForEach ($obj in  Get-WmiObject -class win32_processor) { $cpu+=$obj.NumberOfCores}; $cpu'
@@ -423,7 +423,7 @@ class HorizonViewChecker(CheckerBase):
          
         return passed , message,None
      
-    @checkgroup("view_components_checks", "View Connection Brokers has correct Memory",["Performance"],"For 1-50 Desktop; CB Memory >=4GB ,for 51-2000 Desktop; CB cpu >=10GB, for 2001-5000 Desktop; CB CPU >=12GB")
+    @checkgroup("view_components_checks", "View Connection Brokers has correct Memory",["performance"],"For 1-50 Desktop; CB Memory >=4GB ,for 51-2000 Desktop; CB cpu >=10GB, for 2001-5000 Desktop; CB CPU >=12GB")
     def check_connectionbroker_memory(self):
          
         memory_powershell='(Get-WmiObject CIM_PhysicalMemory).Capacity / 1GB'
@@ -458,7 +458,7 @@ class HorizonViewChecker(CheckerBase):
          
         return passed , message,None
      
-    @checkgroup("view_components_checks", "Verify that the Maximum number of desktops in a pool is no more than 1000",["Availability"],"<=1000 Desktops")
+    @checkgroup("view_components_checks", "Verify that the Maximum number of desktops in a pool is no more than 1000",["availability"],"<=1000 Desktops")
     def check_max_desktop_per_pool(self):
         powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.maximumCount}'
         output=self.get_view_property(powershell_cmd)
@@ -497,7 +497,7 @@ class HorizonViewChecker(CheckerBase):
           
         return passed_all , message,None
      
-    @checkgroup("view_components_checks", "Verify Desktop Pool Status",["Availability"],"true")
+    @checkgroup("view_components_checks", "Verify Desktop Pool Status",["availability"],"true")
     def check_desktop_pool_enabled(self):
         powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.enabled}'
         output=self.get_view_property(powershell_cmd)
@@ -536,7 +536,7 @@ class HorizonViewChecker(CheckerBase):
           
         return passed_all , message,None
      
-    @checkgroup("view_components_checks", "Verify Connection Broker Server configured with static IP",["Availability"],"true")
+    @checkgroup("view_components_checks", "Verify Connection Broker Server configured with static IP",["availability"],"true")
     def check_connection_broker_has_static_ip(self):
         powershell_cmd='ForEach ( $NIC in Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE  ) { Write-Host $NIC.IPAddress = (-NOT $NIC.DHCPEnabled) }'
         output=self.get_view_property(powershell_cmd)
@@ -563,7 +563,7 @@ class HorizonViewChecker(CheckerBase):
          
         return passed_all , message,None
      
-    @checkgroup("view_components_checks", "Verify number of Desktop configured in View",["Availability"],"Number of desktop < 10000 or (2000 x number of brokers) ")
+    @checkgroup("view_components_checks", "Verify number of Desktop configured in View",["availability"],"Number of desktop < 10000 or (2000 x number of brokers) ")
     def check_desktop_configured(self):
         connection_broker_cmd='((get-connectionbroker | where {$_.type -like "Connection Server"}) | measure).count'
         no_of_connection_broker=self.get_view_property(connection_broker_cmd)
