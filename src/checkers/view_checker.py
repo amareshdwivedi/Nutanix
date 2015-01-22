@@ -469,18 +469,30 @@ class HorizonViewChecker(CheckerBase):
         pools= output.split("\n")
         message = ""
         passed_all = True
-        for pool in pools:
-            pool_name, max_vm_in_pool= pool.split("=")
-            pool_name=pool_name.strip()
-            max_vm_in_pool=int(max_vm_in_pool.strip())
-            flag=True
-            if max_vm_in_pool >1000:
-                flag=False
-            output="Pool :"+pool_name + " Max Desktop :"+str(max_vm_in_pool)
-            expected="Max Desktop <=10000"
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
-            message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
-          
+        expected="Max Desktop <=10000"
+        try:
+            
+            for pool in pools:
+                pool_name, max_vm_in_pool= pool.split("=")
+                pool_name=pool_name.strip()
+                max_vm_in_pool=max_vm_in_pool.strip()
+                
+                if pool_name == '' and max_vm_in_pool =='':
+                    continue
+                
+                max_vm_in_pool=int(max_vm_in_pool.strip())
+                flag=True
+                if max_vm_in_pool >1000:
+                    flag=False
+                output="Pool :"+pool_name + " Max Desktop :"+str(max_vm_in_pool)
+                
+                self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
+                message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+                passed_all = flag and passed_all
+        except ValueError:
+            passed_all=False
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL")) 
+            message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
         #passed_all = passed_all and passed
           
         return passed_all , message,None
@@ -496,18 +508,30 @@ class HorizonViewChecker(CheckerBase):
         pools= output.split("\n")
         message = ""
         passed_all = True
-        for pool in pools:
-            pool_name, pool_status= pool.split("=")
-            pool_name=pool_name.strip()
-            pool_status=pool_status.strip()
-            flag=True
-            if pool_status == 'false':
-                flag=False
-            output="Pool :"+pool_name + " Enabled:"+pool_status
-            expected="true"
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
-            message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
-          
+        is_pool_found=False
+        expected="true"
+        try:
+            for pool in pools:
+                pool_name, pool_status= pool.split("=")
+                pool_name=pool_name.strip()
+                pool_status=pool_status.strip()
+                
+                if pool_name =='' and pool_status == '':
+                    continue
+                is_pool_found=True
+                
+                flag=True
+                if pool_status == 'false':
+                    flag=False
+                output="Pool :"+pool_name + " Enabled:"+pool_status
+                passed_all = flag and passed_all
+                self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
+                message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+        
+        except ValueError:
+            passed_all = False and passed_all
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
+            message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")   
         #passed_all = passed_all and passed
           
         return passed_all , message,None
