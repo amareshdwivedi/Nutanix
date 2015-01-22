@@ -3,6 +3,7 @@ import requests
 from web import form
 from checkers.ncc_checker import NCCChecker
 from checkers.vc_checker import VCChecker
+from checkers.view_checker import HorizonViewChecker
 from checkers.base_checker import CheckerBase
 from reporters import DefaultConsoleReporter
 from report_generator import PDFReportGenerator,CSVReportGenerator
@@ -68,7 +69,6 @@ class index:
             checker_module.configure(checker_config, self.reporter)
 
     def GET(self):
-        #print self.checkers
         return render.index(self.checkers)
         
     def run_checks(self,data):
@@ -96,6 +96,14 @@ class index:
                 group.append("run_all")
             else:
                 group.append(data['group'])
+                
+        if data['category'] == "view":
+            checkers_list = ['view']
+            run_logs['view'] = {'checks': []}
+            if data['group'] == "Run All":
+                group.append("run_all")
+            else:
+                group.append(data['group'] + " " + "run_all")         
         
         with open("display_json.json", "w") as myfile:
             json.dump(run_logs, myfile)
@@ -106,6 +114,8 @@ class index:
                 result = checker_module.execute(group)
             elif checker == 'ncc':
                 result = checker_module.execute(group)
+            elif checker == 'view':
+                result = checker_module.execute(group)    
             else:        
                 result = checker_module.execute(["run_all"])
             

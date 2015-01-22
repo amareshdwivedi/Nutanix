@@ -76,6 +76,10 @@ $def with (checkers,msg="")
 				    $$("#group_select").append('<option value="stargate_checks">Stargate Checks</option>')
 				    $$("#group_select").append('<option value="system_checks">System Checks</option>')
 				}
+				if(category == "view"){
+					$$("#group_select").empty()
+					$$("#group_select").append('<option value="Run All">Run All</option>')
+				}
 				
 			});
 			
@@ -111,10 +115,37 @@ $def with (checkers,msg="")
 				                        var h1 = jQuery('#logs')[0].scrollHeight,h2 = jQuery('#logs').height();
 				                        jQuery('#logs').scrollTop(h1 - h2);	
 		                        	}
-		                        }  if(category == "vc"){
+		                        }
+                                if(category == "view"){
+		                        	jQuery("#logs").empty();
+		                        	jQuery("#nccDataHead").remove();
+		                        	jQuery("#nccMainData").remove();                                	
+		                        	jQuery("#logs").append("<div id='viewDataHead' class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
+						        			"<div class='col-lg-10 col-md-10 col-sm-10'>Check</div>"+
+						        			
+						        			"<div class='col-lg-2 col-md-2 col-sm-2'>Status</div>"+
+						        		"</div>");
+		                        		jQuery("#logs").append("<div id='viewMainData' class='logsdata col-lg-12 col-md-12 col-sm-12'></div>");
+		                        		for(i=0; i<obj.view.checks.length; i++){
+                                		jQuery("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-10 col-md-10 col-sm-10'>"+obj.view.checks[i].Name+"</div>"+
+		                        		"<div class='col-lg-2 col-md-2 col-sm-2 result"+i+"'>"+obj.view.checks[i].Status+"</div></div>");
+		                        		
+		                        			if(jQuery(".result"+i+"").html()=="PASS"){
+					                        	jQuery(".result"+i+"").addClass("success");
+					                        }else if(jQuery(".result"+i+"").html()=="FAIL"){
+					                        	jQuery(".result"+i+"").addClass("fail");
+					                        }
+				                        var h1 = jQuery('#logs')[0].scrollHeight,h2 = jQuery('#logs').height();
+				                        jQuery('#logs').scrollTop(h1 - h2);	
+		                        	}
+		                        }
+                                if(category == "vc"){
 		                        	jQuery("#logs").empty();
 		                        	jQuery("#nccDataHead").remove();
 		                        	jQuery("#nccMainData").remove();
+		                        	jQuery("#logs").empty();
+		                        	jQuery("#viewMainData").remove();
+		                        	jQuery("#viewDataHead").remove();		                        	
 		                        	for(i=0; i<obj.vc.checks.length; i++){
 		                        		jQuery("#logs").append("<h4>"+obj.vc.checks[i].Message+"</h4>");
 		                        		jQuery("#logs").append("<div class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+

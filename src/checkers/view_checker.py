@@ -267,6 +267,15 @@ class HorizonViewChecker(CheckerBase):
                     self.result.add_check_result(CheckerResult(check_name,None, passed, message))
                     #self.reporter.notify_one_line(check_name, str(passed))
                 #self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'],None,check['expectedresult']))
+             
+                    try:
+                        self.realtime_results = json.load(open("display_json.json","r"))
+                        self.realtime_results['view']['checks'].append({'Name':check_name ,'Status': passed and "PASS" or "FAIL"})
+                        with open("display_json.json", "w") as myfile:
+                            json.dump(self.realtime_results, myfile)
+                    except:
+                        pass  
+                     
                 passed_all = passed_all and passed
        
             if check_group in check_functions:
@@ -278,9 +287,14 @@ class HorizonViewChecker(CheckerBase):
                     passed, message,path = check_function()
                     self.result.add_check_result(CheckerResult(check_function.descr,None, passed, message))
 
-                    #self.result.add_check_result(CheckerResult(check_name,None, passed, message))
-                    #self.result.add_check_result(CheckerResult(check_name,authconfig=self.authconfig, message=message,category=check_function.category,path=None,expected_result=check_function.expected_result))
-                    #self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.category, path,check_function.expected_result))
+                    try:
+                        self.realtime_results = json.load(open("display_json.json","r"))
+                        self.realtime_results['view']['checks'].append({'Name':check_function.descr ,'Status': passed and "PASS" or "FAIL"})
+                        with open("display_json.json", "w") as myfile:
+                            json.dump(self.realtime_results, myfile)
+                    except:
+                        pass  
+ 
                     passed_all = passed_all and passed
             self.reporter.notify_progress(self.reporter.notify_checkName,"")
         
