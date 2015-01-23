@@ -708,26 +708,26 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             else:
                 return "Host["+host+"] NTP servers["+str(actual_value)+"] are configured " , False, '' 
     
-    if check_name=="Management VMkernel adapter has only Management Traffic enabled":
+    if check_name=="Management VMkernel adapter has only Management Traffic Enabled":
         if status == 'FAIL':
             if actual_value == "Management-Adapter-Not-Found":
-                return "On Host["+host+"], Management-Adapter-Not-Found", True , 'info'
+                return "On Host["+host+"], Management-Adapter-Not-Found", False , 'info'
             else:
-                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info'  
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'warning'  
             
-    if check_name=="vMotion VMkernel adapter has only vMotion Traffic enabled":
+    if check_name=="vMotion VMkernel adapter has only vMotion Traffic Enabled":
         if status == 'FAIL':
             if actual_value == "vMotion-Adapter-Not-Found":
-                return "On Host["+host+"], vMotion-Adapter-Not-Found", True , 'info'
+                return "On Host["+host+"], vMotion-Adapter-Not-Found", False , 'info'
             else:
-                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info'
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'warning'
             
-    if check_name=="FTLogging VMkernel adapter has only FTLogging enabled":
+    if check_name=="FTLogging VMkernel adapter has only FTLogging Enabled":
         if status == 'FAIL':
             if actual_value == "FTLogging-Adapter-Not-Found":
-                return "On Host["+host+"], FTLogging-Adapter-Not-Found", True , 'info'
+                return "On Host["+host+"], FTLogging-Adapter-Not-Found", False , 'info'
             else:
-                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'info' 
+                return "On Host["+host+"],<br/> for VMKernal Adapter["+entity+"] :<br/>"+ actual_value.replace(';','<br/>'), True , 'warning' 
 
     if check_name == "CVM in Autostart":
         if actual_value == "Not-Configured":
@@ -736,6 +736,24 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "On host ["+host+"] CVM ["+entity+"] is not in host Autostart", True, 'alert'
         elif actual_value == "PowerOn": 
             return "On host ["+host+"] CVM ["+entity+"] is in host Autostart", False, 'alert'
+            
+    if check_name == "[UserVars.SuppressShellWarning]":
+        if actual_value == "Not-Configured":
+            if host=="":
+                return 'Host not found', False, 'info'
+            return 'Advance value [UserVars.SuppressShellWarning] on Host['+host+'] is not set', True, 'info'
+        elif actual_value != "1":
+            return 'Advance value [UserVars.SuppressShellWarning] on Host['+host+'] is not set', True,'info'
+        else:
+            return actual_value, False,'info' 
+        
+    if check_name == "SSh Enabled":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value != "True":
+            return "SSH on Host["+host+"] is Disabled", True, 'alert'
+        elif actual_value == "PowerOn": 
+            return "SSH on Host["+host+"] is Enabled", False, 'alert'                   
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
