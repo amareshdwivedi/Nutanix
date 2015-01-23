@@ -592,6 +592,8 @@ class HorizonViewChecker(CheckerBase):
         message = ""
         passed_all = True
         expected="Max Desktop <=10000"
+        is_pool_found=False
+        error=False
         try:
              
             for pool in pools:
@@ -601,7 +603,7 @@ class HorizonViewChecker(CheckerBase):
                  
                 if pool_name == '' and max_vm_in_pool =='':
                     continue
-                 
+                is_pool_found=True
                 max_vm_in_pool=int(max_vm_in_pool.strip())
                 flag=True
                 if max_vm_in_pool >1000:
@@ -612,11 +614,17 @@ class HorizonViewChecker(CheckerBase):
                 message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
                 passed_all = flag and passed_all
         except ValueError:
+            error = True
             passed_all=False
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL")) 
             message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
         #passed_all = passed_all and passed
-           
+        
+        if is_pool_found == False and error ==False:
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Pool-Not-Found (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
+            message+= "Actual=Pool-Not-Found (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            passed_all=False
+         
         return passed_all , message,None
       
     @checkgroup("view_components_checks", "Verify Desktop Pool Status",["availability"],"true")
@@ -631,6 +639,7 @@ class HorizonViewChecker(CheckerBase):
         message = ""
         passed_all = True
         is_pool_found=False
+        error=False
         expected="true"
         try:
             for pool in pools:
@@ -651,9 +660,15 @@ class HorizonViewChecker(CheckerBase):
                 message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
          
         except ValueError:
+            error=True
             passed_all = False and passed_all
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
-            message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")   
+            message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
+        
+        if is_pool_found == False and error == False:
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Pool-Not-Found (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
+            message+= "Actual=Pool-Not-Found (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            passed_all=False
         #passed_all = passed_all and passed
            
         return passed_all , message,None
@@ -709,7 +724,7 @@ class HorizonViewChecker(CheckerBase):
         return passed , message,None
      
     @checkgroup("view_components_checks", "Verify vCenter servers have at least 4 vCPUs and 6 GBs of RAM",["Performance"],"vCPUs:>=4 and RAM:>=6 GBs")
-    def check_desktop_configured(self):
+    def check_view_vc(self):
         vm=self.get_vc_vms(self.authconfig['view_vc_ip'])
         expected='>=4 vCPUs and >=6 GBs of RAM'
         passed=True
