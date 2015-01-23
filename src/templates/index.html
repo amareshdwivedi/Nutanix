@@ -249,6 +249,22 @@ $def with (checkers,msg="")
 		                },
 		            });
 		        }
+		        if ($$(this).attr('id')=="config_view") {
+		            var form_data = $$("#view").serializeArray();
+		            form_data.push({name: 'operation', value: 'config_view'});
+		            console.log(form_data)
+		                jQuery.ajax({
+		                //url: '/',
+		                type: "POST",
+		                dataType: "json",
+		                data: form_data,
+		                success: function(value) {
+		                    console.log(value)
+		                    //alert("Successfully Updated")
+		                    jQuery("#modal_config_view").modal('show');
+		                },
+		            });
+		        }		        
 		    return false;
 		    });
 		
@@ -293,6 +309,26 @@ $def with (checkers,msg="")
 		                },
 		            });
 		        }
+		        if ($$(this).attr('id')=="connect_view") {
+		            var form_data = $$("#view").serializeArray();
+		            form_data.push({name: 'operation', value: 'connect_view'});
+		
+		            jQuery.ajax({
+		                //url: '/',
+		                type: "POST",
+		                //contentType: 'application/x-www-form-urlencoded',
+		                dataType: "json",
+		                data: form_data,
+		                success: function(data) {
+		                    console.log(data)
+		                    var status=data["Connection"];
+		                    console.log(status);
+		                    jQuery("#modal_connect_view .connStatus").html( "Connection "+status);
+		                    jQuery("#modal_connect_view").modal('show');
+		                    //alert("Connection "+status)
+		                },
+		            });
+		        }		        
 		    return false;
 		    });
 		});
