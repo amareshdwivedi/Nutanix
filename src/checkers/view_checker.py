@@ -5,6 +5,7 @@ __author__ = 'anand nevase'
 from requests.exceptions import ConnectionError
 import string
 import warnings
+from pyVim import connect
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 from base_checker import *
@@ -21,7 +22,7 @@ from web import form
 import os
 import re
 import base64
-
+import atexit
 def exit_with_message(message):
     print message
     sys.exit(1)
@@ -67,7 +68,10 @@ class HorizonViewChecker(CheckerBase):
         CheckerBase.validate_config(self.authconfig, "view_ip")
         CheckerBase.validate_config(self.authconfig, "view_user")
         CheckerBase.validate_config(self.authconfig, "view_pwd")
-        #CheckerBase.validate_config(self.authconfig, "vc_port")
+        CheckerBase.validate_config(self.authconfig, "view_vc_ip")
+        CheckerBase.validate_config(self.authconfig, "view_vc_user")
+        CheckerBase.validate_config(self.authconfig, "view_vc_pwd")
+        CheckerBase.validate_config(self.authconfig, "view_vc_port")
 
         checks_list = [k for k in config.keys() if k.endswith('checks')]
         #print checks_list
@@ -142,13 +146,70 @@ class HorizonViewChecker(CheckerBase):
         else:
            print Fore.RED+" Connection failure"+Fore.RESET
            exit_with_message(message)
-           
+
+        current_view_vc_ip = self.authconfig['view_vc_ip'] if ('view_vc_ip' in self.authconfig.keys()) else "Not Set"
+        view_vc_ip=raw_input("Enter View vCenter Server IP [default: "+current_view_vc_ip+"]: ")
+        view_vc_ip=view_vc_ip.strip()
+        if view_vc_ip == "":
+            if(current_view_vc_ip == "Not Set"):
+                exit_with_message("Error: Set View vCenter Server IP.")
+            view_vc_ip=current_view_vc_ip
+        
+        if Validate.valid_ip(view_vc_ip) == False:
+            exit_with_message("\nError: Invalid View vCenter Server IP address")
+                
+        current_view_vc_user=self.authconfig['view_vc_user'] if ('view_vc_user' in self.authconfig.keys()) else "Not Set"
+        view_vc_user=raw_input("Enter View vCenter Server User Name [default: "+current_vc_user+"]: ")
+        view_vc_user=view_vc_user.strip()
+        if view_vc_user == "":
+            if(current_view_vc_user == "Not Set"):
+                exit_with_message("Error: Set View  vCenter Server User Name.")
+            view_vc_user=current_view_vc_user
+            
+            
+        view_current_pwd=self.authconfig['view_vc_pwd'] if  ('view_vc_pwd' in self.authconfig.keys()) else "Not Set"
+        new__view_vc_pwd=getpass.getpass('Enter View vCenter Server Password [Press enter to use previous password]: ')
+        
+        if new__view_vc_pwd == "":
+            if(view_current_pwd == "Not Set"):
+                exit_with_message("Error: Set View vCenter Server Password.")
+            new__view_vc_pwd = view_current_pwd
+        else:
+            confirm_pass=getpass.getpass('Re-Enter View vCenter Server Password: ')
+            if new__view_vc_pwd !=confirm_pass :
+                exit_with_message("\nError: Password miss-match.Please run \"view setup\" command again")
+            new__view_vc_pwd=Security.encrypt(new__view_vc_pwd)
+        
+        current_view_vc_port=self.authconfig['view_vc_port'] if  ('view_vc_port' in self.authconfig.keys()) else "Not Set"
+        view_vc_port=raw_input("Enter vCenter Server Port [default: "+str(current_view_vc_port)+"]: ")
+        #vc_port=vc_port.strip()
+        if view_vc_port == "":
+            if(current_view_vc_port == "Not Set"):
+                exit_with_message("Error: Set vCenter Server Port.")
+            view_vc_port=int(current_view_vc_port)
+        else:
+            view_vc_port=int(view_vc_port)
+        if isinstance(view_vc_port, int ) == False:
+            exit_with_message("\nError: Port number is not a numeric value")
+        
+        #Test Connection Status
+        print "Checking View vCenter Server Connection Status:",
+        status, message = self.check_view_vc_connectivity(view_vc_ip, view_vc_user, new__view_vc_pwd, view_vc_port)
+        if status == True:
+            print Fore.GREEN+" Connection successful"+Fore.RESET
+        else:
+           print Fore.RED+" Connection failure"+Fore.RESET
+           exit_with_message(message)      
         #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+str(vc_port)+" cluster : "+cluster+" host : "+hosts
  
         view_auth = dict()
         view_auth["view_ip"]=vc_ip;
         view_auth["view_user"]=vc_user;
         view_auth["view_pwd"]=vc_pwd;
+        view_auth["view_vc_ip"]=view_vc_ip;
+        view_auth["view_vc_user"]=view_vc_user;
+        view_auth["view_vc_pwd"]=new__view_vc_pwd;
+        view_auth["view_vc_port"]=view_vc_port;
         
         CheckerBase.save_auth_into_auth_config(self.get_name(),view_auth)
         exit_with_message("Vmware Horizon View Server is configured Successfully ")
@@ -159,6 +220,56 @@ class HorizonViewChecker(CheckerBase):
          output=proc.read()
          exit_code=proc.close()
          return output.strip().lower(),exit_code
+    
+    def get_vc_connection(self):
+        SI = None
+        
+        if self.si !=None:
+            return self.si
+        
+        try:
+            SI = connect.SmartConnect(host=self.authconfig['view_vc_ip'],
+                                      user=self.authconfig['view_vc_user'],
+                                      pwd=Security.decrypt(self.authconfig['view_vc_pwd']),
+                                      port=self.authconfig['view_vc_port'])
+            atexit.register(connect.Disconnect, SI)
+        except IOError, ex:
+            pass
+        
+        if not SI:
+            return 'View-VC-Error'
+        else:
+           return SI
+    
+    def get_vc_vms(self,value):
+        VM = None
+        SI=self.get_vc_connection()
+   
+        by='ip'
+        if by=='uuid':
+            VM = SI.content.searchIndex.FindByUuid(None, value,
+                                           True,
+                                           True)
+        elif by=='dns':
+            VM = SI.content.searchIndex.FindByDnsName(None, value,
+                                                      True)
+        elif by=='ip':
+            VM = SI.content.searchIndex.FindByIp(None, value, True)
+        
+        return VM
+     
+    def check_view_vc_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port):
+        si=None
+        warnings.simplefilter('ignore')
+        try:
+            si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
+            return True,None
+        except vim.fault.InvalidLogin:
+            return False,"Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command again!!"
+        except ConnectionError as e:
+            return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
+        finally:
+            Disconnect(si)
          
     def check_connectivity(self,host_ip,host_username,host_password):
             
@@ -241,8 +352,13 @@ class HorizonViewChecker(CheckerBase):
         #check view server connectivity
         status, message = self.check_connectivity(self.authconfig['view_ip'],self.authconfig['view_user'],self.authconfig['view_pwd'])
         if status == False:
-           exit_with_message("Error : Connection Error"+"\n\nPlease run \"view setup\" command to configure Vmware Horizon View Server")
-                   
+           exit_with_message("Error : Horizon View Connection Error"+"\n\nPlease run \"view setup\" command to configure Vmware Horizon View Server")
+        
+        vcstatus, vcmessage = self.check_view_vc_connectivity(self.authconfig['view_vc_ip'],self.authconfig['view_vc_user'],self.authconfig['view_vc_pwd'],self.authconfig['view_vc_port'])         
+        
+        if vcstatus == False:
+           exit_with_message("Error : View VC Connection Error"+"\n\nPlease run \"view setup\" command to configure Vmware Horizon View VC Server")
+        
         
         passed_all = True
         
@@ -372,28 +488,34 @@ class HorizonViewChecker(CheckerBase):
     
     @checkgroup("view_components_checks", "Verify View Connection Brokers runs on a supported operating system",["availability"],"[Windows Server 2008 R2 (64 bit),Windows Server 2008 R2 SP1 (64 bit),Windows 2012 R2 (64 bit)]")
     def check_connectionbroker_os(self):
-        powershell_cmd="(Get-WmiObject Win32_OperatingSystem ).Caption + (Get-WmiObject -class Win32_OperatingSystem).OSArchitecture"
-        output=self.get_view_property(powershell_cmd)
+#         powershell_cmd="(Get-WmiObject Win32_OperatingSystem ).Caption + (Get-WmiObject -class Win32_OperatingSystem).OSArchitecture"
+#         output=self.get_view_property(powershell_cmd)
         
-        expected = 'Windows Server 2008 R2 or Windows Server 2008 R2 SP1 or Windows 2012 R2'
+        vm=self.get_vc_vms(self.authconfig['view_ip'])
         
+        expected = ['Microsoft Windows Server 2008 R2 (64-bit)','Microsoft Windows Server 2008 R2 SP1 (64-bit)', 'Microsoft Windows Server 2012 R2 (64-bit)']
+        if vm == None:
+            return False, "Actual=VM-Not-Found (Expected: ="+str(expected).replace(',',';')+")#"+(True and "PASS" or "FAIL"),None
+        
+        os=vm.summary.config.guestFullName
         message = ""
-        passed_all = True
+        passed_all = False
         
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (True and "PASS" or "FAIL"))
-        message+="Actual="+output+" (Expected: ="+str(expected)+")#"+(True and "PASS" or "FAIL") 
+        if os in expected:
+            passed_all = True
         
-        #passed_all = passed_all and passed
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+os+" (Expected: ="+str(expected)+")", (True and "PASS" or "FAIL"))
+        message+="Actual="+os+" (Expected: ="+str(expected).replace(',',';')+")#"+(True and "PASS" or "FAIL") 
         
         return passed_all , message,None
     
     @checkgroup("view_components_checks", "View Connection Brokers has correct CPUs",["performance"],"For 1-50 Desktop; CB cpu >=2 ,for 51-2000 Desktop; CB cpu >=4, for 2001-5000 Desktop; CB CPU >=6")
     def check_connectionbroker_cpu(self):
-         
+          
         cpu_powershell='$cpu=0;ForEach ($obj in  Get-WmiObject -class win32_processor) { $cpu+=$obj.NumberOfCores}; $cpu'
         cpu=self.get_view_property(cpu_powershell)
         vms=self.get_view_property('(Get-DesktopVM).length')
-                 
+                  
         message = ""
         passed= True
         actual=None
@@ -416,20 +538,20 @@ class HorizonViewChecker(CheckerBase):
                  passed= False
             expected = "For 2001-5000 Desktops Number of Cpu:>=6"
         actual= "Number of Cpu:"+str(cpu)+"; Number of Desktop:"+str(vms)
-        
+         
         self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
         message = "Actual="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         #passed_all = passed_all and passed
-         
+          
         return passed , message,None
-     
+      
     @checkgroup("view_components_checks", "View Connection Brokers has correct Memory",["performance"],"For 1-50 Desktop; CB Memory >=4GB ,for 51-2000 Desktop; CB cpu >=10GB, for 2001-5000 Desktop; CB CPU >=12GB")
     def check_connectionbroker_memory(self):
-         
+          
         memory_powershell='(Get-WmiObject CIM_PhysicalMemory).Capacity / 1GB'
         memory=self.get_view_property(memory_powershell)
         vms=self.get_view_property('(Get-DesktopVM).length')
-                 
+                  
         message = ""
         passed= True
         actual=None
@@ -455,37 +577,37 @@ class HorizonViewChecker(CheckerBase):
         self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
         message+= "Actual="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         #passed_all = passed_all and passed
-         
+          
         return passed , message,None
-     
+      
     @checkgroup("view_components_checks", "Verify that the Maximum number of desktops in a pool is no more than 1000",["availability"],"<=1000 Desktops")
     def check_max_desktop_per_pool(self):
         powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.maximumCount}'
         output=self.get_view_property(powershell_cmd)
-          
+           
         if output == 'command-error':
             return None,None,None
-          
+           
         pools= output.split("\n")
         message = ""
         passed_all = True
         expected="Max Desktop <=10000"
         try:
-            
+             
             for pool in pools:
                 pool_name, max_vm_in_pool= pool.split("=")
                 pool_name=pool_name.strip()
                 max_vm_in_pool=max_vm_in_pool.strip()
-                
+                 
                 if pool_name == '' and max_vm_in_pool =='':
                     continue
-                
+                 
                 max_vm_in_pool=int(max_vm_in_pool.strip())
                 flag=True
                 if max_vm_in_pool >1000:
                     flag=False
                 output="Pool :"+pool_name + " Max Desktop :"+str(max_vm_in_pool)
-                
+                 
                 self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
                 message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
                 passed_all = flag and passed_all
@@ -494,17 +616,17 @@ class HorizonViewChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL")) 
             message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
         #passed_all = passed_all and passed
-          
+           
         return passed_all , message,None
-     
+      
     @checkgroup("view_components_checks", "Verify Desktop Pool Status",["availability"],"true")
     def check_desktop_pool_enabled(self):
         powershell_cmd='ForEach($Pool in Get-Pool){Write-Host $Pool.displayName = $Pool.enabled}'
         output=self.get_view_property(powershell_cmd)
-          
+           
         if output == 'command-error':
             return None,None,None
-          
+           
         pools= output.split("\n")
         message = ""
         passed_all = True
@@ -515,11 +637,11 @@ class HorizonViewChecker(CheckerBase):
                 pool_name, pool_status= pool.split("=")
                 pool_name=pool_name.strip()
                 pool_status=pool_status.strip()
-                
+                 
                 if pool_name =='' and pool_status == '':
                     continue
                 is_pool_found=True
-                
+                 
                 flag=True
                 if pool_status == 'false':
                     flag=False
@@ -527,23 +649,23 @@ class HorizonViewChecker(CheckerBase):
                 passed_all = flag and passed_all
                 self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
                 message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
-        
+         
         except ValueError:
             passed_all = False and passed_all
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
             message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")   
         #passed_all = passed_all and passed
-          
+           
         return passed_all , message,None
-     
+      
     @checkgroup("view_components_checks", "Verify Connection Broker Server configured with static IP",["availability"],"true")
     def check_connection_broker_has_static_ip(self):
         powershell_cmd='ForEach ( $NIC in Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE  ) { Write-Host $NIC.IPAddress = (-NOT $NIC.DHCPEnabled) }'
         output=self.get_view_property(powershell_cmd)
-         
+          
         if output == 'command-error':
             return None,None,None
-         
+          
         nics= output.split("\n")
         message = ""
         passed_all = True
@@ -558,11 +680,11 @@ class HorizonViewChecker(CheckerBase):
             expected="True"
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
             message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
-         
+          
         #passed_all = passed_all and passed
-         
+          
         return passed_all , message,None
-     
+      
     @checkgroup("view_components_checks", "Verify number of Desktop configured in View",["availability"],"Number of desktop < 10000 or (2000 x number of brokers) ")
     def check_desktop_configured(self):
         connection_broker_cmd='((get-connectionbroker | where {$_.type -like "Connection Server"}) | measure).count'
@@ -572,10 +694,10 @@ class HorizonViewChecker(CheckerBase):
         no_of_desktop=self.get_view_property(desktop_cmd)
         if no_of_desktop == 'command-error' or no_of_connection_broker == 'command-error':
             return None,None,None
-         
+          
         no_of_desktop=int(no_of_desktop)
         no_of_connection_broker=int(no_of_connection_broker)
-         
+          
         passed=False
         if (no_of_desktop < 1000) or (no_of_desktop < (2000* no_of_connection_broker)):
             passed = True
@@ -583,5 +705,27 @@ class HorizonViewChecker(CheckerBase):
         expected="No.of desktop < 10000 or (2000 x No.of Connection Brokers)"
         self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
         message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL") 
-      
+       
+        return passed , message,None
+     
+    @checkgroup("view_components_checks", "Verify vCenter servers have at least 4 vCPUs and 6 GBs of RAM",["Performance"],"vCPUs:>=4 and RAM:>=6 GBs")
+    def check_desktop_configured(self):
+        vm=self.get_vc_vms(self.authconfig['view_vc_ip'])
+        expected='>=4 vCPUs and >=6 GBs of RAM'
+        passed=True
+        message=""
+        if vm is None:
+              self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=VCenter-Server-Not-Found (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
+              message+= "Actual=Actual=VCenter-Server-Not-Found (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL") 
+              passed=False
+        else:
+            vm_config=vm.summary.config
+            vm_cpu= int(vm_config.numCpu)
+            vm_memory=int(vm_config.memorySizeMB)*(0.001) # convert to GB
+            passed=False
+            if(vm_cpu >=4 and vm_memory >=6):
+                passed=True
+            output='vCPUs:'+str(vm_cpu)+' and RAM:'+str(vm_memory)+'GB'
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
+            message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         return passed , message,None
