@@ -96,7 +96,7 @@
 				<div id="kickoff">
 					<!--Secondary Navigation-->
 
-					<nav id="secondary_nav">
+					<div class="secondary_nav">
 
 						<!--UserInfo-->
 
@@ -126,11 +126,11 @@
 								<li><a href="#"><span class="fa fa-gear"></span>Others 1</a></li>
 								<li><a href="#"><span class="fa fa-gear"></span>Other 2</a></li>-->
 						</ul>
-					</nav>
+					</div>
 
 					<!--Content Wrap-->
 
-					<div id="content_wrap">
+					<div class="content_wrap">
 						<!--Activity Stats-->
 
 						<div id="activity_stats">
@@ -205,6 +205,11 @@
 												</table>
 											</div>
 										</div>
+										
+										<div id="quick_actions"> 
+										  <a class="button_big btn_blue kickoffBtn" style="float:right;width: 60px;text-align: center;" href="#">Next</a> 
+										  <!--<a class="button_big" href="#" style="float:right;width: 60px;text-align: center;">Cancel</a> -->
+										</div> 
 									</div>
 								</div>
 							</div>
@@ -247,7 +252,7 @@
 				<div id="predeploy">
 					<!--Secondary Navigation-->
 
-					<nav id="secondary_nav">
+					<div class="secondary_nav" >
 
 						<!--UserInfo-->
 
@@ -271,26 +276,123 @@
 						<!--Responsive Nav ends-->
 
 						<h2>Pre Deploy</h2>
-						<ul>
-							<li><a href="#"><span class="fa fa-gear"></span>Cluster Configuration</a></li>
-							<li><a href="#"><span class="fa fa-globe"></span>Networking</a></li>
-							<li><a href="#"><span class="fa fa-key"></span>Credentials</a></li>
-							<li><a href="#"><span class="fa fa-database"></span>Storage</a></li>
-							<li><a href="#"><span class="fa fa-comments"></span>Notification</a></li>
-							<li><a href="#"><span class="fa fa-sitemap"></span>Deployment Infrastructure</a></li>
-						</ul>
-					</nav>
+						<div id="preDeploy_secondaryNav">
+							<ul>
+								<li class="active"><a href="#preCluster"><span class="fa fa-gear"></span>Cluster Configuration</a></li>
+								<li><a href="#preNetworking"><span class="fa fa-globe"></span>Networking</a></li>
+								<li><a href="#preCredentials"><span class="fa fa-key"></span>Credentials</a></li>
+								<li><a href="#preStorage"><span class="fa fa-database"></span>Storage</a></li>
+								<li><a href="#preNotification"><span class="fa fa-comments"></span>Notification</a></li>
+								<li><a href="#preInfra"><span class="fa fa-sitemap"></span>Deployment Infrastructure</a></li>
+							</ul>
+						</div>
+					</div>
 
 					<!--Content Wrap-->
 
-					<div id="content_wrap">
-						PreDeploy COntent
+					<div class="content_wrap preDeploy_maincontent tab">
+						<div id="preCluster" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-gear"></span>
+										<h5>Cluster Configuration</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Cluster Configuration Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preNetworking" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-globe"></span>
+										<h5>Networking</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Networking Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preCredentials" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-key"></span>
+										<h5>Credentials</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Credentials Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preStorage" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-database"></span>
+										<h5>Storage</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Storage Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preNotification" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-comments"></span>
+										<h5>Notification</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Notification Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preInfra" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-sitemap"></span>
+										<h5>Deployment Infrastructure</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Deployment Infrastructure Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 				<!-------------------------------------------Pre Deploy End----------------------------------------------->
 				<!-------------------------------------------Deploy Start----------------------------------------------->
 				<div id="deploy">
-					<nav id="secondary_nav">
+					<div class="secondary_nav">
 
 						<!--UserInfo-->
 
@@ -315,18 +417,18 @@
 
 						<h2>Deploy</h2>
 						
-					</nav>
+					</div>
 
 					<!--Content Wrap-->
 
-					<div id="content_wrap">
+					<div class="content_wrap">
 						Deploy Content
 					</div>
 				</div>
 				<!-------------------------------------------Deploy End----------------------------------------------->
 				<!-------------------------------------------Post Deploy Start----------------------------------------------->		
 				<div id="postdeploy">
-					<nav id="secondary_nav">
+					<div class="secondary_nav">
 
 						<!--UserInfo-->
 
@@ -351,18 +453,18 @@
 
 						<h2>Post Deploy</h2>
 						
-					</nav>
+					</div>
 
 					<!--Content Wrap-->
 
-					<div id="content_wrap">
+					<div class="content_wrap">
 						PostDeploy COntent
 					</div>
 				</div>
 				<!-------------------------------------------Post Deploy End----------------------------------------------->
 				<!-------------------------------------------Knowledge Transfer Start----------------------------------------------->
 				<div id="knowledgeTransfer">
-					<nav id="secondary_nav">
+					<div class="secondary_nav">
 
 						<!--UserInfo-->
 
@@ -387,11 +489,11 @@
 
 						<h2>Knowledge Transfer</h2>
 						
-					</nav>
+					</div>
 
 					<!--Content Wrap-->
 
-					<div id="content_wrap">
+					<div class="content_wrap">
 						knowledgeTransfer COntent
 					</div>
 				</div>

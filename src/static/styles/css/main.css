@@ -270,7 +270,7 @@ nav#primary_nav ul li.ui-state-active a{
 }
 
 /*====SECONDARY NAV====*/
-#secondary_nav{
+.secondary_nav{
 	width:210px;
 	height:100%;
 	font-family:'ProximaNovaSoftBold';
@@ -346,7 +346,7 @@ dl.customer_info dd a.user_messages span{
 	font-family:ProximaNovaSoftBold;
 	display:inline-block;
 }
-#secondary_nav h2{
+.secondary_nav h2{
 	color:#8a9294;
 	font-size:30px;
 	padding:0px 15px;
@@ -355,33 +355,33 @@ dl.customer_info dd a.user_messages span{
 	font-family:ProximaNovaSoftBold;
 	text-shadow: 0px 1px 0px  #ffffff;
 }
-#secondary_nav ul{
+.secondary_nav ul{
 	margin:21px 15px;
 }
-#secondary_nav ul li{
+.secondary_nav ul li{
 	list-style:none;
 	padding:12px 0px;
 	border-top:solid 1px #dcdfe0;
 	line-height:100%;
 	box-shadow:inset 0px 1px 0px #ffffff;
 }
-#secondary_nav ul li a{
+.secondary_nav ul li a{
 	color:#818386;
 	font-size:14px;
 	text-decoration:none;
 	display:inline-block;
 	line-height:17px;
 }
-#secondary_nav ul li a span{
+.secondary_nav ul li a span{
 	font-size:21px;
 	float:left;
 	margin:-4px 8px 0px 5px;
 }
 
-#secondary_nav ul li.active a{
-	font-family: 'ProximaNovaSoftBold';
+.secondary_nav ul li.active a{
+	font-family: 'ProximaNovaSoftBold';color:#478cfe;
 }
-#secondary_nav ul li.active a span{
+.secondary_nav ul li.active a span{
 	color:#478cfe;
 	text-shadow: 0px 1px 0px  #f4f4f4;
 }
@@ -394,7 +394,7 @@ section.main_content{
 	min-height:750px;
 }
 
-#content_wrap{
+.content_wrap{
 	padding:18px;
 	display:block;
 	margin-left:210px;
@@ -1367,10 +1367,10 @@ a.res_icon, #responsive_nav{ display:none;}
 
 	.one_two_wrap {
 	}
-	#secondary_nav{
+	.secondary_nav{
 		width:155px;
 	}
-	#content_wrap{
+	.content_wrap{
 		margin-left:155px;
 	}
 	section.main_content{
@@ -1392,7 +1392,7 @@ a.res_icon, #responsive_nav{ display:none;}
 	.form_fields_container li div.form_input{
 		width:60%;
 	}
-	#secondary_nav ul li a span{
+	.secondary_nav ul li a span{
 		display:none;
 	}
 	
@@ -1416,7 +1416,7 @@ a.res_icon, #responsive_nav{ display:none;}
 	header .header_search input[type="text"] {
 		width:70px;
 	}
-	#content_wrap{
+	.content_wrap{
 		margin-left:0px;
 		padding:8px;
 	}
@@ -1424,12 +1424,12 @@ a.res_icon, #responsive_nav{ display:none;}
 	header{ padding:5px 7px}
 	section.main_content{ margin-left:0px;  background:#ebebeb; background-image:none; border-radius:4px 4px 0px 0px}	
 	nav#primary_nav{display:none;}
-	#secondary_nav{ border-radius:3px 3px 0px 0px; overflow:hidden;}
-	#secondary_nav > ul{ display:none;}
+	.secondary_nav{ border-radius:3px 3px 0px 0px; overflow:hidden;}
+	.secondary_nav > ul{ display:none;}
 	dl.customer_info{ margin-left:0px;}
 	dl.customer_info dt{ width:50px;}
 	img{ max-width:100%;}
-	#secondary_nav{ width:100%; clear:both;}
+	.secondary_nav{ width:100%; clear:both;}
 	
 	dl.customer_info{ width:320px; height:61px}
 	dl.customer_info dt{ margin-right:0px;}
@@ -1482,7 +1482,7 @@ a.res_icon, #responsive_nav{ display:none;}
 	#tabs > ul >li{padding:8px 6px!important; height:15px;}
 	#tabs > ul >li a{ font-size:12px;}
 	.error_pages{margin:25px 0px;}
-	#secondary_nav h2{ margin:10px 0px; float:left; padding:0px;}
+	.secondary_nav h2{ margin:10px 0px; float:left; padding:0px;}
 	.error_full_page h1{font-size:35px;}
 	/*Nav*/
 	a.res_icon{display:block; width:41px; height:31px; background:url(../../images/navigate.png) no-repeat center; float:left; clear:left; margin:10px;}
@@ -1521,7 +1521,7 @@ a.res_icon, #responsive_nav{ display:none;}
 	header .header_search input[type="text"] {
 		width:150px;
 	}
-	#content_wrap{
+	.content_wrap{
 		margin-left:0px;
 		padding:8px;
 	}
@@ -1529,11 +1529,11 @@ a.res_icon, #responsive_nav{ display:none;}
 	header{ padding:5px 7px}
 	section.main_content{ margin-left:0px; background:#ebebeb; background-image:none;}	
 	nav#primary_nav{display:none;}
-	#secondary_nav > ul{ display:none;}
+	.secondary_nav > ul{ display:none;}
 	dl.customer_info{ margin-left:0px;}
 	dl.customer_info dt{ width:50px;}
 	img{ max-width:100%;}
-	#secondary_nav{ width:100%; clear:both;}
+	.secondary_nav{ width:100%; clear:both;}
 	
 	dl.customer_info{ width:470px; height:61px}
 	dl.customer_info dt{ margin-right:0px;}
@@ -1584,7 +1584,7 @@ a.res_icon, #responsive_nav{ display:none;}
 	#tabs > ul >li{padding:8px 6px!important; height:15px;}
 	#tabs > ul >li a{ font-size:12px;}
 	.error_pages{margin:25px 0px;}
-	#secondary_nav h2{ margin:10px 0px; float:left; padding:0px;}
+	.secondary_nav h2{ margin:10px 0px; float:left; padding:0px;}
 	.error_pages{ margin-top:5px;}
 	.error_full_page h1{font-size:35px;}
 	/*Nav*/
@@ -1617,11 +1617,7 @@ text-shadow: 0px 1px 0px #fff;}
 .chooseCustomerType .radio-inline div.radio{ margin-top:0; margin-right:5px;}
 .chooseCustomerType .radio-inline div.radio input{ margin:0;}
  #createNewCustomer{ display:none;}
-.mainBody_container{ padding: 0;
-list-style: none;
-display: inline-block;
-width: 100%;
-background: #fff; float:left;}
+.mainBody_container{width: 100%;}
 #selectExisting  .form_container .selector{  margin:10px 20px;}
 
 .form_fields_container li div.form_input.error input{border: 1px solid #f00;}
@@ -1636,7 +1632,7 @@ border-radius: 2px;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
-  margin:20px;
+  margin:0 0 20px 0;
 }
 
 table.dataTable {
@@ -1722,12 +1718,12 @@ table.dataTable tr .row_hover {
   background-color: #f9f9f9;
   cursor: pointer;
 }
-table.dataTable tr.odd,
-table.dataTable tr.even {
+table.dataTable tr,
+table.dataTable tr {
   background-color: #fff;
 }
-table.dataTable tr.odd:hover,
-table.dataTable tr.even:hover {
+table.dataTable tr:hover,
+table.dataTable tr:hover {
   background-color: #f9f9f9;
   cursor: pointer;
 }
@@ -1842,7 +1838,7 @@ table.dataTable tr td .details-link:hover {
 .widget_body h1, .widget_body h2, .widget_body h3, .widget_body h4, .widget_body h5, .widget_body h6
 {font-family:ProximaNovaSoftRegular;
 }
-.mainBody_container h3{ font-size:14px; margin: 0 20px;}
+.mainBody_container h3{ font-size:14px; margin: 0 0 20px 0;}
 .customerDetails{ display:none;}
 
 .createNewCustomer{ float:right}
@@ -1926,7 +1922,10 @@ table.dataTable tr td .details-link:hover {
     margin: 0;
     white-space: nowrap;
 }
-
+table.dataTable tr.row_selected {
+  /* background-color: #e0f5fc; */
+  background-color: #e0f5fc;
+}
 /*MainContainer Tabs CSS*/
 #mainTabContainer.ui-tabs{
     border:0;
@@ -1949,3 +1948,8 @@ table.dataTable tr td .details-link:hover {
 }
 
 #mainTabContainer.ui-tabs .ui-tabs-panel{ background: none; border: 0; border-radius: 0; padding: 0;}
+#preCluster {
+ display: block;   
+}
+.tab-content { display:none}
+.widget .widget_body{ float:left; width:96%; padding:20px 2%; background:#fff;}

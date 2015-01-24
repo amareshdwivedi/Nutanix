@@ -460,6 +460,14 @@ jQuery(document).ready(function() {
 	 jQuery(".antiscroll-inner").niceScroll();
 	 
 	 $("#mainTabContainer").tabs();
+	 $("#preDeploy_secondaryNav ul a").click(function(event) {
+        event.preventDefault();
+        $(this).parent().addClass("active");
+        $(this).parent().siblings().removeClass("active");
+        var tab = $(this).attr("href");
+        $(".tab-content").not(tab).css("display", "none");
+        $(tab).fadeIn();
+    });
 });
 
 //===== TOOLTIP =====//

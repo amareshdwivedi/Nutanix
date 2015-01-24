@@ -43,6 +43,8 @@ jQuery(document).ready(function() {
 	}
 	
 	$(".customersTable tbody").on('click','tr',function(){
+			$(".customersTable tbody tr").removeClass("row_selected");
+			$(this).addClass("row_selected");
 			var customerId = $(this).find('td.customerId').html();
 			getCutomerDetails(customerId);
 	});
@@ -96,5 +98,26 @@ jQuery(document).ready(function() {
 	});
 	
 	
+	$("a.kickoffBtn").click(function(){
+		var cutomerId = $(".customersTable tr.row_selected td.customerId").text();
+		alert(cutomerId);
+		getCustomerTask(cutomerId);
+	});
+	
+	function getCustomerTask(cutomerId){
+		alert(cutomerId);
+		$.ajax({
+			 type: "GET",
+			 url: "/v1/deployer/customers/"+cutomerId+"/tasks/",
+			 async: false,
+			 dataType: "json",
+			 success: function(data){
+				//alert(data);
+			 },
+			 error: function(request,status,errorThrown){
+				 alert("No Data Available");
+			 }
+		});	
+	}
 	
 });
