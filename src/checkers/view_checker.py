@@ -380,7 +380,7 @@ class HorizonViewChecker(CheckerBase):
                     passed=HorizonViewChecker.apply_operator(actual, expected, operator)
                     message="Actual="+actual + " (Expected: " + operator + expected+ ") "
                     self.reporter.notify_progress(self.reporter.notify_checkLog,message, passed and "PASS" or "FAIL")
-                    self.result.add_check_result(CheckerResult(check_name,None, passed, message,category=self.category))
+                    self.result.add_check_result(CheckerResult(check_name,None, passed, message,category=check['category'],expected_result=check['expectedresult']))
                     #self.reporter.notify_one_line(check_name, str(passed))
                 #self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'],None,check['expectedresult']))
              
@@ -401,7 +401,7 @@ class HorizonViewChecker(CheckerBase):
                         if self.category not in check_function.category:
                             continue                      
                     passed, message,path = check_function()
-                    self.result.add_check_result(CheckerResult(check_function.descr,None, passed, message,category=self.category))
+                    self.result.add_check_result(CheckerResult(check_function.descr,None, passed, message,category=check_function.category,expected_result=check_function.expected_result))
 
                     try:
                         self.realtime_results = json.load(open("display_json.json","r"))
