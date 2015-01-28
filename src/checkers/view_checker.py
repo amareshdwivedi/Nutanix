@@ -334,7 +334,7 @@ class HorizonViewChecker(CheckerBase):
                 check_groups_run.append(group)
 
         self.reporter.notify_progress(self.reporter.notify_info,"Starting Vmware Horizon View Checks")
-        self.result = CheckerResult("view",self.authconfig)
+        self.result = ViewCheckerResult("view",self.authconfig)
         warnings.simplefilter('ignore')
 
         
@@ -378,9 +378,9 @@ class HorizonViewChecker(CheckerBase):
                     expected=check['ref-value']
                     actual = self.get_view_property(check['property'])
                     passed=HorizonViewChecker.apply_operator(actual, expected, operator)
-                    message="Actual="+actual + " (Expected: " + operator + expected+ ") "
+                    message="Actual:="+actual + " (Expected:= " + operator + expected+ ") "
                     self.reporter.notify_progress(self.reporter.notify_checkLog,message, passed and "PASS" or "FAIL")
-                    self.result.add_check_result(CheckerResult(check_name,None, passed, message,category=check['category'],expected_result=check['expectedresult']))
+                    self.result.add_check_result(ViewCheckerResult(check_name,None, passed,message,category=check['category'],expected_result=check['expectedresult']))
                     #self.reporter.notify_one_line(check_name, str(passed))
                 #self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'],None,check['expectedresult']))
              
@@ -401,7 +401,7 @@ class HorizonViewChecker(CheckerBase):
                         if self.category not in check_function.category:
                             continue                      
                     passed, message,path = check_function()
-                    self.result.add_check_result(CheckerResult(check_function.descr,None, passed, message,category=check_function.category,expected_result=check_function.expected_result))
+                    self.result.add_check_result(ViewCheckerResult(check_function.descr,None, passed, message,category=check_function.category,expected_result=check_function.expected_result))
 
                     try:
                         self.realtime_results = json.load(open("display_json.json","r"))
@@ -495,7 +495,7 @@ class HorizonViewChecker(CheckerBase):
         
         expected = ['Microsoft Windows Server 2008 R2 (64-bit)','Microsoft Windows Server 2008 R2 SP1 (64-bit)', 'Microsoft Windows Server 2012 R2 (64-bit)']
         if vm == None:
-            return False, "Actual=VM-Not-Found (Expected: ="+str(expected).replace(',',';')+")#"+(True and "PASS" or "FAIL"),None
+            return False, "Actual:=VM-Not-Found (Expected:="+str(expected).replace(',',';')+")#"+(True and "PASS" or "FAIL"),None
         
         os=vm.summary.config.guestFullName
         message = ""
@@ -504,8 +504,8 @@ class HorizonViewChecker(CheckerBase):
         if os in expected:
             passed_all = True
         
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+os+" (Expected: ="+str(expected)+")", (True and "PASS" or "FAIL"))
-        message+="Actual="+os+" (Expected: ="+str(expected).replace(',',';')+")#"+(True and "PASS" or "FAIL") 
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+os+" (Expected:="+str(expected)+")", (True and "PASS" or "FAIL"))
+        message+=", "+"Actual:="+os+" (Expected:="+str(expected).replace(',',';')+")#"+(True and "PASS" or "FAIL") 
         
         return passed_all , message,None
     
@@ -539,8 +539,8 @@ class HorizonViewChecker(CheckerBase):
             expected = "For 2001-5000 Desktops Number of Cpu:>=6"
         actual= "Number of Cpu:"+str(cpu)+"; Number of Desktop:"+str(vms)
          
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message = "Actual="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+actual+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message =", "+ "Actual:="+actual+" (Expected:="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         #passed_all = passed_all and passed
           
         return passed , message,None
@@ -574,8 +574,8 @@ class HorizonViewChecker(CheckerBase):
                  passed= False
             expected = "For 2001-5000 Desktops Memory:>=12GB"
         actual= "Memory:"+str(memory)+"GB; Number of Desktop:"+str(vms)
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+actual+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message+= "Actual="+actual+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+actual+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message+=", "+ "Actual:="+actual+" (Expected:="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         #passed_all = passed_all and passed
           
         return passed , message,None
@@ -610,19 +610,19 @@ class HorizonViewChecker(CheckerBase):
                     flag=False
                 output="Pool :"+pool_name + " Max Desktop :"+str(max_vm_in_pool)
                  
-                self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
-                message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+                self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (flag and "PASS" or "FAIL"))
+                message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
                 passed_all = flag and passed_all
         except ValueError:
             error = True
             passed_all=False
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL")) 
-            message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=:Get-Pool Command Error (Expected:="+str(expected)+")", (False and "PASS" or "FAIL")) 
+            message+=", "+ "Actual:=Get-Pool Command Error (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL")
         #passed_all = passed_all and passed
         
         if is_pool_found == False and error ==False:
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Pool-Not-Found (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
-            message+= "Actual=Pool-Not-Found (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=Pool-Not-Found (Expected:="+str(expected)+")", (False and "PASS" or "FAIL"))
+            message+=", "+ "Actual:=Pool-Not-Found (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL")
             passed_all=False
          
         return passed_all , message,None
@@ -656,18 +656,18 @@ class HorizonViewChecker(CheckerBase):
                     flag=False
                 output="Pool :"+pool_name + " Enabled:"+pool_status
                 passed_all = flag and passed_all
-                self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
-                message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+                self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (flag and "PASS" or "FAIL"))
+                message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
          
         except ValueError:
             error=True
             passed_all = False and passed_all
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
-            message+= "Actual=Get-Pool Command Error (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=Get-Pool Command Error (Expected:="+str(expected)+")", (False and "PASS" or "FAIL"))
+            message+= ", "+"Actual:=Get-Pool Command Error (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL")
         
         if is_pool_found == False and error == False:
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=Pool-Not-Found (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
-            message+= "Actual=Pool-Not-Found (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=Pool-Not-Found (Expected:="+str(expected)+")", (False and "PASS" or "FAIL"))
+            message+=", "+ "Actual:=Pool-Not-Found (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL")
             passed_all=False
         #passed_all = passed_all and passed
            
@@ -693,8 +693,8 @@ class HorizonViewChecker(CheckerBase):
                 flag=False
             output="IP :"+nic_ip +" isStaticIP:"+is_status
             expected="True"
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (flag and "PASS" or "FAIL"))
-            message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (flag and "PASS" or "FAIL"))
+            message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
           
         #passed_all = passed_all and passed
           
@@ -718,9 +718,8 @@ class HorizonViewChecker(CheckerBase):
             passed = True
         output="No.of Desktops: "+str(no_of_desktop)+"; No.of Connection Brokers: "+str(no_of_connection_broker)
         expected="No.of desktop < 10000 or (2000 x No.of Connection Brokers)"
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL") 
-       
+        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
+        message+="Actual:="+output+" (Expected:="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         return passed , message,None
      
     @checkgroup("view_components_checks", "Verify vCenter servers have at least 4 vCPUs and 6 GBs of RAM",["Performance"],"vCPUs:>=4 and RAM:>=6 GBs")
@@ -730,8 +729,8 @@ class HorizonViewChecker(CheckerBase):
         passed=True
         message=""
         if vm is None:
-              self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=VCenter-Server-Not-Found (Expected: ="+str(expected)+")", (False and "PASS" or "FAIL"))
-              message+= "Actual=Actual=VCenter-Server-Not-Found (Expected: ="+str(expected)+")#"+(False and "PASS" or "FAIL") 
+              self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=VCenter-Server-Not-Found (Expected:="+str(expected)+")", (False and "PASS" or "FAIL"))
+              message+= "Actual:=VCenter-Server-Not-Found (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL") 
               passed=False
         else:
             vm_config=vm.summary.config
@@ -741,6 +740,6 @@ class HorizonViewChecker(CheckerBase):
             if(vm_cpu >=4 and vm_memory >=6):
                 passed=True
             output='vCPUs:'+str(vm_cpu)+' and RAM:'+str(vm_memory)+'GB'
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual="+output+" (Expected: ="+str(expected)+")", (passed and "PASS" or "FAIL"))
-            message+= "Actual="+output+" (Expected: ="+str(expected)+")#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
+            message+= "Actual:="+output+" (Expected:="+str(expected)+")#"+(passed and "PASS" or "FAIL")
         return passed , message,None
