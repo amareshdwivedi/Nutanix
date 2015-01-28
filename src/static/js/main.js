@@ -457,17 +457,88 @@ jQuery(document).ready(function() {
 				$(".errorMsg").hide();
 	 });
 	 
+	 $(".createTaskLink").click(function(){
+		 $('#createTaskModal').modal();
+		 $(".createTask-form .form_input").removeClass("error");
+		 $(".errorMsg").hide();
+	 });
+	 
 	 jQuery(".antiscroll-inner").niceScroll();
 	 
 	 $("#mainTabContainer").tabs();
-	 $("#preDeploy_secondaryNav ul a").click(function(event) {
+	 /*$("#preDeploy_secondaryNav ul a").click(function(event) {
         event.preventDefault();
         $(this).parent().addClass("active");
         $(this).parent().siblings().removeClass("active");
         var tab = $(this).attr("href");
         $(".tab-content").not(tab).css("display", "none");
         $(tab).fadeIn();
+    });*/
+	var preDeployLength = $("#preDeploy_secondaryNav ul li").length;
+	/*for(i=0;i<=preDeployLength;i++){
+		 $("#preDeploy_secondaryNav ul li a").addClass("step-"+i+"");
+	}*/
+	$('#preDeploy_secondaryNav ul li').each(function(i, e){
+		$("a", this).attr("class", "step-" + i);
+	});
+	$(".preDeploy_maincontent .quick_actions").each(function(i, e){
+		$(".next", this).attr("name", "step-" + (i+1));
+	});
+	$(".preDeploy_maincontent .quick_actions").each(function(i, e){
+		$(".back", this).attr("name", "step-" + (i-1));
+	});
+	
+	$(".preDeploy_maincontent a.next").click(function(event) {
+		var nextStep = $(this).attr("name");
+		event.preventDefault();
+		$("#preDeploy_secondaryNav ul li").find("."+nextStep+"").parent().removeClass("disabled");
+		$("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().siblings().addClass("disabled");
+		$("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().addClass("active");
+        $("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().siblings().removeClass("active");
+        var tab = $("#preDeploy_secondaryNav ul li a."+nextStep+"").attr("href");
+		$(".tab-content").not(tab).css("display", "none");
+        $(tab).fadeIn();
+		$(tab).addClass(nextStep);
     });
+	$(".preDeploy_maincontent a.back").click(function(event) {
+		var previousStep = $(this).attr("name");
+		event.preventDefault();
+		$("#preDeploy_secondaryNav ul li").find("."+previousStep+"").parent().removeClass("disabled");
+		$("#preDeploy_secondaryNav ul li a."+previousStep+"").parent().siblings().addClass("disabled");
+		$("#preDeploy_secondaryNav ul li a."+previousStep+"").parent().addClass("active");
+        $("#preDeploy_secondaryNav ul li a."+previousStep+"").parent().siblings().removeClass("active");
+        var tab = $("#preDeploy_secondaryNav ul li a."+previousStep+"").attr("href");
+        $(".tab-content").not(tab).css("display", "none");
+        $(tab).fadeIn();
+		$(tab).addClass(previousStep);
+    });
+	$("#preDeploy_secondaryNav ul li.disabled a").unbind('click');
+	
+	
+	var count = 1;
+	if(count <= 1){
+			$('.removeBlock').hide();
+			var a = $( "#preCluster .widget_body" ).innerHeight();
+			alert(a);
+	}
+	
+	$('.addBlock').live("click",function(){
+		var $clone = $('#block-0').clone();
+		//$clone.find('[id]').each(function(){this.id+='someotherpart'});
+		$clone.attr('id', "block"+(++count));
+		$clone.insertAfter($('[id^=block]:last'));
+		$("#block"+count+"").find(".blockName").html("Block "+count+"");
+		$('.removeBlock').show();
+	});
+	$(".removeBlock").live("click",function(){
+		$(this).parents().eq(2).remove();
+		count--;
+		if(count <= 1){
+			$('.removeBlock').hide();
+		}
+	});
+
+	
 });
 
 //===== TOOLTIP =====//

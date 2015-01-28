@@ -191,7 +191,8 @@ header .header_search input[type="submit"] {
 /*====PRIMARY NAV====*/
 nav#primary_nav{
 	float:left;
-	padding-top:92px;
+	/*padding-top:92px;*/
+    padding-top:12px;
 	font-family:ProximaNovaSoftBold;
 }
 nav#primary_nav ul{
@@ -1462,7 +1463,7 @@ a.res_icon, #responsive_nav{ display:none;}
 	.project_sort ul.project_list li{ width:70px; margin-right:5px; height:70px; margin-bottom:7px; padding:7px;}
 	div.msgbar{ margin-top:8px;}
 	#activity_stats{ display:none;}
-	#quick_actions .btn_grey{ display:none;}
+	.quick_actions .btn_grey{ display:none;}
 	.action_bar a.button_small{ margin-left:0px;}
 	
 	.dataTables_wrapper .dataTable tbody td{ padding:4px!important;}
@@ -1839,6 +1840,7 @@ table.dataTable tr td .details-link:hover {
 {font-family:ProximaNovaSoftRegular;
 }
 .mainBody_container h3{ font-size:14px; margin: 0 0 20px 0;}
+.mainBody_container.customerDetails h3{ float:left; margin:8px 0 12px 0}
 .customerDetails{ display:none;}
 
 .createNewCustomer{ float:right}
@@ -1912,7 +1914,7 @@ table.dataTable tr td .details-link:hover {
     font-family: ProximaNovaSoftSemiBold;
     font-size: 12px;
 }
-
+a.nutanix-form-btn { color: #fff; text-decoration: none;}
 
 .n-breadcrumb {
     color: #424950;
@@ -1953,3 +1955,25 @@ table.dataTable tr.row_selected {
 }
 .tab-content { display:none}
 .widget .widget_body{ float:left; width:96%; padding:20px 2%; background:#fff;}
+.preDeploy_maincontent .widget{ margin-top: 0; margin-bottom: 20px; width:100%; float: left;}
+.preDeploy_maincontent .widget .widget_title span{padding:7px 0 6px}
+
+.createNewTask{ float: right;}
+.createNewTask .createTaskLink{ color: #fff; text-decoration: none;}
+
+.preDeploy_maincontent .next, .preDeploy_maincontent .submit{ margin-right:40px;}
+a.btn-default{ margin-right: 10px; text-decoration: none}
+#preDeploy_secondaryNav ul li a{ cursor: default}
+
+.blockHead{  font-size:14px; font-weight: 600; padding: 0 0 10px; float:left}
+.blockName{  font-size:13px; font-weight: 600; float:left; padding:5px 10px;}
+.blockIcons{  font-size:13px; font-weight: 600; float:right; margin-right: 20px; margin-bottom:5px;}
+.blockIcons a{ text-decoration: none; margin-left: 5px;}
+.addBlock i{ color:#04B404;}
+.removeBlock i{ color:#FE2E2E}
+.subLevelHead{ padding-top:5px; padding-bottom: 5px; margin-top:0; background: #eee }
+.nodeContainer{border: 1px solid #eee;
+    padding: 0; margin:10px;
+    width: 98%;}
+.blockContainer{border: 1px solid #eee;}
+.sublevelContent{ padding-top:10px;}
