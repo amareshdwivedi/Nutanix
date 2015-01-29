@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Nutanix Deployer</title>
+<link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
+
+<!--Stylesheets-->
+
+<link rel="stylesheet" href="/static/styles/css/reset.css" />
+
+<link rel="stylesheet" href="/static/styles/css/typography.css" />
+<link rel="stylesheet" href="/static/styles/css/tipsy.css" />
+<link rel="stylesheet" href="/static/js/cl_editor/jquery.cleditor.css" />
+<link rel="stylesheet" href="/static/styles/uploadify/uploadify.css" />
+<link rel="stylesheet" href="/static/styles/css/jquery.ui.all.css" />
+<link rel="stylesheet" href="/static/styles/css/fullcalendar.css" />
+<link rel="stylesheet" href="/static/styles/css/bootstrap.css" />
+<link rel="stylesheet" href="/static/js/jq_tables/demo_table_jui.css" />
+<link rel="stylesheet"
+	href="/static/js/fancybox/jquery.fancybox-1.3.4.css" />
+<link rel="stylesheet" href="/static/styles/css/highlight.css" />
+<link rel="stylesheet" href="/static/styles/css/font-awesome.css" />
+<link rel="stylesheet" href="/static/styles/css/main.css" />
+
+<!--[if lt IE 9]>
+
+    <script src="js/html5.js"></script>
+
+    <![endif]-->
+
+<!--Javascript-->
+
+<script type="text/javascript" src="/static/js/jquery.min.js">
+	
+</script>
+<script type="text/javascript" src="/static/js/main.js">
+	
+</script>
+<script type="text/javascript" src="/static/js/services.js">
+	
+</script>
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+
+<body>
+
+	<!--Header-->
+
+	<header>
+
+		<!--Logo-->
+
+		<div id="logo">
+			<a href="#"><img src="/static/images/logo.png" alt="" /></a>
+		</div>
+
+		<!--Search-->
+
+		<div class="header_search">
+			<form action="#">
+				<input type="text" name="search" placeholder="Search" id="ac">
+				<input type="submit" value="">
+			</form>
+		</div>
+	</header>
+
+	<!--Deployer Container-->
+
+	<div id="deployer_container">
+		<div id="mainTabContainer">
+			<!--Primary Navigation-->
+
+			<nav id="primary_nav">
+				<ul>
+					<li class="active"><a href="#kickoff"><i
+							class="fa fa-home fa-2x"></i><br />Kick off</a></li>
+					<li class="nav_graphs"><a href="#predeploy"><i
+							class="fa fa-cogs fa-2x"></i><br />Pre Deploy</a></li>
+					<li class="nav_forms"><a href="#deploy"><i
+							class="fa fa-download fa-2x"></i><br />Deploy</a></li>
+					<li class="nav_typography"><a href="#postdeploy"><i
+							class="fa fa-heart fa-2x"></i><br />Post Deploy</a></li>
+					<li class="nav_uielements"><a href="#knowledgeTransfer"><i
+							class="fa fa-book fa-2x"></i><br />Knowledge <br />Transfer</a></li>
+				</ul>
+			</nav>
+
+			<!--Main Content-->
+
+			<section class="main_content">
+				<!-------------------------------------------KickOff Start----------------------------------------------->
+				<div id="kickoff">
+					<!--Secondary Navigation-->
+
+					<div class="secondary_nav">
+
+						<!--UserInfo-->
+
+						<dl class="customer_info">
+							<dt>
+								<!-- <a href="#"><img src="images/avatar.png" alt="" /></a> -->
+								<a href="#" style="color: grey;"><i
+									class="sign-out fa fa-sign-out fa-5x"></i></a>
+							</dt>
+							<dd>
+								<a class="welcome_user" href="#">Welcome,<strong>Deployer
+										User</strong></a> <span class="log_data">Last sign in : 16:11 Jan
+									13th 2015</span>
+							</dd>
+						</dl>
+
+						<!--Responsive Nav-->
+
+						<a class="res_icon" href="#"></a>
+
+						<!--Responsive Nav ends-->
+
+						<h2>Kick off</h2>
+						<ul>
+							<li><a href="#"><span class="fa fa-user"></span>Contact</a></li>
+							<!--<li><a href="#"><span class="fa fa-file-o"></span>Collateral</a></li>
+								<li><a href="#"><span class="fa fa-gear"></span>Others 1</a></li>
+								<li><a href="#"><span class="fa fa-gear"></span>Other 2</a></li>-->
+						</ul>
+					</div>
+
+					<!--Content Wrap-->
+
+					<div class="content_wrap">
+						<!--Activity Stats-->
+
+						<div id="activity_stats">
+							<h3>Activity</h3>
+							<div class="activity_column">
+								<span class="iconsweet">+</span> <span class="big_txt rd_txt">12</span>Nodes
+							</div>
+							<div class="activity_column">
+								<span class="iconsweet">Y</span> <span class="big_txt gr_txt">6</span>Clusters
+							</div>
+							<div class="activity_column">
+								<span class="iconsweet">#</span> <span class="big_txt">2</span>
+								Errors
+							</div>
+						</div>
+
+						<div class="msgbar msg_Info hide_onC">
+							<span class="iconsweet">*</span>
+							<p>Deployer Messages here!</p>
+						</div>
+
+						<div class="one_wrap fl_left">
+							<div class="widget" id="selectExisting">
+								<div class="widget_title">
+									<span class="fa fa-user"></span>
+									<h5>Existing Customers</h5>
+									<div class="createNewCustomer">
+										<a href="#." class="createCustomerLink"><span
+											class="fa fa-plus"></span>
+										<h5>Create New Customer</h5></a>
+									</div>
+								</div>
+								<div class="widget_body">
+									<!--Form fields-->
+									<div class="mainBody_container">
+										<div class="dataTables_wrapper">
+											<div class="antiscroll-inner">
+												<table class="customersTable dataTable" cellspacing="0"
+													cellpadding="0" border="0" style="width: 100%;">
+													<thead>
+														<tr>
+															<th width="25%">Customer Id</th>
+															<th width="75%">Customer Name</th>
+														</tr>
+													</thead>
+													<tbody>
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+
+									<div class="mainBody_container customerDetails">
+										<h3 class="n-breadcrumb ">
+											Customer Details - <span><span>
+										</h3>
+										<div class="dataTables_wrapper">
+											<div class="antiscroll-inner">
+												<table class="customersDetailsTable dataTable"
+													cellspacing="0" cellpadding="0" border="0"
+													style="width: 100%;">
+													<thead>
+														<tr>
+															<th>Id</th>
+															<th>Status</th>
+															<th>Task</th>
+															<th>Date Created</th>
+														</tr>
+													</thead>
+													<tbody>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										
+										<div id="quick_actions"> 
+										  <a class="button_big btn_blue kickoffBtn" style="float:right;width: 60px;text-align: center;" href="#">Next</a> 
+										  <!--<a class="button_big" href="#" style="float:right;width: 60px;text-align: center;">Cancel</a> -->
+										</div> 
+									</div>
+								</div>
+							</div>
+							<div class="widget" id="createNewCustomer">
+								<div class="widget_title">
+									<span class="fa fa-user"></span>
+									<h5>Contact Information</h5>
+								</div>
+								<div class="widget_body">
+									<!--Form fields-->
+									<form class="createCustomer-form">
+										<div class="errorMsg"></div>
+										<ul class="form_fields_container">
+											<li><label>Id</label>
+												<div class="form_input">
+													<input name="customer_id" type="text">
+												</div></li>
+											<li><label>Name</label>
+												<div class="form_input">
+													<input name="customer_name" type="text">
+												</div></li>
+											<li><label>Phone</label>
+												<div class="form_input">
+													<input name="customer_phone" type="text">
+												</div></li>
+											<li><label>Email</label>
+												<div class="form_input">
+													<input name="customer_email" type="email">
+												</div></li>
+										</ul>
+									</form>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+				<!-------------------------------------------KickOff End----------------------------------------------->
+				<!-------------------------------------------Pre Deploy Start----------------------------------------------->
+				<div id="predeploy">
+					<!--Secondary Navigation-->
+
+					<div class="secondary_nav" >
+
+						<!--UserInfo-->
+
+						<dl class="customer_info">
+							<dt>
+								<!-- <a href="#"><img src="images/avatar.png" alt="" /></a> -->
+								<a href="#" style="color: grey;"><i
+									class="sign-out fa fa-sign-out fa-5x"></i></a>
+							</dt>
+							<dd>
+								<a class="welcome_user" href="#">Welcome,<strong>Deployer
+										User</strong></a> <span class="log_data">Last sign in : 16:11 Jan
+									13th 2015</span>
+							</dd>
+						</dl>
+
+						<!--Responsive Nav-->
+
+						<a class="res_icon" href="#"></a>
+
+						<!--Responsive Nav ends-->
+
+						<h2>Pre Deploy</h2>
+						<div id="preDeploy_secondaryNav">
+							<ul>
+								<li class="active"><a href="#preCluster"><span class="fa fa-gear"></span>Cluster Configuration</a></li>
+								<li><a href="#preNetworking"><span class="fa fa-globe"></span>Networking</a></li>
+								<li><a href="#preCredentials"><span class="fa fa-key"></span>Credentials</a></li>
+								<li><a href="#preStorage"><span class="fa fa-database"></span>Storage</a></li>
+								<li><a href="#preNotification"><span class="fa fa-comments"></span>Notification</a></li>
+								<li><a href="#preInfra"><span class="fa fa-sitemap"></span>Deployment Infrastructure</a></li>
+							</ul>
+						</div>
+					</div>
+
+					<!--Content Wrap-->
+
+					<div class="content_wrap preDeploy_maincontent tab">
+						<div id="preCluster" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-gear"></span>
+										<h5>Cluster Configuration</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Cluster Configuration Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preNetworking" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-globe"></span>
+										<h5>Networking</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Networking Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preCredentials" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-key"></span>
+										<h5>Credentials</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Credentials Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preStorage" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-database"></span>
+										<h5>Storage</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Storage Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preNotification" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-comments"></span>
+										<h5>Notification</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Notification Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preInfra" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-sitemap"></span>
+										<h5>Deployment Infrastructure</h5>
+									</div>
+									<div class="widget_body">
+										<!--Form fields-->
+										<div class="mainBody_container">
+											Deployment Infrastructure Content
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-------------------------------------------Pre Deploy End----------------------------------------------->
+				<!-------------------------------------------Deploy Start----------------------------------------------->
+				<div id="deploy">
+					<div class="secondary_nav">
+
+						<!--UserInfo-->
+
+						<dl class="customer_info">
+							<dt>
+								<!-- <a href="#"><img src="images/avatar.png" alt="" /></a> -->
+								<a href="#" style="color: grey;"><i
+									class="sign-out fa fa-sign-out fa-5x"></i></a>
+							</dt>
+							<dd>
+								<a class="welcome_user" href="#">Welcome,<strong>Deployer
+										User</strong></a> <span class="log_data">Last sign in : 16:11 Jan
+									13th 2015</span>
+							</dd>
+						</dl>
+
+						<!--Responsive Nav-->
+
+						<a class="res_icon" href="#"></a>
+
+						<!--Responsive Nav ends-->
+
+						<h2>Deploy</h2>
+						
+					</div>
+
+					<!--Content Wrap-->
+
+					<div class="content_wrap">
+						Deploy Content
+					</div>
+				</div>
+				<!-------------------------------------------Deploy End----------------------------------------------->
+				<!-------------------------------------------Post Deploy Start----------------------------------------------->		
+				<div id="postdeploy">
+					<div class="secondary_nav">
+
+						<!--UserInfo-->
+
+						<dl class="customer_info">
+							<dt>
+								<!-- <a href="#"><img src="images/avatar.png" alt="" /></a> -->
+								<a href="#" style="color: grey;"><i
+									class="sign-out fa fa-sign-out fa-5x"></i></a>
+							</dt>
+							<dd>
+								<a class="welcome_user" href="#">Welcome,<strong>Deployer
+										User</strong></a> <span class="log_data">Last sign in : 16:11 Jan
+									13th 2015</span>
+							</dd>
+						</dl>
+
+						<!--Responsive Nav-->
+
+						<a class="res_icon" href="#"></a>
+
+						<!--Responsive Nav ends-->
+
+						<h2>Post Deploy</h2>
+						
+					</div>
+
+					<!--Content Wrap-->
+
+					<div class="content_wrap">
+						PostDeploy COntent
+					</div>
+				</div>
+				<!-------------------------------------------Post Deploy End----------------------------------------------->
+				<!-------------------------------------------Knowledge Transfer Start----------------------------------------------->
+				<div id="knowledgeTransfer">
+					<div class="secondary_nav">
+
+						<!--UserInfo-->
+
+						<dl class="customer_info">
+							<dt>
+								<!-- <a href="#"><img src="images/avatar.png" alt="" /></a> -->
+								<a href="#" style="color: grey;"><i
+									class="sign-out fa fa-sign-out fa-5x"></i></a>
+							</dt>
+							<dd>
+								<a class="welcome_user" href="#">Welcome,<strong>Deployer
+										User</strong></a> <span class="log_data">Last sign in : 16:11 Jan
+									13th 2015</span>
+							</dd>
+						</dl>
+
+						<!--Responsive Nav-->
+
+						<a class="res_icon" href="#"></a>
+
+						<!--Responsive Nav ends-->
+
+						<h2>Knowledge Transfer</h2>
+						
+					</div>
+
+					<!--Content Wrap-->
+
+					<div class="content_wrap">
+						knowledgeTransfer COntent
+					</div>
+				</div>
+				<!-------------------------------------------Knowledge Transfer End----------------------------------------------->
+			</section>
+
+		</div>
+	</div>
+
+
+	<!-- Modal -->
+	<div class="modal fade" id="createCustomerModal" tabindex="-1"
+		role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<a class="nutanix-close"
+						ng-click="cloneDesignScenarioModalcancel()"> <span
+						aria-hidden="true"> <i class="fa fa-times"></i>
+					</span>
+					</a>
+					<h4 class="modal-title" id="myModalLabel">Create New Customer</h4>
+				</div>
+				<div class="modal-body">
+					<form class="createCustomer-form">
+						<div class="errorMsg"></div>
+						<ul class="form_fields_container">
+							<li><label>Id</label>
+								<div class="form_input">
+									<input name="customer_id" type="text">
+								</div></li>
+							<li><label>Name</label>
+								<div class="form_input">
+									<input name="customer_name" type="text">
+								</div></li>
+							<li><label>Phone</label>
+								<div class="form_input">
+									<input name="customer_phone" type="text">
+								</div></li>
+							<li><label>Email</label>
+								<div class="form_input">
+									<input name="customer_email" type="email">
+								</div></li>
+						</ul>
+
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button class="btn nutanix-form-btn createNewCustomerBtn"
+						type="button">OK</button>
+					<button data-dismiss="modal" aria-hidden="true"
+						class="btn btn-default default-font" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="/static/js/excanvas.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.flot.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.flot.stack.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.flot.pie.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.quicksand.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.easing.1.3.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.tipsy.js"></script>
+	<script type="text/javascript" src="/static/js/cl_editor/jquery.cleditor.min.js"></script>
+	<script type="text/javascript" src="/static/uploadify/swfobject.js"></script>
+	<script type="text/javascript" src="/static/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.autogrowtextarea.js"></script>
+	<script type="text/javascript" src="/static/js/form_elements.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ui.mouse.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ui.slider.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ui.progressbar.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ui.datepicker.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ui.tabs.js"></script>
+	<script type="text/javascript" src="/static/js/fullcalendar.js"></script>
+	<script type="text/javascript" src="/static/js/gcal.js"></script>
+	<script type="text/javascript" src="/static/js/bootstrap-modal.js"></script>
+	<script type="text/javascript" src="/static/js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+	<script type="text/javascript" src="/static/js/fancybox/jquery.mousewheel-3.0.4.pack.js"></script>
+	<script type="text/javascript" src="/static/js/highlight.js"></script>
+	<script type="text/javascript" src="/static/js/jq_tables/jquery.dataTables.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.nicescroll.min.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.nicescroll.plus.js"></script>
+</body>
+
+</html>

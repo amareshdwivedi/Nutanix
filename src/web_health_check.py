@@ -46,13 +46,18 @@ urls = (
     '/refresh', 'refresh',
     '/', 'index',
     '/GeneratePdf/','reportGenerator.GeneratePdf'
-)
+    '/home/', 'home'
+
+	)
 
 app = web.application(urls, globals())
 #web.header('Content-Type', 'applicaton/json')
 #render = web.template.render('templates/')
 render = web.template.render('templates/')
 
+class home:
+	def GET(self):
+		return render.home()
 
 class index:
     def __init__(self):
