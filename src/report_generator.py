@@ -246,10 +246,13 @@ def PDFReportGenerator(resultJson,curdir=None):
             ncc_report(story, resultJson[checkers].get('checks'))
     doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
     
+    pdf_report_name = pdffilename.split(os.path.sep)[-1]
+    generic_report_name = pdf_report_name.split('.')[0]
+    
     if curdir is None:
-        print "\nReports generated successfully at :: " + os.getcwd() + os.path.sep +"reports"
+        print "\nReport ("+pdf_report_name+") generated successfully at :: " + os.getcwd() + os.path.sep +"reports"
     else:
-        print "\nReports generated successfully at :: " + curdir + os.path.sep +"reports"  
+        print "\nReport ("+pdf_report_name+") generated successfully at :: " + curdir + os.path.sep +"reports"  
 
 
 
@@ -311,4 +314,3 @@ def CSVReportGenerator(resultJson,curdir=None):
         csv_writer.writerows(details)
         csv_writer.writerows(rows)
         csv_file.close()
-             

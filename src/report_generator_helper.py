@@ -332,8 +332,6 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
             return "CVM ["+entity+"] on Cluster ["+cluster+"] has Memory limit is set to ["+actual_value+"]", False ,"alert"          
 
-
-
                                         
     # Start of storage_and_vm Checks
     if check_name == "VM hardware version is the most up to date with the ESXI version":
@@ -618,7 +616,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return 'Not-Configured', False, ''
         elif actual_value == "Not supported":
-            return "On host ["+host+"] power management settings in BIOS are not set to OS Controlled" , True , "alert"
+            return "On host ["+host+"] power management settings in BIOS is not set to OS Controlled" , True , "alert"
         else: 
             return "Host Power management policy on host ["+host+"] is set to ["+actual_value+"]", True, "info" if actual_value=="Balanced" else "alert"
         
@@ -754,6 +752,56 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "SSH on Host["+host+"] is Disabled", True, 'alert'
         elif actual_value == "PowerOn": 
             return "SSH on Host["+host+"] is Enabled", False, 'alert'                   
+                 
+    if check_name == "Check if only 10Gbps VMNIC are Connected":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value == "10GBps VMNIC Not Connected":
+            return "On Cluster ["+cluster+"] Host ["+host+"] has 10 Gbps NIC Disconnected", True, 'alert'
+        elif actual_value == "10GBps VMNIC Connected but Not in Full Duplex Mode":
+            return "On Cluster ["+cluster+"] Host ["+host+"] has 10 Gbps NIC Connected but not in Full Duplex mode", True, 'alert' 
+        
+    if check_name == "Failed Logins in auth.log":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        elif int(actual_value) > 50:
+            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
+        else:
+            return  "Total Error Entries are ["+actual_value+"]", False, 'warning'         
+  
+    if check_name == "Error Messages in hostd.log":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        elif int(actual_value) > 50:
+            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
+        else:
+            return  "Total Error Entries are ["+actual_value+"]", False, 'warning' 
+        
+    if check_name == "Error Messages in vmkernel.log":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        elif int(actual_value) > 50:
+            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
+        else:
+            return  "Total Error Entries are ["+actual_value+"]", False, 'warning' 
+        
+    if check_name == "Error Messages in lacp.log":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        elif int(actual_value) > 50:
+            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
+        else:
+            return  "Total Error Entries are ["+actual_value+"]", False, 'warning' 
+        
+                                         
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
@@ -945,8 +993,10 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return  "Host ["+host+"] has BIOS Version["+actual_value+"]", True, 'info'  
         
     if check_name == "VT-Extensions":
-        if actual_value == "Not-Configured" or "SSH Connection Failed":
-            return "Host ["+host+"] has either VT-Extensions Not-Configured or SSH Connection to Host Failed", False, ''
+        if actual_value == "Not-Configured":
+            return "Host ["+host+"] has VT-Extensions is Not-Configured", True, 'alert'
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection to Host Failed", False, ''            
         elif actual_value == "0":
             return  "On host ["+host+"] VT support is not available for this hardware", True, 'alert'                
         elif actual_value == "1":
@@ -954,7 +1004,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "2":
             return  "On host ["+host+"]  VT is available but is currently not enabled in the BIOS", True, 'alert' 
         else:
-            return  "On host ["+host+"] VT support is  available", False, '' 
+            return  "On host ["+host+"] VT support is  available", True, '' 
                            
     if check_name == "NX-1020 Nodes mixed with Other Nodes":
         if actual_value == "Not-Configured" or "SSH Connection Failed":
