@@ -61,6 +61,7 @@ jQuery(document).ready(function() {
 				$(value).parent().removeClass("error");
 				$(".errorMsg").hide();
 				$(".errorMsg").html("");
+				isFormValid = true;
 			}
 		});
 
@@ -100,12 +101,10 @@ jQuery(document).ready(function() {
 	
 	$("a.kickoffBtn").click(function(){
 		var cutomerId = $(".customersTable tr.row_selected td.customerId").text();
-		alert(cutomerId);
 		getCustomerTask(cutomerId);
 	});
 	
 	function getCustomerTask(cutomerId){
-		alert(cutomerId);
 		$.ajax({
 			 type: "GET",
 			 url: "/v1/deployer/customers/"+cutomerId+"/tasks/",
