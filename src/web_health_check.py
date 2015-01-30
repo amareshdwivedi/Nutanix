@@ -45,7 +45,7 @@ urls = (
     '/run', 'runChecks',
     '/refresh', 'refresh',
     '/', 'index',
-    '/GeneratePdf/','reportGenerator.GeneratePdf'
+    '/GeneratePdf/','reportGenerator.GeneratePdf',
     '/home/', 'home'
 
 	)
