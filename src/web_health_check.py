@@ -22,7 +22,7 @@ from pyVim.connect import SmartConnect, Disconnect
 from requests.exceptions import ConnectionError
 from deployer_web import initiate_deployment
 import api
-
+import reportGenerator
 
 
 if (len(sys.argv) > 2):
@@ -45,6 +45,7 @@ urls = (
     '/run', 'runChecks',
     '/refresh', 'refresh',
     '/', 'index',
+    '/GeneratePdf/','reportGenerator.GeneratePdf'
     '/home/', 'home'
 
 	)
