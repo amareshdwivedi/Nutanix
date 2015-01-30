@@ -599,7 +599,17 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif status == "PASS":
             return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", True, 'info'
         else:
-            return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", False, 'info'                    
+            return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", False, 'info'  
+
+    if check_name == "Error Messages in vpxd.log":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        elif int(actual_value) > 50:
+            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
+        else:
+            return  "Total Error Entries are ["+actual_value+"]", False, 'warning'                          
 
 
               
@@ -1007,8 +1017,10 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return  "On host ["+host+"] VT support is  available", True, '' 
                            
     if check_name == "NX-1020 Nodes mixed with Other Nodes":
-        if actual_value == "Not-Configured" or "SSH Connection Failed":
-            return  actual_value, False,'' 
+        if actual_value == "Not-Configured":
+            return  actual_value, False,''
+        elif actual_value == "SSH Connection Failed":
+            return  actual_value, False,''
         elif status == "FAIL":
             if message is not None :
                  messageList = message.split(']')
@@ -1018,8 +1030,10 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
              return actual_value, False,''       
 
     if check_name == "NX-1020 Maximum Cluster Size":
-        if actual_value == "Not-Configured" or "SSH Connection Failed":
-            return  actual_value, False,'' 
+        if actual_value == "Not-Configured":
+            return  actual_value, False,''
+        elif actual_value == "SSH Connection Failed":
+            return  actual_value, False,''
         elif status == "FAIL":
             if message is not None :
                  messageList = message.split(']')
@@ -1029,8 +1043,10 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
              return actual_value, False,'' 
          
     if check_name == "NX-6000 Nodes mixed with NX-2000 Nodes":
-        if actual_value == "Not-Configured" or "SSH Connection Failed":
-            return  actual_value, False,'' 
+        if actual_value == "Not-Configured":
+            return  actual_value, False,''
+        elif actual_value == "SSH Connection Failed":
+            return  actual_value, False,''
         elif status == "FAIL":
             if message is not None :
                  messageList = message.split(']')
@@ -1040,24 +1056,28 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
              return actual_value, False,'' 
          
     if check_name == "NX-1050 Maximum Cluster Size":
-        if actual_value == "Not-Configured" or "SSH Connection Failed":
-            return  actual_value, False,'' 
+        if actual_value == "Not-Configured":
+            return  actual_value, False,''
+        elif actual_value == "SSH Connection Failed":
+            return  actual_value, False,''
         elif status == "FAIL":
             if message is not None :
                  messageList = message.split(']')
                  cluster_string = messageList[0]
-            return  cluster_string + "]" + " all Nodes are connected to 1Gbps network - consider 10Gbps connectivity for this cluster", True, 'alert' 
+            return  cluster_string + "]" + " Nodes are connected to 1Gbps network - consider 10Gbps connectivity for this cluster", True, 'alert' 
         else:
              return actual_value, False,'' 
          
     if check_name == "NX-1050 Nodes mixed with Other Nodes":
-        if actual_value == "Not-Configured" or "SSH Connection Failed":
-            return  actual_value, False,'' 
+        if actual_value == "Not-Configured":
+            return  actual_value, False,''
+        elif actual_value == "SSH Connection Failed":
+            return  actual_value, False,''
         elif status == "FAIL":
             if message is not None :
                  messageList = message.split(']')
                  cluster_string = messageList[0]
-            return  cluster_string + "]" + " has NX-1050 mixed with other Nutnaix models and all Hosts are connected over 1Gbps which is unsupported configuration.", True, 'alert' 
+            return  cluster_string + "]" + " has NX-1050 mixed with other Nutnaix models and Hosts are connected over 1Gbps which is unsupported configuration.", True, 'alert' 
         else:
              return actual_value, False,''                            
 
