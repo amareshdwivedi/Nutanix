@@ -44,10 +44,21 @@
 </script>
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, maximum-scale=1">
+	<script type="text/javascript">
+$$(window).load(function() {
+	$$(".pageloader").fadeOut("slow");
+})
+</script>
 </head>
 
 <body>
-
+ <div class="pageloader">
+        <div class="col-sm-4 col-xs-12 loadingwrap">
+            <i class=" fa fa-spin fa-cog loadingwrap1"></i> 
+            <i class=" fa fa-spin fa-spin-reverse fa-cog loadingwrap2"></i>
+            <i class=" fa fa-spin fa-cog loadingwrap3"></i>
+        </div>
+    </div>
 	<!--Header-->
 
 	<header>
@@ -70,11 +81,11 @@
 
 	<!--Deployer Container-->
 
-	<div id="deployer_container">
-		<div id="mainTabContainer">
+	<div id="deployer_container" class="no-padding">
+		<div id="mainTabContainer" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
 			<!--Primary Navigation-->
 
-			<nav id="primary_nav" >
+			<nav id="primary_nav" class="col-lg-1 col-md-1 col-sm-12 col-xs-12  no-margin no-padding">
 				<ul>
 					<li class="active"><a href="#kickoff"><i
 							class="fa fa-home fa-2x"></i><br />Kick off</a></li>
@@ -85,13 +96,13 @@
 					<li class="nav_typography"><a href="#postdeploy"><i
 							class="fa fa-heart fa-2x"></i><br />Post Deploy</a></li>
 					<li class="nav_uielements"><a href="#knowledgeTransfer"><i
-							class="fa fa-book fa-2x"></i><br />Knowledge <br />Transfer</a></li>
+							class="fa fa-book fa-2x"></i><br />Knowledge Transfer</a></li>
 				</ul>
 			</nav>
 
 			<!--Main Content-->
 
-			<section class="main_content">
+			<section class="main_content col-lg-11 col-md-11 col-sm-12 col-xs-12 no-margin no-padding">
 				<!-------------------------------------------KickOff Start----------------------------------------------->
 				<div id="kickoff">
 					<!--Secondary Navigation-->
@@ -167,6 +178,7 @@
 									<div class="mainBody_container">
 										<div class="dataTables_wrapper">
 											<div class="antiscroll-inner">
+												<input type="hidden" value="" id="customerId"/>
 												<table class="customersTable dataTable" cellspacing="0"
 													cellpadding="0" border="0" style="width: 100%;">
 													<thead>
@@ -256,7 +268,7 @@
 								<li class="disabled"><a href="#preNetworking"><span class="fa fa-globe"></span>Networking</a></li>
 								<li class="disabled"><a href="#preCredentials"><span class="fa fa-key"></span>Credentials</a></li>
 								<li class="disabled"><a href="#preStorage"><span class="fa fa-database"></span>Storage</a></li>
-								<!--<li class="disabled"><a href="#preNotification" class="step-5"><span class="fa fa-comments" ></span>Notification</a></li>-->
+								<li class="disabled"><a href="#preDeployerinfra" class="step-5"><span class="fa fa-comments" ></span>Deployer Infrastructure</a></li>
 								<li class="disabled"><a href="#preInfra"><span class="fa fa-sitemap"></span>vCenter</a></li>
 							</ul>
 						</div>
@@ -280,7 +292,7 @@
 													Cluster Shared IP
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.51" id="externalIP" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -288,16 +300,38 @@
 													Node RAM 
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="24" id="node_ram" class="form-control form-font"/>
 												</div>
 											</div>
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+													Cluster Init Successful
+												</label>
+												<div class="form-group predeployForm">
+													<input type="text" value="" id="cluster_init_successful" class="form-control form-font"/>
+												</div>
+											</div>											
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+													Cluster Name
+												</label>
+												<div class="form-group predeployForm">
+													<input type="text"  value="gso-cluster-2-IaaS" id="cluster_name" class="form-control form-font"/>
+												</div>
+											</div>	
+											
 											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
 												<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label">
 													<span class="blockHead">Blocks</span>
 												</label>
 											</div>
-											<div id="block-0" class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding blockContainer">
+											<div id="block-1" class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding blockContainer">
 												<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label subLevelHead">
+													<span class="accordionIcons">
+														<a class="accordion-section-title minus" href="#accordion-1">
+															<i class="fa fa-minus-square"></i>
+														</a>
+													</span>
 													<span class="blockName">Block 1</span>
 													<span class="blockIcons">
 														<a href="#." class="addBlock">
@@ -308,9 +342,135 @@
 														</a>
 													</span>
 												</label>
-												<div id="node-1" class="col-lg-12 col-sm-12 col-xs-12 no-margin nodeContainer">
+												<div id="accordion-1" class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding nodeWrapper accordion-section-content">
+												<div id="node-1" name="node-1" class="col-lg-12 col-sm-12 col-xs-12 no-margin nodeContainer">
+													<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label subLevelHead">
+														<span class="nodeName">Node 1</span>
+													</label>
+													<div class="col-lg-12 col-sm-12 col-xs-12 no-margin sublevelContent">
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																IPMI Mac
+															</label>
+															<div class="form-group predeployForm">
+																<input type="text" value="00:25:90:da:fe:08" id="ipmimac" class="form-control form-font"/>
+															</div>
+														</div>
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																Image Successful
+															</label>
+															<div class="form-group predeployForm">
+																<input type="text" id="image_successful" class="form-control form-font"/>
+															</div>
+														</div>
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																Hypervisor Hostname
+															</label>
+															<div class="form-group predeployForm">
+																<input type="text" value="NTNX-Block-1-A" id="hyperversionhostname" class="form-control form-font"/>
+															</div>
+														</div>														
+														
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																IPV6 Address
+															</label>
+															<div class="form-group predeployForm">
+																<input type="text" value="" id="ipv6_address" class="form-control form-font"/>
+															</div>
+														</div>
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																IPMI Configured
+															</label>
+															<div class="form-group predeployForm">
+																<select id="ipmi_configured" class="form-control form-font">
+																	<option value="true" >True</option>
+																	<option value="false" >False</option>
+																</select>
+															</div>
+														</div>
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																Image Now
+															</label>
+															<div class="form-group predeployForm">
+																<select id="image_now" class="form-control form-font">
+																	<option value="true" >True</option>
+																	<option value="false" >False</option>
+																</select>
+															</div>
+														</div>
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																CVM IP
+															</label>
+															<div class="form-group predeployForm">
+																<input type="text" value="10.1.222.63" id="cvmip" class="form-control form-font"/>
+															</div>
+														</div>
+															<input type="hidden" id="nodePosition" value="A" />
+
+														<!-- <div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																Node Position 
+															</label>
+															<div class="form-group predeployForm">
+																<span class="fl"><input type="radio" id="a" name="nodePosition" value="A"/><span class="radiotext">A</span></span>
+																<span class="fl"><input type="radio" id="b" name="nodePosition" value="B"/><span class="radiotext">B</span></span>
+																<span class="fl"><input type="radio" id="c" name="nodePosition" value="C"/><span class="radiotext">C</span></span>
+															</div>
+														</div>
+														-->
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																IPMI IP 
+															</label>
+															<div class="form-group predeployForm">
+																<input type="text" value="10.1.222.23" id="ipmiip" class="form-control form-font"/>
+															</div>
+														</div>
+
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																Hypervisor IP 
+															</label>
+															<div class="form-group predeployForm">
+																<input type="text" value="10.1.222.83" id="hyperversionip" class="form-control form-font"/>
+															</div>
+														</div>
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																Cluster Member 
+															</label>
+															<div class="form-group predeployForm">
+																<select id="cluster_member" class="form-control form-font">
+																	<option value="true">True</option>
+																	<option value="false">False</option>
+																</select>
+															</div>
+														</div>
+														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																IPMI Configured Now 
+															</label>
+
+															<div class="form-group predeployForm">
+																<select id="ipmi_configure_now" class="form-control form-font">
+																	<option value="true">True</option>
+																	<option value="false">False</option>
+																</select>
+															</div>
+														</div>
+													
+													</div>
+												</div>
+												
+												<div id="node-2" name="node-2" class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding nodeContainer">
 												<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label subLevelHead">
-													<span class="blockName">Node 1</span>
+													<span class="nodeName">Node 2</span>
 												</label>
 												<div class="col-lg-12 col-sm-12 col-xs-12 no-margin sublevelContent">
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -318,7 +478,7 @@
 															IPMI Mac
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="00:25:90:da:fe:00" id="ipmimac" class="form-control form-font"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -326,15 +486,25 @@
 															Image Successful
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text"  id="image_successful" class="form-control form-font"/>
 														</div>
 													</div>
+												
+													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+															Hypervisor Hostname
+														</label>
+														<div class="form-group predeployForm">
+															<input type="text" value="NTNX-Block-1-B" id="hyperversionhostname" class="form-control form-font"/>
+														</div>
+													</div>														
+													
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															IPV6 Address
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="" id="ipv6_address" class="form-control form-font"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -342,9 +512,9 @@
 															IPMI Configured
 														</label>
 														<div class="form-group predeployForm">
-															<select id="ipmiConfigured" class="form-control form-font">
-																<option>True</option>
-																<option>False</option>
+															<select id="ipmi_configured" class="form-control form-font">
+																<option value="true" >True</option>
+																<option value="false" >False</option>
 															</select>
 														</div>
 													</div>
@@ -353,9 +523,9 @@
 															Image Now
 														</label>
 														<div class="form-group predeployForm">
-															<select id="imageNow" class="form-control form-font">
-																<option>True</option>
-																<option>False</option>
+															<select id="image_now" class="form-control form-font">
+																<option value="true" >True</option>
+																<option value="false" >False</option>
 															</select>
 														</div>
 													</div>
@@ -364,73 +534,67 @@
 															CVM IP
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="10.1.222.64" id="cvmip" class="form-control form-font"/>
 														</div>
 													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<!--<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															Node Position 
 														</label>
 														<div class="form-group predeployForm">
 															<span class="fl"><input type="radio" id="a" name="nodePosition" value="A"/><span class="radiotext">A</span></span>
-															<span class="fl"><input type="radio" id="b" name="nodePosition" value="B"/><span class="radiotext">A</span></span>
-															<span class="fl"><input type="radio" id="c" name="nodePosition" value="C"/><span class="radiotext">A</span></span>
+															<span class="fl"><input type="radio" id="b" name="nodePosition" value="B"/><span class="radiotext">B</span></span>
+															<span class="fl"><input type="radio" id="c" name="nodePosition" value="C"/><span class="radiotext">C</span></span>
 														</div>
-													</div>
+													</div> -->
+													<input type="hidden" id="nodePosition" value="B" />
+
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															IPMI IP 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="10.1.222.24" id="ipmiip" class="form-control form-font"/>
 														</div>
 													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															CVG RAM 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
+
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															Hypervisor IP 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="10.1.222.84" id="hyperversionip" class="form-control form-font"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															Cluster Member 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																Cluster Member 
+															</label>
+															<div class="form-group predeployForm">
+																<select id="cluster_member" class="form-control form-font">
+																	<option value="true">True</option>
+																	<option value="false">False</option>
+																</select>
+															</div>
 														</div>
-													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															IPMI Configured Now 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<select id="ipmi_configure_now" class="form-control form-font">
+																<option value="true">True</option>
+																<option value="false">False</option>
+															</select>
 														</div>
 													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															IPv6 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
+
 												</div>
 												</div>
 												
-												<div id="node-2" class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding nodeContainer">
+												<div id="node-3" name="node-3" class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding nodeContainer">
 												<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label subLevelHead">
-													<span class="blockName">Node 2</span>
+													<span class="nodeName">Node 3</span>
 												</label>
 												<div class="col-lg-12 col-sm-12 col-xs-12 no-margin sublevelContent">
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -438,7 +602,7 @@
 															IPMI Mac
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="00:25:90:da:fd:fd" id="ipmimac" class="form-control form-font"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -446,25 +610,36 @@
 															Image Successful
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text"  id="image_successful" class="form-control form-font"/>
 														</div>
 													</div>
+													
+													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+															Hypervisor Hostname
+														</label>
+														<div class="form-group predeployForm">
+															<input type="text" value="NTNX-Block-1-C" id="hyperversionhostname" class="form-control form-font"/>
+														</div>
+													</div>														
+													
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															IPV6 Address
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="" id="ipv6_address" class="form-control form-font"/>
 														</div>
 													</div>
+
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															IPMI Configured
 														</label>
 														<div class="form-group predeployForm">
-															<select id="ipmiConfigured" class="form-control form-font">
-																<option>True</option>
-																<option>False</option>
+															<select id="ipmi_configured" class="form-control form-font">
+																<option value="true" >True</option>
+																<option value="false" >False</option>
 															</select>
 														</div>
 													</div>
@@ -473,198 +648,76 @@
 															Image Now
 														</label>
 														<div class="form-group predeployForm">
-															<select id="imageNow" class="form-control form-font">
-																<option>True</option>
-																<option>False</option>
+															<select id="image_now" class="form-control form-font">
+																<option value="true" >True</option>
+																<option value="false" >False</option>
 															</select>
 														</div>
 													</div>
+													
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															CVM IP
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="10.1.222.65" id="cvmip" class="form-control form-font"/>
 														</div>
 													</div>
+													<input type="hidden" id="nodePosition" value="C" />
+													<!--
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															Node Position 
 														</label>
 														<div class="form-group predeployForm">
+														
 															<span class="fl"><input type="radio" id="a" name="nodePosition" value="A"/><span class="radiotext">A</span></span>
-															<span class="fl"><input type="radio" id="b" name="nodePosition" value="B"/><span class="radiotext">A</span></span>
-															<span class="fl"><input type="radio" id="c" name="nodePosition" value="C"/><span class="radiotext">A</span></span>
+															<span class="fl"><input type="radio" id="b" name="nodePosition" value="B"/><span class="radiotext">B</span></span>
+															<span class="fl"><input type="radio" id="c" name="nodePosition" value="C"/><span class="radiotext">C</span></span>
 														</div>
 													</div>
+													-->
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															IPMI IP 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="10.1.222.25" id="ipmiip" class="form-control form-font"/>
 														</div>
 													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															CVG RAM 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
+											
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															Hypervisor IP 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<input type="text" value="10.1.222.85" id="hyperversionip" class="form-control form-font"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															Cluster Member 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+																Cluster Member 
+															</label>
+															<div class="form-group predeployForm">
+																<select id="cluster_member" class="form-control form-font">
+																	<option value="true">True</option>
+																	<option value="false">False</option>
+																</select>
+															</div>
 														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															IPMI Configured Now 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															IPv6 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-												</div>
-												</div>
-												
-												<div id="node-3" class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding nodeContainer">
-												<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label subLevelHead">
-													<span class="blockName">Node 3</span>
-												</label>
-												<div class="col-lg-12 col-sm-12 col-xs-12 no-margin sublevelContent">
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															IPMI Mac
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															Image Successful
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															IPV6 Address
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															IPMI Configured
-														</label>
-														<div class="form-group predeployForm">
-															<select id="ipmiConfigured" class="form-control form-font">
-																<option>True</option>
-																<option>False</option>
-															</select>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															Image Now
-														</label>
-														<div class="form-group predeployForm">
-															<select id="imageNow" class="form-control form-font">
-																<option>True</option>
-																<option>False</option>
-															</select>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															CVM IP
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															Node Position 
-														</label>
-														<div class="form-group predeployForm">
-															<span class="fl"><input type="radio" id="a" name="nodePosition" value="A"/><span class="radiotext">A</span></span>
-															<span class="fl"><input type="radio" id="b" name="nodePosition" value="B"/><span class="radiotext">A</span></span>
-															<span class="fl"><input type="radio" id="c" name="nodePosition" value="C"/><span class="radiotext">A</span></span>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															IPMI IP 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															CVG RAM 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															Hypervisor IP 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															Cluster Member 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 															IPMI Configured Now 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
+															<select id="ipmi_configure_now" class="form-control form-font">
+																<option value="true">True</option>
+																<option value="false">False</option>
+															</select>
 														</div>
 													</div>
-													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-														<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-															IPv6 
-														</label>
-														<div class="form-group predeployForm">
-															<input type="text" value="" id="clusterName" class="form-control form-font"/>
-														</div>
-													</div>
+
+												</div>
 												</div>
 												</div>
 											</div>
@@ -688,28 +741,30 @@
 									<div class="widget_body">
 										<!--Form fields-->
 										<div class="mainBody_container col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+											<!--<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													IPMI IP	
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="" id="ipmiip" class="form-control form-font"/>
 												</div>
 											</div>
+											
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													CVM IP
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="" id="cvmip" class="form-control form-font"/>
 												</div>
 											</div>
+											-->
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Hypervisor Netmask
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="255.255.255.0" id="HyperversionNM" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -717,7 +772,7 @@
 													IPMI Netmask 		
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="255.255.255.0" id="IPNM" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -725,7 +780,7 @@
 													CVM Netmask	
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="255.255.255.0" id="CvmNM" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -733,7 +788,7 @@
 													Hypervisor Gateway
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.1" id="HyperversionGateway" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -741,7 +796,7 @@
 													IPMI Gateway
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.1" id="IPMGateway" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -749,7 +804,7 @@
 													CVM Gateway
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.1" id="Cvmgateway" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -757,7 +812,7 @@
 													Hypervisor NTP Server
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.107" id="HYPERVERSIONCVMNTPSERVER" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -765,7 +820,7 @@
 													CVM NTP Server
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.107" id="CVMNTPSERVER" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -773,7 +828,7 @@
 													Hypervisor Nameserver
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.107" id="HyperverNameServer" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -781,7 +836,7 @@
 													CVM DNS Server
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.107" id="CVMDNSSERVER" class="form-control form-font"/>
 												</div>
 											</div>
 											
@@ -810,7 +865,7 @@
 													IPMI User
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="ADMIN" id="IPMIUsernanme" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -818,15 +873,23 @@
 													IPMI Password
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="ADMIN" id="IPMIPass" class="form-control form-font"/>
 												</div>
 											</div>
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+													Hypervisor Password
+												</label>
+												<div class="form-group predeployForm">
+													<input type="text" value="nutanix/4u" id="hypervisorpass" class="form-control form-font"/>
+												</div>
+											</div>											
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Prism User
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="admin" id="pusername" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -834,7 +897,7 @@
 													Prism Password
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="admin" id="ppassword" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -842,7 +905,7 @@
 													vCenter Client User
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="root" id="v_center_user" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -850,7 +913,7 @@
 													vCenter Password
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="vmware" id="v_center_password" class="form-control form-font"/>
 												</div>
 											</div>
 										</div>
@@ -878,7 +941,7 @@
 													URL
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="https://10.1.222.63:9440/PrismGateway/services/rest/" id="restURL" class="form-control form-font"/>
 												</div>
 											</div>
 											
@@ -887,7 +950,7 @@
 													Container
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="Test_Container" id="container_name" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -895,7 +958,7 @@
 													Storage Pool Name
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="Test_StoragePool" id="storagepool_name" class="form-control form-font"/>
 												</div>
 											</div>
 											
@@ -909,23 +972,70 @@
 								</div>
 							</div>
 						</div>
-						<!--<div id="preNotification" class="tab-content">
+						<div id="preDeployerinfra" class="tab-content">
 							<div class="one_wrap fl_left">
 								<div class="widget">
 									<div class="widget_title">
 										<span class="fa fa-comments"></span>
-										<h5>Notification</h5>
+										<h5>Deployment Infrastructure</h5>
 									</div>
 									<div class="widget_body">
 										<div class="mainBody_container col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-													Notifications
+													Hypervisor  ISO
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<select id="hypervisor_iso" class="form-control form-font">
+														<option value="VMware-VMvisor-Installer-5.5.0-1331820.x86_64.iso"> VMware-VMvisor-Installer-5.5.0-1331820.x86_64.iso</option>
+													</select>
 												</div>
 											</div>
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+													Phonix  ISO
+												</label>
+												<div class="form-group predeployForm">
+													<select id="phonix_iso" class="form-control form-font">
+														<option value="phoenix-1.3_ESX_NOS-4.0.1-stable.iso"> phoenix-1.3_ESX_NOS-4.0.1-stable.iso</option>
+													</select>
+												</div>
+											</div>											
+
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+													Use Foundation IPS
+												</label>
+												<div class="form-group predeployForm">
+													<select id="foundation_ip" class="form-control form-font">
+														<option value="true">True</option>
+														<option value="false">False</option>
+													</select>
+												</div>
+											</div>	
+											
+											
+											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
+												<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+														Foundation Server IP
+													</label>
+													<div class="form-group predeployForm">
+														<input type="text" value="10.1.222.146" id="foundation_server_ip" class="form-control form-font"/>
+													</div>
+												</div>
+											</div>		
+											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
+												<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+														Redundancy Factor
+													</label>
+													<div class="form-group predeployForm">
+														<input type="text" value="null" id="redundancy_factor" class="form-control form-font"/>
+													</div>
+												</div>
+											</div>												
+											
 											
 										</div>
 										
@@ -936,31 +1046,24 @@
 									</div>
 								</div>
 							</div>
-						</div>-->
+						</div>
 						<div id="preInfra" class="tab-content">
 							<div class="one_wrap fl_left">
 								<div class="widget">
 									<div class="widget_title">
 										<span class="fa fa-sitemap"></span>
-										<h5>Deployment Infrastructure</h5>
+										<h5>Vcenter</h5>
 									</div>
 									<div class="widget_body">
 										<!--Form fields-->
 										<div class="mainBody_container col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-														Foundation Server IP
-													</label>
-													<div class="form-group predeployForm">
-														<input type="text" value="" id="clusterName" class="form-control form-font"/>
-													</div>
-												</div>
+
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Existing vCenter Server IP
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="10.1.222.184" id="v_center_host" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -968,7 +1071,7 @@
 													User
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="root" id="v_center_user" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -976,25 +1079,16 @@
 													Password
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="nutanix/4u" id="v_center_vm_password" class="form-control form-font"/>
 												</div>
 											</div>
-											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
-												<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-														Foundation Server IP
-													</label>
-													<div class="form-group predeployForm">
-														<input type="text" value="" id="clusterName" class="form-control form-font"/>
-													</div>
-												</div>
-											</div>
+
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Data Center
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="Test_DataCenter" id="v_center_datacenter" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -1002,7 +1096,7 @@
 													Data Center If Exist
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="true" id="v_center_datacenter_reuse" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -1010,7 +1104,7 @@
 													Cluster 
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="Test_Cluster"  id="v_center_cluster" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -1018,13 +1112,23 @@
 													Cluster If Exist
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="clusterName" class="form-control form-font"/>
+													<input type="text" value="true"  id="v_center_cluster_reuse" class="form-control form-font"/>
 												</div>
 											</div>
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+													Port
+												</label>
+												<div class="form-group predeployForm">
+													<input type="text" value="443" id="vcenter_port" class="form-control form-font"/>
+												</div>
+											</div>
+											
 										</div>
 										
 										<div class="quick_actions"> 
-										  <a class="btn nutanix-form-btn submit" name="submit" style="float:right;width: 60px;text-align: center;" href="#">Submit</a> 
+										  <input type="hidden" id="task_id" class="taskid" value=""/>
+										  <a class="btn nutanix-form-btn submit" id="submit_all" name="submit" style="float:right;width: 60px;text-align: center;" href="#">Submit</a> 
 										  <a class="btn btn-default default-font back" style="float:right;width: 60px;text-align: center;" href="#">Back</a> 
 										</div>
 									</div>
@@ -1065,7 +1169,90 @@
 					<!--Content Wrap-->
 
 					<div class="content_wrap">
-						Deploy Content
+						<div class="mainBody_container col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
+                            <div class="col-lg-12  col-md-12 col-sm-12 col-xs-12 no-margin no-padding startDeployment">
+                                <input type="button" value="Begin Deployment" class="startDeploymentBtn"/>
+                            </div>
+                            
+                            <div class="col-lg-12  col-md-12 col-sm-12 col-xs-12 no-margin no-padding deploymentProgress">
+                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
+                                    <div class="statusContainer">
+                                        <div class="progressHeading">
+                                            <h3>Foundation</h3>
+                                        </div>
+                                        <div class="progressStatus">
+                                            <div class="progressStatusMessage">
+                                                <h2 class="progressPercentage">100%</h2>
+                                                <div class="statusMessage">
+                                                    Setup Completed...
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="taskCompleted">
+                                            <i class="fa fa-check-square"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
+                                    <div class="statusContainer">
+                                        <div class="progressHeading">
+                                            <h3>Nutanix Configuration</h3>
+                                        </div>
+                                        <div class="progressStatus">
+                                            <div class="progressStatusMessage">
+                                                <h2 class="progressPercentage">30%</h2>
+                                                <div class="statusMessage">
+                                                    Running Config...
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="progressActiveSec">
+                                                
+                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
+                                    <div class="statusContainer">
+                                        <div class="progressHeading">
+                                            <h3>vCenter</h3>
+                                        </div>
+                                        <div class="progressStatus">
+                                            <div class="progressStatusMessage">
+                                                <h2 class="progressPercentage">10%</h2>
+                                                <div class="statusMessage">
+                                                    Installing...
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="progressActiveSec">
+                                                
+                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
+                                    <div class="statusContainer">
+                                        <div class="progressHeading">
+                                            <h3>Vsphere</h3>
+                                        </div>
+                                        <div class="progressStatus">
+                                            <div class="progressStatusMessage error">
+                                                <h2 class="progressPercentage">48%</h2>
+                                                <div class="statusMessage">
+                                                    System Error...
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                         <div class="taskError">
+                                            <i class="fa fa-exclamation-triangle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 					</div>
 				</div>
 				<!-------------------------------------------Deploy End----------------------------------------------->
@@ -1151,7 +1338,7 @@
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<a class="nutanix-close"> <span
+					<a class="nutanix-close" data-dismiss="modal"> <span
 						aria-hidden="true"> <i class="fa fa-times"></i>
 					</span>
 					</a>
@@ -1197,7 +1384,7 @@
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<a class="nutanix-close"> <span
+					<a class="nutanix-close" data-dismiss="modal"> <span
 						aria-hidden="true"> <i class="fa fa-times"></i>
 					</span>
 					</a>
@@ -1220,6 +1407,28 @@
 						type="button">OK</button>
 					<button data-dismiss="modal" aria-hidden="true"
 						class="btn btn-default default-font" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="commonModal" tabindex="-1"
+		role="dialog" aria-labelledby="commonModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<a data-dismiss="modal" class="nutanix-close"> <span
+						aria-hidden="true"> <i class="fa fa-times"></i>
+					</span>
+					</a>
+					<h4 class="modal-title" id="commonModalLabel"></h4>
+				</div>
+				<div class="modal-body">
+					
+				</div>
+				<div class="modal-footer">
+					<button data-dismiss="modal" aria-hidden="true"
+						class="btn btn-default default-font" type="button">Ok</button>
 				</div>
 			</div>
 		</div>

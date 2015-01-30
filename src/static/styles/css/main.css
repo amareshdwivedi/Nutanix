@@ -24,7 +24,62 @@
   font-style: normal;
 }
 
+.pageloader {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	background: #000;
+    opacity:0.9;
+}
+.fa-spin.fa-spin-reverse {
+  -moz-animation-direction: reverse;
+  -o-animation-direction: reverse;
+  -webkit-animation-direction: reverse;
+  animation-direction: reverse;
+}
 
+.loadingwrap {
+  width: 9em;
+  height: 9em;
+  font-size: 1.3em;
+  color: lightgrey;
+  background: transparent;
+  position: relative;
+  top: 25%;
+  left:45%;
+}
+  
+.loadingwrap > i {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    font-size: 4em;
+    text-align: center;
+    xbackground: pink;
+    position: absolute;
+      top: 0;
+      left: 0;
+    -o-animation-duration: 3s;
+    -webkit-animation-duration: 3s;
+    animation-duration: 3s;
+  }
+  
+  .loadingwrap > i:nth-child(2) {
+    font-size: 6em;
+    xbackground: orange;
+      top: 0.4em;
+      left: 0.25em;
+  }
+    
+  .loadingwrap > i:nth-child(3) {
+    font-size: 3em;
+    xbackground: beige;
+      top: 0.2em;
+      left: 1.7em;
+  }
 body{ 
 	background:url(../../images/pat_bg.png) #515b5e; 
 	font-family:ProximaNovaSoftRegular;
@@ -389,10 +444,11 @@ dl.customer_info dd a.user_messages span{
 /*====MAIN CONTENT====*/
 section.main_content{
 	overflow:visible;
-	margin-left:93px;
-	background:url(../../images/section_bg.png) repeat-y left center #ebebeb;
+	/*margin-left:93px;*/
+    background:url(../../images/section_bg.png) repeat-y left center #ebebeb;
 	border-radius:4px 3px 3px 3px;
-	min-height:750px;
+	min-height:500px;
+    padding-bottom: 15px;
 }
 
 .content_wrap{
@@ -1353,7 +1409,18 @@ background-position:center;
 
 /*CHANGES v1.3*/
 a.res_icon, #responsive_nav{ display:none;}
-
+@media only screen and (min-width: 1080px) {.ui-tabs #primary_nav .ui-tabs-nav li{float:right}}
+@media only screen and (min-width:402px) and (max-width: 780px)  {
+ .nav#primary_nav{
+    }
+    nav#primary_nav ul li{ width:auto; margin-bottom: 0;}
+    nav#primary_nav ul li a{ width:auto; padding-right: 15px; padding-left: 15px;}
+    .ui-tabs #primary_nav .ui-tabs-nav li{ clear:none; float:left;width:auto;}
+    .ui-tabs #primary_nav .ui-tabs-nav{ height:78px;padding-left: 15px;}
+    nav#primary_nav ul li.ui-state-active{ background-image: none; background-color: #CACECF;border-radius: 5px 5px 0 0;}
+    .deploymentProgress .col-lg-4{ margin-left: 1.5%; margin-right: 1.5%;}
+	.ui-tabs #primary_nav .ui-tabs-nav li{  float:left}
+}
 /*RESPONSIVE*/
 @media only screen and (max-width: 1080px) {
 
@@ -1363,6 +1430,7 @@ a.res_icon, #responsive_nav{ display:none;}
 	.form_fields_container li div.form_input{
 	width:65%;	
 	}
+    
 }
 @media only screen and (max-width: 780px) {
 
@@ -1396,7 +1464,17 @@ a.res_icon, #responsive_nav{ display:none;}
 	.secondary_nav ul li a span{
 		display:none;
 	}
-	
+    
+    
+    .nav#primary_nav{
+    }
+    nav#primary_nav ul li{ width:auto; margin-bottom: 0;}
+    nav#primary_nav ul li a{ width:auto; padding-right: 15px; padding-left: 15px;}
+    .ui-tabs #primary_nav .ui-tabs-nav li{ clear:none; float:left;width:auto;}
+    .ui-tabs #primary_nav .ui-tabs-nav{ height:78px;padding-left: 15px;}
+    nav#primary_nav ul li.ui-state-active{ background-image: none; background-color: #CACECF;border-radius: 5px 5px 0 0;}
+    .deploymentProgress .col-lg-4{ margin-left: 1.5%; margin-right: 1.5%;}
+	.ui-tabs #primary_nav .ui-tabs-nav li{  float:left}
 }
 @media only screen and (max-width: 420px) {
 	
@@ -1944,7 +2022,7 @@ table.dataTable tr.row_selected {
 .ui-tabs #primary_nav .ui-tabs-nav{
     background: none; border:0; border-radius: 0;
 }
-.ui-tabs #primary_nav .ui-tabs-nav li{ padding:2px 9px 2px 1px !important; display:block}
+.ui-tabs #primary_nav .ui-tabs-nav li{ padding:2px 10px 2px 1px !important; display:block;}
 .ui-tabs #primary_nav .ui-tabs-nav li.ui-tabs-selected{
     height: auto;
 }
@@ -1962,12 +2040,14 @@ table.dataTable tr.row_selected {
 .createNewTask .createTaskLink{ color: #fff; text-decoration: none;}
 
 .preDeploy_maincontent .next, .preDeploy_maincontent .submit{ margin-right:40px;}
+.preDeploy_maincontent #preCluster .next{margin-right:0;}
 a.btn-default{ margin-right: 10px; text-decoration: none}
 #preDeploy_secondaryNav ul li a{ cursor: default}
 
+.accordionIcons{ float:left;padding:6px 0 0 10px}
 .blockHead{  font-size:14px; font-weight: 600; padding: 0 0 10px; float:left}
-.blockName{  font-size:13px; font-weight: 600; float:left; padding:5px 10px;}
-.blockIcons{  font-size:13px; font-weight: 600; float:right; margin-right: 20px; margin-bottom:5px;}
+.blockName, .nodeName{  font-size:13px; font-weight: 600; float:left; padding:5px 10px;}
+.blockIcons{  font-size:13px; font-weight: 600; float:right; margin-right: 20px; padding:5px 0;}
 .blockIcons a{ text-decoration: none; margin-left: 5px;}
 .addBlock i{ color:#04B404;}
 .removeBlock i{ color:#FE2E2E}
@@ -1975,5 +2055,134 @@ a.btn-default{ margin-right: 10px; text-decoration: none}
 .nodeContainer{border: 1px solid #eee;
     padding: 0; margin:10px;
     width: 98%;}
-.blockContainer{border: 1px solid #eee;}
+.blockContainer{border: 1px solid #eee; margin-bottom:10px;}
 .sublevelContent{ padding-top:10px;}
+.accordion-section-content {
+    /*display:none;*/
+}
+
+
+
+/*Progress Bar*/
+.startDeployment input.startDeploymentBtn{
+background-color: #59B836;
+    border: 1px solid #59B836;
+    color: #fff;
+    font-family: ProximaNovaSoftSemiBold;
+    font-size: 15px;
+    padding:5px 10px; float: right; cursor: pointer;
+}
+ .browser {
+                background: #E7E7E7;
+                border: 4px solid #E7E7E7;
+                width: 100%;
+                height: 200px;
+                margin: 0 0 10px;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+.browser iframe {
+    border: 0;
+    background: #fff;
+    height: 100%;
+    width: 100%;
+}
+.progressHeading h3{
+    font-size: 18px; margin: 0; padding: 6px 0; text-align: center;color: #99ABAD;
+    font-family: ProximaNovaSoftBold;
+}
+.progressActiveSec::before,
+.progressActiveSec::after {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    display: block;
+    border: 5px solid #fff;
+    border-radius: 50%;
+    content: '';
+}
+
+.progressActiveSec::before {
+    height: 80px;
+    margin-left: -78px;
+    width: 80px;
+    border-right-color: rgba(0, 0, 0, .2);
+    border-left-color: rgba(0, 0, 0, .2);
+    -webkit-animation: pace-theme-corner-indicator-spin 3s linear infinite;
+    animation: pace-theme-corner-indicator-spin 3s linear infinite;
+}
+
+.progressActiveSec::after {
+    bottom: 68px;
+    height: 45px;
+    margin-left: -60px;
+    width: 45px;
+    border-top-color: rgba(0, 0, 0, .2);
+    border-bottom-color: rgba(0, 0, 0, .2);
+    -webkit-animation: pace-theme-corner-indicator-spin 1s reverse  linear infinite;
+    animation: pace-theme-corner-indicator-spin 1s reverse  linear infinite;
+}
+
+@-webkit-keyframes pace-theme-corner-indicator-spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(359deg); }
+}
+@keyframes pace-theme-corner-indicator-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(359deg); }
+}
+
+
+.deploymentProgress .col-lg-4{ margin-left: 8.5%; margin-right: 7.5%;}
+.statusContainer{
+background: #e0e0e0;
+                border: 4px solid #e0e0e0;
+                width: 100%;
+                height: 200px;
+                margin: 0 0 10px;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    position: relative;
+}
+
+.progressStatus{ background: #fff; height: 160px; width: 100%;position: relative}
+.progressHeading{ position: relative}
+.progressStatusMessage{ position: relative;padding: 20px 0 10px 10px; color: #99abad;}
+.progressActiveSec, .taskCompleted, .taskError{
+    border-left: 174px solid transparent;
+    border-top: 160px solid #CDCDCD;
+    height: 0;
+    position: absolute;
+    right: 0;
+    top: 30px;
+    width: 45px;
+}
+.deploymentProgress{ background: #F1F1F1;  padding:10px 0 0 0;}
+.taskCompleted i.fa-check-square{  bottom: 65px;
+    color: #59b836;
+    font-size: 65px;
+    position: absolute;
+    right: 43px;}
+.taskError i.fa-exclamation-triangle{  bottom: 65px;
+    color: #F35556;
+    font-size: 65px;
+    position: absolute;
+    right: 29px;}
+.progressPercentage{ font-size: 32px;font-family: ProximaNovaSoftSemiBold;}
+.statusMessage{ color: #99abad;font-size: 16px;font-family: ProximaNovaSoftSemiBold; top:70px; position: relative}
+.progressStatusMessage.error{color:#FE000B}
+
+/*@media (min-width: 768px) {
+    .nav#primary_nav{
+    }
+    nav#primary_nav ul li{ width:auto; margin-bottom: 0;}
+    nav#primary_nav ul li a{ width:auto; padding-right: 15px; padding-left: 15px;}
+    .ui-tabs #primary_nav .ui-tabs-nav li{ clear:none; float:left;width:auto;}
+    .ui-tabs #primary_nav .ui-tabs-nav{ height:78px;padding-left: 15px;}
+    nav#primary_nav ul li.ui-state-active{ background-image: none; background-color: #CACECF;border-radius: 5px 5px 0 0;}
+    .deploymentProgress .col-lg-4{ margin-left: 1.5%; margin-right: 1.5%;}
+}*/

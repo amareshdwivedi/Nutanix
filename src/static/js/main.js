@@ -466,18 +466,8 @@ jQuery(document).ready(function() {
 	 jQuery(".antiscroll-inner").niceScroll();
 	 
 	 $("#mainTabContainer").tabs();
-	 /*$("#preDeploy_secondaryNav ul a").click(function(event) {
-        event.preventDefault();
-        $(this).parent().addClass("active");
-        $(this).parent().siblings().removeClass("active");
-        var tab = $(this).attr("href");
-        $(".tab-content").not(tab).css("display", "none");
-        $(tab).fadeIn();
-    });*/
-	var preDeployLength = $("#preDeploy_secondaryNav ul li").length;
-	/*for(i=0;i<=preDeployLength;i++){
-		 $("#preDeploy_secondaryNav ul li a").addClass("step-"+i+"");
-	}*/
+	 
+    /*Predeployer Tabs Functionlity start*/
 	$('#preDeploy_secondaryNav ul li').each(function(i, e){
 		$("a", this).attr("class", "step-" + i);
 	});
@@ -513,21 +503,23 @@ jQuery(document).ready(function() {
 		$(tab).addClass(previousStep);
     });
 	$("#preDeploy_secondaryNav ul li.disabled a").unbind('click');
+	/*Predeployer tab functionality end*/
 	
-	
+    /*Predeloyer Add/Remove Block functionality starts*/
 	var count = 1;
 	if(count <= 1){
 			$('.removeBlock').hide();
-			var a = $( "#preCluster .widget_body" ).innerHeight();
-			alert(a);
 	}
 	
 	$('.addBlock').live("click",function(){
-		var $clone = $('#block-0').clone();
+		var $clone = $('#block-1').clone();
 		//$clone.find('[id]').each(function(){this.id+='someotherpart'});
-		$clone.attr('id', "block"+(++count));
+		$clone.attr('id', "block-"+(++count));
 		$clone.insertAfter($('[id^=block]:last'));
-		$("#block"+count+"").find(".blockName").html("Block "+count+"");
+		$("#block-"+count+"").find(".blockName").html("Block "+count+"");
+        
+        $("#block-"+count+"").find(".accordion-section-title").removeAttr("href").attr("href", "#accordion-"+count+"");
+        $("#block-"+count+"").find(".accordion-section-content").removeAttr("id").attr("id", "accordion-"+count+"");
 		$('.removeBlock').show();
 	});
 	$(".removeBlock").live("click",function(){
@@ -537,8 +529,26 @@ jQuery(document).ready(function() {
 			$('.removeBlock').hide();
 		}
 	});
-
+    /*Predeployer Add/Remove block functionality Ends*/
 	
+    /*Blocks Expand /Collapse Funtionality Start*/
+    $('.accordion-section-title.plus').live("click",function(e) {
+        var currentAttrValue = $(this).attr('href');
+        $(this).find("i").removeClass('fa-plus-square').addClass('fa-minus-square');
+        $(this).addClass('active minus').removeClass('plus');
+        $(currentAttrValue).slideDown(300).addClass('open'); 
+        e.preventDefault();
+    });
+    
+    $('.accordion-section-title.minus').live("click",function(e) {
+        var currentAttrValue = $(this).attr('href');
+        $(this).find("i").addClass('fa-plus-square').removeClass('fa-minus-square');
+        $(this).removeClass('active minus').addClass('plus');
+        $(currentAttrValue).slideUp(300).removeClass('open'); 
+        e.preventDefault();
+    });
+    /*Blocks Expand/Collapse Functionality Ends*/    
+    
 });
 
 //===== TOOLTIP =====//
