@@ -3,7 +3,7 @@ __author__ = 'subashatreya'
 import abc
 import json
 import os
-from reporters import CheckerResult
+from reporters import CheckerResult,ViewCheckerResult
 
 def check(func):
     def wrapper(*args, **kwargs):

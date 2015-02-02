@@ -3,6 +3,7 @@ import requests
 from web import form
 from checkers.ncc_checker import NCCChecker
 from checkers.vc_checker import VCChecker
+from checkers.view_checker import HorizonViewChecker
 from checkers.base_checker import CheckerBase
 from reporters import DefaultConsoleReporter
 from report_generator import PDFReportGenerator,CSVReportGenerator
@@ -77,7 +78,6 @@ class index:
             checker_module.configure(checker_config, self.reporter)
 
     def GET(self):
-        #print self.checkers
         return render.index(self.checkers)
     
 class config:
@@ -175,6 +175,14 @@ class runChecks:
                 group.append("run_all")
             else:
                 group.append(data['group'])
+                
+        if data['category'] == "view":
+            checkers_list = ['view']
+            run_logs['view'] = {'checks': []}
+            if data['group'] == "Run All":
+                group.append("run_all")
+            else:
+                group.append(data['group'] + " " + "run_all")         
         
         with open("display_json.json", "w") as myfile:
             json.dump(run_logs, myfile)
@@ -186,6 +194,8 @@ class runChecks:
                 result = checker_module.execute(group)
             elif checker == 'ncc':
                 result = checker_module.execute(group)
+            elif checker == 'view':
+                result = checker_module.execute(group)    
             else:        
                 result = checker_module.execute(["run_all"])
             
@@ -207,6 +217,23 @@ class runChecks:
 class refresh:
     def __init__(self):
         pass
+    
+        if data['operation'].split('_')[1] == "view":
+            conf_data = { "view_ip": data['Server'], 
+                          "view_pwd": Security.encrypt(data['Password']), 
+                          "view_user": data['User']
+                          }
+
+            CheckerBase.save_auth_into_auth_config("view",conf_data)
+            status = {"Configuration": "Success"}        
+            return json.dumps(status)        
+    
+        
+        if data['operation'].split('_')[1] == "view":
+            ret , msg = self.checkers['view'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
+            if ret:
+                status['Connection'] = "Success"
+            return json.dumps(status)        
 
     def GET(self):
         try:

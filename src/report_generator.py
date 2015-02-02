@@ -12,7 +12,7 @@ from reportlab.lib.styles import getSampleStyleSheet, StyleSheet1, ParagraphStyl
 from reportlab.platypus import  LongTable, TableStyle, Image, Paragraph, Spacer, Table
 from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.lib.enums import  TA_CENTER
-from report_generator_helper import get_vc_check_actual_output_format 
+from report_generator_helper import get_vc_check_actual_output_format,get_view_severity 
 import copy
 import time
 import os
@@ -195,6 +195,56 @@ def ncc_report(story, checks_list):
     story.append(Spacer(1, 0.3 * inch))
 
 
+# Function to generate report for VIEW
+def view_report(story, checks_list):
+    count = 0
+    for checks in checks_list:
+            count += 1
+            categoryList=""
+            story.append(Spacer(1, 0.01 * inch))
+            categoryListLen = len(checks.get('Category'))
+            for category in checks.get('Category'):
+                categoryList += category
+                if(categoryListLen > 1):
+                    categoryList += ","
+                    categoryListLen = categoryListLen - 1
+                else : 
+                    continue   
+            checks_data = [[str(count) + ". Check: " + checks.get('Name'), "  Category: "+ categoryList]]
+            checks_para_table = Table(checks_data, hAlign='LEFT')
+            checks_para_table.setStyle(TableStyle([('ALIGN', (0, 0), (1, 0), 'LEFT'),
+                                                   ('FONTSIZE', (0, 0), (1, 0), 10.50)]))
+            checks_property_data = [['Actual Result', 'Expected Result','Check Status','Severity']]
+            property_lenght = len(checks.get('Properties'))
+            for properties in checks.get('Properties'):
+               
+                if properties is not None:
+                    xprop_actual,xprop_result, xprop_exp = properties.get('Message').split(":=")
+                    actual_result = xprop_result.split("(Expected")[0]
+                    expected_result = xprop_exp[:-1]
+                    check_status = properties.get('Status')
+                    
+                    severity_info =  get_view_severity(checks.get('Name'))
+
+                    
+                checks_property_data.append([Paragraph(actual_result.replace(';','<br/>'), NormalMessageStyle),
+                                             Paragraph(expected_result.replace(';','<br/>'), NormalMessageStyle),
+                                             Paragraph(check_status, NormalMessageStyle),
+                                             Paragraph(severity_info, NormalMessageStyle)])
+
+            checks_property_table = LongTable(checks_property_data, colWidths=[2.5*inch,2.75*inch,1*inch,0.75*inch])
+            checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (3, 0), colors.fidlightblue),
+                                                       ('ALIGN', (0, 0), (3, property_lenght), 'LEFT'),
+                                        ('INNERGRID', (0, 0), (3, -1), 0.25, colors.black),
+                                        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                        ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                        ('TEXTFONT', (0, 0), (3, 0), 'Times-Roman'),
+                                        ('FONTSIZE', (0, 0), (3, 0), 10)]))
+            
+            story.append(checks_para_table)
+            story.append(Spacer(1, 0.05 * inch))
+            story.append(checks_property_table)
+            story.append(Spacer(1, 0.3 * inch))
     
 def PDFReportGenerator(resultJson,curdir=None):   
     # Adding timestamp to the report name  
@@ -228,6 +278,9 @@ def PDFReportGenerator(resultJson,curdir=None):
         elif checkers == 'vc':
             checkers_table_data = [["vCenter"+ " ["+resultJson[checkers].get('ip')+"] "+" Health Check Results"]]
             checkers_table_data.append([Paragraph("Username:" + resultJson[checkers].get('user'), NormalMessageStyle)])
+        elif checkers == 'view':
+            checkers_table_data = [["VMware View"+ " ["+resultJson[checkers].get('ip')+"] "+" Check Results"]]
+            checkers_table_data.append([Paragraph("Username:" + resultJson[checkers].get('user'), NormalMessageStyle)])        
         
         checkers_table = LongTable(checkers_table_data)
         # style sheet for table
@@ -244,6 +297,8 @@ def PDFReportGenerator(resultJson,curdir=None):
             vc_report(story, resultJson[checkers].get('checks'),resultJson[checkers].get('ip'))
         if checkers == 'ncc':
             ncc_report(story, resultJson[checkers].get('checks'))
+        if checkers == 'view':
+            view_report(story, resultJson[checkers].get('checks'))            
     doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
     
     pdf_report_name = pdffilename.split(os.path.sep)[-1]
@@ -281,25 +336,34 @@ def CSVReportGenerator(resultJson,curdir=None):
                 if isinstance(xcheck['Properties'], list):
                     #rows.append([xchecker, xcheck['Name'],"Overall Status",xcheck['Status'], xcheck['Severity']])
                     for prop in xcheck['Properties']:
-                        xprop_msg, xprop_actual, xprop_exp = prop['Message'].split("=")
-                        if xprop_msg == "":
-                            xprop_msg = check['name']
-                        xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
-
-                        actual_result, is_prop_include , severity =get_vc_check_actual_output_format(xcheck['Name'],
-                                                                                                 xprop_actual,
-                                                                                                 prop['Entity'],
-                                                                                                 prop['Datacenter'],
-                                                                                                 prop['Cluster'],
-                                                                                                 prop['Host'],
-                                                                                                 prop['Status'],
-                                                                                                 prop['Message'],
-                                                                                                 xprop_exp.strip(')'),
-                                                                                                 allChecks['ip'])
-                        if is_prop_include == False:
-                           continue
-                       
-                        rows.append([xchecker, xcheck['Name'],prop['Entity'],prop['Datacenter'],prop['Cluster'],xcheck['Expected_Result'],actual_result,'|'.join(xcheck['Category']), severity])
+                        if(xchecker == "vc"):
+                            xprop_msg, xprop_actual, xprop_exp = prop['Message'].split("=")
+                            if xprop_msg == "":
+                                xprop_msg = check['name']
+                            xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+    
+                            actual_result, is_prop_include , severity =get_vc_check_actual_output_format(xcheck['Name'],
+                                                                                                     xprop_actual,
+                                                                                                     prop['Entity'],
+                                                                                                     prop['Datacenter'],
+                                                                                                     prop['Cluster'],
+                                                                                                     prop['Host'],
+                                                                                                     prop['Status'],
+                                                                                                     prop['Message'],
+                                                                                                     xprop_exp.strip(')'),
+                                                                                                     allChecks['ip'])
+                            if is_prop_include == False:
+                               continue
+                           
+                            rows.append([xchecker, xcheck['Name'],prop['Entity'],prop['Datacenter'],prop['Cluster'],xcheck['Expected_Result'],actual_result,'|'.join(xcheck['Category']), severity])
+                        elif(xchecker == "view"):  
+                            xprop_actual,xprop_result, xprop_exp = prop.get('Message').split(":=")
+                            actual_result = xprop_result.split("(Expected")[0]
+                            expected_result = xprop_exp[:-1]
+                            check_status = prop.get('Status')
+                    
+                            severity_info =  get_view_severity(xcheck['Name'])
+                            rows.append([xchecker, xcheck['Name'],None,None,None,expected_result,actual_result,'|'.join(xcheck['Category']), severity_info])   
                 else:
                     rows.append([xchecker, xcheck['Name'],None,None,None,None,xcheck['Status'],None,None])
         except KeyError:
@@ -314,3 +378,4 @@ def CSVReportGenerator(resultJson,curdir=None):
         csv_writer.writerows(details)
         csv_writer.writerows(rows)
         csv_file.close()
+             

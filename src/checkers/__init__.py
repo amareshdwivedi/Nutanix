@@ -1,5 +1,5 @@
 __author__ = 'subashatreya'
 
-__all__ = ["NCCChecker", "VCChecker"]
+__all__ = ["HorizonViewChecker", "NCCChecker", "VCChecker"]
 
 
