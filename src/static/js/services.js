@@ -68,10 +68,10 @@ jQuery(document).ready(function() {
 
 		if(isFormValid ){
 		  var formData = {}
-			$('#createNewCustomer .form_input input').each(function() {
+			$('#createNewCustomerModel .form_input input').each(function() {
 				formData[$(this).attr('name')] = $(this).val();
 			});
-			$("#createCustomerModal .modal-body").html("");
+			//$("#createCustomerModal .modal-body").html("");
 		  $.ajax({
 			 type: "POST",
 			 url: "/v1/deployer/customers/",
@@ -82,12 +82,16 @@ jQuery(document).ready(function() {
 			 {
 				 if(data.response == 200){
 					 $('#createCustomerModal').modal();
-					 $("#createCustomerModal .modal-body").html(data.message);
+					 $("#createCustomerModal .modal-body .form_fields_container").hide();
+                     $("#createCustomerModal .modal-body .sucessMsg").show();
+                     $("#createCustomerModal .modal-body .sucessMsg").html(data.message);
 					 getCustomers();
 				 }
 				 else{
 					 $('#createCustomerModal').modal();
-					 $("#createCustomerModal .modal-body").html(data.error);
+					 $("#createCustomerModal .modal-body .form_fields_container").hide();
+                     $("#createCustomerModal .modal-body .sucessMsg").show();
+                     $("#createCustomerModal .modal-body .sucessMsg").html(data.error);
 				 }
 			 },
 			 error: function (jqXHR, textStatus, errorThrown)

@@ -452,9 +452,10 @@ jQuery(document).ready(function() {
 	 });	*/
 	 
 	 $(".createCustomerLink").click(function(){
-		 $('#createCustomerModal').modal();
+		 $('#createNewCustomerModel').modal();
 		 $(".createCustomer-form .form_input").removeClass("error");
-				$(".errorMsg").hide();
+         $("#createCustomerModal .modal-body .sucessMsg").hide();
+		$(".errorMsg").hide();
 	 });
 	 
 	 $(".createTaskLink").click(function(){
