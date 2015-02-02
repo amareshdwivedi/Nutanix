@@ -138,6 +138,8 @@ jQuery(document).ready(function() {
                      $("#commonModal .modal-header h4.modal-title").html("Create Task");
 					 $("#commonModal .modal-body").html("Task Created Successfully.");
                      $("#task_id").val(data.task_id);
+                     
+                     $( "#mainTabContainer" ).tabs( "enable", 2 ).tabs( "select", 2 );
 				 }
 				 else{
 					 $('#commonModal').modal();
