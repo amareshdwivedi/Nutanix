@@ -63,7 +63,7 @@ $def with (checkers,msg="")
 				$$("#group_select").append('<option value="recoverability">Recoverability</option>')
 				$$("#group_select").append('<option value="manageability">Manageability</option>')
 				$$("#group_select").append('<option value="configurability">Configurability</option>')
-				$$("#group_select").append('<option value="supportability">Supportability</option>')
+				$$("#group_select").append('<option value="supportability">Supportability</option>')				
 				$$("#group_select").append('<option value="post-install">Post Install</option>')
 				}
 				if(category == "ncc"){
@@ -81,6 +81,8 @@ $def with (checkers,msg="")
 				if(category == "view"){
 					$$("#group_select").empty()
 					$$("#group_select").append('<option value="Run All">Run All</option>')
+					$$("#group_select").append('<option value="availability">Availability</option>')
+					$$("#group_select").append('<option value="performance">Performance</option>')
 				}
 				
 			});
@@ -119,27 +121,34 @@ $def with (checkers,msg="")
 		                        	}
 		                        }
                                 if(category == "view"){
-		                        	jQuery("#logs").empty();
+                                	jQuery("#logs").empty();
 		                        	jQuery("#nccDataHead").remove();
-		                        	jQuery("#nccMainData").remove();                                	
-		                        	jQuery("#logs").append("<div id='viewDataHead' class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
-						        			"<div class='col-lg-10 col-md-10 col-sm-10'>Check</div>"+
-						        			
+		                        	jQuery("#nccMainData").remove();
+		                        	jQuery("#logs").empty();
+		                        	jQuery("#vcMainData").remove();
+		                        	jQuery("#vcDataHead").remove();		                        	
+		                        	for(i=0; i<obj.view.checks.length; i++){
+		                        		jQuery("#logs").append("<h4>"+obj.view.checks[i].Message+"</h4>");
+		                        		jQuery("#logs").append("<div class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
+						        			"<div class='col-lg-5 col-md-5 col-sm-5'>Actual</div>"+
+						        			"<div class='col-lg-5 col-md-5 col-sm-5'>Expected</div>"+
 						        			"<div class='col-lg-2 col-md-2 col-sm-2'>Status</div>"+
 						        		"</div>");
-		                        		jQuery("#logs").append("<div id='viewMainData' class='logsdata col-lg-12 col-md-12 col-sm-12'></div>");
-		                        		for(i=0; i<obj.view.checks.length; i++){
-                                		jQuery("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-10 col-md-10 col-sm-10'>"+obj.view.checks[i].Name+"</div>"+
-		                        		"<div class='col-lg-2 col-md-2 col-sm-2 result"+i+"'>"+obj.view.checks[i].Status+"</div></div>");
-		                        		
-		                        			if(jQuery(".result"+i+"").html()=="PASS"){
-					                        	jQuery(".result"+i+"").addClass("success");
-					                        }else if(jQuery(".result"+i+"").html()=="FAIL"){
-					                        	jQuery(".result"+i+"").addClass("fail");
+		                        		jQuery("#logs").append("<div class='logsdata"+i+" col-lg-12 col-md-12 col-sm-12 logsdata'></div>");
+		                        		for(j=0; j<obj.view.checks[i].Properties.length; j++){
+			                        		jQuery("#logs .logsdata"+i).append("<div class='logsmainData'><div class='col-lg-5 col-md-5 col-sm-5'>"+obj.view.checks[i].Properties[j].Actual.replace(/;/g,'<BR/>')+"</div>"+
+			                        		"<div class='col-lg-5 col-md-5 col-sm-5'>"+obj.view.checks[i].Properties[j].Expected.replace(/;/g,'<br/>')+"</div>"+
+			                        		"<div class='col-lg-2 col-md-2 col-sm-2  result"+i+j+"'>"+obj.view.checks[i].Properties[j].Status+"</div></div>");
+			                        		
+			                        		if(jQuery(".result"+i+j+"").html()=="PASS"){
+					                        	jQuery(".result"+i+j+"").addClass("success");
+					                        }else if(jQuery(".result"+i+j+"").html()=="FAIL"){
+					                        	jQuery(".result"+i+j+"").addClass("fail");
 					                        }
-				                        var h1 = jQuery('#logs')[0].scrollHeight,h2 = jQuery('#logs').height();
-				                        jQuery('#logs').scrollTop(h1 - h2);	
+		                        		}
 		                        	}
+			                        var h1 = jQuery('#logs')[0].scrollHeight,h2 = jQuery('#logs').height();
+			                        jQuery('#logs').scrollTop(h1 - h2);	
 		                        }
                                 if(category == "vc"){
 		                        	jQuery("#logs").empty();
@@ -225,7 +234,7 @@ $def with (checkers,msg="")
 		                jQuery.ajax({
 		                url: '/config',
 		                type: "POST",
-		                //contentType: 'application/json',
+		                //contentType: 'application/json',		                
 		                dataType: "json",
 		                data: form_data,
 		                success: function(value) {
@@ -254,10 +263,10 @@ $def with (checkers,msg="")
 		        }
 		        if ($$(this).attr('id')=="config_view") {
 		            var form_data = $$("#view").serializeArray();
-		            form_data.push({name: 'operation', value: 'config_view'});
+		            form_data.push({name: 'checker', value: 'view'});
 		            console.log(form_data)
 		                jQuery.ajax({
-		                //url: '/',
+		                url: '/config',
 		                type: "POST",
 		                dataType: "json",
 		                data: form_data,
@@ -314,10 +323,10 @@ $def with (checkers,msg="")
 		        }
 		        if ($$(this).attr('id')=="connect_view") {
 		            var form_data = $$("#view").serializeArray();
-		            form_data.push({name: 'operation', value: 'connect_view'});
+		            form_data.push({name: 'checker', value: 'view'});
 		
 		            jQuery.ajax({
-		                //url: '/',
+		                url: '/connect',
 		                type: "POST",
 		                //contentType: 'application/x-www-form-urlencoded',
 		                dataType: "json",

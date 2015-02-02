@@ -1084,3 +1084,23 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
     #Default return
     return str(actual_value), False,'info'
  
+def get_view_severity(check_name):
+    severity_map={}
+    severity_map['VMwareVDMDS Service']='High'
+    severity_map['VMware View PCoIP Secure Gateway Service']='High'
+    severity_map['VMware View Connection Server Service']='High'
+    severity_map['VMware View Message Bus Component Service']='High'
+    severity_map['VMware View Framework Component Service']='High'
+    severity_map['VMware View Script Host Service']='High'
+    severity_map['VMware View Web Component Service']='High'
+    severity_map['VMware View Security Gateway Component Service']='High'
+    severity_map['Verify redundancy in View environment as well as the state']='High'
+    severity_map['Verify Connection Broker Server configured with static IP']='High'
+    severity_map['View Connection Brokers has correct CPUs']='High'
+    severity_map['View Connection Brokers has correct Memory']='High'
+    severity_map['Verify View Connection Brokers runs on a supported operating system']='High'
+    severity_map['Verify number of Desktop configured in View']='High'
+    severity_map['Verify Desktop Pool Status']='High'
+    severity_map['Verify that the Maximum number of desktops in a pool is no more than 1000']='High'
+    severity_map['Verify vCenter servers have at least 4 vCPUs and 6 GBs of RAM']='High'
+    return severity_map.get(check_name)
