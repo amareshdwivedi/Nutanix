@@ -107,6 +107,16 @@ class config:
             CheckerBase.save_auth_into_auth_config("ncc",conf_data)
             status = {"Configuration": "Success"}        
             return json.dumps(status)
+        
+        if data['checker'].split('_')[1] == "view":
+            conf_data = { "view_ip": data['Server'], 
+                          "view_pwd": Security.encrypt(data['Password']), 
+                          "view_user": data['User']
+                          }
+
+            CheckerBase.save_auth_into_auth_config("view",conf_data)
+            status = {"Configuration": "Success"}        
+            return json.dumps(status)           
 
 class connect:
     def __init__(self):
@@ -131,6 +141,13 @@ class connect:
             if ret:
                 status['Connection'] = "Success"
             return json.dumps(status)
+         
+        if data['checker'].split('_')[1] == "view":
+            ret , msg = self.checkers['view'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
+            if ret:
+                status['Connection'] = "Success"
+            return json.dumps(status)        
+        
     
 class runChecks:
     def __init__(self):
@@ -217,23 +234,6 @@ class runChecks:
 class refresh:
     def __init__(self):
         pass
-    
-        if data['operation'].split('_')[1] == "view":
-            conf_data = { "view_ip": data['Server'], 
-                          "view_pwd": Security.encrypt(data['Password']), 
-                          "view_user": data['User']
-                          }
-
-            CheckerBase.save_auth_into_auth_config("view",conf_data)
-            status = {"Configuration": "Success"}        
-            return json.dumps(status)        
-    
-        
-        if data['operation'].split('_')[1] == "view":
-            ret , msg = self.checkers['view'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
-            if ret:
-                status['Connection'] = "Success"
-            return json.dumps(status)        
 
     def GET(self):
         try:
