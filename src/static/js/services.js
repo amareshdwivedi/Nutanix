@@ -177,7 +177,7 @@ jQuery(document).ready(function() {
 				foundationObject["cluster_name"] = $('#cluster_name').val();
 				//var cluster_external_ip = $('#externalIP').val();
 				foundationObject["cluster_external_ip"] = $.trim($('#externalIP').val());
-				var redundancy_factor = $('#mrf').val();
+				var redundancy_factor = $('#redundancy_factor').val();
 				if(redundancy_factor == "null"){
 					redundancy_factor = null;
 				}
@@ -190,7 +190,8 @@ jQuery(document).ready(function() {
 				foundationObject["phoenix_iso"] = $('#phoenix_iso').val();
 				foundationObject["hypervisor_iso"] = $('#hypervisor_iso').val();
 
-				foundationObject["use_foundation_ips"] = $('#foundation_ip').val();
+				//foundationObject["use_foundation_ips"] = $('#foundation_ip').val();
+				foundationObject["use_foundation_ips"] = false;
 				foundationObject["cluster_init_successful"] = null;
 				
 				foundationObject['hypervisor_password'] = $('#hypervisorpass').val();
