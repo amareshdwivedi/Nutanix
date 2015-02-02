@@ -107,6 +107,20 @@ class config:
             CheckerBase.save_auth_into_auth_config("ncc",conf_data)
             status = {"Configuration": "Success"}        
             return json.dumps(status)
+        
+        if data['checker'] == "view":
+            conf_data = { "view_ip": data['Server'], 
+                          "view_pwd": Security.encrypt(data['Password']), 
+                          "view_user": data['User'],
+                          "view_vc_ip": data['VC Server'],
+                          "view_vc_user": data['VC User'],
+                          "view_vc_pwd": Security.encrypt(data['VC Password']),
+                          "view_vc_port": data['VC Port'],
+                          }
+
+            CheckerBase.save_auth_into_auth_config("view",conf_data)
+            status = {"Configuration": "Success"}        
+            return json.dumps(status)           
 
 class connect:
     def __init__(self):
@@ -131,6 +145,14 @@ class connect:
             if ret:
                 status['Connection'] = "Success"
             return json.dumps(status)
+         
+        if data['checker'] == "view":
+            ret , msg = self.checkers['view'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
+            vc_ret , vc_msg = self.checkers['view'].check_view_vc_connectivity(data['VC Server'],data['VC User'],Security.encrypt(data['VC Password']),data['VC Port'])
+            if ret and vc_ret:
+                status['Connection'] = "Success"
+            return json.dumps(status)        
+        
     
 class runChecks:
     def __init__(self):
@@ -182,7 +204,7 @@ class runChecks:
             if data['group'] == "Run All":
                 group.append("run_all")
             else:
-                group.append(data['group'] + " " + "run_all")         
+                group.append(data['group'])          
         
         with open("display_json.json", "w") as myfile:
             json.dump(run_logs, myfile)
@@ -217,23 +239,6 @@ class runChecks:
 class refresh:
     def __init__(self):
         pass
-    
-        if data['operation'].split('_')[1] == "view":
-            conf_data = { "view_ip": data['Server'], 
-                          "view_pwd": Security.encrypt(data['Password']), 
-                          "view_user": data['User']
-                          }
-
-            CheckerBase.save_auth_into_auth_config("view",conf_data)
-            status = {"Configuration": "Success"}        
-            return json.dumps(status)        
-    
-        
-        if data['operation'].split('_')[1] == "view":
-            ret , msg = self.checkers['view'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
-            if ret:
-                status['Connection'] = "Success"
-            return json.dumps(status)        
 
     def GET(self):
         try:
