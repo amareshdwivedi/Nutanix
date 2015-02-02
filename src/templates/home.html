@@ -1232,25 +1232,6 @@ $$(window).load(function() {
                                             </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
-                                    <div class="statusContainer">
-                                        <div class="progressHeading">
-                                            <h3>Vsphere</h3>
-                                        </div>
-                                        <div class="progressStatus">
-                                            <div class="progressStatusMessage error">
-                                                <h2 class="progressPercentage">48%</h2>
-                                                <div class="statusMessage">
-                                                    System Error...
-                                                </div>
-                                            </div>
-                                            
-                                        </div>
-                                         <div class="taskError">
-                                            <i class="fa fa-exclamation-triangle"></i>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 					</div>
@@ -1287,7 +1268,80 @@ $$(window).load(function() {
 					<!--Content Wrap-->
 
 					<div class="content_wrap">
-						PostDeploy COntent
+						<div class="mainBody_container col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
+                            <div class="col-lg-12  col-md-12 col-sm-12 col-xs-12 no-margin no-padding startPostDeployment">
+                                <h4><a href="/" target="_blank">Run Health Check Tests</a></h4>
+                                
+                            </div>
+                            
+                            <div class="col-lg-12  col-md-12 col-sm-12 col-xs-12 no-margin no-padding deploymentProgress">
+                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
+                                    <div class="statusContainer">
+                                        <div class="progressHeading">
+                                            <h3>VCenter</h3>
+                                        </div>
+                                        <div class="progressStatus">
+                                            <div class="progressStatusMessage">
+                                                <h2 class="progressPercentage">100%</h2>
+                                                <div class="statusMessage">
+                                                    Setup Completed...
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="taskCompleted">
+                                            <i class="fa fa-check-square"></i>
+                                        </div>
+                                    </div>
+                                    <div class="deploymentType">
+                                        <select id="testTypes">
+                                            <option>Run All Tests</option>
+                                            <option>Post Install</option>
+                                            <option>Performance</option>
+                                            <option>Availability</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
+                                    <div class="statusContainer">
+                                        <div class="progressHeading">
+                                            <h3>Nutanix Cluster Check</h3>
+                                        </div>
+                                        <div class="progressStatus">
+                                            <div class="progressStatusMessage">
+                                                <h2 class="progressPercentage">30%</h2>
+                                                <div class="statusMessage">
+                                                    Running Config...
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="progressActiveSec">
+                                                
+                                            </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
+                                    <div class="statusContainer">
+                                        <div class="progressHeading">
+                                            <h3>VMWare View</h3>
+                                        </div>
+                                        <div class="progressStatus">
+                                            <div class="progressStatusMessage">
+                                                <h2 class="progressPercentage">10%</h2>
+                                                <div class="statusMessage">
+                                                    Installing...
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="progressActiveSec">
+                                                
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 					</div>
 				</div>
 				<!-------------------------------------------Post Deploy End----------------------------------------------->
