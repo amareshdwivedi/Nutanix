@@ -54,6 +54,9 @@ class customers:
             data = json.loads(web.data())
             customer_id = data['customer_id']
             customer_name = data['customer_name']
+            customer_phone = data['customer_phone']   
+            customer_email= data['customer_email']
+			
         except:
             final_data['response'] = httplib.NOT_FOUND
             final_data['error'] = INVALID_INPUT
@@ -64,7 +67,7 @@ class customers:
             final_data['error'] = USER_ALREADY_EXIST   
             return json.dumps(final_data)         
         else:
-            resp = model.add_customer(customer_name,customer_id)
+            resp = model.add_customer(customer_name,customer_id,customer_email,customer_phone)
             if resp:
                 final_data['response'] = httplib.OK
                 final_data['customer_id'] = customer_id  
@@ -177,6 +180,7 @@ class customeraction:
         module_id = None
         task_id = None
         modules = ['foundation','prism','vcenter']
+		
         try:
             data = json.loads(web.data())
             customer_id = data['customer_id']
@@ -186,10 +190,10 @@ class customeraction:
             final_data['response'] = httplib.NOT_FOUND
             final_data['error'] = INVALID_INPUT
             return json.dumps(final_data)
+		
         get_customer_data = model.get_by_id(customer_id)
         if get_customer_data:
             task_is_exist = model.get_history_by_taskid(customer_id,task_id)
-        
             json_to_initilize = json.loads(task_is_exist[0]['json_data'])
             if task_is_exist:
                 if module_id in modules:
@@ -202,33 +206,44 @@ class customeraction:
                    
                     if module_id == "foundation":
                         model.update_task_module_status(task_id,'foundation','started')
-                        resp = deploy.initiate_foundation()
-                        final_data['response'] = httplib.OK
-                        final_data['status'] = resp
+                        try:
+                            resp = deploy.initiate_foundation()
+                            final_data['response'] = httplib.OK
+                            final_data['status'] = resp
+                        except:
+                            final_data['response'] = httplib.INTERNAL_SERVER_ERROR
                         return json.dumps(final_data)
                     
                     if module_id == "vcenter":
                         model.update_task_module_status(task_id,'vcenter','started')
-                        resp = deploy.initiate_vcenter_server_config()
-                        if resp == 200:
-                            model.update_task_module_status(task_id,'vcenter',"Completed")
-                        else:
+                        try:
+                            resp = deploy.initiate_vcenter_server_config()
+                            final_data['response'] = httplib.OK
+                        except:
+                            resp = None
                             model.update_task_module_status(task_id,'vcenter',"Failed")
+                            final_data['response'] = httplib.INTERNAL_SERVER_ERROR
+                        if resp:
+                            model.update_task_module_status(task_id,'vcenter',"Completed")
+                        #else:
+                        #    model.update_task_module_status(task_id,'vcenter',"Failed")
 
-                        final_data['response'] = httplib.OK
                         final_data['status'] = resp
                         return json.dumps(final_data)
                     
                     if module_id == "prism":
                         model.update_task_module_status(task_id,'prism','started')
-                        resp = deploy.initiate_cluster_config()
-                        final_data['response'] = httplib.OK
-                        final_data['status'] = resp
-                        if resp == 200:
-                            model.update_task_module_status(task_id,'prism',"Completed")
-                        else:
+                        try:
+                            resp = deploy.initiate_cluster_config()
+                            final_data['response'] = httplib.OK
+                            final_data['status'] = resp
+                        except:
+                            resp = None
                             model.update_task_module_status(task_id,'prism',"Failed")
-      
+                            final_data['response'] = httplib.INTERNAL_SERVER_ERROR							
+                        if resp :
+                            model.update_task_module_status(task_id,'prism',"Completed")
+                        
                         return json.dumps(final_data)                                        
                 else:
                     final_data['response'] = httplib.NOT_FOUND
