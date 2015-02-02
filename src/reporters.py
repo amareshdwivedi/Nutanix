@@ -21,6 +21,9 @@ class CheckerResult:
             elif self.name == "ncc":
                 self.ip = authconfig['cvm_ip']
                 self.user = authconfig['cvm_user']
+            elif self.name == "view":
+                self.ip = authconfig['view_ip']
+                self.user = authconfig['view_user']    
                 
         self.steps = []
         self.path = path
@@ -65,8 +68,7 @@ class CheckerResult:
             xprop = xprop.replace('NoName.','').replace('NoName','')    
             props.append({"Message":xprop,"Status":xstatus,"Datacenter":datacenter,"Cluster":cluster,"Host":host, "Entity":entity})
         return props
-    
-        
+      
     def to_dict(self):
         if self.message is None:
             dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user, "Category": self.category} 
@@ -78,6 +80,41 @@ class CheckerResult:
                 dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "ip":self.ip, "user":self.user, "Category": self.category}
             except AttributeError:
                 dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message,"Category": self.category}
+                
+                
+            
+        if len(self.steps) > 0:
+            steps_dict = []
+            for step in self.steps:
+                steps_dict.append(step.to_dict())
+            dict_obj["checks"] = steps_dict
+
+        return dict_obj
+
+class ViewCheckerResult(CheckerResult):      
+    def prop_dict(self):
+        #print "view prop_dict"
+        props  = []
+        all_prop = [ x for x in self.message.split(', ') if x != '']
+        for xprop in all_prop:
+            #print "xprop : "+ xprop
+            xprop,xstatus = xprop.split("#")
+            props.append({"Message":xprop,"Status":xstatus})
+        
+        return props
+         
+    def to_dict(self):
+        #print "view to_dict"
+        if self.message is None:
+            dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user, "Category": self.category} 
+        elif ',' in self.message:
+            self.props = self.prop_dict()
+            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Category": self.category, "Expected_Result": self.expected_result}
+        else:
+            try:
+                dict_obj = {"Name": self.name, "Status": self.passed, "Message": self.message, "ip":self.ip, "user":self.user, "Category": self.category}
+            except AttributeError:
+                dict_obj = {"Name": self.name, "Status": self.passed, "Message": self.message,"Category": self.category}
                 
                 
             
