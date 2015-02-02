@@ -466,7 +466,9 @@ jQuery(document).ready(function() {
 	 
 	 jQuery(".antiscroll-inner").niceScroll();
 	 
-	 $("#mainTabContainer").tabs();
+	 $("#mainTabContainer").tabs({
+          disabled: [ 1, 2,3,4 ]
+        });
 	 
     /*Predeployer Tabs Functionlity start*/
 	$('#preDeploy_secondaryNav ul li').each(function(i, e){
@@ -550,6 +552,12 @@ jQuery(document).ready(function() {
     });
     /*Blocks Expand/Collapse Functionality Ends*/    
     
+    /*Create new Tesk*/
+    
+    $(".createNewTaskBtn").live("click",function(){
+        $( "#mainTabContainer" ).tabs( "enable", 1 ).tabs( "select", 1 );
+        $('#createTaskModal').modal('hide');
+	});
 });
 
 //===== TOOLTIP =====//
