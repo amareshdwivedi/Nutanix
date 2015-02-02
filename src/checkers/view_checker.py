@@ -1,6 +1,5 @@
 from __future__ import division
 from bdb import effective
-from test.test_pydoc import expected_data_docstrings
 __author__ = 'anand nevase'
 from requests.exceptions import ConnectionError
 import string
@@ -49,7 +48,11 @@ class HorizonViewChecker(CheckerBase):
         self.config_form =  form.Form( 
                 form.Textbox("Server",value=self.authconfig['view_ip']),
                 form.Textbox("User",value=self.authconfig['view_user']),
-                form.Password("Password",value=Security.decrypt(self.authconfig['view_pwd'])))() 
+                form.Password("Password",value=Security.decrypt(self.authconfig['view_pwd'])),
+                form.Textbox("VC Server",value=self.authconfig['view_vc_ip']),
+                form.Textbox("VC Port",value=self.authconfig['view_vc_port']),
+                form.Textbox("VC User",value=self.authconfig['view_vc_user']),
+                form.Password("VC Password",value=Security.decrypt(self.authconfig['view_vc_pwd'])))() 
 
         self.si = None
         self.categories=['performance','availability']
@@ -241,20 +244,26 @@ class HorizonViewChecker(CheckerBase):
         else:
            return SI
     
-    def get_vc_vms(self,value):
+    def get_vc_vms(self,search,search_by='ip'):
+        """
+        Return VI VM(virtual machine) object.
+        @param  string search     search vm either IP or DNS or UUID
+        @param string search_by     search option by IP or DNS or UUID
+        """
         VM = None
+        
+        #get Vcneter Connection object
         SI=self.get_vc_connection()
    
-        by='ip'
-        if by=='uuid':
-            VM = SI.content.searchIndex.FindByUuid(None, value,
+        if search_by=='uuid':
+            VM = SI.content.searchIndex.FindByUuid(None, search,
                                            True,
                                            True)
-        elif by=='dns':
-            VM = SI.content.searchIndex.FindByDnsName(None, value,
+        elif search_by=='dns':
+            VM = SI.content.searchIndex.FindByDnsName(None, search,
                                                       True)
-        elif by=='ip':
-            VM = SI.content.searchIndex.FindByIp(None, value, True)
+        elif search_by=='ip':
+            VM = SI.content.searchIndex.FindByIp(None, search, True)
         
         return VM
      
@@ -378,15 +387,29 @@ class HorizonViewChecker(CheckerBase):
                     expected=check['ref-value']
                     actual = self.get_view_property(check['property'])
                     passed=HorizonViewChecker.apply_operator(actual, expected, operator)
-                    message="Actual:="+actual + " (Expected:= " + operator + expected+ ") "
+                    message=''
+                    if operator == '=':
+                        message="Actual:="+actual + " (Expected:= " + expected+ ")"
+                    else:
+                        message="Actual:="+actual + " (Expected:= " + operator + expected+ ")"
                     self.reporter.notify_progress(self.reporter.notify_checkLog,message, passed and "PASS" or "FAIL")
+                    message=", "+message+'#'+str(passed and "Pass" or "Fail")
                     self.result.add_check_result(ViewCheckerResult(check_name,None, passed,message,category=check['category'],expected_result=check['expectedresult']))
                     #self.reporter.notify_one_line(check_name, str(passed))
                 #self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'],None,check['expectedresult']))
              
                     try:
                         self.realtime_results = json.load(open("display_json.json","r"))
-                        self.realtime_results['view']['checks'].append({'Name':check_name ,'Status': passed and "PASS" or "FAIL"})
+                        all_prop,props = [ x for x in message.split(', ') if x != ''], []
+                        for xprop in all_prop:
+                            xprop,xstatus = xprop.split("#")
+                            
+                            xprop_msg, xprop_actual, xprop_exp = xprop.split(":=")                        
+                            xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+                            props.append({"Status":xstatus,"Expected":xprop_exp[:-1] , "Actual":xprop_actual })
+
+                        self.realtime_results['view']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
+                        #self.realtime_results['view']['checks'].append({'Name':check_name ,'Status': passed and "PASS" or "FAIL"})
                         with open("display_json.json", "w") as myfile:
                             json.dump(self.realtime_results, myfile)
                     except:
@@ -405,7 +428,15 @@ class HorizonViewChecker(CheckerBase):
 
                     try:
                         self.realtime_results = json.load(open("display_json.json","r"))
-                        self.realtime_results['view']['checks'].append({'Name':check_function.descr ,'Status': passed and "PASS" or "FAIL"})
+                        all_prop,props = [ x for x in message.split(', ') if x != ''], []
+                        for xprop in all_prop:
+                            xprop,xstatus = xprop.split("#")
+                            xprop_msg, xprop_actual, xprop_exp = xprop.split(":=")
+                            xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+                            props.append({"Status":xstatus,"Expected":xprop_exp[:-1] , "Actual":xprop_actual })
+
+                        self.realtime_results['view']['checks'].append({'Message':check_function.descr,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
+                        #self.realtime_results['view']['checks'].append({'Name':check_name ,'Status': passed and "PASS" or "FAIL"})
                         with open("display_json.json", "w") as myfile:
                             json.dump(self.realtime_results, myfile)
                     except:
@@ -490,94 +521,141 @@ class HorizonViewChecker(CheckerBase):
     def check_connectionbroker_os(self):
 #         powershell_cmd="(Get-WmiObject Win32_OperatingSystem ).Caption + (Get-WmiObject -class Win32_OperatingSystem).OSArchitecture"
 #         output=self.get_view_property(powershell_cmd)
-        
-        vm=self.get_vc_vms(self.authconfig['view_ip'])
-        
-        expected = ['Microsoft Windows Server 2008 R2 (64-bit)','Microsoft Windows Server 2008 R2 SP1 (64-bit)', 'Microsoft Windows Server 2012 R2 (64-bit)']
-        if vm == None:
-            return False, "Actual:=VM-Not-Found (Expected:="+str(expected).replace(',',';')+")#"+(True and "PASS" or "FAIL"),None
-        
-        os=vm.summary.config.guestFullName
+        powershell_cmd='foreach ( $cb in get-ConnectionBroker){ if($cb.type -match "Connection Server") {$cb.externalURL}}'
+        connection_brokers=self.get_view_property(powershell_cmd)
         message = ""
-        passed_all = False
+        passed_all = True
+        import urlparse
         
-        if os in expected:
-            passed_all = True
-        
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+os+" (Expected:="+str(expected)+")", (True and "PASS" or "FAIL"))
-        message+=", "+"Actual:="+os+" (Expected:="+str(expected).replace(',',';')+")#"+(True and "PASS" or "FAIL") 
+        for connection_broker in connection_brokers.split('\n'):
+            p = '(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*'
+            hostname= re.search(p,connection_broker).group('host')
+            vm=None
+            if Validate.valid_ip(hostname):
+                vm=self.get_vc_vms(hostname)
+            else:
+                vm=self.get_vc_vms(hostname,'dns')
+            status=False
+            expected = ['Microsoft Windows Server 2008 R2 (64-bit)','Microsoft Windows Server 2008 R2 SP1 (64-bit)', 'Microsoft Windows Server 2012 R2 (64-bit)']
+            if vm == None:
+                self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+hostname+" VM-Not-Found (Expected:="+';'.join(expected)+")", (status and "PASS" or "FAIL"))
+                message+=", "+"Actual:="+hostname+" VM-Not-Found (Expected:="+';'.join(expected)+")#"+(status and "Pass" or "Fail")
+            else:
+                os=vm.summary.config.guestFullName
+
+                if os in expected:
+                    status = True
+                
+                self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=For Server["+hostname+"]: "+os+" (Expected:="+str(';'.join(expected))+")", (status and "PASS" or "FAIL"))
+                message+=", "+"Actual:=For Server["+hostname+"]: "+os+" (Expected:="+';'.join(expected)+")#"+(status and "Pass" or "Fail")
+            passed_all = passed_all and status 
         
         return passed_all , message,None
     
     @checkgroup("view_components_checks", "View Connection Brokers has correct CPUs",["performance"],"For 1-50 Desktop; CB cpu >=2 ,for 51-2000 Desktop; CB cpu >=4, for 2001-5000 Desktop; CB CPU >=6")
-    def check_connectionbroker_cpu(self):
-          
-        cpu_powershell='$cpu=0;ForEach ($obj in  Get-WmiObject -class win32_processor) { $cpu+=$obj.NumberOfCores}; $cpu'
-        cpu=self.get_view_property(cpu_powershell)
+    def check_connectionbroker_cpu(self):  
+#         cpu_powershell='$cpu=0;ForEach ($obj in  Get-WmiObject -class win32_processor) { $cpu+=$obj.NumberOfCores}; $cpu'
+#         cpu=self.get_view_property(cpu_powershell)
         vms=self.get_view_property('(Get-DesktopVM).length')
-                  
+        
+        powershell_cmd='foreach ( $cb in get-ConnectionBroker){ if($cb.type -match "Connection Server") {$cb.externalURL}}'
+        connection_brokers=self.get_view_property(powershell_cmd)
+           
         message = ""
         passed= True
+        passed_all=True
         actual=None
         expected=None
-        if cpu == 'command-error' or  vms == 'command-error':
+        
+        if connection_brokers == 'command-error' or  vms == 'command-error':
             return None, None,None
         else:
-            cpu=int(cpu)
-            vms=int(vms)
-        if vms >0 and vms <= 50: 
-            if cpu <2:
-                 passed= False
-            expected = "For 1-50 Desktops Number of Cpu:>=6"
-        elif vms >50 and vms <=2000: 
-            if cpu <4:
-                 passed= False
-            expected = "For 51-2000 Desktops Number of Cpu:>=4"
-        elif vms >2000 and vms <=5000: 
-            if cpu <6:
-                 passed= False
-            expected = "For 2001-5000 Desktops Number of Cpu:>=6"
-        actual= "Number of Cpu:"+str(cpu)+"; Number of Desktop:"+str(vms)
-         
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+actual+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message =", "+ "Actual:="+actual+" (Expected:="+str(expected)+")#"+(passed and "PASS" or "FAIL")
-        #passed_all = passed_all and passed
+            for connection_broker in connection_brokers.split('\n'):
+                p = '(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*'
+                hostname= re.search(p,connection_broker).group('host')
+                vm=None
+                if Validate.valid_ip(hostname):
+                    vm=self.get_vc_vms(hostname)
+                else:
+                    vm=self.get_vc_vms(hostname,'dns')
+                passed=True
+                if vm != None:                 
+                    cpu=int(vm.summary.config.numCpu)
+                    vms=int(vms)
+                    if vms >0 and vms <= 50: 
+                        if cpu <2:
+                             passed= False
+                        expected = "For 1-50 Desktops; Number of Cpu:>=6"
+                    elif vms >50 and vms <=2000: 
+                        if cpu <4:
+                             passed= False
+                        expected = "For 51-2000 Desktops; Number of Cpu:>=4"
+                    elif vms >2000 and vms <=5000: 
+                        if cpu <6:
+                             passed= False
+                        expected = "For 2001-5000 Desktops; Number of Cpu:>=6"
+                    actual= "For Server["+hostname+"]; Number of Cpu:"+str(cpu)+"; Number of Desktop:"+str(vms)
+                     
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+actual+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
+                    message +=", "+ "Actual:="+actual+" (Expected:="+str(expected)+")#"+(passed and "Pass" or "Fail")
+                else:
+                    message +=", "+ "Actual:="+hostname+" not-found (Expected:=Connection Broker Server CPU's)#"+(False and "Pass" or "Fail")
+                    passed=False
+                passed_all = passed_all and passed
           
-        return passed , message,None
-      
+        return passed_all , message,None
+       
     @checkgroup("view_components_checks", "View Connection Brokers has correct Memory",["performance"],"For 1-50 Desktop; CB Memory >=4GB ,for 51-2000 Desktop; CB cpu >=10GB, for 2001-5000 Desktop; CB CPU >=12GB")
     def check_connectionbroker_memory(self):
-          
-        memory_powershell='(Get-WmiObject CIM_PhysicalMemory).Capacity / 1GB'
-        memory=self.get_view_property(memory_powershell)
+         
+        #memory=self.get_view_property(memory_powershell)
         vms=self.get_view_property('(Get-DesktopVM).length')
-                  
+         
+        #memory_powershell='(Get-WmiObject CIM_PhysicalMemory).Capacity / 1GB'
+        powershell_cmd='foreach ( $cb in get-ConnectionBroker){ if($cb.type -match "Connection Server") {$cb.externalURL}}'
+        connection_brokers=self.get_view_property(powershell_cmd) 
+                   
         message = ""
         passed= True
+        passed_all=True
         actual=None
         expected=None
-        if memory == 'command-error' or  vms == 'command-error':
+        if connection_brokers == 'command-error' or  vms == 'command-error':
             return None, None,None
         else:
-            memory=int(memory)
-            vms=int(vms)
-        if vms >0 and vms <= 50: 
-            if memory <4:
-                 passed= False
-            expected = "For 1-50 Desktops Memory:>=4GB"
-        elif vms >50 and vms <=2000: 
-            if memory <10:
-                 passed= False
-            expected = "For 51-2000 Desktops Memory:>=10GB"
-        elif vms >2000 and vms <=5000: 
-            if memory <12:
-                 passed= False
-            expected = "For 2001-5000 Desktops Memory:>=12GB"
-        actual= "Memory:"+str(memory)+"GB; Number of Desktop:"+str(vms)
-        self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+actual+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message+=", "+ "Actual:="+actual+" (Expected:="+str(expected)+")#"+(passed and "PASS" or "FAIL")
-        #passed_all = passed_all and passed
-          
+            for connection_broker in connection_brokers.split('\n'):
+                p = '(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*'
+                hostname= re.search(p,connection_broker).group('host')
+                vm=None
+                if Validate.valid_ip(hostname):
+                    vm=self.get_vc_vms(hostname)
+                else:
+                    vm=self.get_vc_vms(hostname,'dns')
+                passed=True
+                if vm != None:
+                    memory=int(vm.summary.config.memorySizeMB)*(0.001) # convert to GB
+                    vms=int(vms)
+                    if vms >0 and vms <= 50: 
+                        if memory <4:
+                             passed= False
+                        expected = "For 1-50 Desktops; Memory:>=4GB"
+                    elif vms >50 and vms <=2000: 
+                        if memory <10:
+                             passed= False
+                        expected = "For 51-2000 Desktops; Memory:>=10GB"
+                    elif vms >2000 and vms <=5000: 
+                        if memory <12:
+                             passed= False
+                        expected = "For 2001-5000 Desktops; Memory:>=12GB"
+                    actual= "For Server["+hostname+"]; Memory:"+str(memory)+"GB; Number of Desktop:"+str(vms)
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+actual+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
+                    message+=", "+ "Actual:="+actual+" (Expected:="+str(expected)+")#"+(passed and "Pass" or "Fail")
+                else:
+                    message +=", "+ "Actual:="+hostname+" not-found (Expected:=Connection Broker Server CPU's)#"+(False and "Pass" or "Fail")
+                    passed=False
+                passed_all = passed_all and passed
+                    #passed_all = passed_all and passed
+           
         return passed , message,None
       
     @checkgroup("view_components_checks", "Verify that the Maximum number of desktops in a pool is no more than 1000",["availability"],"<=1000 Desktops")
@@ -611,18 +689,18 @@ class HorizonViewChecker(CheckerBase):
                 output="Pool :"+pool_name + " Max Desktop :"+str(max_vm_in_pool)
                  
                 self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (flag and "PASS" or "FAIL"))
-                message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+                message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "Pass" or "Fail") 
                 passed_all = flag and passed_all
         except ValueError:
             error = True
             passed_all=False
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual=:Get-Pool Command Error (Expected:="+str(expected)+")", (False and "PASS" or "FAIL")) 
-            message+=", "+ "Actual:=Get-Pool Command Error (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            message+=", "+ "Actual:=Get-Pool Command Error (Expected:="+str(expected)+")#"+(False and "Pass" or "Fail")
         #passed_all = passed_all and passed
         
         if is_pool_found == False and error ==False:
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=Pool-Not-Found (Expected:="+str(expected)+")", (False and "PASS" or "FAIL"))
-            message+=", "+ "Actual:=Pool-Not-Found (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            message+=", "+ "Actual:=Pool-Not-Found (Expected:="+str(expected)+")#"+(False and "Pass" or "Fail")
             passed_all=False
          
         return passed_all , message,None
@@ -657,17 +735,17 @@ class HorizonViewChecker(CheckerBase):
                 output="Pool :"+pool_name + " Enabled:"+pool_status
                 passed_all = flag and passed_all
                 self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (flag and "PASS" or "FAIL"))
-                message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+                message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "Pass" or "Fail") 
          
         except ValueError:
             error=True
             passed_all = False and passed_all
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=Get-Pool Command Error (Expected:="+str(expected)+")", (False and "PASS" or "FAIL"))
-            message+= ", "+"Actual:=Get-Pool Command Error (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            message+= ", "+"Actual:=Get-Pool Command Error (Expected:="+str(expected)+")#"+(False and "Pass" or "Fail")
         
         if is_pool_found == False and error == False:
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=Pool-Not-Found (Expected:="+str(expected)+")", (False and "PASS" or "FAIL"))
-            message+=", "+ "Actual:=Pool-Not-Found (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL")
+            message+=", "+ "Actual:=Pool-Not-Found (Expected:="+str(expected)+")#"+(False and "Pass" or "Fail")
             passed_all=False
         #passed_all = passed_all and passed
            
@@ -694,7 +772,7 @@ class HorizonViewChecker(CheckerBase):
             output="IP :"+nic_ip +" isStaticIP:"+is_status
             expected="True"
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (flag and "PASS" or "FAIL"))
-            message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "PASS" or "FAIL") 
+            message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "Pass" or "Fail") 
           
         #passed_all = passed_all and passed
           
@@ -719,7 +797,7 @@ class HorizonViewChecker(CheckerBase):
         output="No.of Desktops: "+str(no_of_desktop)+"; No.of Connection Brokers: "+str(no_of_connection_broker)
         expected="No.of desktop < 10000 or (2000 x No.of Connection Brokers)"
         self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
-        message+="Actual:="+output+" (Expected:="+str(expected)+")#"+(passed and "PASS" or "FAIL")
+        message+=", "+"Actual:="+output+" (Expected:="+str(expected)+")#"+(passed and "Pass" or "Fail")
         return passed , message,None
      
     @checkgroup("view_components_checks", "Verify vCenter servers have at least 4 vCPUs and 6 GBs of RAM",["Performance"],"vCPUs:>=4 and RAM:>=6 GBs")
@@ -730,10 +808,10 @@ class HorizonViewChecker(CheckerBase):
         message=""
         if vm is None:
               self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=VCenter-Server-Not-Found (Expected:="+str(expected)+")", (False and "PASS" or "FAIL"))
-              message+= "Actual:=VCenter-Server-Not-Found (Expected:="+str(expected)+")#"+(False and "PASS" or "FAIL") 
+              message+=", "+ "Actual:=VCenter-Server-Not-Found (Expected:="+str(expected)+")#"+(False and "Pass" or "Fail") 
               passed=False
         else:
-            vm_config=vm.summary.config
+            vm_config=vm.summary.config 
             vm_cpu= int(vm_config.numCpu)
             vm_memory=int(vm_config.memorySizeMB)*(0.001) # convert to GB
             passed=False
@@ -741,5 +819,5 @@ class HorizonViewChecker(CheckerBase):
                 passed=True
             output='vCPUs:'+str(vm_cpu)+' and RAM:'+str(vm_memory)+'GB'
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
-            message+= "Actual:="+output+" (Expected:="+str(expected)+")#"+(passed and "PASS" or "FAIL")
+            message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(passed and "Pass" or "Fail")
         return passed , message,None
