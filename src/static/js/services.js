@@ -254,7 +254,8 @@ jQuery(document).ready(function() {
 						//var ipv6_address = $('#ipv6_address'+i).val();
 						nodeObject['ipv6_address'] = $("#"+block_id+ " #"+node_id+ " #ipv6_address").val();//$('#ipv6_address'+i).val();
 						
-						var cluster_member = $("#"+block_id+ " #"+node_id+ " #ipv6_address").val();//$('#cluster_member'+i).val();
+						//var cluster_member = $("#"+block_id+ " #"+node_id+ " #ipv6_address").val();//$('#cluster_member'+i).val();
+						var cluster_member = 'true'
 						// nodeObject['cluster_member'] = cluster_member;
 				        if(cluster_member == 'true'){
 						nodeObject['cluster_member'] = true;
@@ -264,7 +265,8 @@ jQuery(document).ready(function() {
 						nodeObject['cluster_member'] = false;
                         }
 
-						var ipmi_configure_now = $("#"+block_id+ " #"+node_id+ " #ipmi_configure_now").val();//$('#ipmi_configure_now'+i).val();
+						//var ipmi_configure_now = $("#"+block_id+ " #"+node_id+ " #ipmi_configure_now").val();//$('#ipmi_configure_now'+i).val();
+                        var ipmi_configure_now = 'false'
                         if(ipmi_configure_now == 'true'){
 						nodeObject['ipmi_configure_now'] = true;
                         }
@@ -273,8 +275,9 @@ jQuery(document).ready(function() {
 						nodeObject['ipmi_configure_now'] = false;
                         }
 						//var ipv6_interface = $('#ipv6_interface'+i).val();
-						nodeObject['ipv6_interface'] = $("#"+block_id+ " #"+node_id+ " #ipv6_interface").val();//$('#ipv6_interface'+i).val();
-						
+						//nodeObject['ipv6_interface'] = $("#"+block_id+ " #"+node_id+ " #ipv6_interface").val();//$('#ipv6_interface'+i).val();
+						nodeObject['ipv6_interface'] = "";
+
 						//var node_position = $('#node_position'+i).val();
 						nodeObject['node_position'] = $("#"+block_id+ " #"+node_id+ " #nodePosition").val();//nodePosition// $('#node_position'+i).val();
 						
