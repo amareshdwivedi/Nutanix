@@ -2,6 +2,7 @@ __author__ = 'subashatreya'
 
 from checkers.ncc_checker import NCCChecker
 from checkers.vc_checker import VCChecker
+from checkers.view_checker import HorizonViewChecker
 from checkers.base_checker import CheckerBase
 from reporters import DefaultConsoleReporter
 from report_generator import PDFReportGenerator,CSVReportGenerator
@@ -33,7 +34,6 @@ def usage(checkers, message=None):
 
 
 def main():
-
     checkers = {}
     for checker_class in CheckerBase.__subclasses__():
         checker = checker_class()
