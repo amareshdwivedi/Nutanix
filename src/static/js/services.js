@@ -213,6 +213,7 @@ jQuery(document).ready(function() {
                      var block_id = $(this).attr("id");
                      var nodelength = $("#"+block_id+ " .nodeContainer").length;    
                      var i = 1;
+                    var j = 1;
                      $("#"+block_id+ " .nodeContainer").each(function(){
                          var node_id = $(this).attr("id");
                           var vcenterhosts = {};
@@ -227,7 +228,15 @@ jQuery(document).ready(function() {
 						//var hypervisor_ip = $('#hyperversionip'+i).val();
 						nodeObject['hypervisor_ip'] = $("#"+block_id+ " #"+node_id+ " #hyperversionip").val();// $('#hyperversionip'+i).val();
 						//var cvm_ip = $('#cvmip'+i).val();
+                         
 						nodeObject['cvm_ip'] = $("#"+block_id+ " #"+node_id+ " #cvmip").val();// $('#cvmip'+i).val();
+                         
+                         
+                        if(j == 1 || j == "1"){
+                           
+                            var restbaseurl = "https://"+nodeObject['cvm_ip']+":9440/PrismGateway/services/rest/";
+                             $('#restURL').val(restbaseurl);
+                        } 
 						//var hypervisor_hostname = $('#hyperversionhostname'+i).val();
 		nodeObject['hypervisor_hostname'] =  $("#"+block_id+ " #"+node_id+ " #hyperversionhostname").val();//$('#hyperversionhostname'+i).val();
 						
@@ -294,6 +303,7 @@ jQuery(document).ready(function() {
                         }
 						
 						nodes.push(nodeObject);
+                          j = j + 1;
                     })
                
 					mainblock['nodes'] = nodes;
