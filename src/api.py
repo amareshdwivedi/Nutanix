@@ -218,6 +218,7 @@ class customeraction:
                         model.update_task_module_status(task_id,'vcenter','started')
                         try:
                             resp = deploy.initiate_vcenter_server_config()
+                            model.update_task_module_status(task_id,'vcenter','Completed')
                             final_data['response'] = httplib.OK
                         except:
                             resp = None

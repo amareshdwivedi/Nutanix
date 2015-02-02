@@ -349,7 +349,7 @@ jQuery(document).ready(function() {
 					vCenterObject['hosts'] = hosts;
 					main_rest_block['vCenterConf'] = vCenterObject;
 		//	}
-				console.log(JSON.stringify(main_rest_block)); 
+		//		console.log(JSON.stringify(main_rest_block)); 
             
                 var customerId = $("#customerId").val();
                 createCustomerTask(customerId,main_rest_block);
@@ -360,17 +360,17 @@ jQuery(document).ready(function() {
     
     
     $(".startDeploymentBtn").click(function(){
+        $(".pageloader").show();
 		var customerId = $("#customerId").val();
-        var taskId = $("task_id").val();
-        startDeployment("1234", "14");
+        var taskId = $("#task_id").val();
+        startDeployment(customerId, taskId);
 	});
     
     function startDeployment(customerId, taskId){
         var post_data = {};
         post_data["customer_id"] = customerId;
         post_data["task_id"] =taskId;
-        alert(taskId);
-        post_data["module_id"] ="vcenter";
+        post_data["module_id"] ="foundation";
 
 		$.ajax({
 			 type: "POST",
@@ -380,12 +380,109 @@ jQuery(document).ready(function() {
              data:JSON.stringify(post_data),
 			 success: function(data){
 				//alert(data);
-                 alert("1");
+             },
+			 error: function(request,status,errorThrown){
+				 alert("No Data Available");
+			 }
+		});	
+        
+
+        $(".pageloader").fadeOut("slow");
+        deployementStatus(customerId, taskId);
+        setInterval(function(){
+            deployementStatus(customerId, taskId); // this will run after every 10 seconds
+        }, 10000);
+	}
+
+    function deployementStatus(customerId, taskId){
+        $.ajax({
+			 type: "GET",
+			 url: "/v1/deployer/customers/"+customerId+"/tasks/"+taskId+"/status/",
+			 async: false,
+			 dataType: "json",
+             success: function(data){
+                 for (var i = 0; i < data.task_status.length; i++) {
+                    if(data.task_status[i].module == "foundation"){
+                        $("#foundationStatus .progressPercentage").html(data.task_status[i].status);
+                        if(data.task_status[i].status == "100.0%"){
+                            
+                        var post_data = {};
+                        post_data["customer_id"] = customerId;
+                        post_data["task_id"] =taskId;
+                        post_data["module_id"] ="vcenter";
+                        $.ajax({
+                             type: "POST",
+                             url: "/v1/deployer/action/",
+                             async: false,
+                             dataType: "json",
+                             data:JSON.stringify(post_data),
+                             success: function(data){
+                                //alert(data);
+                             },
+                             error: function(request,status,errorThrown){
+                                 alert("No Data Available");
+                             }
+                        });	
+
+                        post_data["module_id"] ="prism";
+                        $.ajax({
+                             type: "POST",
+                             url: "/v1/deployer/action/",
+                             async: false,
+                             dataType: "json",
+                             data:JSON.stringify(post_data),
+                             success: function(data){
+                                //alert(data);
+                             },
+                             error: function(request,status,errorThrown){
+                                 alert("No Data Available");
+                             }
+                        });	                            
+                            
+                            $("#foundationStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
+                            $("#foundationStatus .statusMessage").html("Setup Completed...");
+                        }else{
+                            $("#foundationStatus .status").html("");
+                            $("#foundationStatus .status").removeClass("taskCompleted").addClass("progressActiveSec");
+                            $("#foundationStatus .statusMessage").html("Setup InProgress...");
+                        }
+                    }else if(data.task_status[i].module == "prism"){
+                        $("#prismStatus .progressPercentage").html(data.task_status[i].status);
+                        if(data.task_status[i].status == "Failed"){
+                            $("#prismStatus .status").html("");
+                            $("#prismStatus .status").removeClass("progressActiveSec").addClass("taskError").append("<i class='fa fa-exclamation-triangle'></i>");
+                            $("#prismStatus .statusMessage").html("Setup Failed...");
+                        }else if(data.task_status[i].status == "Completed"){
+                            $("#prismStatus .status").html("");
+                            $("#prismStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
+                            $("#prismStatus .statusMessage").html("Setup Completed...");
+                        }else{
+                            $("#prismStatus .status").html("");
+                            $("#prismStatus .status").addClass("progressActiveSec");
+                            $("#prismStatus .statusMessage").html("Setup InProgress...");
+                        }
+                    }else if(data.task_status[i].module == "vcenter"){
+                        $("#vcenterStatus .progressPercentage").html(data.task_status[i].status);
+                        if(data.task_status[i].status == "Failed"){
+                            $("#vcenterStatus .status").html("");
+                            $("#vcenterStatus .status").removeClass("progressActiveSec").addClass("taskError").append("<i class='fa fa-exclamation-triangle'></i>");
+                            $("#vcenterStatus .statusMessage").html("Setup Failed...");
+                        }else if(data.task_status[i].status == "Completed"){
+
+                            $("#vcenterStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
+                            $("#vcenterStatus .statusMessage").html("Setup Completed...");
+                        }else{
+                            $("#vcenterStatus .status").html("");
+                            $("#vcenterStatus .status").addClass("progressActiveSec");
+                            $("#vcenterStatus .statusMessage").html("Setup InProgress...");
+                        }
+                    }
+                 }
 			 },
 			 error: function(request,status,errorThrown){
 				 alert("No Data Available");
 			 }
 		});	
-	}
-	
+    }
+    
 });
