@@ -287,6 +287,16 @@ $$(window).load(function() {
 									<div class="widget_body">
 										<!--Form fields-->
 										<div class="mainBody_container col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
+										
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+													Cluster Name
+												</label>
+												<div class="form-group predeployForm">
+													<input type="text"  value="gso-cluster-2-IaaS" id="cluster_name" class="form-control form-font"/>
+												</div>
+											</div>											
+										
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Cluster Shared IP
@@ -297,13 +307,13 @@ $$(window).load(function() {
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-													Node RAM 
+													Node RAM (GB)
 												</label>
 												<div class="form-group predeployForm">
 													<input type="text" value="24" id="node_ram" class="form-control form-font"/>
 												</div>
 											</div>
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+											<div  style="display:none;" class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Cluster Init Successful
 												</label>
@@ -311,14 +321,7 @@ $$(window).load(function() {
 													<input type="text" value="" id="cluster_init_successful" class="form-control form-font"/>
 												</div>
 											</div>											
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-													Cluster Name
-												</label>
-												<div class="form-group predeployForm">
-													<input type="text"  value="gso-cluster-2-IaaS" id="cluster_name" class="form-control form-font"/>
-												</div>
-											</div>	
+
 											
 											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
 												<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label">
