@@ -7,6 +7,7 @@ import warnings
 from pyVim import connect
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
+import pyVmomi
 from base_checker import *
 from prettytable import PrettyTable
 import sys
@@ -26,6 +27,98 @@ def exit_with_message(message):
     print message
     sys.exit(1)
 
+def collect_properties(service_instance, view_ref, obj_type, path_set=None,
+                       include_mors=False):
+    """
+    Collect properties for managed objects from a view ref
+
+    Check the vSphere API documentation for example on retrieving
+    object properties:
+
+        - http://goo.gl/erbFDz
+
+    Args:
+        si          (ServiceInstance): ServiceInstance connection
+        view_ref (pyVmomi.vim.view.*): Starting point of inventory navigation
+        obj_type      (pyVmomi.vim.*): Type of managed object
+        path_set               (list): List of properties to retrieve
+        include_mors           (bool): If True include the managed objects
+                                       refs in the result
+
+    Returns:
+        A list of properties for the managed objects
+
+    """
+    collector = service_instance.content.propertyCollector
+
+    # Create object specification to define the starting point of
+    # inventory navigation
+    obj_spec = pyVmomi.vmodl.query.PropertyCollector.ObjectSpec()
+    obj_spec.obj = view_ref
+    obj_spec.skip = True
+
+    # Create a traversal specification to identify the path for collection
+    traversal_spec = pyVmomi.vmodl.query.PropertyCollector.TraversalSpec()
+    traversal_spec.name = 'traverseEntities'
+    traversal_spec.path = 'view'
+    traversal_spec.skip = False
+    traversal_spec.type = view_ref.__class__
+    obj_spec.selectSet = [traversal_spec]
+
+    # Identify the properties to the retrieved
+    property_spec = pyVmomi.vmodl.query.PropertyCollector.PropertySpec()
+    property_spec.type = obj_type
+
+    if not path_set:
+        property_spec.all = True
+
+    property_spec.pathSet = path_set
+
+    # Add the object and property specification to the
+    # property filter specification
+    filter_spec = pyVmomi.vmodl.query.PropertyCollector.FilterSpec()
+    filter_spec.objectSet = [obj_spec]
+    filter_spec.propSet = [property_spec]
+
+    # Retrieve properties
+    props = collector.RetrieveContents([filter_spec])
+
+    data = []
+    for obj in props:
+        properties = {}
+        for prop in obj.propSet:
+            properties[prop.name] = prop.val
+
+        if include_mors:
+            properties['obj'] = obj.obj
+
+        data.append(properties)
+    return data
+
+
+def get_container_view(service_instance, obj_type, container=None):
+    """
+    Get a vSphere Container View reference to all objects of type 'obj_type'
+
+    It is up to the caller to take care of destroying the View when no longer
+    needed.
+
+    Args:
+        obj_type (list): A list of managed object types
+
+    Returns:
+        A container view ref to the discovered managed objects
+
+    """
+    if not container:
+        container = service_instance.content.rootFolder
+
+    view_ref = service_instance.content.viewManager.CreateContainerView(
+        container=container,
+        type=obj_type,
+        recursive=True
+    )
+    return view_ref
 
 def checkgroup(group_name, description, category,expected_result):
     def outer(func):
@@ -266,6 +359,22 @@ class HorizonViewChecker(CheckerBase):
             VM = SI.content.searchIndex.FindByIp(None, search, True)
         
         return VM
+    
+    def get_vc_all_vms(self,vm_properties=None):
+        """
+        Return     dict                    containing VM object, and property of VM.
+        @param     array vm_properties     properties to be fetch if None VM object is return
+        """
+        service_instance=self.get_vc_connection()
+        root_folder = service_instance.content.rootFolder
+        view = get_container_view(service_instance,
+                                           obj_type=[vim.VirtualMachine])
+        vm_data = collect_properties(service_instance, view_ref=view,
+                                              obj_type=vim.VirtualMachine,
+                                              path_set=vm_properties,
+                                              include_mors=True)
+        
+        return vm_data
      
     def check_view_vc_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port):
         si=None
@@ -367,8 +476,7 @@ class HorizonViewChecker(CheckerBase):
         
         if vcstatus == False:
            exit_with_message("Error : View VC Connection Error"+"\n\nPlease run \"view setup\" command to configure Vmware Horizon View VC Server")
-        
-        
+            
         passed_all = True
         
         for check_group in check_groups_run:          
@@ -821,3 +929,36 @@ class HorizonViewChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (passed and "PASS" or "FAIL"))
             message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(passed and "Pass" or "Fail")
         return passed , message,None
+    
+    @checkgroup("view_components_checks", "Verify Desktop VM disk controller is an LSI Logic Controller",["Performance"],"true")
+    def check_view_desktop_vm_has_LSI_controller(self):
+        desktop_vms_name=self.get_view_property('Foreach ($vm in get-DesktopVM) {$vm.Name}')
+        if desktop_vms_name == 'command-error':
+            return None,None,None
+        
+        desktop_vms_names=desktop_vms_name.split('\n')
+        vm_data=self.get_vc_all_vms(vm_properties=["name","config.hardware.device[1000].deviceInfo.summary"])
+        passed=True
+        message=""
+        for vm in vm_data:
+            vm_name=vm["name"]
+            if vm_name in desktop_vms_names:
+                '''check is VM is part of VMware View Desktop VM'''
+                controller=None
+                try:
+                    controller=vm["config.hardware.device[1000].deviceInfo.summary"]
+                except KeyError:
+                    continue
+                
+                if controller!=None:
+                    LSI_found=False
+                    if 'LSI' in controller:
+                        LSI_found=True
+                    passed=passed and LSI_found
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=For Desktop VM ["+vm_name+"]: Disk controller["+controller+"]+ :"+str(LSI_found)+" (Expected:=LSI controller : True)", (LSI_found and "PASS" or "FAIL"))
+                    message+=", "+ "Actual:=For DesktopVM ["+vm_name+"]; Disk controller["+controller+"] :"+str(LSI_found)+" (Expected:=LSI controller : True)#"+(LSI_found and "Pass" or "Fail")
+                else:
+                    passed=passed and False
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=For Desktop VM ["+vm_name+"]: LSI controller not found (Expected:=LSI controller : True)", (False and "PASS" or "FAIL"))
+                    message+=", "+ "Actual:=For DesktopVM ["+vm_name+"]; LSI controller not found (Expected:=LSI controller : True)#"+(False and "Pass" or "Fail")
+        return passed , message,None    
