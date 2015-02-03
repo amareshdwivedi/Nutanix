@@ -454,7 +454,8 @@ jQuery(document).ready(function() {
 	 $(".createCustomerLink").click(function(){
 		 $('#createNewCustomerModel').modal();
 		 $(".createCustomer-form .form_input").removeClass("error");
-         $("#createCustomerModal .modal-body .sucessMsg").hide();
+         $("#createNewCustomerModel .modal-body .sucessMsg").hide();
+         $(".createNewCustomerBtn").show();
 		$(".errorMsg").hide();
 	 });
 	 
@@ -467,7 +468,7 @@ jQuery(document).ready(function() {
 	 jQuery(".antiscroll-inner").niceScroll();
 	 
 	 $("#mainTabContainer").tabs({
-          disabled: [ 1, 2,3,4 ]
+          disabled: [1,2,4 ]
         });
 	 
     /*Predeployer Tabs Functionlity start*/

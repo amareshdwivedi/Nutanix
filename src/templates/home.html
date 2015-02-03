@@ -270,8 +270,8 @@ $$(window).load(function() {
 								<li class="disabled"><a href="#preNetworking"><span class="fa fa-globe"></span>Networking </a></li>
 								<li class="disabled"><a href="#preCredentials"><span class="fa fa-key"></span>Credentials</a></li>
 								<li class="disabled"><a href="#preStorage"><span class="fa fa-database"></span>Storage</a></li>
-								<li class="disabled"><a href="#preDeployerinfra" class="step-5"><span class="fa fa-comments" ></span>Deployer Infrastructure</a></li>
 								<li class="disabled"><a href="#preInfra"><span class="fa fa-sitemap"></span>vCenter</a></li>
+								<li class="disabled"><a href="#preDeployerinfra" class="step-5"><span class="fa fa-comments" ></span>Deployer Infrastructure</a></li>
 							</ul>
 						</div>
 					</div>
@@ -895,7 +895,7 @@ $$(window).load(function() {
 											</div>
 											-->
 											<input type="hidden"  id="restURL" class="form-control form-font"/>
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Storage Pool Name
 												</label>
@@ -904,7 +904,7 @@ $$(window).load(function() {
 												</div>
 											</div>
 											
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Container
 												</label>
@@ -913,69 +913,6 @@ $$(window).load(function() {
 												</div>
 											</div>
 											
-										</div>
-										
-										<div class="quick_actions"> 
-										  <a class="btn nutanix-form-btn next" style="float:right;width: 60px;text-align: center;" href="#">Next</a> 
-										  <a class="btn btn-default default-font back" style="float:right;width: 60px;text-align: center;" href="#">Back</a> 
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div id="preDeployerinfra" class="tab-content">
-							<div class="one_wrap fl_left">
-								<div class="widget">
-									<div class="widget_title">
-										<span class="fa fa-comments"></span>
-										<h5>Deployment Infrastructure</h5>
-									</div>
-									<div class="widget_body">
-										<div class="mainBody_container col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-													Hypervisor  ISO
-												</label>
-												<div class="form-group predeployForm">
-													<select id="hypervisor_iso" class="form-control form-font">
-														<option value="VMware-VMvisor-Installer-5.5.0-1331820.x86_64.iso"> VMware-VMvisor-Installer-5.5.0-1331820.x86_64.iso</option>
-													</select>
-												</div>
-											</div>
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-													Phoenix  ISO
-												</label>
-												<div class="form-group predeployForm">
-													<select id="phonix_iso" class="form-control form-font">
-														<option value="phoenix-1.3_ESX_NOS-4.0.1-stable.iso"> phoenix-1.3_ESX_NOS-4.0.1-stable.iso</option>
-													</select>
-												</div>
-											</div>											
-
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-													Use Foundation IPS
-												</label>
-												<div class="form-group predeployForm">
-													<select id="foundation_ip" class="form-control form-font">
-														<option value="true">True</option>
-														<option value="false">False</option>
-													</select>
-												</div>
-											</div>	
-											
-											
-											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
-												<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-														Foundation Server IP
-													</label>
-													<div class="form-group predeployForm">
-														<input type="text" value="10.1.222.146" id="foundation_server_ip" class="form-control form-font"/>
-													</div>
-												</div>
-											</div>		
 										</div>
 										
 										<div class="quick_actions"> 
@@ -1065,6 +1002,69 @@ $$(window).load(function() {
 										</div>
 										
 										<div class="quick_actions"> 
+										  <a class="btn nutanix-form-btn next" style="float:right;width: 60px;text-align: center;" href="#">Next</a> 
+										  <a class="btn btn-default default-font back" style="float:right;width: 60px;text-align: center;" href="#">Back</a> 
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="preDeployerinfra" class="tab-content">
+							<div class="one_wrap fl_left">
+								<div class="widget">
+									<div class="widget_title">
+										<span class="fa fa-comments"></span>
+										<h5>Deployment Infrastructure</h5>
+									</div>
+									<div class="widget_body">
+										<div class="mainBody_container col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-4 col-sm-4 col-xs-12 no-margin no-padding left-label control-label">
+													Hypervisor  ISO
+												</label>
+												<div class="form-group predeployForm">
+													<select id="hypervisor_iso" class="form-control form-font">
+														<option value="VMware-VMvisor-Installer-5.5.0-1331820.x86_64.iso"> VMware-VMvisor-Installer-5.5.0-1331820.x86_64.iso</option>
+													</select>
+												</div>
+											</div>
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-4 col-sm-4 col-xs-12 no-margin no-padding left-label control-label">
+													Phoenix  ISO
+												</label>
+												<div class="form-group predeployForm">
+													<select id="phonix_iso" class="form-control form-font">
+														<option value="phoenix-1.3_ESX_NOS-4.0.1-stable.iso"> phoenix-1.3_ESX_NOS-4.0.1-stable.iso</option>
+													</select>
+												</div>
+											</div>											
+
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-4 col-sm-4 col-xs-12 no-margin no-padding left-label control-label">
+													Use Foundation IPS
+												</label>
+												<div class="form-group predeployForm">
+													<select id="foundation_ip" class="form-control form-font">
+														<option value="true">True</option>
+														<option value="false">False</option>
+													</select>
+												</div>
+											</div>	
+											
+											
+											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
+												<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-4 col-sm-4 col-xs-12 no-margin no-padding left-label control-label">
+														Foundation Server IP
+													</label>
+													<div class="form-group predeployForm">
+														<input type="text" value="10.1.222.146" id="foundation_server_ip" class="form-control form-font"/>
+													</div>
+												</div>
+											</div>		
+										</div>
+										
+										<div class="quick_actions"> 
 										  <input type="hidden" id="task_id" class="taskid" value=""/>
 										  <a class="btn nutanix-form-btn submit" id="submit_all" name="submit" style="float:right;width: 60px;text-align: center;" href="#">Submit</a> 
 										  <a class="btn btn-default default-font back" style="float:right;width: 60px;text-align: center;" href="#">Back</a> 
@@ -1073,6 +1073,7 @@ $$(window).load(function() {
 								</div>
 							</div>
 						</div>
+						
 					</div>
 				</div>
 				<!-------------------------------------------Pre Deploy End----------------------------------------------->
@@ -1109,7 +1110,19 @@ $$(window).load(function() {
 					<div class="content_wrap">
 						<div class="mainBody_container col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
                             <div class="col-lg-12  col-md-12 col-sm-12 col-xs-12 no-margin no-padding startDeployment">
-                                <input type="button" value="Begin Deployment" class="startDeploymentBtn"/>
+								<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12 no-margin no-padding">
+									<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding successMessage">
+										<p>Task Created Successfully.</p>
+									</div>
+									<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
+										<input type="checkbox" id="foundationCheck" name="deployment_type" value="foundation"><span class="checkText">Foundation</span>
+										<input type="checkbox" id="prismCheck" name="deployment_type" value="prism"><span class="checkText">Prism</span>
+										<input type="checkbox" id="vcenterCheck" name="deployment_type" value="vcenter"><span class="checkText">Vcenter</span>
+									</div>
+                                </div>
+								<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 no-margin no-padding">
+									<input type="button" value="Begin Deployment" class="startDeploymentBtn"/>
+								</div>
                             </div>
                             
                             <div class="col-lg-12  col-md-12 col-sm-12 col-xs-12 no-margin no-padding deploymentProgress">
