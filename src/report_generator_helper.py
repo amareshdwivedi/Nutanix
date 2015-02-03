@@ -763,7 +763,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "PowerOn": 
             return "SSH on Host["+host+"] is Enabled", False, 'alert'                   
                  
-    if check_name == "Check if only 10Gbps VMNIC are Connected":
+    if check_name == "Check if only 10GBps VMNIC are Connected":
         if actual_value == "Not-Configured":
             return 'Not-Configured', False, ''
         elif actual_value == "10GBps VMNIC Not Connected":
@@ -811,7 +811,13 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
             return  "Total Error Entries are ["+actual_value+"]", False, 'warning' 
         
-                                         
+    if check_name == "Both 10GBps & 1GBps VMNIC Connected to VDS or VSS":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif status == "FAIL":
+            return "In cluster ["+cluster+"] Host ["+entity+"] has 10Gbps and 1Gbps network adapter assigned to VDS or VSS", True, 'info'
+        else:
+            return "PASS", False, ''                                         
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
