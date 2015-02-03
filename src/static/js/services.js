@@ -81,23 +81,25 @@ jQuery(document).ready(function() {
 			 success: function(data)
 			 {
 				 if(data.response == 200){
-					 $('#createCustomerModal').modal();
-					 $("#createCustomerModal .modal-body .form_fields_container").hide();
-                     $("#createCustomerModal .modal-body .sucessMsg").show();
-                     $("#createCustomerModal .modal-body .sucessMsg").html(data.message);
+					 $('#createNewCustomerModel').modal();
+					 $("#createNewCustomerModel .modal-body .form_fields_container").hide();
+                     $("#createNewCustomerModel .modal-body .sucessMsg").show();
+                      $(".createNewCustomerBtn").hide();
+                     $("#createNewCustomerModel .modal-body .sucessMsg").html(data.message);
 					 getCustomers();
 				 }
 				 else{
-					 $('#createCustomerModal').modal();
-					 $("#createCustomerModal .modal-body .form_fields_container").hide();
-                     $("#createCustomerModal .modal-body .sucessMsg").show();
-                     $("#createCustomerModal .modal-body .sucessMsg").html(data.error);
+					 $('#createNewCustomerModel').modal();
+					 $("#createNewCustomerModel .modal-body .form_fields_container").hide();
+                     $("#createNewCustomerModel .modal-body .sucessMsg").show();
+                      $(".createNewCustomerBtn").hide();
+                     $("#createNewCustomerModel .modal-body .sucessMsg").html(data.error);
 				 }
 			 },
 			 error: function (jqXHR, textStatus, errorThrown)
 			 {
-				$('#createCustomerModal').modal();
-				$("#createCustomerModal .modal-body").html("Unable to Create New Customer.");
+				$('#createNewCustomerModel').modal();
+				$("#createNewCustomerModel .modal-body").html("Unable to Create New Customer.");
 			 }
 			});
 		}
@@ -134,11 +136,11 @@ jQuery(document).ready(function() {
 			 success: function(data){
 				//alert(data);
                  if(data.response == 200){
-					 $('#commonModal').modal();
+					 /*$('#commonModal').modal();
                      $("#commonModal .modal-header h4.modal-title").html("Create Task");
-					 $("#commonModal .modal-body").html("Task Created Successfully.");
+					 $("#commonModal .modal-body").html("Task Created Successfully.");*/
                      $("#task_id").val(data.task_id);
-                     
+                     $(".successMessage").show();
                      $( "#mainTabContainer" ).tabs( "enable", 2 ).tabs( "select", 2 );
 				 }
 				 else{
@@ -377,38 +379,89 @@ jQuery(document).ready(function() {
         $(".pageloader").show();
 		var customerId = $("#customerId").val();
         var taskId = $("#task_id").val();
-        startDeployment(customerId, taskId);
+
+        var checkValues = [];
+        checked = $('input[name=deployment_type]:checked');
+        if( checked.length > 0 ) {
+             checkValues = checked.map(function(){
+                return $(this).val();
+            }).get();        
+        }
+
+        startDeployment(customerId, taskId,checkValues);
+    //    startDeployment(customerId, "29",checkValues);
 	});
     
-    function startDeployment(customerId, taskId){
+    var interval = null;
+    function startDeployment(customerId, taskId,checkValues){
         var post_data = {};
         post_data["customer_id"] = customerId;
         post_data["task_id"] =taskId;
         post_data["module_id"] ="foundation";
 
-		$.ajax({
-			 type: "POST",
-			 url: "/v1/deployer/action/",
-			 async: false,
-			 dataType: "json",
-             data:JSON.stringify(post_data),
-			 success: function(data){
-				//alert(data);
-             },
-			 error: function(request,status,errorThrown){
-				 alert("No Data Available");
-			 }
-		});	
+       
+
+        if (checkValues.indexOf("foundation") > -1) {
+            console.log(JSON.stringify(checkValues));
+            
+            	$.ajax({
+                     type: "POST",
+                     url: "/v1/deployer/action/",
+                     async: false,
+                     dataType: "json",
+                     data:JSON.stringify(post_data),
+                     success: function(data){
+                        //alert(data);
+                     },
+                     error: function(request,status,errorThrown){
+                         alert("No Data Available");
+                     }
+                });	
+
+
+                $(".pageloader").fadeOut("slow");
+                deployementStatus(customerId, taskId,checkValues);
+                interval = setInterval(function(){
+                    deployementStatus(customerId, taskId,checkValues); // this will run after every 10 seconds
+                }, 10000);
+            
+        }
+        
+        
+        if (checkValues.indexOf("vcenter") > -1 && checkValues.indexOf("foundation") == -1 ) {
+                post_data["module_id"] ="vcenter";
+                $.ajax({
+                     type: "POST",
+                     url: "/v1/deployer/action/",
+                     async: false,
+                     dataType: "json",
+                     data:JSON.stringify(post_data),
+                     success: function(data){
+                        //alert(data);
+                     },
+                     error: function(request,status,errorThrown){
+                         alert("No Data Available");
+                     }
+                });	 
+               $(".pageloader").fadeOut("slow");
+                deployementStatus(customerId, taskId,checkValues);
+                /*interval = setInterval(function(){
+                    deployementStatus(customerId, taskId,checkValues); // this will run after every 10 seconds
+                }, 10000);*/
+
+        }
+        
         
 
-        $(".pageloader").fadeOut("slow");
-        deployementStatus(customerId, taskId);
-        setInterval(function(){
-            deployementStatus(customerId, taskId); // this will run after every 10 seconds
-        }, 10000);
-	}
+        
 
-    function deployementStatus(customerId, taskId){
+	}
+    var completeTask = false;
+    
+    var prismCheck = false;
+    var vcenterCheck = false;
+    function deployementStatus(customerId, taskId,checkValues){
+        
         $.ajax({
 			 type: "GET",
 			 url: "/v1/deployer/customers/"+customerId+"/tasks/"+taskId+"/status/",
@@ -418,40 +471,52 @@ jQuery(document).ready(function() {
                  for (var i = 0; i < data.task_status.length; i++) {
                     if(data.task_status[i].module == "foundation"){
                         $("#foundationStatus .progressPercentage").html(data.task_status[i].status);
-                        if(data.task_status[i].status == "100.0%"){
-                            
-                        var post_data = {};
-                        post_data["customer_id"] = customerId;
-                        post_data["task_id"] =taskId;
-                        post_data["module_id"] ="vcenter";
-                        $.ajax({
-                             type: "POST",
-                             url: "/v1/deployer/action/",
-                             async: false,
-                             dataType: "json",
-                             data:JSON.stringify(post_data),
-                             success: function(data){
-                                //alert(data);
-                             },
-                             error: function(request,status,errorThrown){
-                                 alert("No Data Available");
-                             }
-                        });	
+                        if(data.task_status[i].status == "100.0%" && !completeTask){
+                    
+                      //  clearInterval(interval);
+    
+                         if (checkValues.indexOf("prism") > -1) {    
+                            var post_data = {};
+                            post_data["customer_id"] = customerId;
+                            post_data["task_id"] =taskId;
+                            post_data["module_id"] ="prism";
+                            $.ajax({
+                                 type: "POST",
+                                 url: "/v1/deployer/action/",
+                                 async: false,
+                                 dataType: "json",
+                                 data:JSON.stringify(post_data),
+                                 success: function(data){
+                                    //alert(data);
+                                     completeTask = true;
+                                     prismCheck = true;
+                                 },
+                                 error: function(request,status,errorThrown){
+                                     alert("No Data Available");
+                                 }
+                            });	
 
-                        post_data["module_id"] ="prism";
-                        $.ajax({
-                             type: "POST",
-                             url: "/v1/deployer/action/",
-                             async: false,
-                             dataType: "json",
-                             data:JSON.stringify(post_data),
-                             success: function(data){
-                                //alert(data);
-                             },
-                             error: function(request,status,errorThrown){
-                                 alert("No Data Available");
-                             }
-                        });	                            
+                        }
+                         if (checkValues.indexOf("vcenter") > -1) {
+                            post_data["module_id"] ="vcenter";
+                            $.ajax({
+                                 type: "POST",
+                                 url: "/v1/deployer/action/",
+                                 async: false,
+                                 dataType: "json",
+                                 data:JSON.stringify(post_data),
+                                 success: function(data){
+                                    //alert(data);
+                                     completeTask = true;
+                                     vcenterCheck = true;
+                                 },
+                                 error: function(request,status,errorThrown){
+                                     alert("No Data Available");
+                                 }
+                            });	     
+
+                         }
+                            
                             
                             $("#foundationStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
                             $("#foundationStatus .statusMessage").html("Setup Completed...");
@@ -460,7 +525,8 @@ jQuery(document).ready(function() {
                             $("#foundationStatus .status").removeClass("taskCompleted").addClass("progressActiveSec");
                             $("#foundationStatus .statusMessage").html("Setup InProgress...");
                         }
-                    }else if(data.task_status[i].module == "prism"){
+                    }
+                      if(data.task_status[i].module == "prism" && prismCheck){
                         $("#prismStatus .progressPercentage").html(data.task_status[i].status);
                         if(data.task_status[i].status == "Failed"){
                             $("#prismStatus .status").html("");
@@ -475,7 +541,9 @@ jQuery(document).ready(function() {
                             $("#prismStatus .status").addClass("progressActiveSec");
                             $("#prismStatus .statusMessage").html("Setup InProgress...");
                         }
-                    }else if(data.task_status[i].module == "vcenter"){
+                    }
+                     
+                     if(data.task_status[i].module == "vcenter" && vcenterCheck){
                         $("#vcenterStatus .progressPercentage").html(data.task_status[i].status);
                         if(data.task_status[i].status == "Failed"){
                             $("#vcenterStatus .status").html("");

@@ -2244,3 +2244,10 @@ background: #e0e0e0;
     text-shadow: 0 1px 0 #ffffff; margin-bottom: 10px;}
 .startPostDeployment h4 a{color: #8a9294;}
 .startPostDeployment h4 a:hover{color: #222;}
+
+#preDeployerinfra div.selector{width:290px;}
+#preDeployerinfra div.selector span{ width:290px;}
+#preDeployerinfra .predeployForm{width:64%}
+#preDeployerinfra .form-control{ width:96%}
+.checkText{ float: left;margin: 8px 20px 8px 10px;}
+.successMessage{color:#3c763d; font-weight: bold;font-size:14px;}
