@@ -1109,4 +1109,5 @@ def get_view_severity(check_name):
     severity_map['Verify Desktop Pool Status']='High'
     severity_map['Verify that the Maximum number of desktops in a pool is no more than 1000']='High'
     severity_map['Verify vCenter servers have at least 4 vCPUs and 6 GBs of RAM']='High'
+    severity_map['Verify Desktop VM disk controller is an LSI Logic Controller']='High'
     return severity_map.get(check_name)
