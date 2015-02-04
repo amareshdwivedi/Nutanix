@@ -407,6 +407,10 @@ jQuery(document).ready(function() {
 	});
     
     var interval = null;
+    var completeTask = false;
+    
+    var prismCheck = false;
+    var vcenterCheck = false;
     function startDeployment(customerId, taskId,checkValues){
         var post_data = {};
         post_data["customer_id"] = customerId;
@@ -452,6 +456,7 @@ jQuery(document).ready(function() {
                      data:JSON.stringify(post_data),
                      success: function(data){
                         //alert(data);
+                         vcenterCheck = true;
                      },
                      error: function(request,status,errorThrown){
                          alert("No Data Available");
@@ -470,10 +475,6 @@ jQuery(document).ready(function() {
         
 
 	}
-    var completeTask = false;
-    
-    var prismCheck = false;
-    var vcenterCheck = false;
     function deployementStatus(customerId, taskId,checkValues){
         
         $.ajax({
