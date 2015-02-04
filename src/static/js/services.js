@@ -91,7 +91,8 @@ jQuery(document).ready(function() {
 					 $('#createNewCustomerModel').modal();
 					 $("#createNewCustomerModel .modal-body .form_fields_container").hide();
                      $("#createNewCustomerModel .modal-body .sucessMsg").show();
-                      $(".createNewCustomerBtn").hide();
+                     $(".createNewCustomerBtn").hide();
+                     $("#createNewCustomerModel .cancelButton").show();
                      $("#createNewCustomerModel .modal-body .sucessMsg").html(data.message);
 					 getCustomers();
                      
@@ -104,8 +105,9 @@ jQuery(document).ready(function() {
 					 $("#createNewCustomerModel .modal-body .form_fields_container").hide();
                      $("#createNewCustomerModel .modal-body .sucessMsg").show();
                       $(".createNewCustomerBtn").hide();
+                     $("#createNewCustomerModel .cancelButton").show();
                      $("#createNewCustomerModel .modal-body .sucessMsg").html(data.error);
-                     location.reload(false);
+                     //location.reload(false);
 				 }
 			 },
 			 error: function (jqXHR, textStatus, errorThrown)

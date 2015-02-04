@@ -2251,3 +2251,5 @@ background: #e0e0e0;
 #preDeployerinfra .form-control{ width:96%}
 .checkText{ float: left;margin: 8px 20px 8px 10px;}
 .successMessage{color:#3c763d; font-weight: bold;font-size:14px;}
+.successMessage span{ font-weight: normal;color:#4a4a4a; }
+.cancelButton{ display:none;}

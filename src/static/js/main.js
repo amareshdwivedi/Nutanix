@@ -456,6 +456,7 @@ jQuery(document).ready(function() {
 		 $(".createCustomer-form .form_input").removeClass("error");
          $("#createNewCustomerModel .modal-body .sucessMsg").hide();
          $(".createNewCustomerBtn").show();
+         $("#createNewCustomerModel .cancelButton").hide();
 		$(".errorMsg").hide();
 	 });
 	 

@@ -307,14 +307,6 @@ $$(window).load(function() {
 													<input type="text" value="10.1.222.51" id="externalIP" class="form-control form-font"/>
 												</div>
 											</div>
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-													Node RAM (GB)
-												</label>
-												<div class="form-group predeployForm">
-													<input type="text" value="24" id="node_ram" class="form-control form-font"/>
-												</div>
-											</div>
 											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
 												<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
@@ -337,6 +329,16 @@ $$(window).load(function() {
 												<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label">
 													<span class="blockHead">Blocks</span>
 												</label>
+											</div>
+											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
+												<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+														Node RAM (GB)
+													</label>
+													<div class="form-group predeployForm">
+														<input type="text" value="24" id="node_ram" class="form-control form-font"/>
+													</div>
+												</div>
 											</div>
 											<div id="block-1" class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding blockContainer">
 												<label class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding left-label control-label subLevelHead">
@@ -366,7 +368,7 @@ $$(window).load(function() {
 																IPMI Mac
 															</label>
 															<div class="form-group predeployForm">
-																<input type="text" value="00:25:90:da:fe:08" id="ipmimac" class="form-control form-font"/>
+																<input type="text" value="00:25:90:DA:FE:08" id="ipmimac" class="form-control form-font"/>
 															</div>
 														</div>
 														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -477,7 +479,7 @@ $$(window).load(function() {
 															IPMI Mac
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="00:25:90:da:fe:00" id="ipmimac" class="form-control form-font"/>
+															<input type="text" value="00:25:90:DA:FE:00" id="ipmimac" class="form-control form-font"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -586,7 +588,7 @@ $$(window).load(function() {
 															IPMI Mac
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="00:25:90:da:fd:fd" id="ipmimac" class="form-control form-font"/>
+															<input type="text" value="00:25:90:DA:FD:FD" id="ipmimac" class="form-control form-font"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -944,6 +946,14 @@ $$(window).load(function() {
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+													Port
+												</label>
+												<div class="form-group predeployForm">
+													<input type="text" value="443" id="vcenter_port" class="form-control form-font"/>
+												</div>
+											</div>
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													User
 												</label>
 												<div class="form-group predeployForm">
@@ -956,14 +966,6 @@ $$(window).load(function() {
 												</label>
 												<div class="form-group predeployForm">
 													<input type="text" value="nutanix/4u" id="v_center_vm_password" class="form-control form-font"/>
-												</div>
-											</div>
-											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
-												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
-													Port
-												</label>
-												<div class="form-group predeployForm">
-													<input type="text" value="443" id="vcenter_port" class="form-control form-font"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -1112,7 +1114,7 @@ $$(window).load(function() {
                             <div class="col-lg-12  col-md-12 col-sm-12 col-xs-12 no-margin no-padding startDeployment">
 								<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12 no-margin no-padding">
 									<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding successMessage">
-										<p>Task Created Successfully.</p>
+										<p>Deployment configuration created successfully. <span>Please select deployment task and begin deployment.</span></p>
 									</div>
 									<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
 										<input type="checkbox" id="foundationCheck" name="deployment_type" value="foundation"><span class="checkText">Foundation</span>
@@ -1372,7 +1374,9 @@ $$(window).load(function() {
 				</div>
 				<div class="modal-footer">
 					<button class="btn nutanix-form-btn createNewCustomerBtn"
-						type="button">OK</button>
+						type="button">Save</button>
+					<button data-dismiss="modal" aria-hidden="true"
+						class="btn nutanix-form-btn cancelButton" type="button">OK</button>
 					<button data-dismiss="modal" aria-hidden="true"
 						class="btn btn-default default-font" type="button">Cancel</button>
 				</div>
