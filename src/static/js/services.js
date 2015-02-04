@@ -10,10 +10,17 @@ jQuery(document).ready(function() {
 			 dataType: "json",
 			 success: function(data){
 				var customers='';
-				for (var i = 0; i < data.customer_record.length; i++) {
-					customers += '<tr><td class="customerId">'+data.customer_record[i].customer_id+'</td><td class="customerName">'+data.customer_record[i].customer_name+'</td></tr>';
-				}
-				$("table.customersTable tbody").html(customers);
+                 
+                 if(data.response != 404 || data.response != '404'){
+                    for (var i = 0; i < data.customer_record.length; i++) {
+                        customers += '<tr><td class="customerId">'+data.customer_record[i].customer_id+'</td><td class="customerName">'+data.customer_record[i].customer_name+'</td></tr>';
+                    }
+                    
+                    $("table.customersTable tbody").html(customers);
+                    
+                }
+                 
+				
 			 },
 			 error: function(request,status,errorThrown){
 				 alert("No Data Available");
@@ -87,6 +94,10 @@ jQuery(document).ready(function() {
                       $(".createNewCustomerBtn").hide();
                      $("#createNewCustomerModel .modal-body .sucessMsg").html(data.message);
 					 getCustomers();
+                     
+                      $('.createCustomer-form').find('input:text').val('');
+                      $('.createCustomer-form').find('input:email').val('');
+                     location.reload(false);
 				 }
 				 else{
 					 $('#createNewCustomerModel').modal();
@@ -94,6 +105,7 @@ jQuery(document).ready(function() {
                      $("#createNewCustomerModel .modal-body .sucessMsg").show();
                       $(".createNewCustomerBtn").hide();
                      $("#createNewCustomerModel .modal-body .sucessMsg").html(data.error);
+                     location.reload(false);
 				 }
 			 },
 			 error: function (jqXHR, textStatus, errorThrown)
