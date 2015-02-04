@@ -513,6 +513,9 @@ jQuery(document).ready(function() {
 
                         }
                          if (checkValues.indexOf("vcenter") > -1) {
+                              var post_data = {};
+                            post_data["customer_id"] = customerId;
+                            post_data["task_id"] =taskId;
                             post_data["module_id"] ="vcenter";
                             $.ajax({
                                  type: "POST",
