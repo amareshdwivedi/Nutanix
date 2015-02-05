@@ -1873,16 +1873,16 @@ class VCChecker(CheckerBase):
                 ssh.connect(vcenter_ip, username="root", password="vmware")
                    
             except paramiko.AuthenticationException:
-                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Greater than or equal to "+str(expected_result)+")",("FAIL"))
+                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
                 return False ,message
             except paramiko.SSHException, e:
-                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Greater than or equal to "+str(expected_result)+")",("FAIL"))
+                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
                 return False ,message
             except socket.error, e:
-                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Greater than or equal to "+str(expected_result)+")",("FAIL"))
+                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
                 return False ,message
              
             if ssh is not None:
@@ -1893,13 +1893,13 @@ class VCChecker(CheckerBase):
                 for line in stdout:
                     if line.startswith('wrapper.java.maxmemory'):
                         memory = line.split("=")[1]
-                if memory is not None and memory >= expected_result:     
-                    message += ", " +check_name+" on "+vcenter_ip+" ="+memory+" (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+memory.strip()+" (Expected: =Greater than or equal to "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
+                if memory is not None and int(memory.strip()) == expected_result:     
+                    message += ", " +check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
                 else:
                     passed = False
-                    message += ", " +check_name+" on "+vcenter_ip+" ="+memory+" (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+memory.strip()+" (Expected: =Greater than or equal to "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
+                    message += ", " +check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
 
                 ssh.close()
         return passed,message
@@ -2033,17 +2033,17 @@ class VCChecker(CheckerBase):
         expected_result = self.get_vcenterserver_default_memory(server_version, inventory_size, "vcenter_server_memory")
         if vm is not None:
             memory_assigned = vm.config.hardware.memoryMB
-            if memory_assigned is not None and memory_assigned >= expected_result:
-                message += ", " +"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: =Greater than or equal to "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            if memory_assigned is not None and memory_assigned == expected_result:
+                message += ", " +"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
             else:
                 passed = False
-                message += ", " +"Memory Assigned  to vCenter Server = None (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = None (Expected: =Greater than or equal to "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
+                message += ", " +"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
         else:
             passed = False
-            message += ", " +"Memory Assigned  to vCenter Server = Cannot Determine (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = Cannot Determine (Expected: =Greater than or equal to "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            message += ", " +"Memory Assigned  to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
                     
         return passed ,message,''  
 
@@ -2077,17 +2077,17 @@ class VCChecker(CheckerBase):
         expected_result = self.get_vcenterserver_default_memory(server_version, inventory_size, "number_of_cpu")
         if vm is not None:
             cpu_assigned = vm.config.hardware.numCPU
-            if cpu_assigned is not None and cpu_assigned >= expected_result:
-                message += ", " +"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: =Greater than or equal to "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            if cpu_assigned is not None and cpu_assigned == expected_result:
+                message += ", " +"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
             else:
                 passed = False
-                message += ", " +"Number of CPU Assigned  to vCenter Server = None (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Number of CPU Assigned  to vCenter Server = None (Expected: =Greater than or equal to "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
+                message += ", " +"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
         else:
             passed = False
-            message += ", " +"Number of CPU Assigned  to vCenter Server = Cannot Determine (Expected: =Greater than or equal to "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"CPU Assigned  to vCenter Server = Cannot Determine (Expected: =Greater than or equal to "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            message += ", " +"Number of CPU Assigned  to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"CPU Assigned  to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
                     
         return passed ,message,''  
 
@@ -2137,16 +2137,16 @@ class VCChecker(CheckerBase):
                 ssh.connect(vcenter_ip, username="root", password="vmware")
                    
             except paramiko.AuthenticationException:
-                message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+                message += ", " +"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
                 return False ,message,path_curr
             except paramiko.SSHException, e:
-                message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+                message += ", " +"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
                 return False ,message,path_curr
             except socket.error, e:
-                message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+                message += ", " +"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
                 return False ,message,path_curr
              
             if ssh is not None:
@@ -2158,12 +2158,12 @@ class VCChecker(CheckerBase):
                     error_count+=1
                      
                 if error_count > 50:
-                    message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(False and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+str(error_count)+" (Expected: =Less than 50)",(False and "PASS" or "FAIL"))
+                    message += ", " +"Error Messages in vpxd.log = "+str(error_count)+" (Expected: =Less than 50)"+"#"+(False and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log = "+str(error_count)+" (Expected: =Less than 50)",(False and "PASS" or "FAIL"))
                     passed = False
                 elif error_count <= 50:
-                    message += ", "+"Error Messages in vpxd.log of "+vcenter_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(True and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+str(error_count)+" (Expected: =Less than 50)",(True and "PASS" or "FAIL"))
+                    message += ", "+"Error Messages in vpxd.log = "+str(error_count)+" (Expected: =Less than 50)"+"#"+(True and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log = "+str(error_count)+" (Expected: =Less than 50)",(True and "PASS" or "FAIL"))
              
                 ssh.close()
                 
