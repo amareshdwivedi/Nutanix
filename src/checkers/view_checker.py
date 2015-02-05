@@ -940,16 +940,19 @@ class HorizonViewChecker(CheckerBase):
         vm_data=self.get_vc_all_vms(vm_properties=["name","config.hardware.device[1000].deviceInfo.summary"])
         passed=True
         message=""
+        any_view_vm_found=False
         for vm in vm_data:
             vm_name=vm["name"]
             if vm_name in desktop_vms_names:
                 '''check is VM is part of VMware View Desktop VM'''
+                
                 controller=None
                 try:
                     controller=vm["config.hardware.device[1000].deviceInfo.summary"]
                 except KeyError:
                     continue
                 
+                any_view_vm_found=True
                 if controller!=None:
                     LSI_found=False
                     if 'LSI' in controller:
@@ -961,4 +964,8 @@ class HorizonViewChecker(CheckerBase):
                     passed=passed and False
                     self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=For Desktop VM ["+vm_name+"]: LSI controller not found (Expected:=LSI controller : True)", (False and "PASS" or "FAIL"))
                     message+=", "+ "Actual:=For DesktopVM ["+vm_name+"]; LSI controller not found (Expected:=LSI controller : True)#"+(False and "Pass" or "Fail")
+        if any_view_vm_found==False:
+            passed=False
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:=No-Desktop-VM-Found (Expected:=LSI controller : True)", (False and "PASS" or "FAIL"))
+            message+=", "+ "Actual:=No-Desktop-VM-Found (Expected:=LSI controller : True)#"+(False and "Pass" or "Fail")
         return passed , message,None    
