@@ -228,7 +228,7 @@ class HorizonViewChecker(CheckerBase):
         else:
             confirm_pass=getpass.getpass('Re-Enter Vmware Horizon View Server Password: ')
             if new_vc_pwd !=confirm_pass :
-                exit_with_message("\nError: Password miss-match.Please run \"vc setup\" command again")
+                exit_with_message("\nError: Password miss-match.Please run \"view setup\" command again")
             vc_pwd=Security.encrypt(new_vc_pwd)
        
         #Test Connection Status
@@ -255,7 +255,7 @@ class HorizonViewChecker(CheckerBase):
             exit_with_message("\nError: Invalid View vCenter Server IP address")
                 
         current_view_vc_user=self.authconfig['view_vc_user'] if ('view_vc_user' in self.authconfig.keys()) else "Not Set"
-        view_vc_user=raw_input("Enter View vCenter Server User Name [default: "+current_vc_user+"]: ")
+        view_vc_user=raw_input("Enter View vCenter Server User Name [default: "+current_view_vc_user+"]: ")
         view_vc_user=view_vc_user.strip()
         if view_vc_user == "":
             if(current_view_vc_user == "Not Set"):
