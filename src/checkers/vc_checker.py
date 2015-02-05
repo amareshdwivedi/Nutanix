@@ -2034,16 +2034,16 @@ class VCChecker(CheckerBase):
         if vm is not None:
             memory_assigned = vm.config.hardware.memoryMB
             if memory_assigned is not None and memory_assigned == expected_result:
-                message += ", " +"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+                message += ", " +"Memory Assigned to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
             else:
                 passed = False
-                message += ", " +"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
+                message += ", " +"Memory Assigned to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
         else:
             passed = False
-            message += ", " +"Memory Assigned  to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned  to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            message += ", " +"Memory Assigned to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
                     
         return passed ,message,''  
 
@@ -2068,7 +2068,7 @@ class VCChecker(CheckerBase):
                     
         return passed ,message,''  
 
-    @checkgroup("vcenter_server_checks", "Number of CPU Assigned  to vCenter Server",["performance"],"Number of CPU Assigned")
+    @checkgroup("vcenter_server_checks", "CPUs Assigned to vCenter Server",["performance"],"Number of CPU Assigned")
     def check_CPU_assigned(self):
         message = ""     
         passed = True
@@ -2078,16 +2078,16 @@ class VCChecker(CheckerBase):
         if vm is not None:
             cpu_assigned = vm.config.hardware.numCPU
             if cpu_assigned is not None and cpu_assigned == expected_result:
-                message += ", " +"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+                message += ", " +"CPUs Assigned to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"CPUs Assigned to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
             else:
                 passed = False
-                message += ", " +"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Number of CPU Assigned  to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
+                message += ", " +"CPUs Assigned to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"CPUs Assigned to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
         else:
             passed = False
-            message += ", " +"Number of CPU Assigned  to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"CPU Assigned  to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            message += ", " +"CPUs Assigned to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"CPUs Assigned to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
                     
         return passed ,message,''  
 
