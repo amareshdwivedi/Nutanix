@@ -138,15 +138,22 @@ class HorizonViewChecker(CheckerBase):
 
     def __init__(self):
         super(HorizonViewChecker, self).__init__(HorizonViewChecker._NAME_)
-        self.config_form =  form.Form( 
+        
+        if sys.platform.startswith("win") :
+            self.config_form =  form.Form( 
                 form.Textbox("Server",value=self.authconfig['view_ip']),
                 form.Textbox("User",value=self.authconfig['view_user']),
                 form.Password("Password",value=Security.decrypt(self.authconfig['view_pwd'])),
                 form.Textbox("VC Server",value=self.authconfig['view_vc_ip']),
                 form.Textbox("VC Port",value=self.authconfig['view_vc_port']),
                 form.Textbox("VC User",value=self.authconfig['view_vc_user']),
-                form.Password("VC Password",value=Security.decrypt(self.authconfig['view_vc_pwd'])))() 
-
+                form.Password("VC Password",value=Security.decrypt(self.authconfig['view_vc_pwd'])))()
+        else:
+            '''VMware Horizon View Health Check works on windows only.
+                config_form is set to None so that on WEB UI condition is check if it none, not supported OS message is shown
+            '''
+            self.config_form = None
+            
         self.si = None
         self.categories=['performance','availability']
         self.category=None
@@ -194,121 +201,122 @@ class HorizonViewChecker(CheckerBase):
         exit_with_message(message)
 
     def setup(self):
-        print "\nConfiguring Vmware Horizon View Server:\n"
+        print "\nConfiguring VMware Horizon View Server:\n"
         
-#         print "Current configuration for vCenter Server is:\n vCenter Server IP: %s \n vCenter User Name: %s \n VCenter Port: %d\n Clusters: %s \n hosts: %s"%\
-#               (self.authconfig['vc_ip'], self.authconfig['vc_user'], self.authconfig['vc_port'],self.authconfig['cluster'],self.authconfig['host'] )
-        current_vc_ip = self.authconfig['view_ip'] if ('view_ip' in self.authconfig.keys()) else "Not Set"
-        vc_ip=raw_input("Enter Vmware Horizon View Server IP [default: "+current_vc_ip+"]: ")
-        vc_ip=vc_ip.strip()
-        if vc_ip == "":
-            if(current_vc_ip == "Not Set"):
-                exit_with_message("Error: Set Vmware Horizon View Server IP.")
-            vc_ip=current_vc_ip
-        
-        if Validate.valid_ip(vc_ip) == False:
-            exit_with_message("\nError: Invalid Vmware Horizon View Server IP address")
+        if sys.platform.startswith("win") :
+            current_vc_ip = self.authconfig['view_ip'] if ('view_ip' in self.authconfig.keys()) else "Not Set"
+            vc_ip=raw_input("Enter VMware Horizon View Server IP [default: "+current_vc_ip+"]: ")
+            vc_ip=vc_ip.strip()
+            if vc_ip == "":
+                if(current_vc_ip == "Not Set"):
+                    exit_with_message("Error: Set VMware Horizon View Server IP.")
+                vc_ip=current_vc_ip
+            
+            if Validate.valid_ip(vc_ip) == False:
+                exit_with_message("\nError: Invalid VMware Horizon View Server IP address")
+                    
+            current_vc_user=self.authconfig['view_user'] if ('view_user' in self.authconfig.keys()) else "Not Set"
+            vc_user=raw_input("Enter VMware Horizon View Server User Name [default: "+current_vc_user+"]: ")
+            vc_user=vc_user.strip()
+            if vc_user == "":
+                if(current_vc_user == "Not Set"):
+                    exit_with_message("Error: Set VMware Horizon View Server User Name.")
+                vc_user=current_vc_user
                 
-        current_vc_user=self.authconfig['view_user'] if ('view_user' in self.authconfig.keys()) else "Not Set"
-        vc_user=raw_input("Enter Vmware Horizon View Server User Name [default: "+current_vc_user+"]: ")
-        vc_user=vc_user.strip()
-        if vc_user == "":
-            if(current_vc_user == "Not Set"):
-                exit_with_message("Error: Set Vmware Horizon View Server User Name.")
-            vc_user=current_vc_user
-            
-            
-        current_pwd=self.authconfig['view_pwd'] if  ('view_pwd' in self.authconfig.keys()) else "Not Set"
-        new_vc_pwd=getpass.getpass('Enter Vmware Horizon View Server Password [Press enter to use previous password]: ')
-        
-        if new_vc_pwd == "":
-            if(current_pwd == "Not Set"):
-                exit_with_message("Error: Set Vmware Horizon View Server Password.")
-            vc_pwd = current_pwd
-        else:
-            confirm_pass=getpass.getpass('Re-Enter Vmware Horizon View Server Password: ')
-            if new_vc_pwd !=confirm_pass :
-                exit_with_message("\nError: Password miss-match.Please run \"view setup\" command again")
-            vc_pwd=Security.encrypt(new_vc_pwd)
-       
-        #Test Connection Status
-        print "Checking Vmware Horizon View Server Connection Status:",
-         
-#         if not sys.platform.startswith("win"):
-#             exit_with_message("Plateform Not supported \n Windows system required to run Vmware Horizon View Checks")
-        status, message = self.check_connectivity(vc_ip, vc_user, vc_pwd)
-        if status == True:
-            print Fore.GREEN+" Connection successful"+Fore.RESET
-        else:
-           print Fore.RED+" Connection failure"+Fore.RESET
-           exit_with_message(message)
-
-        current_view_vc_ip = self.authconfig['view_vc_ip'] if ('view_vc_ip' in self.authconfig.keys()) else "Not Set"
-        view_vc_ip=raw_input("Enter View vCenter Server IP [default: "+current_view_vc_ip+"]: ")
-        view_vc_ip=view_vc_ip.strip()
-        if view_vc_ip == "":
-            if(current_view_vc_ip == "Not Set"):
-                exit_with_message("Error: Set View vCenter Server IP.")
-            view_vc_ip=current_view_vc_ip
-        
-        if Validate.valid_ip(view_vc_ip) == False:
-            exit_with_message("\nError: Invalid View vCenter Server IP address")
                 
-        current_view_vc_user=self.authconfig['view_vc_user'] if ('view_vc_user' in self.authconfig.keys()) else "Not Set"
-        view_vc_user=raw_input("Enter View vCenter Server User Name [default: "+current_view_vc_user+"]: ")
-        view_vc_user=view_vc_user.strip()
-        if view_vc_user == "":
-            if(current_view_vc_user == "Not Set"):
-                exit_with_message("Error: Set View  vCenter Server User Name.")
-            view_vc_user=current_view_vc_user
+            current_pwd=self.authconfig['view_pwd'] if  ('view_pwd' in self.authconfig.keys()) else "Not Set"
+            new_vc_pwd=getpass.getpass('Enter VMware Horizon View Server Password [Press enter to use previous password]: ')
             
+            if new_vc_pwd == "":
+                if(current_pwd == "Not Set"):
+                    exit_with_message("Error: Set VMware Horizon View Server Password.")
+                vc_pwd = current_pwd
+            else:
+                confirm_pass=getpass.getpass('Re-Enter VMware Horizon View Server Password: ')
+                if new_vc_pwd !=confirm_pass :
+                    exit_with_message("\nError: Password miss-match.Please run \"view setup\" command again")
+                vc_pwd=Security.encrypt(new_vc_pwd)
+           
+            #Test Connection Status
+            print "Checking VMware Horizon View Server Connection Status:",
+             
+    #         if not sys.platform.startswith("win"):
+    #             exit_with_message("Plateform Not supported \n Windows system required to run VMware Horizon View Checks")
+            status, message = self.check_connectivity(vc_ip, vc_user, vc_pwd)
+            if status == True:
+                print Fore.GREEN+" Connection successful"+Fore.RESET
+            else:
+               print Fore.RED+" Connection failure"+Fore.RESET
+               exit_with_message(message)
+    
+            current_view_vc_ip = self.authconfig['view_vc_ip'] if ('view_vc_ip' in self.authconfig.keys()) else "Not Set"
+            view_vc_ip=raw_input("Enter View vCenter Server IP [default: "+current_view_vc_ip+"]: ")
+            view_vc_ip=view_vc_ip.strip()
+            if view_vc_ip == "":
+                if(current_view_vc_ip == "Not Set"):
+                    exit_with_message("Error: Set View vCenter Server IP.")
+                view_vc_ip=current_view_vc_ip
             
-        view_current_pwd=self.authconfig['view_vc_pwd'] if  ('view_vc_pwd' in self.authconfig.keys()) else "Not Set"
-        new__view_vc_pwd=getpass.getpass('Enter View vCenter Server Password [Press enter to use previous password]: ')
-        
-        if new__view_vc_pwd == "":
-            if(view_current_pwd == "Not Set"):
-                exit_with_message("Error: Set View vCenter Server Password.")
-            new__view_vc_pwd = view_current_pwd
+            if Validate.valid_ip(view_vc_ip) == False:
+                exit_with_message("\nError: Invalid View vCenter Server IP address")
+                    
+            current_view_vc_user=self.authconfig['view_vc_user'] if ('view_vc_user' in self.authconfig.keys()) else "Not Set"
+            view_vc_user=raw_input("Enter View vCenter Server User Name [default: "+current_view_vc_user+"]: ")
+            view_vc_user=view_vc_user.strip()
+            if view_vc_user == "":
+                if(current_view_vc_user == "Not Set"):
+                    exit_with_message("Error: Set View  vCenter Server User Name.")
+                view_vc_user=current_view_vc_user
+                
+                
+            view_current_pwd=self.authconfig['view_vc_pwd'] if  ('view_vc_pwd' in self.authconfig.keys()) else "Not Set"
+            new__view_vc_pwd=getpass.getpass('Enter View vCenter Server Password [Press enter to use previous password]: ')
+            
+            if new__view_vc_pwd == "":
+                if(view_current_pwd == "Not Set"):
+                    exit_with_message("Error: Set View vCenter Server Password.")
+                new__view_vc_pwd = view_current_pwd
+            else:
+                confirm_pass=getpass.getpass('Re-Enter View vCenter Server Password: ')
+                if new__view_vc_pwd !=confirm_pass :
+                    exit_with_message("\nError: Password miss-match.Please run \"view setup\" command again")
+                new__view_vc_pwd=Security.encrypt(new__view_vc_pwd)
+            
+            current_view_vc_port=self.authconfig['view_vc_port'] if  ('view_vc_port' in self.authconfig.keys()) else "Not Set"
+            view_vc_port=raw_input("Enter vCenter Server Port [default: "+str(current_view_vc_port)+"]: ")
+            #vc_port=vc_port.strip()
+            if view_vc_port == "":
+                if(current_view_vc_port == "Not Set"):
+                    exit_with_message("Error: Set vCenter Server Port.")
+                view_vc_port=int(current_view_vc_port)
+            else:
+                view_vc_port=int(view_vc_port)
+            if isinstance(view_vc_port, int ) == False:
+                exit_with_message("\nError: Port number is not a numeric value")
+            
+            #Test Connection Status
+            print "Checking View vCenter Server Connection Status:",
+            status, message = self.check_view_vc_connectivity(view_vc_ip, view_vc_user, new__view_vc_pwd, view_vc_port)
+            if status == True:
+                print Fore.GREEN+" Connection successful"+Fore.RESET
+            else:
+               print Fore.RED+" Connection failure"+Fore.RESET
+               exit_with_message(message)      
+            #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+str(vc_port)+" cluster : "+cluster+" host : "+hosts
+     
+            view_auth = dict()
+            view_auth["view_ip"]=vc_ip;
+            view_auth["view_user"]=vc_user;
+            view_auth["view_pwd"]=vc_pwd;
+            view_auth["view_vc_ip"]=view_vc_ip;
+            view_auth["view_vc_user"]=view_vc_user;
+            view_auth["view_vc_pwd"]=new__view_vc_pwd;
+            view_auth["view_vc_port"]=view_vc_port;
+            
+            CheckerBase.save_auth_into_auth_config(self.get_name(),view_auth)
+            exit_with_message("VMware Horizon View Server is configured Successfully ")
         else:
-            confirm_pass=getpass.getpass('Re-Enter View vCenter Server Password: ')
-            if new__view_vc_pwd !=confirm_pass :
-                exit_with_message("\nError: Password miss-match.Please run \"view setup\" command again")
-            new__view_vc_pwd=Security.encrypt(new__view_vc_pwd)
-        
-        current_view_vc_port=self.authconfig['view_vc_port'] if  ('view_vc_port' in self.authconfig.keys()) else "Not Set"
-        view_vc_port=raw_input("Enter vCenter Server Port [default: "+str(current_view_vc_port)+"]: ")
-        #vc_port=vc_port.strip()
-        if view_vc_port == "":
-            if(current_view_vc_port == "Not Set"):
-                exit_with_message("Error: Set vCenter Server Port.")
-            view_vc_port=int(current_view_vc_port)
-        else:
-            view_vc_port=int(view_vc_port)
-        if isinstance(view_vc_port, int ) == False:
-            exit_with_message("\nError: Port number is not a numeric value")
-        
-        #Test Connection Status
-        print "Checking View vCenter Server Connection Status:",
-        status, message = self.check_view_vc_connectivity(view_vc_ip, view_vc_user, new__view_vc_pwd, view_vc_port)
-        if status == True:
-            print Fore.GREEN+" Connection successful"+Fore.RESET
-        else:
-           print Fore.RED+" Connection failure"+Fore.RESET
-           exit_with_message(message)      
-        #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+str(vc_port)+" cluster : "+cluster+" host : "+hosts
- 
-        view_auth = dict()
-        view_auth["view_ip"]=vc_ip;
-        view_auth["view_user"]=vc_user;
-        view_auth["view_pwd"]=vc_pwd;
-        view_auth["view_vc_ip"]=view_vc_ip;
-        view_auth["view_vc_user"]=view_vc_user;
-        view_auth["view_vc_pwd"]=new__view_vc_pwd;
-        view_auth["view_vc_port"]=view_vc_port;
-        
-        CheckerBase.save_auth_into_auth_config(self.get_name(),view_auth)
-        exit_with_message("Vmware Horizon View Server is configured Successfully ")
+            exit_with_message("VMware Horizon View Health Check not supported on this operating system. Please use windows machine")
         return
     
     def run_local_command(self,cmd):
@@ -451,7 +459,7 @@ class HorizonViewChecker(CheckerBase):
                     self.usage("Group " + group + " is not a valid check group")
                 check_groups_run.append(group)
 
-        self.reporter.notify_progress(self.reporter.notify_info,"Starting Vmware Horizon View Checks")
+        self.reporter.notify_progress(self.reporter.notify_info,"Starting VMware Horizon View Checks")
         self.result = ViewCheckerResult("view",self.authconfig)
         warnings.simplefilter('ignore')
 
@@ -470,12 +478,12 @@ class HorizonViewChecker(CheckerBase):
         #check view server connectivity
         status, message = self.check_connectivity(self.authconfig['view_ip'],self.authconfig['view_user'],self.authconfig['view_pwd'])
         if status == False:
-           exit_with_message("Error : Horizon View Connection Error"+"\n\nPlease run \"view setup\" command to configure Vmware Horizon View Server")
+           exit_with_message("Error : Horizon View Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View Server")
         
         vcstatus, vcmessage = self.check_view_vc_connectivity(self.authconfig['view_vc_ip'],self.authconfig['view_vc_user'],self.authconfig['view_vc_pwd'],self.authconfig['view_vc_port'])         
         
         if vcstatus == False:
-           exit_with_message("Error : View VC Connection Error"+"\n\nPlease run \"view setup\" command to configure Vmware Horizon View VC Server")
+           exit_with_message("Error : View VC Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View VC Server")
             
         passed_all = True
         
@@ -557,7 +565,7 @@ class HorizonViewChecker(CheckerBase):
 #         Disconnect(self.si)
         self.result.passed = ( passed_all and "PASS" or "FAIL" )
         self.result.message = "View Checks completed with " + (passed_all and "success" or "failure")
-        self.reporter.notify_progress(self.reporter.notify_info," Vmware Horizon View Checks complete")
+        self.reporter.notify_progress(self.reporter.notify_info," VMware Horizon View Checks complete")
 
         return self.result
 
