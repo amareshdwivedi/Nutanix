@@ -475,6 +475,9 @@ class HorizonViewChecker(CheckerBase):
                 else:
                     check_functions[group_name] = [func_obj]
         
+        #Check weather OS is windows if not execute view setup command message is shown
+        if not sys.platform.startswith("win") :
+            exit_with_message("Error : Horizon View Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View Server")
         #check view server connectivity
         status, message = self.check_connectivity(self.authconfig['view_ip'],self.authconfig['view_user'],self.authconfig['view_pwd'])
         if status == False:

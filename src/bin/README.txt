@@ -7,7 +7,7 @@ Table of Contents
     03 How to Run IaaS Provisioning
     04 How to Run HealthCheck
     05 Known Issues
-    06 Prerequisites
+    06 Prerequisites for Horizon View Healthcheck
 
 01 Overview
 
@@ -158,7 +158,7 @@ Table of Contents
    5.2 Health Check Scripts:
    			VMware Horizon View Health Check working only on WINDOWS based machine. If installed on NON-WINDOWS machine, operating system not supported message will shown.
 
-06 Prerequisites
+06 Prerequisites for VMware Horizon View Health Check - 
 	6.1 For VMware Horizon View Health Check - 
 		6.1.1 On Connection Broker Server , open command prompt(having Administrator privileges) do following configuration for WINRM:
 			1	Run the following command to set the default WinRM configuration values.
