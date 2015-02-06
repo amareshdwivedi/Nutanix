@@ -230,4 +230,11 @@ Table of Contents
 				c:\> winrm set winrm/config/client @{AllowUnencrypted="true"}
 		
 		6.1.3 For Configuring healthcheck for VMware Horizon View Health Check
-			Check weather Connection Broker user has domain account and having access to VMware PowerCLI access as well as machine access. 
+			Check weather Connection Broker user has domain account and having access to VMware PowerCLI access as well as machine access.
+			Run following command to test weather windows account has access to machine as well as VMware PowerCLI:
+				1. Open Command prompt (as a administrator): 
+					Start > Run > cmd.exe
+				2. Run following commands:
+					a) c:\> powershell
+					b) PS c:\> Add-PSSnapin VMware.View.Broker
+					c) PS c:\> get-ConnectionBroker 
