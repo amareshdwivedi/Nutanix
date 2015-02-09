@@ -207,7 +207,8 @@ jQuery(document).ready(function() {
 				foundationObject["hypervisor_iso"] = $('#hypervisor_iso').val();
 
 				//foundationObject["use_foundation_ips"] = $('#foundation_ip').val();
-				foundationObject["use_foundation_ips"] = false;
+				//foundationObject["use_foundation_ips"] = false;
+                foundationObject['use_foundation_ips'] = $("#"+block_id+ " #"+node_id+ " input[name=foundation_ip]:checked").val();
 				foundationObject["cluster_init_successful"] = null;
 				
 				foundationObject['hypervisor_password'] = $('#hypervisorpass').val();
@@ -271,25 +272,24 @@ jQuery(document).ready(function() {
 						nodeObject['ipv6_address'] = $("#"+block_id+ " #"+node_id+ " #ipv6_address").val();//$('#ipv6_address'+i).val();
 						
 						//var cluster_member = $("#"+block_id+ " #"+node_id+ " #ipv6_address").val();//$('#cluster_member'+i).val();
-						var cluster_member = 'true'
-						// nodeObject['cluster_member'] = cluster_member;
-				        if(cluster_member == 'true'){
+						/*var cluster_member = 'true'
+						if(cluster_member == 'true'){
 						nodeObject['cluster_member'] = true;
                         }
-
-                      else{
+                        else{
 						nodeObject['cluster_member'] = false;
-                        }
-
+                        }*/
+                        nodeObject['cluster_member'] = $("#"+block_id+ " #"+node_id+ " input[name=cluster_member]:checked").val();
 						//var ipmi_configure_now = $("#"+block_id+ " #"+node_id+ " #ipmi_configure_now").val();//$('#ipmi_configure_now'+i).val();
-                        var ipmi_configure_now = 'false'
+                        /*var ipmi_configure_now = 'false'
                         if(ipmi_configure_now == 'true'){
 						nodeObject['ipmi_configure_now'] = true;
                         }
 
                         if(ipmi_configure_now == 'false'){
 						nodeObject['ipmi_configure_now'] = false;
-                        }
+                        }*/
+                        nodeObject['ipmi_configure_now'] = $("#"+block_id+ " #"+node_id+ " input[name=ipmi_configure_now]:checked").val();
 						//var ipv6_interface = $('#ipv6_interface'+i).val();
 						//nodeObject['ipv6_interface'] = $("#"+block_id+ " #"+node_id+ " #ipv6_interface").val();//$('#ipv6_interface'+i).val();
 						nodeObject['ipv6_interface'] = "";
@@ -297,30 +297,33 @@ jQuery(document).ready(function() {
 						//var node_position = $('#node_position'+i).val();
 						nodeObject['node_position'] = $("#"+block_id+ " #"+node_id+ " #nodePosition").val();//nodePosition// $('#node_position'+i).val();
 						
-						var image_now = $("#"+block_id+ " #"+node_id+ " #image_now").val();//$('#image_now'+i).val();
+						/*var image_now = $("#"+block_id+ " #"+node_id+ " #image_now").val();
                         if(image_now == 'false'){
                             nodeObject['image_now'] = false;
                         }
                         if(image_now == 'true'){
                             nodeObject['image_now'] = true;
-                        }
-
-						var image_successful =$("#"+block_id+ " #"+node_id+ " #image_successful").val();// $('#image_successful'+i).val();
+                        }*/
+                        nodeObject['image_now'] = $("#"+block_id+ " #"+node_id+ " input[name=image_now]:checked").val();
+						
+                        var image_successful =$("#"+block_id+ " #"+node_id+ " #image_successful").val();// $('#image_successful'+i).val();
 						if(image_successful == ""){
 							nodeObject['image_successful'] = null;
 						}
 						else{
 							nodeObject['image_successful'] = image_successful;
-
-						}
-						var ipmi_configured = $("#"+block_id+ " #"+node_id+ " #ipmi_configured").val();//$('#ipmi_configured'+i).val();
+                        }
+                        
+                         
+						/*var ipmi_configured = $("#"+block_id+ " #"+node_id+ " #ipmi_configured").val();//$('#ipmi_configured'+i).val();
 						//nodeObject['ipmi_configured'] = ipmi_configured;							
 						 if(ipmi_configured == 'false'){
                             nodeObject['ipmi_configured'] = false;
                         }
                         if(ipmi_configured == 'true'){
                             nodeObject['ipmi_configured'] = true;
-                        }
+                        }*/
+                        nodeObject['ipmi_configured'] = $("#"+block_id+ " #"+node_id+ " input[name=ipmi_configured]:checked").val();
 						
 						nodes.push(nodeObject);
                           j = j + 1;

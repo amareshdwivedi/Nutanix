@@ -557,7 +557,12 @@ jQuery(document).ready(function() {
     /*Create new Tesk*/
     
     $(".createNewTaskBtn").live("click",function(){
-        $( "#mainTabContainer" ).tabs( "enable", 1 ).tabs( "select", 1 );
+        var taskType = $("#task_name").val();
+        if(taskType == "healthcheck"){
+            $( "#mainTabContainer" ).tabs("select", 3);
+        }else if(taskType == "deployment"){
+            $( "#mainTabContainer" ).tabs("enable", 1).tabs("select", 1);
+        }        
         $('#createTaskModal').modal('hide');
 	});
 });
