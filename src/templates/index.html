@@ -370,81 +370,54 @@ $def with (checkers,msg="")
 				    $for checker, checkObject in checkers.iteritems():
 				    <h2 class="formHeading"><span>$:checker</span> configration detail</h2>
 				    <div class="col-lg-12 col-md-12 col-sm-12 no-margin  connectionForms">
-				    	<form id=$checker method="post">
-				    		<div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formTbl">
-				    			$:checkObject.config_form.render()
-				    		</div>
-				    		<div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formButtonsSec">
-				    			<input type="button" data-toggle="modal" data-target=#modal_$:id1$:checker id=$:id1$:checker class="conf btn btn-primary healthCheckBtn" value="Configure" /> 
-				                <input type="button" data-toggle="modal" data-target=#modal_$:id2$:checker id=$:id2$:checker class="conn btn btn-primary healthCheckBtn" value="Verify Connection"  />
-				    		</div>
-				    		<div class="modal fade" id="modal_$:id1$:checker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-							  <div class="modal-dialog">
-							    <div class="modal-content">
-							      <div class="modal-header">
-							        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-							        <h4 class="modal-title" id="myModalLabel">Configuration Status</h4>
-							      </div>
-							      <div class="modal-body">
-							        	Successfully Updated
-							      </div>
-							      <div class="modal-footer">
-							        <button type="button" class="btn btn-primary healthCheckBtn" data-dismiss="modal">Close</button>
-							      </div>
-							    </div>
-							  </div>
-							</div>
-							<div class="modal fade" id="modal_$:id2$:checker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-							  <div class="modal-dialog">
-							    <div class="modal-content">
-							      <div class="modal-header">
-							        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-							        <h4 class="modal-title" id="myModalLabel">Connection Status</h4>
-							      </div>
-							      <div class="modal-body">
-							       <!--  Successfully Updated -->
-							        <div class="connStatus"></div>
-							      </div>
-							      <div class="modal-footer">
-							        <button type="button" class="btn btn-primary healthCheckBtn" data-dismiss="modal">Close</button>
-							      </div>
-							    </div>
-							  </div>
-							</div>
-				    	</form>
-				    </div>
+					    $if checkObject.config_form:
+					    	<form id=$checker method="post">
+					    		<div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formTbl">
+					    			$:checkObject.config_form.render()
+					    		</div>
+					    		<div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formButtonsSec">
+					    			<input type="button" data-toggle="modal" data-target=#modal_$:id1$:checker id=$:id1$:checker class="conf btn btn-primary healthCheckBtn" value="Configure" /> 
+					                <input type="button" data-toggle="modal" data-target=#modal_$:id2$:checker id=$:id2$:checker class="conn btn btn-primary healthCheckBtn" value="Verify Connection"  />
+					    		</div>
+					    		<div class="modal fade" id="modal_$:id1$:checker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+								  <div class="modal-dialog">
+								    <div class="modal-content">
+								      <div class="modal-header">
+								        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+								        <h4 class="modal-title" id="myModalLabel">Configuration Status</h4>
+								      </div>
+								      <div class="modal-body">
+								        	Successfully Updated
+								      </div>
+								      <div class="modal-footer">
+								        <button type="button" class="btn btn-primary healthCheckBtn" data-dismiss="modal">Close</button>
+								      </div>
+								    </div>
+								  </div>
+								</div>
+								<div class="modal fade" id="modal_$:id2$:checker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+								  <div class="modal-dialog">
+								    <div class="modal-content">
+								      <div class="modal-header">
+								        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+								        <h4 class="modal-title" id="myModalLabel">Connection Status</h4>
+								      </div>
+								      <div class="modal-body">
+								       <!--  Successfully Updated -->
+								        <div class="connStatus"></div>
+								      </div>
+								      <div class="modal-footer">
+								        <button type="button" class="btn btn-primary healthCheckBtn" data-dismiss="modal">Close</button>
+								      </div>
+								    </div>
+								  </div>
+								</div>
+					    	</form>
+					    $else:
+					    	<div>Kindly host website on windows machine to run VMware Horizon View Health Check.</div>
+					    </div>
             	</div>
-				<!-- <table border=1 bgcolor="" width=30%>
-				    <tr><th>Select Check</th><th>Check Category</th><th>Connection Details</th></tr>
-				    $ id1 = "config_"
-				    $ id2 = "connect_"
-				    $ id3 = "run_"
-				    $for checker, checkObject in checkers.iteritems():
-				    <tr>
-				        <td><input id=$:id3$:checker name=$:checker type="checkbox" class='run' size=20></td>
-				        <td width=30% style="vertical-align=top"><b>$checker :</b></td>
-				        <td>
-				            <form id=$checker method="post">
-				                <table border=1>
-				                    <tr>
-				                        <td>$:checkObject.config_form.render()</td>
-				                    </tr>
-				                    <tr>
-				                        <td align=right>
-				                            <input type="button" id=$:id1$:checker class="conf" value="Configure" /> 
-				                            <input type="button" id=$:id2$:checker class="conn" value="Verify Connection"  />
-				                        </td>
-				                    </tr>
-				                </table>
-				            </form>
 				
-				        </td>
-				    </tr>
-					<tr>
-		    	<td><input type="button" id="runchecks" value="Run" bgcolor="green"/><td/>
-		    	<td></td>
-					</tr>
-				</table> -->
             </div>
             <div class="col-lg-9 col-md-9 col-sm-9" id="mainContent">
 	            <div class="col-lg-12 col-md-12 col-sm-12 categorySec">
@@ -453,7 +426,8 @@ $def with (checkers,msg="")
 		            <select id="category_select"> 
 		            	<option value="">Select Checker</option>
 		            	$for checker, checkObject in checkers.iteritems():
-			            	<option value=$checker >$:checker</option>
+		            		$if checkObject.config_form:
+		            			<option value=$checker >$:checker</option>
 		            </select>
 		            Check Group:
 		            <select id="group_select" disabled> 

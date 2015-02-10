@@ -597,9 +597,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return actual_value, True, ''
         elif status == "PASS":
-            return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", True, 'info'
+            return "VCenter Server Plugins configured are ["+actual_value+"]", True, 'info'
         else:
-            return "VCenter Server Plugins on vCenter Server ["+vCenterServerIP+"] are ["+actual_value+"]", False, 'info'  
+            return "VCenter Server Plugins configured are ["+actual_value+"]", False, 'info'  
 
     if check_name == "Error Messages in vpxd.log":
         if actual_value == "Not-Configured":
@@ -611,7 +611,85 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
             return  "Total Error Entries are ["+actual_value+"]", False, 'warning'                          
 
+    if check_name == "JVM Memory for vSphere Web Client":
+        if actual_value == "vCenter IP Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        elif status == "FAIL":
+            return "JVM memory for vSphere Web Client configured is ["+actual_value+"] , Recommended Memory is ["+exp_value_from_msg+"]", True, 'info' 
+ 
+    if check_name == "JVM Memory for Inventory Services":
+        if actual_value == "vCenter IP Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        elif status == "FAIL":
+            return "JVM memory for Inventory Services configured is ["+actual_value+"], Recommended Memory is ["+exp_value_from_msg+"]", True, 'info'
+        
+    if check_name == "JVM Memory for Storage Base Profiles":
+        if actual_value == "vCenter IP Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        elif status == "FAIL":
+            return "JVM Memory for Storage Base Profiles configured is ["+actual_value+"], Recommended Memory is ["+exp_value_from_msg+"]", True, 'info'                 
 
+    if check_name == "Memory Utilization of vCenter Server":
+        if actual_value == "Cannot Determine":
+            return "Cannot Determine", False, ''
+        elif actual_value == "None":
+            return "None",False,''
+        else:
+            return "Memory Utilization of vCenter Server is ["+actual_value+"]", True, 'info'                 
+ 
+    if check_name == "Memory Assigned to vCenter Server":
+        if actual_value == "Cannot Determine":
+            return "Cannot Determine", False, ''
+        elif actual_value == "None":
+            return "None",False,''
+        else:
+            return "Memory Assigned to vCenter Server is ["+actual_value+"], Recommended Memory is ["+exp_value_from_msg+"]", True, 'info' 
+        
+    if check_name == "CPU Utilization of vCenter Server":
+        if actual_value == "Cannot Determine":
+            return "Cannot Determine", False, ''
+        elif actual_value == "None":
+            return "None",False,''
+        else:
+            return "CPU Utilization of vCenter Server is ["+actual_value+"]", True, 'info' 
+        
+    if check_name == "CPUs Assigned to vCenter Server":
+        if actual_value == "Cannot Determine":
+            return "Cannot Determine", False, ''
+        elif actual_value == "None":
+            return "None",False,''
+        else:
+            return "CPUs Assigned to vCenter Server is ["+actual_value+"], Recommended CPUs is ["+exp_value_from_msg+"]", True, 'info'
+                               
+    if check_name == "vCenter Server Disk Utilization":
+        if actual_value == "Not-Configured":
+            return "Not-Configured", False, ''
+        elif actual_value == "SSH Connection Failed":
+            return "SSH Connection Failed",False,''
+        else:
+            actual_value = actual_value.replace("\n"," ") 
+            actual_value_dict = actual_value.split(" ")
+            actual_value_dict = [x for x in actual_value_dict if x != '']
+            print_value = ""
+            count = 0;
+            for word in actual_value_dict:
+                if word == "Mounted":
+                    count+=1
+                    print_value = print_value + word.strip() + " "
+                else:
+                    count+=1
+                    if count > 5:
+                        print_value = print_value + word.strip() + " || <br/>"
+                        count = 0
+                    else:
+                        print_value = print_value + word.strip() + " | "    
+            return  print_value, True, 'info' 
               
     # Start of ESXI Checks      
     if check_name == "Host's HyperThreading Status":

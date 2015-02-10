@@ -1851,7 +1851,269 @@ class VCChecker(CheckerBase):
             
         return passed_all, message, path
 
+    def jvm_memory_helper(self,check_name,expected_result,file_name):
+        path_curr='content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value'
+        vcenter_ipv4 = self.get_vc_property(path_curr)
+        for key,ip in vcenter_ipv4.iteritems():
+            vcenter_ip=ip
+        message = ""     
+        passed_all = True
+        passed = True
+        memory = None       
+        if vcenter_ip == "Not-Configured" :
+            passed = False
+            message += ", " +check_name+"  = vCenter IP Not-Configured (Expected: =Configured JVM Memory)"+"#"+("FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = vCenter IP Not-Configured (Expected: =Configured JVM Memory)",("FAIL"))
+        else:
+            ssh=None
+            error_count = 0
+            try:
+                ssh = paramiko.SSHClient()
+                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                ssh.connect(vcenter_ip, username="root", password="vmware")
+                   
+            except paramiko.AuthenticationException:
+                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
+                return False ,message
+            except paramiko.SSHException, e:
+                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
+                return False ,message
+            except socket.error, e:
+                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
+                return False ,message
+             
+            if ssh is not None:
+                cmd_memory = "cat "+file_name+" | grep \"wrapper.java.maxmemory\""    
+                stdin, stdout, stderr =  ssh.exec_command(cmd_memory)     
+                     
+                   
+                for line in stdout:
+                    if line.startswith('wrapper.java.maxmemory'):
+                        memory = line.split("=")[1]
+                if memory is not None and int(memory.strip()) == expected_result:     
+                    message += ", " +check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
+                else:
+                    passed = False
+                    message += ", " +check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
 
+                ssh.close()
+        return passed,message
+   
+    @checkgroup("vcenter_server_checks", "JVM Memory for vSphere Web Client",["performance"],"Memory Configured")
+    def check_jvm_memory_vsphere_client(self):
+   
+        check_name = "JVM Memory for vSphere web client"
+        server_version , inventory_size = self.get_inventory_info()
+        expected_result = self.get_vcenterserver_default_memory(server_version, inventory_size, "vsphere_web_client_memory")
+        passed,message = self.jvm_memory_helper(check_name,expected_result,"/usr/lib/vmware-vsphere-client/server/wrapper/conf/wrapper.conf")
+               
+        return passed ,message,''
+     
+    @checkgroup("vcenter_server_checks", "JVM Memory for Inventory Services",["performance"],"Memory Configured")
+    def check_jvm_memory_inventory_services(self):
+     
+        check_name = "JVM Memory for Inventory Services"
+        server_version , inventory_size = self.get_inventory_info()
+        expected_result = self.get_vcenterserver_default_memory(server_version, inventory_size, "inventory_service_memory")        
+        passed,message = self.jvm_memory_helper(check_name,expected_result,"/usr/lib/vmware-vpx/inventoryservice/wrapper/conf/wrapper.conf")
+                 
+        return passed ,message,''
+           
+    @checkgroup("vcenter_server_checks", "JVM Memory for Storage Base Profiles",["performance"],"Memory Configured")
+    def check_jvm_memory_storage_profile(self):
+     
+        check_name = "JVM Memory for Storage Base Profiles"
+        server_version , inventory_size = self.get_inventory_info()
+        expected_result = self.get_vcenterserver_default_memory(server_version, inventory_size, "storage_management_memory")        
+        passed,message = self.jvm_memory_helper(check_name,expected_result,"/usr/lib/vmware-vpx/sps/wrapper/conf/wrapper.conf")
+                 
+        return passed ,message,''    
+
+    def get_inventory_info(self):
+        host_count = 0
+        vm_count = 0
+        vcenter_guest_info = self.get_vc_property('content.about')
+        for key,guest in vcenter_guest_info.iteritems():
+            vcenter_version=guest.version
+            vcenter_OS=guest.osType
+        if vcenter_version == "5.5.0" and "linux" in vcenter_OS:
+            server_version = "vcenter_server_appliance_5.5.x"
+        elif vcenter_version == "5.1.0" and "linux" in vcenter_OS:
+            server_version = "vcenter_server_appliance_5.1.x"    
+        elif  vcenter_version == "5.1.0" or vcenter_version == "5.1.0" and "windows" in vcenter_OS:
+            server_version = "vcenter_server_5.x"   
+            
+        vcenter_ipv4 = self.get_vc_property('content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value')
+        vcenter_ip= None
+                           
+        for key,ip in vcenter_ipv4.iteritems():
+            vcenter_ip=ip
+        hosts = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.vm')
+
+        for host in hosts.keys():
+            host_configured=hosts[host]
+            if host_configured == "Not-Configured":
+                continue
+            else:
+               host_count+=1 
+               for vm_configured in host_configured:
+                   guest_info = vm_configured.guest          
+                   if guest_info is not None:
+                       vm_count+=1
+         
+        if host_count <= 100 or vm_count <= 1000:
+            inventory_size = "small_inventory"
+        elif host_count > 100 and host_count <= 400 or vm_count > 1000 and vm_count <= 4000:
+            inventory_size = "medium_inventory"
+        elif host_count > 400 or vm_count > 4000:
+            inventory_size = "large_inventory"
+        else:
+            inventory_size = "small_inventory"
+        
+        return server_version,inventory_size
+            
+    def get_vcenterserver_vm(self):
+        vcenter_ipv4 = self.get_vc_property('content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value')
+        vcenter_ip= None
+                           
+        for key,ip in vcenter_ipv4.iteritems():
+            vcenter_ip=ip
+        hosts = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.vm')
+                                            
+        for host in hosts.keys():
+            host_vm_list=hosts[host]
+            if host_vm_list== "Not-Configured":
+                continue
+            for vm in host_vm_list:
+                guest_info = vm.guest          
+                if guest_info is not None and guest_info.ipAddress == vcenter_ip:
+                    return vm
+             
+        return None            
+
+    def get_vcenterserver_default_memory(self,server_version,inventory_size,property):
+        vcenter_stats_path=os.path.abspath(os.path.dirname(__file__)) + os.path.sep + ".." + os.path.sep +"conf" + os.path.sep + "vcenter_stats.json"
+        fp = open(vcenter_stats_path, 'r')
+        vcenter_stats_config = json.load(fp)
+        fp.close()
+        return vcenter_stats_config[server_version][inventory_size][property]
+
+    @checkgroup("vcenter_server_checks", "Memory Utilization of vCenter Server",["performance"],"Memory Utilization")
+    def check_memory_utilization(self):
+        message = ""     
+        passed = True
+        vm = self.get_vcenterserver_vm()
+        if vm is not None:
+            memory_utilization = vm.summary.quickStats.guestMemoryUsage
+            if memory_utilization is not None:
+                message += ", " +"Memory Utilization of vCenter Server = "+str(memory_utilization)+" (Expected: =Memory Utilization)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Utilization of vCenter Server = "+str(memory_utilization)+" (Expected: =Memory Utilization)",(passed and "PASS" or "FAIL"))
+            else:
+                passed = False
+                message += ", " +"Memory Utilization of vCenter Server = None (Expected: =Memory Utilization)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Utilization of vCenter Server = None (Expected: =Memory Utilization)",(passed and "PASS" or "FAIL"))                    
+        else:
+            passed = False
+            message += ", " +"Memory Utilization of vCenter Server = Cannot Determine (Expected: =Memory Utilization)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Utilization of vCenter Server =Cannot Determine (Expected: =Memory Utilization)",(passed and "PASS" or "FAIL"))
+                    
+        return passed ,message,''  
+
+    @checkgroup("vcenter_server_checks", "Memory Assigned to vCenter Server",["performance"],"Memory Assigned")
+    def check_memory_assigned(self):
+        message = ""     
+        passed = True
+        vm = self.get_vcenterserver_vm()
+        server_version , inventory_size = self.get_inventory_info()
+        expected_result = self.get_vcenterserver_default_memory(server_version, inventory_size, "vcenter_server_memory")
+        if vm is not None:
+            memory_assigned = vm.config.hardware.memoryMB
+            if memory_assigned is not None and memory_assigned == expected_result:
+                message += ", " +"Memory Assigned to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            else:
+                passed = False
+                message += ", " +"Memory Assigned to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned to vCenter Server = "+str(memory_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
+        else:
+            passed = False
+            message += ", " +"Memory Assigned to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+                    
+        return passed ,message,''  
+
+    @checkgroup("vcenter_server_checks", "CPU Utilization of vCenter Server",["performance"],"CPU Utilization")
+    def check_CPU_utilization(self):
+        message = ""     
+        passed = True
+        vm = self.get_vcenterserver_vm()
+        if vm is not None:
+            cpu_utilization = vm.summary.quickStats.overallCpuUsage
+            if cpu_utilization is not None:
+                message += ", " +"CPU Utilization of vCenter Server = "+str(cpu_utilization)+" (Expected: =CPU Utilization)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"CPU Utilization of vCenter Server = "+str(cpu_utilization)+" (Expected: =CPU Utilization)",(passed and "PASS" or "FAIL"))
+            else:
+                passed = False
+                message += ", " +"CPU Utilization of vCenter Server = None (Expected: =CPU Utilization)"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Utilization of vCenter Server = None (Expected: =CPU Utilization)",(passed and "PASS" or "FAIL"))                    
+        else:
+            passed = False
+            message += ", " +"CPU Utilization of vCenter Server = Cannot Determine (Expected: =CPU Utilization)"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"CPU Utilization of vCenter Server =Cannot Determine (Expected: =CPU Utilization)",(passed and "PASS" or "FAIL"))
+                    
+        return passed ,message,''  
+
+    @checkgroup("vcenter_server_checks", "CPUs Assigned to vCenter Server",["performance"],"Number of CPU Assigned")
+    def check_CPU_assigned(self):
+        message = ""     
+        passed = True
+        vm = self.get_vcenterserver_vm()
+        server_version , inventory_size = self.get_inventory_info()
+        expected_result = self.get_vcenterserver_default_memory(server_version, inventory_size, "number_of_cpu")
+        if vm is not None:
+            cpu_assigned = vm.config.hardware.numCPU
+            if cpu_assigned is not None and cpu_assigned == expected_result:
+                message += ", " +"CPUs Assigned to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"CPUs Assigned to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            else:
+                passed = False
+                message += ", " +"CPUs Assigned to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"CPUs Assigned to vCenter Server = "+str(cpu_assigned)+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))                    
+        else:
+            passed = False
+            message += ", " +"CPUs Assigned to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"CPUs Assigned to vCenter Server = Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+                    
+        return passed ,message,''  
+
+    @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date",["performance"],"Tools Ok")
+    def check_vcenter_server_tool_status(self):
+        message = ""     
+        passed = True
+        vm = self.get_vcenterserver_vm()
+        if vm is not None:
+            guest_info = vm.guest
+            toolsStatus=guest_info.toolsStatus
+            toolsStatus_expected="toolsOk"
+            if toolsStatus == toolsStatus_expected :
+                self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (True and "PASS" or "FAIL"))
+            else:
+                passed = False
+                self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
+            message += ", "+"vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " +"#"+((toolsStatus == toolsStatus_expected) and "PASS" or "FAIL")
+         
+        else:
+            passed = False
+            self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status = Cannot Determine (Expected: =toolsOk)" , (passed and "PASS" or "FAIL"))
+            message += ", "+"vCenter Server VMware Tools installed Status = Cannot Determine (Expected: =toolsOk)" +"#"+(passed and "PASS" or "FAIL")
+                
+        return passed,message,''    
+            
     @checkgroup("vcenter_server_checks", "Error Messages in vpxd.log",["configurability","manageability","availability","security"],"Error Count")
     def check_vpxd_logs(self):
         path_curr='content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value'
@@ -1864,8 +2126,8 @@ class VCChecker(CheckerBase):
                
         if vcenter_ip == "Not-Configured" :
             passed = False
-            message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+"Not-Configured"+" (Expected: =Error Count)"+"#"+("FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+"Not-Configured"+" (Expected: =Error Count)",("FAIL"))
+            message += ", " +"Error Messages in vpxd.log = vCenter IP Not-Configured (Expected: =Error Count)"+"#"+("FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log = vCenter IP Not-Configured (Expected: =Error Count)",("FAIL"))
         else:
             ssh=None
             error_count = 0
@@ -1875,16 +2137,16 @@ class VCChecker(CheckerBase):
                 ssh.connect(vcenter_ip, username="root", password="vmware")
                    
             except paramiko.AuthenticationException:
-                message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+                message += ", " +"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
                 return False ,message,path_curr
             except paramiko.SSHException, e:
-                message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+                message += ", " +"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
                 return False ,message,path_curr
             except socket.error, e:
-                message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+                message += ", " +"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of = SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
                 return False ,message,path_curr
              
             if ssh is not None:
@@ -1896,12 +2158,12 @@ class VCChecker(CheckerBase):
                     error_count+=1
                      
                 if error_count > 50:
-                    message += ", " +"Error Messages in vpxd.log of "+vcenter_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(False and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+str(error_count)+" (Expected: =Less than 50)",(False and "PASS" or "FAIL"))
+                    message += ", " +"Error Messages in vpxd.log = "+str(error_count)+" (Expected: =Less than 50)"+"#"+(False and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log = "+str(error_count)+" (Expected: =Less than 50)",(False and "PASS" or "FAIL"))
                     passed = False
                 elif error_count <= 50:
-                    message += ", "+"Error Messages in vpxd.log of "+vcenter_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(True and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log of "+vcenter_ip+"="+str(error_count)+" (Expected: =Less than 50)",(True and "PASS" or "FAIL"))
+                    message += ", "+"Error Messages in vpxd.log = "+str(error_count)+" (Expected: =Less than 50)"+"#"+(True and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log = "+str(error_count)+" (Expected: =Less than 50)",(True and "PASS" or "FAIL"))
              
                 ssh.close()
                 
@@ -1909,6 +2171,66 @@ class VCChecker(CheckerBase):
             
         return passed_all ,message,path_curr
     
+    @checkgroup("vcenter_server_checks", "vCenter Server Disk Utilization",["performance","manageability"],"Disk Utilization Information")
+    def check_disk_utilization(self):
+        path_curr='content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value'
+        vcenter_ipv4 = self.get_vc_property(path_curr)
+        for key,ip in vcenter_ipv4.iteritems():
+            vcenter_ip=ip
+        message = ""     
+        passed_all = True
+        passed = True
+               
+        if vcenter_ip == "Not-Configured" :
+            passed = False
+            message += ", " +"vCenter Server Disk Utilization = vCenter IP Not-Configured (Expected: =Disk Utilization Information)"+"#"+("FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Disk Utilization = vCenter IP Not-Configured (Expected: =Disk Utilization Information)",("FAIL"))
+        else:
+            ssh=None
+            line_map = {}
+            line_count = 0
+            try:
+                ssh = paramiko.SSHClient()
+                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                ssh.connect(vcenter_ip, username="root", password="vmware")
+                   
+            except paramiko.AuthenticationException:
+                message += ", " +"vCenter Server Disk Utilization of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Disk Utilization Information)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Disk Utilization of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Disk Utilization Information)",("FAIL"))
+                return False ,message,path_curr
+            except paramiko.SSHException, e:
+                message += ", " +"vCenter Server Disk Utilization of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Disk Utilization Information)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Disk Utilization of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Disk Utilization Information)",("FAIL"))
+                return False ,message,path_curr
+            except socket.error, e:
+                message += ", " +"vCenter Server Disk Utilization of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Disk Utilization Information)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Disk Utilization of "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Disk Utilization Information)",("FAIL"))
+                return False ,message,path_curr
+             
+            if ssh is not None:
+                cmd_disk = "df -h"    
+                stdin, stdout, stderr =  ssh.exec_command(cmd_disk)     
+                   
+                 
+                for line in stdout:
+                    line_count+=1
+                    line_map[line_count] = line
+                
+                if line_count > 0:
+                    passed = True
+                    message += ", " +"vCenter Server Disk Utilization of "+vcenter_ip+"="+'\n'.join(line_map.values())+" (Expected: =Disk Utilization Information)"+"#"+(passed and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Disk Utilization of "+vcenter_ip+"="+"                                                                         \n"+'\n'.join(line_map.values())+" (Expected: =Disk Utilization Information)",(passed and "PASS" or "FAIL"))
+                elif line_count == 0:
+                    passed = False
+                    message += ", "+"vCenter Server Disk Utilization of "+vcenter_ip+"="+"No values fetched from SSH"+" (Expected: =Disk Utilization Information)"+"#"+(passed and "PASS" or "FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Disk Utilization of "+vcenter_ip+"=No values fetched from SSH (Expected: =Disk Utilization Information)",(passed and "PASS" or "FAIL"))
+             
+                ssh.close()
+                
+            passed_all = passed_all and passed
+            
+        return passed_all ,message,path_curr
+            
     @checkgroup("vcenter_server_checks", "Validate vCenter Server License Expiration Date",["availability"],"No expiration date or expiration date less than 60 days")
     def check_vcenter_server_license_expiry(self):
         expirationDate = self.get_vc_property('content.licenseManager.evaluation.properties[key=expirationDate].value')
@@ -1925,41 +2247,7 @@ class VCChecker(CheckerBase):
             message += ", "+"License Expiration Validation = " + str(expiry_date) + " (Expected: =Not within next 60 days or always valid) "+"#"+((valid_60_days) and "PASS" or "FAIL")
         return passed, message,''
  
-    @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date",["performance"],"Tools Ok")
-    def check_vcenter_server_tool_status(self):
-        vcenter_ipv4 = self.get_vc_property('content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value')
-        vcenter_ip= None
-        for key,ip in vcenter_ipv4.iteritems():
-            vcenter_ip=ip
-        vms = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.vm.guest')
-         
-        message = ""
-        passed = True
-        ip_present = False
-        for vm in vms.keys():
-            guest_info=vms[vm]
-            if guest_info == "Not-Configured":
-                continue
-                       
-            if guest_info.ipAddress == vcenter_ip:
-                ip_present = True
-                toolsStatus=guest_info.toolsStatus
-                toolsStatus_expected="toolsOk"
-                if toolsStatus == toolsStatus_expected :
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (True and "PASS" or "FAIL"))
-                else:
-                    passed = False
-                    self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " , (False and "PASS" or "FAIL"))
-                message += ", "+"vCenter Server VMware Tools installed Status="+toolsStatus  + " (Expected: ="+toolsStatus_expected+") " +"#"+((toolsStatus == toolsStatus_expected) and "PASS" or "FAIL")
-                break
-         
-        if ip_present == False:
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status="+"Cannot Determine"  + " (Expected: =toolsOk) " , (False and "PASS" or "FAIL"))
-            message += ", "+"vCenter Server VMware Tools installed Status="+"Cannot Determine"  + " (Expected: =toolsOk) " +"#"+(False and "PASS" or "FAIL")
-                
-        return passed,message,''    
     
-    #{"name" : "vCenter Server Plugins", "path" : "content.extensionManager.extensionList.description.key", "operator":"=", "ref-value": "", "category": ["security"],"expectedresult": "Plugin is Registered"}
     @checkgroup("vcenter_server_checks", "vCenter Server Plugins",["performance"],"List of plugins")
     def check_vcenter_server_plugins(self):
         vcenter_plugins_map = self.get_vc_property('content.extensionManager.extensionList')
