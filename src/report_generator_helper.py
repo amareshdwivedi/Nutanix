@@ -1061,7 +1061,15 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             else:
                 return "Virtual machine ["+actual_value+"] is connected to CVM portgroup["+entity+"]" , True, 'warning'
 
-
+    if check_name == "Port Group and VLAN Consistency across vSphere Clusters":
+        if actual_value == "True":
+            return "PortGroup and VLANs Consistent", False,''
+        elif "Missing Port Groups" in actual_value:
+            message,port_group,host = actual_value.split("::")
+            return "Port Group "+port_group+" is Not Configured on Host ["+host+"]", True,'alert'                       
+        elif "Missing VLAN IDs" in actual_value:
+            message,vlan_id,host = actual_value.split("::")
+            return "VLAN "+vlan_id+" is Not Configured on Host ["+host+"]", True,'alert' 
             
     #hardware_and_bios_checks
     if check_name == "VT-D(Virtualization Tech for Direct I/O)":
