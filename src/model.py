@@ -95,7 +95,7 @@ class DataModel:
     def add_task(self,cust_id,json_data):
     
         now = str(datetime.datetime.now())
-        return self._db.insert('customer_history',C_Id=cust_id,json_data=json_data,task="Deployment")
+        return self._db.insert('customer_history',C_Id=cust_id,json_data=json_data,task="Deployment",status="Pending")
 
     def get_number_of_nodes(self,model):
         

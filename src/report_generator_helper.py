@@ -673,7 +673,23 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "SSH Connection Failed":
             return "SSH Connection Failed",False,''
         else:
-            return  actual_value, True, 'info' 
+            actual_value = actual_value.replace("\n"," ") 
+            actual_value_dict = actual_value.split(" ")
+            actual_value_dict = [x for x in actual_value_dict if x != '']
+            print_value = ""
+            count = 0;
+            for word in actual_value_dict:
+                if word == "Mounted":
+                    count+=1
+                    print_value = print_value + word.strip() + " "
+                else:
+                    count+=1
+                    if count > 5:
+                        print_value = print_value + word.strip() + " || <br/>"
+                        count = 0
+                    else:
+                        print_value = print_value + word.strip() + " | "    
+            return  print_value, True, 'info' 
               
     # Start of ESXI Checks      
     if check_name == "Host's HyperThreading Status":
