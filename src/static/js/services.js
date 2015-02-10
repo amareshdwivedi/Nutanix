@@ -62,17 +62,24 @@ jQuery(document).ready(function() {
 		$(".createCustomer-form .form_input input").each(function(index, value){
 			if ($.trim($(value).val()).length == 0){
 				$(value).parent().addClass("error");
-				$(".errorMsg").show();
-				$(".errorMsg").html("Please fill in all the required fields (highlighted in red)");
-				isFormValid = false;
+				
 			} else {
 				$(value).parent().removeClass("error");
-				$(".errorMsg").hide();
-				$(".errorMsg").html("");
-				isFormValid = true;
+				
 			}
 		});
-
+        
+        var errorInput = $(".createCustomer-form .form_input.error");
+        if(errorInput.length > 0){
+            $(".createCustomer-form .errorMsg").show();
+            $(".createCustomer-form .errorMsg").html("Please fill in all the required fields (highlighted in red)");
+            isFormValid = false;
+        }else{
+            $(".createCustomer-form .errorMsg").hide();
+            $(".createCustomer-form .errorMsg").html("");
+            isFormValid = true;
+        }
+        
 		if(isFormValid ){
 		  var formData = {}
 			$('#createNewCustomerModel .form_input input').each(function() {
@@ -172,9 +179,29 @@ jQuery(document).ready(function() {
     
     var main_rest_block = {};
 		$("#submit_all").click(function(){
-			var mainObject = {};
-			
-				var foundationObject = {};
+            var isFormValid = true;
+            var currentContainer = $(this).parents().eq(1).find(".mainBody_container input.required");
+            currentContainer.each(function(index, value){
+                if ($.trim($(value).val()).length == 0){
+                    $(value).addClass("error");
+                } else {
+                    $(value).removeClass("error");
+                }
+            });
+            var errorInput = $(this).parents().eq(1).find(".mainBody_container input.error");
+            if(errorInput.length > 0){
+                $(this).parents().eq(1).find(".errorMsg").show();
+                $(this).parents().eq(1).find(".errorMsg").html("Please fill in all the required fields (highlighted in red)");
+                isFormValid = false;
+            }else{
+                $(this).parents().eq(1).find(".errorMsg").hide();
+                $(this).parents().eq(1).find(".errorMsg").html("");
+                isFormValid = true;
+            }
+            
+			 if(isFormValid ){    
+                var mainObject = {};
+			    var foundationObject = {};
 				var restInput = {};
 
 				foundationObject["ipmi_netmask"] = $('#IPNM').val();
@@ -208,7 +235,7 @@ jQuery(document).ready(function() {
 
 				//foundationObject["use_foundation_ips"] = $('#foundation_ip').val();
 				//foundationObject["use_foundation_ips"] = false;
-                foundationObject['use_foundation_ips'] = $("#"+block_id+ " #"+node_id+ " input[name=foundation_ip]:checked").val();
+                foundationObject['use_foundation_ips'] = $("input[name=foundation_ip]:checked").val();
 				foundationObject["cluster_init_successful"] = null;
 				
 				foundationObject['hypervisor_password'] = $('#hypervisorpass').val();
@@ -279,7 +306,7 @@ jQuery(document).ready(function() {
                         else{
 						nodeObject['cluster_member'] = false;
                         }*/
-                        nodeObject['cluster_member'] = $("#"+block_id+ " #"+node_id+ " input[name=cluster_member]:checked").val();
+                        nodeObject['cluster_member'] = $("#"+block_id+ " #"+node_id+ " input[name=cluster_member-"+node_id+"]:checked").val();
 						//var ipmi_configure_now = $("#"+block_id+ " #"+node_id+ " #ipmi_configure_now").val();//$('#ipmi_configure_now'+i).val();
                         /*var ipmi_configure_now = 'false'
                         if(ipmi_configure_now == 'true'){
@@ -289,7 +316,7 @@ jQuery(document).ready(function() {
                         if(ipmi_configure_now == 'false'){
 						nodeObject['ipmi_configure_now'] = false;
                         }*/
-                        nodeObject['ipmi_configure_now'] = $("#"+block_id+ " #"+node_id+ " input[name=ipmi_configure_now]:checked").val();
+                        nodeObject['ipmi_configure_now'] = $("#"+block_id+ " #"+node_id+ " input[name=ipmi_configure_now-"+node_id+"]:checked").val();
 						//var ipv6_interface = $('#ipv6_interface'+i).val();
 						//nodeObject['ipv6_interface'] = $("#"+block_id+ " #"+node_id+ " #ipv6_interface").val();//$('#ipv6_interface'+i).val();
 						nodeObject['ipv6_interface'] = "";
@@ -304,7 +331,7 @@ jQuery(document).ready(function() {
                         if(image_now == 'true'){
                             nodeObject['image_now'] = true;
                         }*/
-                        nodeObject['image_now'] = $("#"+block_id+ " #"+node_id+ " input[name=image_now]:checked").val();
+                        nodeObject['image_now'] = $("#"+block_id+ " #"+node_id+ " input[name=image_now-"+node_id+"]:checked").val();
 						
                         var image_successful =$("#"+block_id+ " #"+node_id+ " #image_successful").val();// $('#image_successful'+i).val();
 						if(image_successful == ""){
@@ -323,7 +350,7 @@ jQuery(document).ready(function() {
                         if(ipmi_configured == 'true'){
                             nodeObject['ipmi_configured'] = true;
                         }*/
-                        nodeObject['ipmi_configured'] = $("#"+block_id+ " #"+node_id+ " input[name=ipmi_configured]:checked").val();
+                        nodeObject['ipmi_configured'] = $("#"+block_id+ " #"+node_id+ " input[name=ipmi_configured-"+node_id+"]:checked").val();
 						
 						nodes.push(nodeObject);
                           j = j + 1;
@@ -386,7 +413,7 @@ jQuery(document).ready(function() {
             
                 var customerId = $("#customerId").val();
                 createCustomerTask(customerId,main_rest_block);
-		
+        }
 	});
     
     /*Predeployer Submit Ends*/

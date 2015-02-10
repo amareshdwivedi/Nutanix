@@ -2253,3 +2253,5 @@ background: #e0e0e0;
 .successMessage{color:#3c763d; font-weight: bold;font-size:14px;}
 .successMessage span{ font-weight: normal;color:#4a4a4a; }
 .cancelButton{ display:none;}
+.mainBody_container input.error{border: 1px solid #f00;}
+.mainBody_container .errorMsg{ margin: 0 0 10px 0;}
