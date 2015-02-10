@@ -484,16 +484,38 @@ jQuery(document).ready(function() {
 	});
 	
 	$(".preDeploy_maincontent a.next").click(function(event) {
-		var nextStep = $(this).attr("name");
-		event.preventDefault();
-		$("#preDeploy_secondaryNav ul li").find("."+nextStep+"").parent().removeClass("disabled");
-		$("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().siblings().addClass("disabled");
-		$("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().addClass("active");
-        $("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().siblings().removeClass("active");
-        var tab = $("#preDeploy_secondaryNav ul li a."+nextStep+"").attr("href");
-		$(".tab-content").not(tab).css("display", "none");
-        $(tab).fadeIn();
-		$(tab).addClass(nextStep);
+        var isFormValid = true;
+        var currentContainer = $(this).parents().eq(1).find(".mainBody_container input.required");
+        currentContainer.each(function(index, value){
+			if ($.trim($(value).val()).length == 0){
+				$(value).addClass("error");
+			} else {
+				$(value).removeClass("error");
+			}
+        });
+        var errorInput = $(this).parents().eq(1).find(".mainBody_container input.error");
+        if(errorInput.length > 0){
+            $(this).parents().eq(1).find(".errorMsg").show();
+            $(this).parents().eq(1).find(".errorMsg").html("Please fill in all the required fields (highlighted in red)");
+            isFormValid = false;
+        }else{
+            $(this).parents().eq(1).find(".errorMsg").hide();
+            $(this).parents().eq(1).find(".errorMsg").html("");
+            isFormValid = true;
+        }
+        
+        if(isFormValid ){
+            var nextStep = $(this).attr("name");
+            event.preventDefault();
+            $("#preDeploy_secondaryNav ul li").find("."+nextStep+"").parent().removeClass("disabled");
+            $("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().siblings().addClass("disabled");
+            $("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().addClass("active");
+            $("#preDeploy_secondaryNav ul li a."+nextStep+"").parent().siblings().removeClass("active");
+            var tab = $("#preDeploy_secondaryNav ul li a."+nextStep+"").attr("href");
+            $(".tab-content").not(tab).css("display", "none");
+            $(tab).fadeIn();
+            $(tab).addClass(nextStep);
+        }
     });
 	$(".preDeploy_maincontent a.back").click(function(event) {
 		var previousStep = $(this).attr("name");
