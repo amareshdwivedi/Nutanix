@@ -1,5 +1,5 @@
+$def with (checkers,msg="")
 <!DOCTYPE html>
-
 <html>
 
 <head>
@@ -1276,12 +1276,27 @@ $$(window).load(function() {
                                         </div>
                                     </div>
                                     <div class="deploymentType">
-                                        <select id="testTypes">
-                                            <option>Run All Tests</option>
-                                            <option>Post Install</option>
-                                            <option>Performance</option>
-                                            <option>Availability</option>
+                                        <select id="vc_types">
+                                            <option value="Run All">Run All</option>
+                                            <option value="cluster_checks">Cluster Checks</option>
+                                            <option value="esxi_checks">ESXi Checks</option>
+                                            <option value="cvm_checks">CVM Checks</option>
+                                            <option value="vcenter_server_checks">vCenter Server Checks</option>
+                                            <option value="storage_and_vm_checks">Storage and VM Checks</option>
+                                            <option value="network_and_switch_checks">Network and Switch Checks</option>
+                                            <option value="hardware_and_bios_checks">Hardware and BIOS Checks</option>
+                                            <option value="availability">Availability</option>
+                                            <option value="performance">Performance</option>
+                                            <option value="security">Security</option>
+                                            <option value="reliability">Reliability</option>
+                                            <option value="recoverability">Recoverability</option>
+                                            <option value="manageability">Manageability</option>
+                                            <option value="configurability">Configurability</option>
+                                            <option value="supportability">Supportability</option>				
+                                            <option value="post-install">Post Install</option>
                                         </select>
+                                        <a href="#." name="vc" class="editCheck"><i class="fa fa-pencil"></i></a>
+                                        <input type="button" name="vc" value="Run" class="btn btn nutanix-form-btn healthCheckBtn runCheck"/>
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
@@ -1302,6 +1317,22 @@ $$(window).load(function() {
                                                 
                                             </div>
                                     </div>
+                                    
+                                    <div class="deploymentType">
+                                        <select id="ncc_types">
+                                            	<option value="Run All">Run All</option>
+                                                <option value="cassandra_checks">Cassandra Checks</option>
+                                                <option value="data_protection_checks">Data Protection Checks</option>
+                                                <option value="hardware_checks">Hardware Checks</option>
+                                                <option value="hypervisor_checks">Hypervisor Checks</option>
+                                                <option value="network_checks">Network Checks</option>
+                                                <option value="sar_checks">Sar Checks</option>
+                                                <option value="stargate_checks">Stargate Checks</option>
+                                                <option value="system_checks">System Checks</option>
+                                        </select>
+                                        <a href="#." name="ncc" class="editCheck"><i class="fa fa-pencil"></i></a>
+                                        <input type="button" name="ncc" value="Run" class="btn btn-primary btn nutanix-form-btn healthCheckBtn runCheck"/>
+                                    </div>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
                                     <div class="statusContainer">
@@ -1321,6 +1352,22 @@ $$(window).load(function() {
                                                 
                                             </div>
                                     </div>
+                                    
+                                    <div class="deploymentType">
+                                        <select id="view_types">
+                                            <option value="Run All">Run All</option>
+                                            <option value="availability">Availability</option>
+                                            <option value="performance">Performance</option>
+                                        </select>
+                                        <a href="#." name="view" class="editCheck"><i class="fa fa-pencil"></i></a>
+                                        <input type="button" name="view" value="Run" class="btn btn-primary btn nutanix-form-btn healthCheckBtn runCheck"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding deploymentLogs">
+                                <div class="logcontainer">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-margin no-padding" id="logs">
+                                    </div>    
                                 </div>
                             </div>
                         </div>
@@ -1387,19 +1434,19 @@ $$(window).load(function() {
 						<ul class="form_fields_container">
 							<li><label>Id</label>
 								<div class="form_input">
-									<input name="customer_id" type="text">
+									<input name="customer_id" type="text" pattern="[0-9]{0,10}" placeholder="enter maximum 10 digit number">
 								</div></li>
 							<li><label>Name</label>
 								<div class="form_input">
-									<input name="customer_name" type="text">
+									<input name="customer_name" type="text" placeholder="enter your name">
 								</div></li>
 							<li><label>Phone</label>
 								<div class="form_input">
-									<input name="customer_phone" type="text">
+									<input name="customer_phone" type="text" placeholder="enter your phone number">
 								</div></li>
 							<li><label>Email</label>
 								<div class="form_input">
-									<input name="customer_email" type="email">
+									<input name="customer_email" type="email" placeholder="enter your email id">
 								</div></li>
 						</ul>
 
@@ -1416,6 +1463,48 @@ $$(window).load(function() {
 			</div>
 		</div>
 	</div>
+        
+    <!--HealthCheck Configuration Modal-->    
+    <div class="modal fade" id="healthCheckConfigurationModel" tabindex="-1"
+		role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+            $ id1 = "config_"
+            $ id2 = "connect_"
+            $ id3 = "run_"
+            $for checker, checkObject in checkers.iteritems():
+			<div class="modal-content" id=modal_$checker>
+				<div class="modal-header">
+					<a class="nutanix-close" data-dismiss="modal"> <span
+						aria-hidden="true"> <i class="fa fa-times"></i>
+					</span>
+					</a>
+					<h4 class="modal-title" id="myModalLabel"><span>$:checker</span> configration detail</h4>
+				</div>
+                $if checkObject.config_form:
+				<form id=$checker method="post">
+                    <div class="modal-body">
+                        <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding  connectionForms">
+                            <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formTbl">
+                                $:checkObject.config_form.render()
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding statusmessage">
+                            
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="conf btn btn-default default-font" type="button" id=$:id1$:checker>Configure</button>
+                        <button class="conn btn btn-default default-font" type="button" id=$:id2$:checker>Verify</button>
+                        <button data-dismiss="modal" aria-hidden="true"
+                            class="btn btn-default default-font cancelButton" type="button">OK</button>
+                        <button data-dismiss="modal" aria-hidden="true"
+                            class="btn btn-default default-font" type="button">Cancel</button>                        
+                    </div>
+                </form>
+        
+		</div>
+	</div>
+     <!--Configuration model end-->   
 	
 	
 	<div class="modal fade" id="createTaskModal" tabindex="-1"

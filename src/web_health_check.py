@@ -57,9 +57,26 @@ app = web.application(urls, globals())
 render = web.template.render('templates/')
 
 class home:
-	def GET(self):
-		return render.home()
+    def __init__(self):
+        self.checkers = {}
+        self.callback_name = ''
+        for checker_class in CheckerBase.__subclasses__():
+            checker = checker_class()
+            self.checkers[checker.get_name()] = checker
+        
+        for checker in self.checkers.keys():
+            checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
+            fp = open(checker_conf_path, 'r')
+            checker_config = json.load(fp)
+            fp.close()
+            checker_module = self.checkers[checker]
+            self.reporter = DefaultConsoleReporter(checker)
+            checker_module.configure(checker_config, self.reporter)
 
+    def GET(self):
+        return render.home(self.checkers)
+    
+	
 class index:
     def __init__(self):
         self.checkers = {}
