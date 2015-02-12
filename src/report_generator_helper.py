@@ -1069,7 +1069,11 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "Port Group "+port_group+" is Not Configured on Host ["+host+"]", True,'alert'                       
         elif "Missing VLAN IDs" in actual_value:
             message,vlan_id,host = actual_value.split("::")
-            return "VLAN "+vlan_id+" is Not Configured on Host ["+host+"]", True,'alert' 
+            return "VLAN "+vlan_id+" is Not Configured on Host ["+host+"]", True,'alert'
+     
+    if check_name == "Network Resource Pool Settings":
+        if status == 'FAIL':
+            return actual_value.split("[")[1].split("]")[0], True, 'warning'         
             
     #hardware_and_bios_checks
     if check_name == "VT-D(Virtualization Tech for Direct I/O)":

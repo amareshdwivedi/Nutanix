@@ -107,59 +107,107 @@ def vc_report(story, checks_list,vCenterIP):
                     categoryList += ","
                     categoryListLen = categoryListLen - 1
                 else : 
-                    continue   
+                    continue
             checks_data = [[str(count) + ". Check: " + checks.get('Name'), "  Category: "+ categoryList]]
             checks_para_table = Table(checks_data, hAlign='LEFT')
             checks_para_table.setStyle(TableStyle([('ALIGN', (0, 0), (1, 0), 'LEFT'),
                                                    ('FONTSIZE', (0, 0), (1, 0), 10.50)]))
-            checks_property_data = [['Entity Tested','Datacenter Name','Cluster Name','Expected Result','Check Status','Severity']]
-            property_lenght = len(checks.get('Properties'))
-            expected_result = checks.get('Expected_Result')
-            for properties in checks.get('Properties'):
-               
-                if properties is not None:
-                    entity_tested_name = properties.get('Entity')
-                    datacenter_name = properties.get('Datacenter')
-                    cluster_name = properties.get('Cluster')
-                    #msg = '<br/>(Exp'.join(properties.get('Message').split('(Exp'))
-                    xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
-                    if xprop_msg == "":
-                            xprop_msg = check['name']
-                    xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
-
-                    actual_result, is_prop_include , severity =get_vc_check_actual_output_format(checks.get('Name'),
-                                                                                                 xprop_actual,
-                                                                                                 properties.get('Entity'),
-                                                                                                 properties.get('Datacenter'),
-                                                                                                 properties.get('Cluster'),
-                                                                                                 properties.get('Host'),
-                                                                                                 properties.get('Status'),
-                                                                                                 properties.get('Message'),
-                                                                                                 xprop_exp.strip(')'),
-                                                                                                 vCenterIP)
-                    
-                    if is_prop_include == False:
-                        property_lenght-=1
-                        continue
-                    
-                    checks_property_data.append([Paragraph(entity_tested_name, NormalMessageStyle),
-                                                 Paragraph(datacenter_name, NormalMessageStyle),
-                                                 Paragraph(cluster_name, NormalMessageStyle),
-                                                 Paragraph(expected_result, NormalMessageStyle),
-                                                 Paragraph(actual_result, NormalMessageStyle),
-                                                 Paragraph(severity, NormalMessageStyle)])
-
-                                     
-            checks_property_table = LongTable(checks_property_data, colWidths=[1*inch,1.2*inch,1*inch,1.15*inch,2.7*inch,0.65*inch])
-            checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (5, 0), colors.fidlightblue),
-                                                       ('ALIGN', (0, 0), (5, property_lenght), 'LEFT'),
-                                        ('INNERGRID', (0, 0), (5, -1), 0.25, colors.black),
-                                        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
-                                        ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
-                                        ('TEXTFONT', (0, 0), (5, 0), 'Times-Roman'),
-                                        ('FONTSIZE', (0, 0), (5, 0), 10)]))
             
-           
+            if checks.get('Name') == 'Network Resource Pool Settings':
+                checks_property_data = [['Resource Pool','Expected Shares','Current Shares','Expected Level','Current Level','Expected Limit','Current Limit']]
+                property_lenght = len(checks.get('Properties'))
+                for properties in checks.get('Properties'):
+                   
+                    if properties is not None:
+                        xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
+                        if xprop_msg == "":
+                                xprop_msg = check['name']
+                                
+                        resource_pool = xprop_msg.split("[")[1].split("]")[0] 
+                                
+                        xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+                        if xprop_actual is not None:
+                            xprop_actual = xprop_actual.split("[")[1].split("]")[0]
+                            xprop_actual_list = xprop_actual.split(' ')
+                            current_share = xprop_actual_list[1].split(':')[-1]
+                            current_level = xprop_actual_list[2].split(':')[-1]
+                            current_limit = xprop_actual_list[0].split(':')[-1]  
+                                
+                        xprop_exp = xprop_exp.split(' )')[0] or xprop_exp.split(' ')[0] or "None"
+                        if xprop_exp is not None:
+                            xprop_exp = xprop_exp.split("[")[1].split("]")[0]
+                            xprop_exp_list = xprop_exp.split(' ')
+                            expected_share = xprop_exp_list[1].split(':')[-1]
+                            expected_level = xprop_exp_list[2].split(':')[-1]
+                            expected_limit = xprop_exp_list[0].split(':')[-1]
+                                                     
+                        checks_property_data.append([Paragraph(resource_pool, NormalMessageStyle),
+                                                     Paragraph(expected_share, NormalMessageStyle),
+                                                     Paragraph(current_share, NormalMessageStyle),
+                                                     Paragraph(expected_level, NormalMessageStyle),
+                                                     Paragraph(current_level, NormalMessageStyle),
+                                                     Paragraph(expected_limit, NormalMessageStyle),
+                                                     Paragraph(current_limit, NormalMessageStyle)])
+    
+                                         
+                checks_property_table = LongTable(checks_property_data, colWidths=[1.1*inch,1.2*inch,1.1*inch,1.1*inch,1*inch,1.1*inch,1.1*inch])
+                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (6, 0), colors.fidlightblue),
+                                                           ('ALIGN', (0, 0), (6, property_lenght), 'LEFT'),
+                                            ('INNERGRID', (0, 0), (6, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                            ('TEXTFONT', (0, 0), (6, 0), 'Times-Roman'),
+                                            ('FONTSIZE', (0, 0), (6, 0), 10)]))
+                               
+            else:
+                checks_property_data = [['Entity Tested','Datacenter Name','Cluster Name','Expected Result','Check Status','Severity']]
+                property_lenght = len(checks.get('Properties'))
+                expected_result = checks.get('Expected_Result')
+                for properties in checks.get('Properties'):
+                   
+                    if properties is not None:
+                        entity_tested_name = properties.get('Entity')
+                        datacenter_name = properties.get('Datacenter')
+                        cluster_name = properties.get('Cluster')
+                        #msg = '<br/>(Exp'.join(properties.get('Message').split('(Exp'))
+                        xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
+                        if xprop_msg == "":
+                                xprop_msg = check['name']
+                        xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+    
+                        actual_result, is_prop_include , severity =get_vc_check_actual_output_format(checks.get('Name'),
+                                                                                                     xprop_actual,
+                                                                                                     properties.get('Entity'),
+                                                                                                     properties.get('Datacenter'),
+                                                                                                     properties.get('Cluster'),
+                                                                                                     properties.get('Host'),
+                                                                                                     properties.get('Status'),
+                                                                                                     properties.get('Message'),
+                                                                                                     xprop_exp.strip(')'),
+                                                                                                     vCenterIP)
+                        
+                        if is_prop_include == False:
+                            property_lenght-=1
+                            continue
+                        
+                        checks_property_data.append([Paragraph(entity_tested_name, NormalMessageStyle),
+                                                     Paragraph(datacenter_name, NormalMessageStyle),
+                                                     Paragraph(cluster_name, NormalMessageStyle),
+                                                     Paragraph(expected_result, NormalMessageStyle),
+                                                     Paragraph(actual_result, NormalMessageStyle),
+                                                     Paragraph(severity, NormalMessageStyle)])
+    
+                                         
+                checks_property_table = LongTable(checks_property_data, colWidths=[1*inch,1.2*inch,1*inch,1.15*inch,2.7*inch,0.65*inch])
+                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (5, 0), colors.fidlightblue),
+                                                           ('ALIGN', (0, 0), (5, property_lenght), 'LEFT'),
+                                            ('INNERGRID', (0, 0), (5, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                            ('TEXTFONT', (0, 0), (5, 0), 'Times-Roman'),
+                                            ('FONTSIZE', (0, 0), (5, 0), 10)]))
+                
+               
             story.append(checks_para_table)
             story.append(Spacer(1, 0.05 * inch))
             story.append(checks_property_table)
