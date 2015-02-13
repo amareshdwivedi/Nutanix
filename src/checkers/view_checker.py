@@ -872,29 +872,39 @@ class HorizonViewChecker(CheckerBase):
       
     @checkgroup("view_components_checks", "Verify Connection Broker Server configured with static IP",["availability"],"true")
     def check_connection_broker_has_static_ip(self):
-        powershell_cmd='ForEach ( $NIC in Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE  ) { Write-Host $NIC.IPAddress = (-NOT $NIC.DHCPEnabled) }'
-        output=self.get_view_property(powershell_cmd)
-          
-        if output == 'command-error':
-            return None,None,None
-          
-        nics= output.split("\n")
+        powershell_cmd='foreach ( $cb in get-ConnectionBroker){ if($cb.type -match "Connection Server") {$cb.externalURL}}'
+        connection_brokers=self.get_view_property(powershell_cmd)
         message = ""
         passed_all = True
-        for nic in nics:
-            nic_ip, is_status= nic.split("=")
-            nic_ip=nic_ip.strip()
-            is_status=is_status.strip()
-            flag=True
-            if is_status == 'False':
-                flag=False
-            output="IP :"+nic_ip +" isStaticIP:"+is_status
-            expected="True"
-            self.reporter.notify_progress(self.reporter.notify_checkLog, "Actual:="+output+" (Expected:="+str(expected)+")", (flag and "PASS" or "FAIL"))
-            message+=", "+ "Actual:="+output+" (Expected:="+str(expected)+")#"+(flag and "Pass" or "Fail") 
-          
-        #passed_all = passed_all and passed
-          
+        import urlparse
+        
+        for connection_broker in connection_brokers.split('\n'):
+            p = '(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*'
+            hostname= re.search(p,connection_broker).group('host')
+            vm=None
+            if Validate.valid_ip(hostname):
+                vm=self.get_vc_vms(hostname)
+            else:
+                vm=self.get_vc_vms(hostname,'dns')
+            status=False
+            if vm == None:
+                continue
+            else:
+                nic_info=vm.guest.net
+                for nic in nic_info:
+                    
+                    is_static_ip=nic.ipConfig.dhcp.ipv4.enable
+                    ipaddress=','.join(nic.ipAddress)
+                    actual=None
+                    if is_static_ip:
+                        actual="Actual:=Server["+hostname+"] configured with DHCP IP's ["+ipaddress+"]"
+                    else:
+                        actual="Actual:=Server["+hostname+"] configured with Static IP's ["+ipaddress+"]"
+                        
+                    self.reporter.notify_progress(self.reporter.notify_checkLog, actual+" (Expected:=Static IP's", (not is_static_ip and "PASS" or "FAIL"))
+                    message+=", "+actual+" (Expected:=Static IP's)#"+(not is_static_ip and "Pass" or "Fail")
+                    passed_all = passed_all and (not is_static_ip) 
+       
         return passed_all , message,None
       
     @checkgroup("view_components_checks", "Verify number of Desktop configured in View",["availability"],"Number of desktop < 10000 or (2000 x number of brokers) ")
