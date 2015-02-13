@@ -1000,7 +1000,6 @@ div.msgbar.msg_Alert p{
 	font-size:12px;
 	background:#f8f8f8;
 	border-radius:3px;
-	color:#666;
 	box-shadow: inset 0 1px 0 0px #fff;
 	-webkit-box-shadow:inset 0 1px 0 0px #fff;
 }
@@ -2153,7 +2152,7 @@ background: #e0e0e0;
     top: 30px;
     width: 45px;
 }
-.deploymentProgress{ background: #F1F1F1;  padding:10px 0 0 0;}
+.deploymentProgress,  .deploymentLogs{ background: #F1F1F1;  padding:10px 0 0 0; margin-bottom: 10px;}
 .taskCompleted i.fa-check-square{  bottom: 65px;
     color: #59b836;
     font-size: 65px;
@@ -2255,3 +2254,53 @@ background: #e0e0e0;
 .cancelButton{ display:none;}
 .mainBody_container input.error{border: 1px solid #f00;}
 .mainBody_container .errorMsg{ margin: 0 0 10px 0;}
+
+/* When the pattern is matched */
+input[type="text"]:valid {
+    color: #666;
+}
+
+/* Unmatched */
+input[type="text"]:invalid {
+    color: #f00;
+}
+
+.runCheck{ float: right;
+    margin-bottom: 10px;
+    padding: 3px 10px;}
+
+.logcontainer{  height:480px; border: 1px solid #ccc; overflow-y:scroll;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+    transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+    color: #343536; padding:8px 10px; margin:0 10px;
+    display: block;font-size: 11px;}
+
+#logs h4{padding:5px; margin:0; font-size:14px; width:100%; float:left;}
+.logsHeading,.logsdata{ margin:0;padding:0;}
+.logsHeading div{ font-size:14px; font-weight:bold; padding:5px; color:#fff; background:#26bcf1; margin:0;}
+.logsmainData div{ padding:5px; font-size:12px; border:1px solid #ccc;margin:0;color:#6f787e;}
+.logsmainData{ width: 100%; float:left}
+.editCheck{float: left;
+    font-size: 16px;
+    margin: 5px 11px;}
+#healthCheckConfigurationModel.modal{width:460px;}
+#healthCheckConfigurationModel .modal-footer{ border:0;}
+.formTbl table{ width: 100%; font-size: 12px;font-family: 'ProximaNovaSoftRegular'; }
+.formTbl table label{ float: left;
+    margin-bottom: 17px;
+    margin-left: 25px;
+    text-align: left;}
+.formTbl table input[type="text"],.formTbl table  input[type="password"], .formTbl table select {background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+    color: #343536;
+    display: block;
+    font-size: 11px;
+    height: 20px;
+    line-height: 1.42857;
+    padding: 6px 12px;
+    transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+    width: 80%; margin-bottom: 5px;}
