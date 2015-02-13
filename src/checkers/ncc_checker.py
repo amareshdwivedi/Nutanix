@@ -13,6 +13,7 @@ import socket
 from colorama import Fore
 import web
 from web import form
+import time
 
 MSG_WIDTH = 120
 
@@ -65,8 +66,7 @@ class NCCChecker(CheckerBase):
             if args[0] == 'setup':
                 self.setup()
                 exit_with_message("Nutanix Cluster is configured.")
-            
-        
+                
         ssh=None
         try:
             ssh = paramiko.SSHClient()
@@ -97,7 +97,12 @@ class NCCChecker(CheckerBase):
         #cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false " + " ".join(args) or self.config['ncc_path']
         cmd = ntnx_env + cmd
         status_text = {0 : "Done",1 : "Done", 3 : "Pass",4: "Pass",5: "Warn",6: "Fail", 7: "Err"}
-        stdin, stdout, stderr =  ssh.exec_command(cmd)
+        time.sleep(1)
+        try:
+            stdin, stdout, stderr =  ssh.exec_command(cmd)
+        except paramiko.ChannelException,e:
+            exit_with_message(str(e)+"\n\nUnable to get NCC results through SSH")            
+                
         passed_all = True
         #self.realtime_results['ncc'] = []
         first_json = 0

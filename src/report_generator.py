@@ -114,7 +114,7 @@ def vc_report(story, checks_list,vCenterIP):
                                                    ('FONTSIZE', (0, 0), (1, 0), 10.50)]))
             
             if checks.get('Name') == 'Network Resource Pool Settings':
-                checks_property_data = [['Resource Pool','Expected Shares','Current Shares','Expected Level','Current Level','Expected Limit','Current Limit']]
+                checks_property_data = [['Resource Pool','Exp Shares','Current Shares','Exp Level','Current Level','Exp Limit','Current Limit','Severity']]
                 property_lenght = len(checks.get('Properties'))
                 for properties in checks.get('Properties'):
                    
@@ -122,42 +122,85 @@ def vc_report(story, checks_list,vCenterIP):
                         xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
                         if xprop_msg == "":
                                 xprop_msg = check['name']
-                                
-                        resource_pool = xprop_msg.split("[")[1].split("]")[0] 
-                                
+                                                                
                         xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
-                        if xprop_actual is not None:
+                        if xprop_actual is not None and xprop_actual != 'False':
                             xprop_actual = xprop_actual.split("[")[1].split("]")[0]
                             xprop_actual_list = xprop_actual.split(' ')
                             current_share = xprop_actual_list[1].split(':')[-1]
                             current_level = xprop_actual_list[2].split(':')[-1]
                             current_limit = xprop_actual_list[0].split(':')[-1]  
                                 
-                        xprop_exp = xprop_exp.split(' )')[0] or xprop_exp.split(' ')[0] or "None"
-                        if xprop_exp is not None:
-                            xprop_exp = xprop_exp.split("[")[1].split("]")[0]
-                            xprop_exp_list = xprop_exp.split(' ')
-                            expected_share = xprop_exp_list[1].split(':')[-1]
-                            expected_level = xprop_exp_list[2].split(':')[-1]
-                            expected_limit = xprop_exp_list[0].split(':')[-1]
+                            xprop_exp = xprop_exp.split(' )')[0] or xprop_exp.split(' ')[0] or "None"
+                            if xprop_exp is not None:
+                                xprop_exp = xprop_exp.split("[")[1].split("]")[0]
+                                xprop_exp_list = xprop_exp.split(' ')
+                                expected_share = xprop_exp_list[1].split(':')[-1]
+                                expected_level = xprop_exp_list[2].split(':')[-1]
+                                expected_limit = xprop_exp_list[0].split(':')[-1]
+                            
+                            resource_pool = xprop_msg.split("[")[1].split("]")[0]
                                                      
-                        checks_property_data.append([Paragraph(resource_pool, NormalMessageStyle),
-                                                     Paragraph(expected_share, NormalMessageStyle),
-                                                     Paragraph(current_share, NormalMessageStyle),
-                                                     Paragraph(expected_level, NormalMessageStyle),
-                                                     Paragraph(current_level, NormalMessageStyle),
-                                                     Paragraph(expected_limit, NormalMessageStyle),
-                                                     Paragraph(current_limit, NormalMessageStyle)])
-    
+                            checks_property_data.append([Paragraph(resource_pool, NormalMessageStyle),
+                                                         Paragraph(expected_share, NormalMessageStyle),
+                                                         Paragraph(current_share, NormalMessageStyle),
+                                                         Paragraph(expected_level, NormalMessageStyle),
+                                                         Paragraph(current_level, NormalMessageStyle),
+                                                         Paragraph(expected_limit, NormalMessageStyle),
+                                                         Paragraph(current_limit, NormalMessageStyle),
+                                                         Paragraph('warning', NormalMessageStyle)])
+                        else:
+                            property_lenght-=1
+                            continue
+                                
+                    else:
+                        property_lenght-=1
+                        continue
                                          
-                checks_property_table = LongTable(checks_property_data, colWidths=[1.1*inch,1.2*inch,1.1*inch,1.1*inch,1*inch,1.1*inch,1.1*inch])
-                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (6, 0), colors.fidlightblue),
-                                                           ('ALIGN', (0, 0), (6, property_lenght), 'LEFT'),
-                                            ('INNERGRID', (0, 0), (6, -1), 0.25, colors.black),
+                checks_property_table = LongTable(checks_property_data, colWidths=[1.2*inch,1*inch,1.1*inch,0.8*inch,1.1*inch,0.8*inch,1.1*inch,0.65*inch])
+                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (7, 0), colors.fidlightblue),
+                                                           ('ALIGN', (0, 0), (7, property_lenght), 'LEFT'),
+                                            ('INNERGRID', (0, 0), (7, -1), 0.25, colors.black),
                                             ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
                                             ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
-                                            ('TEXTFONT', (0, 0), (6, 0), 'Times-Roman'),
-                                            ('FONTSIZE', (0, 0), (6, 0), 10)]))
+                                            ('TEXTFONT', (0, 0), (7, 0), 'Times-Roman'),
+                                            ('FONTSIZE', (0, 0), (7, 0), 10)]))
+
+            elif checks.get('Name') == 'JVM Memory for vSphere Server':
+                checks_property_data = [['Entity Checked','Memory Configured','Memory Recommended','Severity']]
+                property_lenght = len(checks.get('Properties'))
+                for properties in checks.get('Properties'):
+                   
+                    if properties is not None and properties.get('Status') == 'FAIL':
+                        xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
+                        if xprop_msg == "":
+                                xprop_msg = check['name']
+                                
+                                
+                        xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+                                
+                        xprop_exp = xprop_exp.split(')')[0] or xprop_exp.split(' ')[0] or "None"
+                        
+                        if xprop_actual == 'SSH Connection Failed':
+                            property_lenght-=1
+                            continue
+                        else:                             
+                            checks_property_data.append([Paragraph(xprop_msg, NormalMessageStyle),
+                                                         Paragraph(xprop_actual, NormalMessageStyle),
+                                                         Paragraph(xprop_exp, NormalMessageStyle),
+                                                         Paragraph("info", NormalMessageStyle)])
+                    else:
+                        property_lenght-=1
+                        continue
+                                         
+                checks_property_table = LongTable(checks_property_data, colWidths=[2.8*inch,1.6*inch,1.75*inch,1.5*inch])
+                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (3, 0), colors.fidlightblue),
+                                                           ('ALIGN', (0, 0), (3, property_lenght), 'LEFT'),
+                                            ('INNERGRID', (0, 0), (3, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                            ('TEXTFONT', (0, 0), (3, 0), 'Times-Roman'),
+                                            ('FONTSIZE', (0, 0), (3, 0), 10)]))
                                
             else:
                 checks_property_data = [['Entity Tested','Datacenter Name','Cluster Name','Expected Result','Check Status','Severity']]
