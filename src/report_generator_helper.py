@@ -611,29 +611,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         else:
             return  "Total Error Entries are ["+actual_value+"]", False, 'warning'                          
 
-    if check_name == "JVM Memory for vSphere Web Client":
-        if actual_value == "vCenter IP Not-Configured":
-            return "Not-Configured", False, ''
-        elif actual_value == "SSH Connection Failed":
-            return "SSH Connection Failed",False,''
-        elif status == "FAIL":
-            return "JVM memory for vSphere Web Client configured is ["+actual_value+"] , Recommended Memory is ["+exp_value_from_msg+"]", True, 'info' 
- 
-    if check_name == "JVM Memory for Inventory Services":
-        if actual_value == "vCenter IP Not-Configured":
-            return "Not-Configured", False, ''
-        elif actual_value == "SSH Connection Failed":
-            return "SSH Connection Failed",False,''
-        elif status == "FAIL":
-            return "JVM memory for Inventory Services configured is ["+actual_value+"], Recommended Memory is ["+exp_value_from_msg+"]", True, 'info'
-        
-    if check_name == "JVM Memory for Storage Base Profiles":
-        if actual_value == "vCenter IP Not-Configured":
-            return "Not-Configured", False, ''
-        elif actual_value == "SSH Connection Failed":
-            return "SSH Connection Failed",False,''
-        elif status == "FAIL":
-            return "JVM Memory for Storage Base Profiles configured is ["+actual_value+"], Recommended Memory is ["+exp_value_from_msg+"]", True, 'info'                 
+    if check_name == "JVM Memory for vSphere Server":
+        if status == 'FAIL':
+            return actual_value, True, 'info'         
 
     if check_name == "Memory Utilization of vCenter Server":
         if actual_value == "Cannot Determine":

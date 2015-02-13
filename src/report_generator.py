@@ -158,6 +158,37 @@ def vc_report(story, checks_list,vCenterIP):
                                             ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
                                             ('TEXTFONT', (0, 0), (6, 0), 'Times-Roman'),
                                             ('FONTSIZE', (0, 0), (6, 0), 10)]))
+
+            elif checks.get('Name') == 'JVM Memory for vSphere Server':
+                checks_property_data = [['Entity Checked','Memory Configured','Memory Recommended']]
+                property_lenght = len(checks.get('Properties'))
+                for properties in checks.get('Properties'):
+                   
+                    if properties is not None and properties.get('Status') == 'FAIL':
+                        xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
+                        if xprop_msg == "":
+                                xprop_msg = check['name']
+                                
+                                
+                        xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+                                
+                        xprop_exp = xprop_exp.split(')')[0] or xprop_exp.split(' ')[0] or "None"
+                                                     
+                        checks_property_data.append([Paragraph(xprop_msg, NormalMessageStyle),
+                                                     Paragraph(xprop_actual, NormalMessageStyle),
+                                                     Paragraph(xprop_exp, NormalMessageStyle)])
+                    else:
+                        property_lenght-=1
+                        continue
+                                         
+                checks_property_table = LongTable(checks_property_data, colWidths=[2.5*inch,2*inch,2*inch])
+                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (2, 0), colors.fidlightblue),
+                                                           ('ALIGN', (0, 0), (2, property_lenght), 'LEFT'),
+                                            ('INNERGRID', (0, 0), (2, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                            ('TEXTFONT', (0, 0), (2, 0), 'Times-Roman'),
+                                            ('FONTSIZE', (0, 0), (2, 0), 10)]))
                                
             else:
                 checks_property_data = [['Entity Tested','Datacenter Name','Cluster Name','Expected Result','Check Status','Severity']]
