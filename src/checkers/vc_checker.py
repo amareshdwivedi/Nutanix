@@ -1868,8 +1868,8 @@ class VCChecker(CheckerBase):
         memory = None       
         if vcenter_ip == "Not-Configured" :
             passed = False
-            message += ", " +check_name+"  = vCenter IP Not-Configured (Expected: =Configured JVM Memory)"+"#"+("FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = vCenter IP Not-Configured (Expected: =Configured JVM Memory)",("FAIL"))
+            message += ", " +" = vCenter IP Not-Configured (Expected: =Configured JVM Memory)"+"#"+("FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog," = vCenter IP Not-Configured (Expected: =Configured JVM Memory)",("FAIL"))
         else:
             ssh=None
             error_count = 0
@@ -1879,17 +1879,17 @@ class VCChecker(CheckerBase):
                 ssh.connect(vcenter_ip, username="root", password="vmware")
                    
             except paramiko.AuthenticationException:
-                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
-                return False ,message
+                message += ", " +"On "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Configured JVM Memory)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog," On "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Configured JVM Memory)",("FAIL"))
+                return False ,message,''
             except paramiko.SSHException, e:
-                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
-                return False ,message
+                message += ", " +"On "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Configured JVM Memory)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"On "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Configured JVM Memory)",("FAIL"))
+                return False ,message,''
             except socket.error, e:
-                message += ", " +check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: = "+str(expected_result)+")",("FAIL"))
-                return False ,message
+                message += ", " +"On "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Configured JVM Memory)"+"#"+("FAIL")
+                self.reporter.notify_progress(self.reporter.notify_checkLog,"On "+vcenter_ip+"="+"SSH Connection Failed"+" (Expected: =Configured JVM Memory)",("FAIL"))
+                return False ,message,''
              
             if ssh is not None:
                 server_version , inventory_size = self.get_inventory_info()

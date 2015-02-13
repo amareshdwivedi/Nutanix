@@ -122,35 +122,40 @@ def vc_report(story, checks_list,vCenterIP):
                         xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
                         if xprop_msg == "":
                                 xprop_msg = check['name']
-                                
-                        resource_pool = xprop_msg.split("[")[1].split("]")[0] 
-                                
+                                                                
                         xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
-                        if xprop_actual is not None:
+                        if xprop_actual is not None and xprop_actual != 'False':
                             xprop_actual = xprop_actual.split("[")[1].split("]")[0]
                             xprop_actual_list = xprop_actual.split(' ')
                             current_share = xprop_actual_list[1].split(':')[-1]
                             current_level = xprop_actual_list[2].split(':')[-1]
                             current_limit = xprop_actual_list[0].split(':')[-1]  
                                 
-                        xprop_exp = xprop_exp.split(' )')[0] or xprop_exp.split(' ')[0] or "None"
-                        if xprop_exp is not None:
-                            xprop_exp = xprop_exp.split("[")[1].split("]")[0]
-                            xprop_exp_list = xprop_exp.split(' ')
-                            expected_share = xprop_exp_list[1].split(':')[-1]
-                            expected_level = xprop_exp_list[2].split(':')[-1]
-                            expected_limit = xprop_exp_list[0].split(':')[-1]
+                            xprop_exp = xprop_exp.split(' )')[0] or xprop_exp.split(' ')[0] or "None"
+                            if xprop_exp is not None:
+                                xprop_exp = xprop_exp.split("[")[1].split("]")[0]
+                                xprop_exp_list = xprop_exp.split(' ')
+                                expected_share = xprop_exp_list[1].split(':')[-1]
+                                expected_level = xprop_exp_list[2].split(':')[-1]
+                                expected_limit = xprop_exp_list[0].split(':')[-1]
+                            
+                            resource_pool = xprop_msg.split("[")[1].split("]")[0]
                                                      
-
-                        checks_property_data.append([Paragraph(resource_pool, NormalMessageStyle),
-                                                     Paragraph(expected_share, NormalMessageStyle),
-                                                     Paragraph(current_share, NormalMessageStyle),
-                                                     Paragraph(expected_level, NormalMessageStyle),
-                                                     Paragraph(current_level, NormalMessageStyle),
-                                                     Paragraph(expected_limit, NormalMessageStyle),
-                                                     Paragraph(current_limit, NormalMessageStyle),
-                                                     Paragraph('warning', NormalMessageStyle)])
-    
+                            checks_property_data.append([Paragraph(resource_pool, NormalMessageStyle),
+                                                         Paragraph(expected_share, NormalMessageStyle),
+                                                         Paragraph(current_share, NormalMessageStyle),
+                                                         Paragraph(expected_level, NormalMessageStyle),
+                                                         Paragraph(current_level, NormalMessageStyle),
+                                                         Paragraph(expected_limit, NormalMessageStyle),
+                                                         Paragraph(current_limit, NormalMessageStyle),
+                                                         Paragraph('warning', NormalMessageStyle)])
+                        else:
+                            property_lenght-=1
+                            continue
+                                
+                    else:
+                        property_lenght-=1
+                        continue
                                          
                 checks_property_table = LongTable(checks_property_data, colWidths=[1.2*inch,1*inch,1.1*inch,0.8*inch,1.1*inch,0.8*inch,1.1*inch,0.65*inch])
                 checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (7, 0), colors.fidlightblue),
@@ -175,11 +180,15 @@ def vc_report(story, checks_list,vCenterIP):
                         xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
                                 
                         xprop_exp = xprop_exp.split(')')[0] or xprop_exp.split(' ')[0] or "None"
-                                                     
-                        checks_property_data.append([Paragraph(xprop_msg, NormalMessageStyle),
-                                                     Paragraph(xprop_actual, NormalMessageStyle),
-                                                     Paragraph(xprop_exp, NormalMessageStyle),
-                                                     Paragraph("info", NormalMessageStyle)])
+                        
+                        if xprop_actual == 'SSH Connection Failed':
+                            property_lenght-=1
+                            continue
+                        else:                             
+                            checks_property_data.append([Paragraph(xprop_msg, NormalMessageStyle),
+                                                         Paragraph(xprop_actual, NormalMessageStyle),
+                                                         Paragraph(xprop_exp, NormalMessageStyle),
+                                                         Paragraph("info", NormalMessageStyle)])
                     else:
                         property_lenght-=1
                         continue

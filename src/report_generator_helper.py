@@ -1052,7 +1052,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "VLAN "+vlan_id+" is Not Configured on Host ["+host+"]", True,'alert'
      
     if check_name == "Network Resource Pool Settings":
-        if status == 'FAIL':
+        if status == 'FAIL' and actual_value != 'False':
             return actual_value.split("[")[1].split("]")[0], True, 'warning'         
             
     #hardware_and_bios_checks
