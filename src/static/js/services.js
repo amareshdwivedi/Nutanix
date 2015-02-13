@@ -603,7 +603,6 @@ jQuery(document).ready(function() {
     /*post deploye / health check run*/
     $(".runCheck").click(function() {
         var categoryType = $(this).attr("name");
-        alert(categoryType)
 
         function fetch_data() {
             $.ajax({
@@ -614,13 +613,13 @@ jQuery(document).ready(function() {
                     if (categoryType == "ncc") {
                         $("#logs").empty();
                         $("#logs").append("<div id='nccDataHead' class='logsHeading col-lg-12 col-md-12 col-sm-12'>" +
-                            "<div class='col-lg-10 col-md-10 col-sm-10'>Check</div>" +
-                            "<div class='col-lg-2 col-md-2 col-sm-2'>Status</div>" +
+                            "<div class='col-lg-10 col-md-10 col-sm-10'><span>Check</span></div>" +
+                            "<div class='col-lg-2 col-md-2 col-sm-2'><span>Status</span></div>" +
                             "</div>");
                         $("#logs").append("<div id='nccMainData' class='logsdata col-lg-12 col-md-12 col-sm-12'></div>");
                         for (i = 0; i < data.ncc.checks.length; i++) {
-                            $("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-10 col-md-10 col-sm-10'>" + data.ncc.checks[i].Name + "</div>" +
-                                "<div class='col-lg-2 col-md-2 col-sm-2 result" + i + "'>" + data.ncc.checks[i].Status + "</div></div>");
+                            $("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-10 col-md-10 col-sm-10'><span>" + data.ncc.checks[i].Name + "</span></div>" +
+                                "<div class='col-lg-2 col-md-2 col-sm-2 result" + i + "'><span>" + data.ncc.checks[i].Status + "</span></div></div>");
                             if ($(".result" + i + "").html() == "Pass") {
                                 $(".result" + i + "").addClass("success");
                             } else if ($(".result" + i + "").html() == "Fail") {
@@ -641,15 +640,15 @@ jQuery(document).ready(function() {
                         for (i = 0; i < data.view.checks.length; i++) {
                             $("#logs").append("<h4>" + data.view.checks[i].Message + "</h4>");
                             $("#logs").append("<div class='logsHeading col-lg-12 col-md-12 col-sm-12'>" +
-                                "<div class='col-lg-5 col-md-5 col-sm-5'>Actual</div>" +
-                                "<div class='col-lg-5 col-md-5 col-sm-5'>Expected</div>" +
-                                "<div class='col-lg-2 col-md-2 col-sm-2'>Status</div>" +
+                                "<div class='col-lg-5 col-md-5 col-sm-5'><span>Actual</span></div>" +
+                                "<div class='col-lg-5 col-md-5 col-sm-5'><span>Expected</span></div>" +
+                                "<div class='col-lg-2 col-md-2 col-sm-2'><span>Status</span></div>" +
                                 "</div>");
                             $("#logs").append("<div class='logsdata" + i + " col-lg-12 col-md-12 col-sm-12 logsdata'></div>");
                             for (j = 0; j < data.view.checks[i].Properties.length; j++) {
-                                $("#logs .logsdata" + i).append("<div class='logsmainData'><div class='col-lg-5 col-md-5 col-sm-5'>" + data.view.checks[i].Properties[j].Actual.replace(/;/g, '<BR/>') + "</div>" +
-                                    "<div class='col-lg-5 col-md-5 col-sm-5'>" + data.view.checks[i].Properties[j].Expected.replace(/;/g, '<br/>') + "</div>" +
-                                    "<div class='col-lg-2 col-md-2 col-sm-2  result" + i + j + "'>" + data.view.checks[i].Properties[j].Status + "</div></div>");
+                                $("#logs .logsdata" + i).append("<div class='logsmainData'><div class='col-lg-5 col-md-5 col-sm-5'><span>" + data.view.checks[i].Properties[j].Actual.replace(/;/g, '<BR/>') + "</span></div>" +
+                                    "<div class='col-lg-5 col-md-5 col-sm-5'><span>" + data.view.checks[i].Properties[j].Expected.replace(/;/g, '<br/>') + "</span></div>" +
+                                    "<div class='col-lg-2 col-md-2 col-sm-2  result" + i + j + "'><span>" + data.view.checks[i].Properties[j].Status + "</span></div></div>");
 
                                 if ($(".result" + i + j + "").html() == "PASS") {
                                     $(".result" + i + j + "").addClass("success");
@@ -672,17 +671,17 @@ jQuery(document).ready(function() {
                         for (i = 0; i < data.vc.checks.length; i++) {
                             $("#logs").append("<h4>" + data.vc.checks[i].Message + "</h4>");
                             $("#logs").append("<div class='logsHeading col-lg-12 col-md-12 col-sm-12'>" +
-                                "<div class='col-lg-7 col-md-7 col-sm-7'>Check</div>" +
-                                "<div class='col-lg-2 col-md-2 col-sm-2'>Expected</div>" +
-                                "<div class='col-lg-2 col-md-2 col-sm-2'>Actual</div>" +
-                                "<div class='col-lg-1 col-md-1 col-sm-1'>Status</div>" +
+                                "<div class='col-lg-7 col-md-7 col-sm-7'><span>Check</span></div>" +
+                                "<div class='col-lg-2 col-md-2 col-sm-2'><span>Expected</span></div>" +
+                                "<div class='col-lg-2 col-md-2 col-sm-2'><span>Actual</span></div>" +
+                                "<div class='col-lg-1 col-md-1 col-sm-1'><span>Status</span></div>" +
                                 "</div>");
                             $("#logs").append("<div class='logsdata" + i + " col-lg-12 col-md-12 col-sm-12 logsdata'></div>");
                             for (j = 0; j < data.vc.checks[i].Properties.length; j++) {
-                                $("#logs .logsdata" + i).append("<div class='logsmainData'><div class='col-lg-7 col-md-7 col-sm-7'>" + data.vc.checks[i].Properties[j].Message + "</div>" +
-                                    "<div class='col-lg-2 col-md-2 col-sm-2'>" + data.vc.checks[i].Properties[j].Expected + "</div>" +
-                                    "<div class='col-lg-2 col-md-2 col-sm-2'>" + data.vc.checks[i].Properties[j].Actual + "</div>" +
-                                    "<div class='col-lg-1 col-md-1 col-sm-1  result" + i + j + "'>" + data.vc.checks[i].Properties[j].Status + "</div></div>");
+                                $("#logs .logsdata" + i).append("<div class='logsmainData'><div class='col-lg-7 col-md-7 col-sm-7'><span>" + data.vc.checks[i].Properties[j].Message + "</div>" +
+                                    "<div class='col-lg-2 col-md-2 col-sm-2'><span>" + data.vc.checks[i].Properties[j].Expected + "</span></div>" +
+                                    "<div class='col-lg-2 col-md-2 col-sm-2'><span>" + data.vc.checks[i].Properties[j].Actual + "</span></div>" +
+                                    "<div class='col-lg-1 col-md-1 col-sm-1  result" + i + j + "'><span>" + data.vc.checks[i].Properties[j].Status + "</span></div></div>");
 
                                 if ($(".result" + i + j + "").html() == "PASS") {
                                     $(".result" + i + j + "").addClass("success");
@@ -694,6 +693,7 @@ jQuery(document).ready(function() {
                         var h1 = $('#logs')[0].scrollHeight,
                             h2 = $('#logs').height();
                         $('#logs').scrollTop(h1 - h2);
+                        
                     }
                     //document.getElementById('logs').value = data;
                 }
