@@ -459,7 +459,33 @@ jQuery(document).ready(function() {
          $("#createNewCustomerModel .cancelButton").hide();
 		$(".errorMsg").hide();
 	 });
-	 
+
+    $("#healthCheckConfigurationModel .modal-content").hide();
+    $(".editCheck").click(function(){
+        var checkerType = $(this).attr("name");    
+		$('#healthCheckConfigurationModel').modal();
+        $("#healthCheckConfigurationModel .modal-content").hide();
+        $("#healthCheckConfigurationModel .statusmessage").hide();
+        $("#healthCheckConfigurationModel .modal-content .formTbl").show();
+        $("#healthCheckConfigurationModel .cancelButton").hide();
+        $("#healthCheckConfigurationModel .conf, #healthCheckConfigurationModel .conn").show();
+        if(checkerType == "vc"){
+            $(".modal-content#modal_vc").show();
+            $(".modal-content#modal_ncc").hide();
+            $(".modal-content#modal_view").hide();
+        }else if(checkerType == "ncc"){
+            $(".modal-content#modal_vc").hide();
+            $(".modal-content#modal_ncc").show();
+            $(".modal-content#modal_view").hide();
+        }else if(checkerType == "view"){
+            $(".modal-content#modal_vc").hide();
+            $(".modal-content#modal_ncc").hide();
+            $(".modal-content#modal_view").show();
+        }
+	});
+
+    
+    
 	 $(".createTaskLink").click(function(){
 		 $('#createTaskModal').modal();
 		 $(".createTask-form .form_input").removeClass("error");

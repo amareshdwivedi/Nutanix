@@ -43,7 +43,10 @@ def checkgroup(group_name, description, category,expected_result):
 class VCChecker(CheckerBase):
 
     _NAME_ = "vc"
-
+    
+    resource_pool_config={}
+    
+    vcenter_stats_config={}
 
     def __init__(self):
         super(VCChecker, self).__init__(VCChecker._NAME_)
@@ -1997,10 +2000,13 @@ class VCChecker(CheckerBase):
         return None            
 
     def get_vcenterserver_default_memory(self,server_version,inventory_size,property):
-        vcenter_stats_path=os.path.abspath(os.path.dirname(__file__)) + os.path.sep + ".." + os.path.sep +"conf" + os.path.sep + "vcenter_stats.json"
-        fp = open(vcenter_stats_path, 'r')
-        vcenter_stats_config = json.load(fp)
-        fp.close()
+        if len(VCChecker.vcenter_stats_config) == 0:                    
+            vcenter_stats_path=os.path.abspath(os.path.dirname(__file__)) + os.path.sep + ".." + os.path.sep +"conf" + os.path.sep + "vcenter_stats.json"
+            fp = open(vcenter_stats_path, 'r')
+            vcenter_stats_config = json.load(fp)
+            fp.close()
+        else:
+            pass    
         return vcenter_stats_config[server_version][inventory_size][property]
 
     @checkgroup("vcenter_server_checks", "Memory Utilization of vCenter Server",["performance"],"Memory Utilization")
@@ -2294,6 +2300,57 @@ class VCChecker(CheckerBase):
          
         return passed,message,''    
 
+    def get_network_resource_pool_settings(self,resource_pool_property):
+        if len(VCChecker.resource_pool_config) == 0:                    
+            resource_pool_path=os.path.abspath(os.path.dirname(__file__)) + os.path.sep + ".." + os.path.sep +"conf" + os.path.sep + "resource_pool.json"
+            fp = open(resource_pool_path, 'r')
+            VCChecker.resource_pool_config = json.load(fp)
+            fp.close()
+        else:
+            pass   
+        return VCChecker.resource_pool_config[resource_pool_property]
+    
+    @checkgroup("network_and_switch_checks", "Network Resource Pool Settings",["performance"],"Configured Values")
+    def check_network_resource_pool_settings(self):
+        path='content.rootFolder.childEntity.networkFolder.childEntity'
+        datacenter_networks = self.get_vc_property(path)
+        
+        message = ""
+        passed = True
+        for datacenter in datacenter_networks.keys():
+            network_list = datacenter_networks.get(datacenter)
+            dvs_found=False
+            for network in network_list:
+                if isinstance(network,vim.dvs.VmwareDistributedVirtualSwitch):
+                    dvs_found=True
+                    resource_pool_list=network.networkResourcePool
+                    for properties in resource_pool_list:
+                        property_key = properties.key
+                        limit = properties.allocationInfo.limit
+                        if limit == -1:
+                            limit = "unlimited"
+                        else:
+                            limit = "other"    
+                        level = properties.allocationInfo.shares.level
+                        shares = properties.allocationInfo.shares.shares
+                        default_settings = self.get_network_resource_pool_settings(property_key)
+                        
+                        if limit == default_settings["limit"] and shares == default_settings["shares"] and level == default_settings["priority"]:
+                            passed = True                          
+                            self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"["+properties.name+"] = [Limit:"+limit+" Shares:"+str(shares)+" Level:"+level+"] (Expected: =[Limit:"+default_settings["limit"]+" Shares:"+str(default_settings["shares"])+" Level:"+default_settings["priority"]+"])" , (passed and "PASS" or "FAIL"))
+                            message += ", " +datacenter+"@"+network.name+"@"+"["+properties.name+"] = [Limit:"+limit+" Shares:"+str(shares)+" Level:"+level+"] (Expected: =[Limit:"+default_settings["limit"]+" Shares:"+str(default_settings["shares"])+" Level:"+default_settings["priority"]+"])"+"#"+(passed and "PASS" or "FAIL")
+                        else:
+                            passed = False
+                            self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"["+properties.name+"] = [Limit:"+limit+" Shares:"+str(shares)+" Level:"+level+"] (Expected: =[Limit:"+default_settings["limit"]+" Shares:"+str(default_settings["shares"])+" Level:"+default_settings["priority"]+"])" , (passed and "PASS" or "FAIL"))
+                            message += ", " +datacenter+"@"+network.name+"@"+"["+properties.name+"] = [Limit:"+limit+" Shares:"+str(shares)+" Level:"+level+"] (Expected: =[Limit:"+default_settings["limit"]+" Shares:"+str(default_settings["shares"])+" Level:"+default_settings["priority"]+"])"+"#"+(passed and "PASS" or "FAIL")                                
+             
+            if dvs_found == False:
+                 passed =False
+                 self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"=False (Expected: =True) " , (passed and "PASS" or "FAIL"))
+                 message += ", " +datacenter+"@"+network.name+"=False (Expected: =True) "+"#"+(passed and "PASS" or "FAIL")                     
+                 
+        return passed, message, path
+
     @checkgroup("network_and_switch_checks", "Port Group and VLAN Consistency across vSphere Clusters",["manageability","availability"],"Port Group and VLAN Consistency within cluster")
     def check_portgroup_consistency(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity'
@@ -2310,9 +2367,9 @@ class VCChecker(CheckerBase):
                     vlanid_passed = True
                     port_group_list = []
                     vlan_map = {}
-
+  
                     hosts = cluster.host
-                                               
+                                                 
                     for xhost in hosts:
                         portgroup_list = xhost.configManager.networkSystem.networkConfig.portgroup
                         for port_group in portgroup_list:
@@ -2321,12 +2378,12 @@ class VCChecker(CheckerBase):
                             if portgroup_name not in port_group_list:
                                 port_group_list.append(portgroup_name)
                                 vlan_map[portgroup_name] = str(vlan_id)
-
+  
                     for xhost in hosts:
                         absent_port_group_list = []
                         individual_port_group_list = []
                         absent_vlanId_map = {}
-
+  
                         portgroup_list = xhost.configManager.networkSystem.networkConfig.portgroup
                         for port_group in portgroup_list:
                             portgroup_name = port_group.spec.name
@@ -2335,12 +2392,12 @@ class VCChecker(CheckerBase):
                             if vlan_id is None:
                                 absent_vlanId_map[portgroup_name] = vlan_map[portgroup_name]
                                 vlanid_passed = False
-                            
+                              
                         for port_group in port_group_list:
                             if port_group not in individual_port_group_list:
                                 absent_port_group_list.append(port_group)
                                 postgroup_passed = False
-                                
+                                  
                         if postgroup_passed and vlanid_passed:
                             self.reporter.notify_progress(self.reporter.notify_checkLog,clusters_key+"."+cluster_name+"."+xhost.name+" =True (Expected: =True)" , (True and "PASS" or "FAIL"))
                             message += ", "+clusters_key+"@"+cluster_name+"@"+xhost.name+" =True (Expected: =True)" +"#"+(True and "PASS" or "FAIL")
@@ -2354,12 +2411,12 @@ class VCChecker(CheckerBase):
                             message += ", "+clusters_key+"@"+cluster_name+"@"+xhost.name+" =Missing VLAN IDs::[" +','.join(set(absent_vlanId_map.values())) + "]::"+xhost.name+" (Expected: =All VLAN IDs must be Present)"+"#"+(vlanid_passed and "PASS" or "FAIL")
             passed_all = passed_all and passed
         return passed_all, message, path
-    
+      
     @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - Network IO Control",["performance"],"Enabled")
     def check_virtual_distributed_switch_networ_io_control(self):
         path='content.rootFolder.childEntity.networkFolder.childEntity'
         datacenter_networks = self.get_vc_property(path)
-        
+          
         message = ""
         passed = True
         for datacenter in datacenter_networks.keys():
@@ -2372,20 +2429,20 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(nioc_enabled) + " (Expected: =True) " , (nioc_enabled and "PASS" or "FAIL"))
                     message += ", " +datacenter+"@"+network.name+"="+str(nioc_enabled) + " (Expected: =True) "+"#"+((nioc_enabled) and "PASS" or "FAIL")
                     passed = passed and nioc_enabled
-             
+               
             if dvs_found == False:
                 passed =False
                 self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"@=Not-Configured (Expected: =True) " , (False and "PASS" or "FAIL"))
                 message += ", " +datacenter+"=Not-Configured (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
-                     
-                 
+                       
+                   
         return passed, message, path
-         
+           
     @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - MTU",["performance"],"1500")
     def check_virtual_distributed_switch_mtu(self):
         path='content.rootFolder.childEntity.networkFolder.childEntity'
         datacenter_networks = self.get_vc_property(path)
-        
+          
         message = ""
         pass_all=True
         for datacenter in datacenter_networks.keys():
@@ -2399,7 +2456,7 @@ class VCChecker(CheckerBase):
                     # default value for maxMtu is 1500. Sometime MOB returns None value. So setting maxMtu value to 1500 as default
                     if maxMtu is None: 
                         maxMtu=1500
-                     
+                       
                     if maxMtu == maxMtu_expected:
                         message += ", " +datacenter+"@"+network.name+"@="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+")"+"#"+(True and "PASS" or "FAIL")
                         self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+") " , ( True and "PASS" or "FAIL"))
@@ -2407,28 +2464,28 @@ class VCChecker(CheckerBase):
                         pass_all=False
                         self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+") " , ( False and "PASS" or "FAIL"))
                         message += ", " +datacenter+"@"+network.name+"@="+str(maxMtu) + " (Expected: ="+str(maxMtu_expected)+")"+"#"+(False and "PASS" or "FAIL")
-             
+               
             if dvs_found==False:
                 pass_all=False
                 self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"=Not-Configured (Expected: ="+str(maxMtu_expected)+") " , ( False and "PASS" or "FAIL"))
                 message += ", " +datacenter+"@=Not-Configured (Expected: ="+str(maxMtu_expected)+")"+"#"+(False and "PASS" or "FAIL")
-             
-         
+               
+           
         return pass_all, message, path
-     
+       
     @checkgroup("network_and_switch_checks", "Check if vSwitchNutanix has no physical adapters",["security","performance"],"None")
     def check_vswitch_no_physical_nic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
         host_networks = self.get_vc_property(path)
-        
+          
         message = ""
         pass_all=True
-         
+           
         for key, network in host_networks.iteritems():
             passed = True
             if network == "Not-Configured":
                 continue
-             
+               
             vswitchs=network.vswitch
             if vswitchs is None:
                 continue
@@ -2448,24 +2505,24 @@ class VCChecker(CheckerBase):
                          nic_names=[]                        
                          for pnic in vswitch.pnic:
                              nic_names.append(pnic_dict[pnic])
-                              
+                                
                          #print vswitch.name+"="+(','.join(nic_names))
                          message += ", " +key+"@"+vswitch.name+"="+(','.join(nic_names))+" (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
                          self.reporter.notify_progress(self.reporter.notify_checkLog,key+"@"+vswitch.name+"="+(','.join(nic_names))+" (Expected: =None)",(False and "PASS" or "FAIL"))
-                      
+                        
             if vSwitchNutanix_found==False:
                 passed = False
                 message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
                 self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=vSwitchNutanix-Not-Found (Expected: =None)",(False and "PASS" or "FAIL"))
             pass_all = passed and pass_all    
-  
+    
         return pass_all, message, path
-     
+       
     @checkgroup("network_and_switch_checks", "vSwitchNutanix Connected to CVM only",["manageability","availability","performance"],"CVM")
     def check_vswitchnutanix_connected_to_only_CVM(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
         host_networks = self.get_vc_property(path)
-        
+          
         message = ""
         pass_all=True
         portgrp=set()
@@ -2473,19 +2530,19 @@ class VCChecker(CheckerBase):
             passed = True
             if network == "Not-Configured":
                 continue
-             
+               
             vswitchs=network.vswitch
             if vswitchs is None:
                 continue
             vSwitchNutanix_found=False
-             
+               
             vSwitchNutanix_key=None
             for vswitch in vswitchs:
                 if vswitch.name == "vSwitchNutanix":
                      vSwitchNutanix_found=True
                      vSwitchNutanix_key=vswitch.key
                      break
-                          
+                            
             if vSwitchNutanix_found==False:
                 passed = False
                 message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
@@ -2494,7 +2551,7 @@ class VCChecker(CheckerBase):
                 for portgroup in network.portgroup:
                     if portgroup.vswitch == vSwitchNutanix_key:
                         portgrp.add(portgroup.spec.name)
- 
+   
         passed= True
         for port_grp_name in portgrp:
             vm_names=self.get_vc_property("content.rootFolder.childEntity.hostFolder.childEntity.network[name="+port_grp_name+"].vm.name")
