@@ -114,7 +114,7 @@ def vc_report(story, checks_list,vCenterIP):
                                                    ('FONTSIZE', (0, 0), (1, 0), 10.50)]))
             
             if checks.get('Name') == 'Network Resource Pool Settings':
-                checks_property_data = [['Resource Pool','Expected Shares','Current Shares','Expected Level','Current Level','Expected Limit','Current Limit']]
+                checks_property_data = [['Resource Pool','Exp Shares','Current Shares','Exp Level','Current Level','Exp Limit','Current Limit','Severity']]
                 property_lenght = len(checks.get('Properties'))
                 for properties in checks.get('Properties'):
                    
@@ -141,26 +141,28 @@ def vc_report(story, checks_list,vCenterIP):
                             expected_level = xprop_exp_list[2].split(':')[-1]
                             expected_limit = xprop_exp_list[0].split(':')[-1]
                                                      
+
                         checks_property_data.append([Paragraph(resource_pool, NormalMessageStyle),
                                                      Paragraph(expected_share, NormalMessageStyle),
                                                      Paragraph(current_share, NormalMessageStyle),
                                                      Paragraph(expected_level, NormalMessageStyle),
                                                      Paragraph(current_level, NormalMessageStyle),
                                                      Paragraph(expected_limit, NormalMessageStyle),
-                                                     Paragraph(current_limit, NormalMessageStyle)])
+                                                     Paragraph(current_limit, NormalMessageStyle),
+                                                     Paragraph('warning', NormalMessageStyle)])
     
                                          
-                checks_property_table = LongTable(checks_property_data, colWidths=[1.1*inch,1.2*inch,1.1*inch,1.1*inch,1*inch,1.1*inch,1.1*inch])
-                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (6, 0), colors.fidlightblue),
-                                                           ('ALIGN', (0, 0), (6, property_lenght), 'LEFT'),
-                                            ('INNERGRID', (0, 0), (6, -1), 0.25, colors.black),
+                checks_property_table = LongTable(checks_property_data, colWidths=[1.2*inch,1*inch,1.1*inch,0.8*inch,1.1*inch,0.8*inch,1.1*inch,0.65*inch])
+                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (7, 0), colors.fidlightblue),
+                                                           ('ALIGN', (0, 0), (7, property_lenght), 'LEFT'),
+                                            ('INNERGRID', (0, 0), (7, -1), 0.25, colors.black),
                                             ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
                                             ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
-                                            ('TEXTFONT', (0, 0), (6, 0), 'Times-Roman'),
-                                            ('FONTSIZE', (0, 0), (6, 0), 10)]))
+                                            ('TEXTFONT', (0, 0), (7, 0), 'Times-Roman'),
+                                            ('FONTSIZE', (0, 0), (7, 0), 10)]))
 
             elif checks.get('Name') == 'JVM Memory for vSphere Server':
-                checks_property_data = [['Entity Checked','Memory Configured','Memory Recommended']]
+                checks_property_data = [['Entity Checked','Memory Configured','Memory Recommended','Severity']]
                 property_lenght = len(checks.get('Properties'))
                 for properties in checks.get('Properties'):
                    
@@ -176,19 +178,20 @@ def vc_report(story, checks_list,vCenterIP):
                                                      
                         checks_property_data.append([Paragraph(xprop_msg, NormalMessageStyle),
                                                      Paragraph(xprop_actual, NormalMessageStyle),
-                                                     Paragraph(xprop_exp, NormalMessageStyle)])
+                                                     Paragraph(xprop_exp, NormalMessageStyle),
+                                                     Paragraph("info", NormalMessageStyle)])
                     else:
                         property_lenght-=1
                         continue
                                          
-                checks_property_table = LongTable(checks_property_data, colWidths=[2.5*inch,2*inch,2*inch])
-                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (2, 0), colors.fidlightblue),
-                                                           ('ALIGN', (0, 0), (2, property_lenght), 'LEFT'),
-                                            ('INNERGRID', (0, 0), (2, -1), 0.25, colors.black),
+                checks_property_table = LongTable(checks_property_data, colWidths=[2.8*inch,1.6*inch,1.75*inch,1.5*inch])
+                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (3, 0), colors.fidlightblue),
+                                                           ('ALIGN', (0, 0), (3, property_lenght), 'LEFT'),
+                                            ('INNERGRID', (0, 0), (3, -1), 0.25, colors.black),
                                             ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
                                             ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
-                                            ('TEXTFONT', (0, 0), (2, 0), 'Times-Roman'),
-                                            ('FONTSIZE', (0, 0), (2, 0), 10)]))
+                                            ('TEXTFONT', (0, 0), (3, 0), 'Times-Roman'),
+                                            ('FONTSIZE', (0, 0), (3, 0), 10)]))
                                
             else:
                 checks_property_data = [['Entity Tested','Datacenter Name','Cluster Name','Expected Result','Check Status','Severity']]
