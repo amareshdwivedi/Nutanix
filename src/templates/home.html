@@ -1464,49 +1464,7 @@ $$(window).load(function() {
 		</div>
 	</div>
         
-    <!--HealthCheck Configuration Modal-->    
-    <div class="modal fade" id="healthCheckConfigurationModel" tabindex="-1"
-		role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-            $ id1 = "config_"
-            $ id2 = "connect_"
-            $ id3 = "run_"
-            $for checker, checkObject in checkers.iteritems():
-			<div class="modal-content" id=modal_$checker>
-				<div class="modal-header">
-					<a class="nutanix-close" data-dismiss="modal"> <span
-						aria-hidden="true"> <i class="fa fa-times"></i>
-					</span>
-					</a>
-					<h4 class="modal-title" id="myModalLabel"><span>$:checker</span> configration detail</h4>
-				</div>
-                $if checkObject.config_form:
-				<form id=$checker method="post">
-                    <div class="modal-body">
-                        <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding  connectionForms">
-                            <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formTbl">
-                                $:checkObject.config_form.render()
-                            </div>
-                            <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding statusmessage">
-                            
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="conf btn btn-default default-font" type="button" id=$:id1$:checker>Configure</button>
-                        <button class="conn btn btn-default default-font" type="button" id=$:id2$:checker>Verify</button>
-                        <button data-dismiss="modal" aria-hidden="true"
-                            class="btn btn-default default-font cancelButton" type="button">OK</button>
-                        <button data-dismiss="modal" aria-hidden="true"
-                            class="btn btn-default default-font" type="button">Cancel</button>                        
-                    </div>
-                </form>
         
-		</div>
-	</div>
-     <!--Configuration model end-->   
-	
-	
 	<div class="modal fade" id="createTaskModal" tabindex="-1"
 		role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -1564,8 +1522,50 @@ $$(window).load(function() {
 			</div>
 		</div>
 	</div>
+        
+    <!--HealthCheck Configuration Modal-->    
+    <div class="modal fade" id="healthCheckConfigurationModel" tabindex="-1"
+		role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+            $ id1 = "config_"
+            $ id2 = "connect_"
+            $ id3 = "run_"
+            $for checker, checkObject in checkers.iteritems():
+			<div class="modal-content" id=modal_$checker>
+				<div class="modal-header">
+					<a class="nutanix-close" data-dismiss="modal"> <span
+						aria-hidden="true"> <i class="fa fa-times"></i>
+					</span>
+					</a>
+					<h4 class="modal-title" id="myModalLabel"><span>$:checker</span> configration detail</h4>
+				</div>
+                $if checkObject.config_form:
+				<form id=$checker method="post">
+                    <div class="modal-body">
+                        <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding  connectionForms">
+                            <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding formTbl">
+                                $:checkObject.config_form.render()
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 no-margin no-padding statusmessage">
+                            
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="conf btn btn-default default-font" type="button" id=$:id1$:checker>Configure</button>
+                        <button class="conn btn btn-default default-font" type="button" id=$:id2$:checker>Verify</button>
+                        <button data-dismiss="modal" aria-hidden="true"
+                            class="btn btn-default default-font cancelButton" type="button">OK</button>
+                        <button data-dismiss="modal" aria-hidden="true"
+                            class="btn btn-default default-font" type="button">Cancel</button>                        
+                    </div>
+                </form>
+        
+		</div>
+	</div>
+    </div>
+     <!--Configuration model end-->   
 	
-
 	<script type="text/javascript" src="/static/js/excanvas.js"></script>
 	<script type="text/javascript" src="/static/js/jquery.flot.js"></script>
 	<script type="text/javascript" src="/static/js/jquery.flot.stack.js"></script>
