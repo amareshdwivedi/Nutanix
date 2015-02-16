@@ -268,6 +268,8 @@ class refresh:
                 checkJson = allJson["vc"]
             if "ncc" in allJson:
                 checkJson = allJson["ncc"]
+            if "view" in allJson:
+                checkJson = allJson["view"]
 
             for item in checkJson["checks"]:
                 chTotal += 1
