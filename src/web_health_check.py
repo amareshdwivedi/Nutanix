@@ -260,7 +260,30 @@ class refresh:
     def GET(self):
         try:
             f = open("display_json.json", 'r')
-            return f.read()
+            
+            allJson = json.load(f)
+            chTotal = chPass = chFail = 0
+
+            if "vc" in allJson:
+                checkJson = allJson["vc"]
+            if "ncc" in allJson:
+                checkJson = allJson["ncc"]
+            if "view" in allJson:
+                checkJson = allJson["view"]
+
+            for item in checkJson["checks"]:
+                chTotal += 1
+                if item["Status"] == "PASS":
+                    chPass += 1
+                else:
+                    chFail +=1
+            
+            allJson["Total"] = chTotal
+            allJson["PASS"] = chPass
+            allJson["FAIL"] = chFail
+            allJson["Percent"] = chPass*1.0/chTotal * 100
+            return allJson
+
         except:
             return True
       

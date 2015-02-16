@@ -11,7 +11,7 @@ class FoundationProvision:
     def __init__(self,foundationDetails):
         self.restInput = foundationDetails['restInput']
         self.provision_url = "http://"+foundationDetails['server']+":8000/foundation/image_nodes"
-        self.progress_url  = "http://"+foundationDetails['server']+":8000/foundation/imaging_progress"
+        self.progress_url  = "http://"+foundationDetails['server']+":8000/foundation/progress"
 
         self.validate_urls()
 
