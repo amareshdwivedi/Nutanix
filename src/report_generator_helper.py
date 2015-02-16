@@ -606,6 +606,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "Not-Configured", False, ''
         elif actual_value == "SSH Connection Failed":
             return "SSH Connection Failed",False,''
+        elif actual_value == "Cannot Determine":
+            return "Cannot Determine",False,''
         elif int(actual_value) > 50:
             return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
         else:
@@ -652,6 +654,10 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "Not-Configured", False, ''
         elif actual_value == "SSH Connection Failed":
             return "SSH Connection Failed",False,''
+        elif actual_value == "Cannot Determine":
+            return "Cannot Determine",False,''
+        elif actual_value == "Cannot Determine vCenter Server IP":
+            return "Cannot Determine vCenter Server IP",False,''                        
         else:
             actual_value = actual_value.replace("\n"," ") 
             actual_value_dict = actual_value.split(" ")
