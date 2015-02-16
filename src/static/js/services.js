@@ -620,15 +620,16 @@ jQuery(document).ready(function() {
                         for (i = 0; i < data.ncc.checks.length; i++) {
                             $("#logs .logsdata").append("<div class='logsmainData'><div class='col-lg-10 col-md-10 col-sm-10'><span>" + data.ncc.checks[i].Name + "</span></div>" +
                                 "<div class='col-lg-2 col-md-2 col-sm-2 result" + i + "'><span>" + data.ncc.checks[i].Status + "</span></div></div>");
-                            if ($(".result" + i + "").html() == "Pass") {
-                                $(".result" + i + "").addClass("success");
-                            } else if ($(".result" + i + "").html() == "Fail") {
-                                $(".result" + i + "").addClass("fail");
+                            if (($(".result" + i + " span").html()).toLowerCase() == "pass") {
+                                $(".result" + i + " span").addClass("success");
+                            } else if (($(".result" + i + " span").html()).toLowerCase() == "fail") {
+                                $(".result" + i + " span").addClass("fail");
                             }
                             var h1 = $('#logs')[0].scrollHeight,
                                 h2 = $('#logs').height();
                             $('#logs').scrollTop(h1 - h2);
                         }
+                        
                     }
                     if (categoryType == "view") {
                         $("#logs").empty();
@@ -650,16 +651,17 @@ jQuery(document).ready(function() {
                                     "<div class='col-lg-5 col-md-5 col-sm-5'><span>" + data.view.checks[i].Properties[j].Expected.replace(/;/g, '<br/>') + "</span></div>" +
                                     "<div class='col-lg-2 col-md-2 col-sm-2  result" + i + j + "'><span>" + data.view.checks[i].Properties[j].Status + "</span></div></div>");
 
-                                if ($(".result" + i + j + "").html() == "PASS") {
-                                    $(".result" + i + j + "").addClass("success");
-                                } else if ($(".result" + i + j + "").html() == "FAIL") {
-                                    $(".result" + i + j + "").addClass("fail");
+                                if (($(".result" + i + j + " span").html()).toLowerCase() == "pass") {
+                                    $(".result" + i + j + " span").addClass("success");
+                                } else if (($(".result" + i + j + " span").html()).toLowerCase() == "fail") {
+                                    $(".result" + i + j + " span").addClass("fail");
                                 }
                             }
                         }
                         var h1 = $('#logs')[0].scrollHeight,
                             h2 = $('#logs').height();
                         $('#logs').scrollTop(h1 - h2);
+                        
                     }
                     if (categoryType == "vc") {
                         $("#logs").empty();
@@ -683,19 +685,57 @@ jQuery(document).ready(function() {
                                     "<div class='col-lg-2 col-md-2 col-sm-2'><span>" + data.vc.checks[i].Properties[j].Actual + "</span></div>" +
                                     "<div class='col-lg-1 col-md-1 col-sm-1  result" + i + j + "'><span>" + data.vc.checks[i].Properties[j].Status + "</span></div></div>");
 
-                                if ($(".result" + i + j + "").html() == "PASS") {
-                                    $(".result" + i + j + "").addClass("success");
-                                } else if ($(".result" + i + j + "").html() == "FAIL") {
-                                    $(".result" + i + j + "").addClass("fail");
+                                if (($(".result" + i + j + " span").html()).toLowerCase() == "pass") {
+                                    $(".result" + i + j + " span").addClass("success");
+                                } else if (($(".result" + i + j + " span").html()).toLowerCase() == "fail") {
+                                    $(".result" + i + j + " span").addClass("fail");
                                 }
                             }
                         }
                         var h1 = $('#logs')[0].scrollHeight,
                             h2 = $('#logs').height();
                         $('#logs').scrollTop(h1 - h2);
-                        
                     }
+                    $("#failCheck").val(data.FAIL);
+                    $("#passCheck").val(data.PASS);
+                    $("#totalCheck").val(data.Total);
+                    $("#totalPercentage").val(data.Percent); 
                     //document.getElementById('logs').value = data;
+                },
+                beforeSend: function(){
+                    
+                    $("."+categoryType+"Status .progressPercentage").html("");
+                    $("."+categoryType+"Status .status").html("");
+                    $("."+categoryType+"Status .status").removeClass("taskCompleted").addClass("progressActiveSec");
+                    $("."+categoryType+"Status .statusMessage").html("Running "+$('#' + categoryType + '_types :selected').text()+"...");
+                    $(".hc_types .runCheck").attr("disabled","disabled");
+                    $(".hc_types select").attr("disabled","disabled");
+                    
+                    /*if (categoryType == "ncc") {
+                        $(".nccStatus .progressPercentage").html("");
+                        $(".nccStatus .status").html("");
+                        $(".nccStatus .status").removeClass("taskCompleted").addClass("progressActiveSec");
+                        $(".nccStatus .statusMessage").html("Running "+$('#' + categoryType + '_types :selected').text()+"...");
+                        $(".hc_types .runCheck").attr("disabled","disabled");
+                        $(".hc_types select").attr("disabled","disabled");
+                    }
+                    if (categoryType == "view") {
+                        $(".viewStatus .progressPercentage").html("");
+                        $(".viewStatus .status").html("");
+                        $(".viewStatus .status").removeClass("taskCompleted").addClass("progressActiveSec");
+                        $(".viewStatus .statusMessage").html("Running "+$('#' + categoryType + '_types :selected').text()+"...");
+                        $(".hc_types .runCheck").attr("disabled","disabled");
+                        $(".hc_types select").attr("disabled","disabled");
+                    }
+                    if (categoryType == "vc") {
+                        $(".vcStatus .progressPercentage").html("");
+                        $(".vcStatus .status").html("");
+                        $(".vcStatus .status").removeClass("taskCompleted").addClass("progressActiveSec");
+                        $(".vcStatus .statusMessage").html("Running "+$('#' + categoryType + '_types :selected').text()+"...");
+                        $(".hc_types .runCheck").attr("disabled","disabled");
+                        $(".hc_types select").attr("disabled","disabled");
+                    }*/
+                    
                 }
             });
         }
@@ -717,10 +757,63 @@ jQuery(document).ready(function() {
             url: '/run',
             type: "POST",
             data: checks,
+            dataType:'html',
             success: function(data) {
                 looping = false;
-                clearInterval(interval);
                 fetch_data();
+                clearInterval(interval);
+                setTimeout(function(){
+                $("#modal_runchecks .runckeckStatus").html(data);
+		        $("#modal_runchecks").modal();
+                    $("."+categoryType+"Status .progressPercentage").html("");
+                    $("."+categoryType+"Status .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>"+$('#totalCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Pass:</span><span class='checkValue'>"+$('#passCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Fail:</span><span class='checkValue'>"+$('#failCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>"+$('#totalPercentage').val()+"%</span></p>");
+                    $("."+categoryType+"Status .status").html("");
+                    $("."+categoryType+"Status .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
+                    $("."+categoryType+"Status .statusMessage").html($('#' + categoryType + '_types :selected').text()+" Completed...");
+                    $(".hc_types .runCheck").removeAttr("disabled");
+                    $(".hc_types select").removeAttr("disabled");
+                    
+                /* if (categoryType == "vc") {
+                        $(".vcStatus .progressPercentage").html("");
+                        $(".vcStatus .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>"+$('#totalCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Pass:</span><span class='checkValue'>"+$('#passCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Fail:</span><span class='checkValue'>"+$('#failCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>"+$('#totalPercentage').val()+"%</span></p>");
+                        $(".vcStatus .status").html("");
+                        $(".vcStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
+                        $(".vcStatus .statusMessage").html($('#' + categoryType + '_types :selected').text()+" Completed...");
+                        $(".hc_types .runCheck").removeAttr("disabled");
+                        $(".hc_types select").removeAttr("disabled");
+                 }
+                if (categoryType == "ncc") {
+                        $(".nccStatus .progressPercentage").html("");
+                        $(".nccStatus .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>"+$('#totalCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Pass:</span><span class='checkValue'>"+$('#passCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Fail:</span><span class='checkValue'>"+$('#failCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>"+$('#totalPercentage').val()+"%</span></p>");
+                        $(".nccStatus .status").html("");
+                        $(".nccStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
+                        $(".nccStatus .statusMessage").html($('#' + categoryType + '_types :selected').text()+" Completed...");
+                        $(".hc_types .runCheck").removeAttr("disabled");
+                        $(".hc_types select").removeAttr("disabled");
+                 }
+                
+                if (categoryType == "view") {
+                        $(".viewStatus .progressPercentage").html("");
+                        $(".viewStatus .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>"+$('#totalCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Pass:</span><span class='checkValue'>"+$('#passCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Fail:</span><span class='checkValue'>"+$('#failCheck').val()+"</span></p>" +
+                		"<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>"+$('#totalPercentage').val()+"%</span></p>");
+                        $(".viewStatus .status").html("");
+                        $(".viewStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
+                        $(".viewStatus .statusMessage").html($('#' + categoryType + '_types :selected').text()+" Completed...");
+                        $(".hc_types .runCheck").removeAttr("disabled");
+                        $(".hc_types select").removeAttr("disabled");
+                 }*/
+                }, 2000);
             },
         });
         var interval = setInterval(function() {

@@ -2142,7 +2142,7 @@ background: #e0e0e0;
 
 .progressStatus{ background: #fff; height: 160px; width: 100%;position: relative}
 .progressHeading{ position: relative}
-.progressStatusMessage{ position: relative;padding: 20px 0 10px 10px; color: #99abad;}
+.progressStatusMessage{ position: relative;padding: 20px 0 10px 10px; color: #99abad; height:130px}
 .progressActiveSec, .taskCompleted, .taskError{
     border-left: 174px solid transparent;
     border-top: 160px solid #CDCDCD;
@@ -2164,7 +2164,7 @@ background: #e0e0e0;
     position: absolute;
     right: 29px;}
 .progressPercentage{ font-size: 32px;font-family: ProximaNovaSoftSemiBold;}
-.statusMessage{ color: #99abad;font-size: 16px;font-family: ProximaNovaSoftSemiBold; top:70px; position: relative}
+.statusMessage{ color: #99abad;font-size: 16px;font-family: ProximaNovaSoftSemiBold; bottom:10px; position: absolute}
 .progressStatusMessage.error{color:#FE000B}
 
 /*@media (min-width: 768px) {
@@ -2248,7 +2248,7 @@ background: #e0e0e0;
 #preDeployerinfra div.selector span{ width:290px;}
 #preDeployerinfra .predeployForm{width:64%}
 #preDeployerinfra .form-control{ width:96%}
-.checkText{ float: left;margin: 8px 20px 8px 10px;}
+.checkBoxText{ float: left;margin: 8px 20px 8px 10px;}
 .successMessage{color:#3c763d; font-weight: bold;font-size:14px;}
 .successMessage span{ font-weight: normal;color:#4a4a4a; }
 .cancelButton{ display:none;}
@@ -2269,15 +2269,16 @@ input[type="text"]:invalid {
     margin-bottom: 10px;
     padding: 3px 10px;}
 
-.logcontainer{  height:480px; border: 1px solid #ccc; overflow-y:scroll;
+.logcontainer{  height:380px; border: 1px solid #ccc; overflow-y:scroll;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
     color: #343536; padding:8px 10px; margin:0 10px;
     display: block;font-size: 11px;}
 
-#logs h4{padding:5px; margin:0; font-size:14px; width:100%; float:left;}
+#logs h4{padding:5px; margin:0; font-size:14px; width:100%; float:left; color:#4a4a4a;}
 .logsHeading,.logsdata{ margin:0;padding:0; background: #fff;}
+ .logsdata{ margin-bottom: 10px;}
 .logsHeading div{ font-size:14px; font-weight:bold; padding:0; color:#fff; background:#26bcf1; margin:0;}
 .logsmainData div{ padding:0; font-size:12px; border:1px solid #ccc; border-top: 0; border-right: 0; box-sizing: border-box;margin:0;color:#6f787e; float:none; clear: both;display: table-cell;}
 .logsmainData div:last-child{ border-right:1px solid #ccc;}
@@ -2306,3 +2307,26 @@ input[type="text"]:invalid {
     padding: 6px 12px;
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
     width: 80%; margin-bottom: 5px;}
+
+.logsmainData .success{ color:#42b663 !important;}
+.logsmainData .fail{color:#fb6f6b !important;}
+
+.healthCheckStatus{}
+.healthCheckStatus h2.progressPercentage{font-size:13px;}
+.healthCheckStatus h2.progressPercentage p{padding:5px 0;}
+.healthCheckStatus h2.progressPercentage p span.checkText{width:108px; float:left}
+.healthCheckStatus h2.progressPercentage p span.checkValue{}
+.healthCheckStatus .progressActiveSec, .healthCheckStatus .taskCompleted, .healthCheckStatus .taskError{
+    border-left: 140px solid transparent;
+}
+
+.btn-primary.disabled, .btn-primary[disabled], fieldset[disabled] .btn-primary, .btn-primary.disabled:hover, .btn-primary[disabled]:hover, fieldset[disabled] .btn-primary:hover, .btn-primary.disabled:focus, .btn-primary[disabled]:focus, fieldset[disabled] .btn-primary:focus, .btn-primary.disabled.focus, .btn-primary.focus[disabled], fieldset[disabled] .btn-primary.focus, .btn-primary.disabled:active, .btn-primary[disabled]:active, fieldset[disabled] .btn-primary:active, .btn-primary.disabled.active, .btn-primary.active[disabled], fieldset[disabled] .btn-primary.active {
+    background-color: #428bca;
+    border-color: #357ebd;
+}
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+    pointer-events: none;
+}
