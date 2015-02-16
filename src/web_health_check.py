@@ -282,7 +282,7 @@ class refresh:
             allJson["PASS"] = chPass
             allJson["FAIL"] = chFail
             allJson["Percent"] = chPass*1.0/chTotal * 100
-            return allJson
+            return json.dumps(allJson)
 
         except:
             return True
