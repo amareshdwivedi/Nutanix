@@ -1553,6 +1553,7 @@ class VCChecker(CheckerBase):
                     passed = False
                     message += ", " +"Error Messages in ESXi Logs on "+host_ip+" =SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in ESXi Logs on "+host_ip+" =SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+                    continue
                 elif esxi_ssh is not None and esxi_ssh._transport is not None:                
                     for check_name in check_list:
                         error_count = 0
@@ -1581,6 +1582,11 @@ class VCChecker(CheckerBase):
                             passed = True
                             message += ", " +check_name+" on "+host_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(passed and "PASS" or "FAIL")
                             self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+host_ip+"="+str(error_count)+" (Expected: =Less than 50)",(passed and "PASS" or "FAIL"))
+                else:
+                    passed = False
+                    message += ", " +"Error Messages in ESXi Logs on "+host_ip+" =Cannot Determine"+" (Expected: =Error Count)"+"#"+("FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in ESXi Logs on "+host_ip+" =Cannot Determine"+" (Expected: =Error Count)",("FAIL"))
+                            
                     esxi_ssh.close()
                     VCChecker.esxi_ssh = None
                     
@@ -2814,6 +2820,7 @@ class VCChecker(CheckerBase):
                     passed = False
                     message += ", " +datacenter+"@"+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
+                    continue
                 elif esxi_ssh is not None and esxi_ssh._transport is not None:                
                     cmd = "esxcfg-info|grep \"HV Support\""    
                     stdin, stdout, stderr =  esxi_ssh.exec_command(cmd)     
@@ -2829,13 +2836,15 @@ class VCChecker(CheckerBase):
                                 message += ", " +datacenter+"@"+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
                                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
                                 passed=VT_extension_level
-                                continue 
                               
                             elif level is not None and level != "3":  
                                 message += ", " +datacenter+"@"+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
                                 self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
                                 passed=VT_extension_level
-                                continue 
+                else:
+                    passed = False
+                    message += ", " +datacenter+"@"+host_ip+" =Cannot Determine"+" (Expected: =3)"+"#"+("FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"@"+host_ip+" =Cannot Determine"+" (Expected: =3)",("FAIL"))
             
                 esxi_ssh.close()
                 VCChecker.esxi_ssh = None
