@@ -88,7 +88,7 @@ class customertasks:
         if cid:
             get_customer_data = model.get_by_id(cid)
             if get_customer_data:
-                add_to_task = model.add_task(cid,input_json)
+                add_to_task = model.add_task(cid,input_json,"Deployment")
                 final_data['task_id'] = add_to_task
                 final_data['response'] = httplib.OK                
                 return json.dumps(final_data)
@@ -306,5 +306,27 @@ class deploymentstatus:
             final_data['response'] = httplib.OK
             return json.dumps(final_data)      
 
-    
-               
+class customerReports:    
+    def GET(self,cid):
+        final_data = {}
+        if cid:
+            customerReportFiles = model.list_report_files(cid)
+
+            import os
+            from os import listdir  
+            from os.path import isfile, join
+            reportDir = os.getcwd() + os.path.sep +"reports"
+
+            allReportFiles = [ f for f in listdir(reportDir) if isfile(join(reportDir,f)) ]
+            availReports = [ ]
+            for xitem in customerReportFiles:
+                for yitem in xitem.values():
+                    if str(yitem) in allReportFiles:
+                        availReports.append(str(yitem))
+
+            web.header( 'Content-Type','application/json' )
+            return json.dumps(availReports)
+
+
+
+             
