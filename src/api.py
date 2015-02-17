@@ -320,9 +320,9 @@ class customerReports:
             allReportFiles = [ f for f in listdir(reportDir) if isfile(join(reportDir,f)) ]
             availReports = [ ]
             for xitem in customerReportFiles:
-                for yitem in xitem.values():
-                    if str(yitem) in allReportFiles:
-                        availReports.append(str(yitem))
+                fileName, dateCreated = xitem.values()
+                if str(fileName) in allReportFiles:
+                    availReports.append([str(fileName), str(dateCreated)])
 
             web.header( 'Content-Type','application/json' )
             return json.dumps(availReports)
@@ -331,12 +331,14 @@ class downloadReports:
     def POST(self):
         try:
             data = json.loads(web.data())
+            #web.header('Content-type','application/octet-stream')
+            #web.header('Content-transfer-encoding','base64') 
             f = open(os.getcwd() + os.path.sep +"reports" + os.path.sep +data['filename'], 'r')
             return f.read()
+            
         except:
             #print sys.exc_info()[0]
             return ''
-
 
 
              
