@@ -842,6 +842,8 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return "Not-Configured", False, ''
         elif actual_value == "SSH Connection Failed":
             return "SSH Connection Failed",False,''
+        elif actual_value == "Cannot Determine":
+            return "Cannot Determine",False,''
         elif int(actual_value) > 50:
             message = message.split(" (")[0]
             return  message, True, 'warning'                
@@ -1062,7 +1064,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return "Host ["+host+"] has VT-Extensions is Not-Configured", True, 'alert'
         elif actual_value == "SSH Connection Failed":
-            return "SSH Connection to Host Failed", False, ''            
+            return "SSH Connection to Host Failed", False, ''  
+        elif actual_value == "Cannot Determine":
+            return "Cannot Determine", False, ''                              
         elif actual_value == "0":
             return  "On host ["+host+"] VT support is not available for this hardware", True, 'alert'                
         elif actual_value == "1":

@@ -1752,12 +1752,12 @@ class VCChecker(CheckerBase):
          
         if flag == "vCenter IP Not configured":
             passed = False
-            message += ", " +"JVM Memory for vSphere Server =Cannot Determine vCenter Server IP"+" (Expected: =Disk Utilization Information)"+"#"+("FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"JVM Memory for vSphere Server =Cannot Determine vCenter Server IP"+" (Expected: =Disk Utilization Information)",("FAIL"))
+            message += ", " +"JVM Memory for vSphere Server =Cannot Determine vCenter Server IP"+" (Expected: =JVM Memory Information)"+"#"+("FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"JVM Memory for vSphere Server =Cannot Determine vCenter Server IP"+" (Expected: =JVM Memory Information)",("FAIL"))
         elif flag == "SSH Connection Failed":
             passed = False
-            message += ", " +"JVM Memory for vSphere Server =SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"JVM Memory for vSphere Server =SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+            message += ", " +"JVM Memory for vSphere Server =SSH Connection Failed"+" (Expected: =JVM Memory Information)"+"#"+("FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"JVM Memory for vSphere Server =SSH Connection Failed"+" (Expected: =JVM Memory Information)",("FAIL"))
         elif vcenter_server_ssh is not None and vcenter_server_ssh._transport is not None:
             server_version , inventory_size = self.get_inventory_info()
              
@@ -1781,8 +1781,8 @@ class VCChecker(CheckerBase):
                 passed,message = self.jvm_memory_helper(check_name,memory,expected_result,message)
         else:
             passed = False
-            message += ", " +"JVM Memory for vSphere Server =Cannot Determine"+" (Expected: =Disk Utilization Information)"+"#"+("FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"JVM Memory for vSphere Server =Cannot Determine"+" (Expected: =Disk Utilization Information)",("FAIL"))
+            message += ", " +"JVM Memory for vSphere Server =Cannot Determine"+" (Expected: =JVM Memory Information)"+"#"+("FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"JVM Memory for vSphere Server =Cannot Determine"+" (Expected: =JVM Memory Information)",("FAIL"))
                  
         passed_all = passed_all and passed
          
