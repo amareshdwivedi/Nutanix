@@ -835,46 +835,18 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "10GBps VMNIC Connected but Not in Full Duplex Mode":
             return "On Cluster ["+cluster+"] Host ["+host+"] has 10 Gbps NIC Connected but not in Full Duplex mode", True, 'alert' 
         
-    if check_name == "Failed Logins in auth.log":
+    if check_name == "Error Messages in ESXi Logs":
         if actual_value == "Not-Configured":
             return "Not-Configured", False, ''
         elif actual_value == "SSH Connection Failed":
             return "SSH Connection Failed",False,''
         elif int(actual_value) > 50:
-            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
+            message = message.split(" (")[0]
+            return  message, True, 'warning'                
         else:
-            return  "Total Error Entries are ["+actual_value+"]", False, 'warning'         
-  
-    if check_name == "Error Messages in hostd.log":
-        if actual_value == "Not-Configured":
-            return "Not-Configured", False, ''
-        elif actual_value == "SSH Connection Failed":
-            return "SSH Connection Failed",False,''
-        elif int(actual_value) > 50:
-            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
-        else:
-            return  "Total Error Entries are ["+actual_value+"]", False, 'warning' 
-        
-    if check_name == "Error Messages in vmkernel.log":
-        if actual_value == "Not-Configured":
-            return "Not-Configured", False, ''
-        elif actual_value == "SSH Connection Failed":
-            return "SSH Connection Failed",False,''
-        elif int(actual_value) > 50:
-            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
-        else:
-            return  "Total Error Entries are ["+actual_value+"]", False, 'warning' 
-        
-    if check_name == "Error Messages in lacp.log":
-        if actual_value == "Not-Configured":
-            return "Not-Configured", False, ''
-        elif actual_value == "SSH Connection Failed":
-            return "SSH Connection Failed",False,''
-        elif int(actual_value) > 50:
-            return  "Total Error Entries are ["+actual_value+"]", True, 'warning'                
-        else:
-            return  "Total Error Entries are ["+actual_value+"]", False, 'warning' 
-        
+            message = message.split(" (")[0]
+            return  message, False, 'warning'         
+          
     if check_name == "Both 10GBps & 1GBps VMNIC Connected to VDS or VSS":
         if actual_value == "Not-Configured":
             return 'Not-Configured', False, ''

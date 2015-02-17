@@ -54,6 +54,8 @@ class VCChecker(CheckerBase):
     responseClusterJson={}
     
     vcenter_server_ssh = None
+    
+    esxi_ssh = None
 
     def __init__(self):
         super(VCChecker, self).__init__(VCChecker._NAME_)
@@ -342,6 +344,12 @@ class VCChecker(CheckerBase):
         
 
         Disconnect(self.si)
+        VCChecker.resource_pool_config={}
+        VCChecker.vcenter_stats_config={}
+        VCChecker.responseHostsJson={}
+        VCChecker.responseClusterJson={}
+        VCChecker.vcenter_server_ssh = None
+        
         self.result.passed = ( passed_all and "PASS" or "FAIL" )
         self.result.message = "VC Checks completed with " + (passed_all and "success" or "failure")
         self.reporter.notify_progress(self.reporter.notify_info,"VC Checks complete")
@@ -1525,9 +1533,9 @@ class VCChecker(CheckerBase):
              
         return passed,message,''   
    
-   
-    @checkgroup("esxi_checks", "Failed Logins in auth.log",["configurability","manageability","availability","security"],"Error Count")
-    def check_auth_logs(self):
+    @checkgroup("esxi_checks", "Error Messages in ESXi Logs",["configurability","manageability","availability","security"],"Error Count")
+    def check_esxi_logs(self):
+        check_list = ["Failed Logins in auth.log","Error Messages in hostd.log","Error Messages in vmkernel.log","Error Messages in lacp.log"]
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
         clusters_map = self.get_vc_property(path_curr)
         message = ""     
@@ -1535,123 +1543,75 @@ class VCChecker(CheckerBase):
         for datacenter, host_list in clusters_map.iteritems():
             passed = True
             #print datacenter
-                 
+                  
             if host_list == "Not-Configured" :
                 continue
             elif len(host_list)==0: 
                 #condtion to Check if no host found
                 continue
-  
-            passed,message = self.log_check_helper(datacenter,host_list,passed,"auth.log",message)
-            passed_all = passed_all and passed
-              
-        return passed_all ,message,path_curr
-       
-    @checkgroup("esxi_checks", "Error Messages in hostd.log",["configurability","manageability","availability","security"],"Error Count")
-    def check_hostd_logs(self):
-        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
-        clusters_map = self.get_vc_property(path_curr)
-        message = ""     
-        passed_all = True
-        for datacenter, host_list in clusters_map.iteritems():
-            passed = True
-            #print datacenter
-                 
-            if host_list == "Not-Configured" :
-                continue
-            elif len(host_list)==0: 
-                #condtion to Check if no host found
-                continue
-  
-            passed,message = self.log_check_helper(datacenter,host_list,passed,"hostd.log",message)
-            passed_all = passed_all and passed
-              
-        return passed_all ,message,path_curr
-           
-    @checkgroup("esxi_checks", "Error Messages in vmkernel.log",["configurability","manageability","availability","security"],"Error Count")
-    def check_vmkernel_logs(self):
-        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
-        clusters_map = self.get_vc_property(path_curr)
-        message = ""     
-        passed_all = True
-        for datacenter, host_list in clusters_map.iteritems():
-            passed = True
-            #print datacenter
-                 
-            if host_list == "Not-Configured" :
-                continue
-            elif len(host_list)==0: 
-                #condtion to Check if no host found
-                continue
-  
-            passed,message = self.log_check_helper(datacenter,host_list,passed,"vmkernel.log",message)
-            passed_all = passed_all and passed
-              
-        return passed_all ,message,path_curr
-           
-    @checkgroup("esxi_checks", "Error Messages in lacp.log",["configurability","manageability","availability","security"],"Error Count")
-    def check_lacp_logs(self):
-        path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
-        clusters_map = self.get_vc_property(path_curr)
-        message = ""     
-        passed_all = True
-        for datacenter, host_list in clusters_map.iteritems():
-            passed = True
-            #print datacenter
-                 
-            if host_list == "Not-Configured" :
-                continue
-            elif len(host_list)==0: 
-                #condtion to Check if no host found
-                continue
-  
-            passed,message = self.log_check_helper(datacenter,host_list,passed,"lacp.log",message)
-            passed_all = passed_all and passed
-              
-        return passed_all ,message,path_curr
-       
-    def log_check_helper(self,datacenter,host_list,passed,file_name,message):
-        for host in host_list:
-            host_ip=host.name        
-            ssh=None
-            error_count = 0
-            try:
-                ssh = paramiko.SSHClient()
-                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                ssh.connect(host_ip, username="root", password="nutanix/4u")
-                     
-            except paramiko.AuthenticationException:
-                message += ", " +datacenter+"@"+host_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
-                return False,message
-            except paramiko.SSHException, e:
-                message += ", " +datacenter+"@"+host_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
-                return False,message
-            except socket.error, e:
-                message += ", " +datacenter+"@"+host_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
-                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+"SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
-                return False,message
-               
-            if ssh is not None:
-                cmd_error = "cat /var/log/"+file_name+" | grep \"Error\" | grep -v \"User \'root\' running command\""    
-                stdin, stdout, stderr =  ssh.exec_command(cmd_error)     
-                     
-                   
-                for line in stdout:
-                    error_count+=1
-                       
-                if error_count > 50:
-                    message += ", " +datacenter+"@"+host_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(False and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+str(error_count)+" (Expected: =Less than 50)",(False and "PASS" or "FAIL"))
+            
+            for host in host_list:
+                host_ip=host.name        
+
+                flag,esxi_ssh = self.log_check_helper(host_ip)
+                
+                if flag == "SSH Connection Failed":
                     passed = False
-                elif error_count <= 50:
-                    message += ", " +datacenter+"@"+host_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(True and "PASS" or "FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+str(error_count)+" (Expected: =Less than 50)",(True and "PASS" or "FAIL"))
-               
-                ssh.close()
-        return passed,message
-   
+                    message += ", " +"Error Messages in ESXi Logs on "+host_ip+" =SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in ESXi Logs on "+host_ip+" =SSH Connection Failed"+" (Expected: =Error Count)",("FAIL"))
+                elif esxi_ssh is not None and esxi_ssh._transport is not None:                
+                    for check_name in check_list:
+                        error_count = 0
+                        time.sleep(1)
+                        if check_name == "Failed Logins in auth.log":
+                            file_name = "auth.log" 
+                        elif check_name == "Error Messages in hostd.log":
+                            file_name = "hostd.log"    
+                        elif check_name == "Error Messages in vmkernel.log":
+                            file_name = "vmkernel.log"    
+                        elif check_name == "Error Messages in lacp.log":
+                            file_name = "lacp.log"
+            
+                        cmd_error = "cat /var/log/"+file_name+" | grep \"Error\" | grep -v \"User \'root\' running command\""        
+                        
+                        stdin, stdout, stderr =  esxi_ssh.exec_command(cmd_error)
+                        
+                        for line in stdout:
+                            error_count+=1
+                               
+                        if error_count > 50:
+                            passed = False
+                            message += ", " +check_name+" on "+host_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(passed and "PASS" or "FAIL")
+                            self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+host_ip+"="+str(error_count)+" (Expected: =Less than 50)",(passed and "PASS" or "FAIL"))
+                        elif error_count <= 50:
+                            passed = True
+                            message += ", " +check_name+" on "+host_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(passed and "PASS" or "FAIL")
+                            self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" on "+host_ip+"="+str(error_count)+" (Expected: =Less than 50)",(passed and "PASS" or "FAIL"))
+                    esxi_ssh.close()
+                    VCChecker.esxi_ssh = None
+                    
+        passed_all = passed_all and passed
+         
+        return passed_all,message,path_curr
+    
+    
+    def log_check_helper(self,host_ip):
+        if VCChecker.esxi_ssh is None:
+                try:
+                    VCChecker.esxi_ssh = paramiko.SSHClient()
+                    VCChecker.esxi_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    VCChecker.esxi_ssh.connect(host_ip, username="root", password="nutanix/4u")
+                except paramiko.AuthenticationException:
+                    return "SSH Connection Failed",None
+                except paramiko.SSHException, e:
+                    return "SSH Connection Failed",None
+                except socket.error, e:
+                    return "SSH Connection Failed",None
+        else:
+            pass
+                
+        return  "Success",VCChecker.esxi_ssh         
+           
     @checkgroup("esxi_checks", "Check if only 10GBps VMNIC are Connected",["performance"],"10GBps VMNIC Connected")
     def check_vmnic_10Gbps(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkConfig.pnic'
@@ -1831,6 +1791,10 @@ class VCChecker(CheckerBase):
     def jvm_memory_helper(self,check_name,memory,expected_result,message):
         passed = True
         if memory is not None and int(memory.strip()) == expected_result:     
+            message += ", " +check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
+        elif memory is not None:
+            passed = False
             message += ", " +check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
             self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
         else:
