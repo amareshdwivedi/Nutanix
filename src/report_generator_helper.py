@@ -125,7 +125,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return 'VM Swap Placement on cluster ['+cluster+'] is ['+actual_value+']', True, 'warning'
         
     if check_name == "Cluster Advance Settings das.useDefaultIsolationAddress":
-        if actual_value == "false":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value == "false":
             return "false", False, ''
         else: 
             return 'Advance Settings das.useDefaultIsolationAddress on cluster ['+cluster+'] is ['+actual_value+']', True, 'alert'
@@ -984,9 +986,9 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         if actual_value == "Not-Configured":
             return "Not-Configured", False,''
         elif actual_value == "True":
-            return "Network IO Control policy on VDS ["+entity+"] is Enabled", True,'warning'                       
+            return "Network IO Control policy on VDS ["+entity+"] is Enabled", False,'warning'                       
         elif actual_value == "False":
-            return "Network IO Control policy on VDS ["+entity+"] is Disabled", True,'info' 
+            return "Network IO Control policy on VDS ["+entity+"] is Disabled", True,'warning' 
     
     if check_name == "Virtual Distributed Switch - MTU":
         if actual_value == "Not-Configured":
@@ -1068,7 +1070,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif actual_value == "2":
             return  "On host ["+host+"]  VT is available but is currently not enabled in the BIOS", True, 'alert' 
         else:
-            return  "On host ["+host+"] VT support is  available", True, '' 
+            return  "On host ["+host+"] VT support is  available", False, '' 
                            
     if check_name == "NX-1020 Nodes mixed with Other Nodes":
         if actual_value == "Not-Configured":

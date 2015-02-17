@@ -97,8 +97,8 @@ class VCChecker(CheckerBase):
     def usage(self, message=None):
         x = PrettyTable(["Name", "Short help"])
         x.align["Name"] = "l"
-        x.align["Short help"] = "l" # Left align city names
-        x.padding_width = 1 # One space between column edges and contents (default)
+        x.align["Short help"] = "l" 
+        x.padding_width = 1 
         checks_list = [k for k in self.config.keys() if k.endswith('checks')]
 
         for checks in checks_list:
@@ -114,8 +114,6 @@ class VCChecker(CheckerBase):
     def setup(self):
         print "\nConfiguring vCenter Server:\n"
         
-#         print "Current configuration for vCenter Server is:\n vCenter Server IP: %s \n vCenter User Name: %s \n VCenter Port: %d\n Clusters: %s \n hosts: %s"%\
-#               (self.authconfig['vc_ip'], self.authconfig['vc_user'], self.authconfig['vc_port'],self.authconfig['cluster'],self.authconfig['host'] )
         current_vc_ip = self.authconfig['vc_ip'] if ('vc_ip' in self.authconfig.keys()) else "Not Set"
         vc_ip=raw_input("Enter vCenter Server IP [default: "+current_vc_ip+"]: ")
         vc_ip=vc_ip.strip()
@@ -151,7 +149,7 @@ class VCChecker(CheckerBase):
         
         current_vc_port=self.authconfig['vc_port'] if  ('vc_port' in self.authconfig.keys()) else "Not Set"
         vc_port=raw_input("Enter vCenter Server Port [default: "+str(current_vc_port)+"]: ")
-        #vc_port=vc_port.strip()
+
         if vc_port == "":
             if(current_vc_port == "Not Set"):
                 exit_with_message("Error: Set vCenter Server Port.")
@@ -177,8 +175,6 @@ class VCChecker(CheckerBase):
            print Fore.RED+" Connection failure"+Fore.RESET
            exit_with_message(message)
            
-        #print "vc_ip :"+vc_ip+" vc_user :"+vc_user+" vc_pwd : "+vc_pwd+ " vc_port:"+str(vc_port)+" cluster : "+cluster+" host : "+hosts
- 
         vc_auth = dict()
         vc_auth["vc_ip"]=vc_ip;
         vc_auth["vc_user"]=vc_user;
@@ -349,6 +345,7 @@ class VCChecker(CheckerBase):
         VCChecker.responseHostsJson={}
         VCChecker.responseClusterJson={}
         VCChecker.vcenter_server_ssh = None
+        VCChecker.esxi_ssh = None
         
         self.result.passed = ( passed_all and "PASS" or "FAIL" )
         self.result.message = "VC Checks completed with " + (passed_all and "success" or "failure")
@@ -374,9 +371,6 @@ class VCChecker(CheckerBase):
         if expected.startswith("content"):
             # Reference to another object
             expected_props = self.get_vc_property(expected)
-
-        
-        
 
         for path,property in props.iteritems():
             expected_val = expected
@@ -1553,7 +1547,7 @@ class VCChecker(CheckerBase):
             for host in host_list:
                 host_ip=host.name        
 
-                flag,esxi_ssh = self.log_check_helper(host_ip)
+                flag,esxi_ssh = self.get_esxi_ssh_connection(host_ip)
                 
                 if flag == "SSH Connection Failed":
                     passed = False
@@ -1595,7 +1589,7 @@ class VCChecker(CheckerBase):
         return passed_all,message,path_curr
     
     
-    def log_check_helper(self,host_ip):
+    def get_esxi_ssh_connection(self,host_ip):
         if VCChecker.esxi_ssh is None:
                 try:
                     VCChecker.esxi_ssh = paramiko.SSHClient()
@@ -2813,53 +2807,43 @@ class VCChecker(CheckerBase):
                     
             for host in host_list:
                 host_ip=host.name
-                ssh=None
-                try:
-                    ssh = paramiko.SSHClient()
-                    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                    ssh.connect(host_ip, username="root", password="nutanix/4u")
-                       
-                except paramiko.AuthenticationException:
+
+                flag,esxi_ssh = self.get_esxi_ssh_connection(host_ip)
+                
+                if flag == "SSH Connection Failed":
+                    passed = False
                     message += ", " +datacenter+"@"+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
-                    return False , message,path_curr
-                except paramiko.SSHException, e:
-                    message += ", " +datacenter+"@"+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
-                    return False , message,path_curr
-                except socket.error, e:
-                    message += ", " +datacenter+"@"+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)"+"#"+("FAIL")
-                    self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+"SSH Connection Failed"+" (Expected: =3)",("FAIL"))
-                    return False , message,path_curr
-       
-                cmd = "esxcfg-info|grep \"HV Support\""    
-                stdin, stdout, stderr =  ssh.exec_command(cmd)     
-                   
-   
-                for line in stdout:
-                    line = ''.join(e for e in line if e.isalnum())
-                      
-                    if line.startswith('HVSupport'):
-                        level = line[-1:]
+                elif esxi_ssh is not None and esxi_ssh._transport is not None:                
+                    cmd = "esxcfg-info|grep \"HV Support\""    
+                    stdin, stdout, stderr =  esxi_ssh.exec_command(cmd)     
+                           
+                    for line in stdout:
+                        line = ''.join(e for e in line if e.isalnum())
                           
-                        if level is not None and level == "3":
-                            VT_extension_level = True
-                            message += ", " +datacenter+"@"+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
-                            self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
-                            passed=VT_extension_level
-                            continue 
-                          
-                        elif level is not None and level != "3":  
-                            message += ", " +datacenter+"@"+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
-                            self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
-                            passed=VT_extension_level
-                            continue 
-             
-            ssh.close()             
-            passed_all = passed_all and passed
+                        if line.startswith('HVSupport'):
+                            level = line[-1:]
+                              
+                            if level is not None and level == "3":
+                                VT_extension_level = True
+                                message += ", " +datacenter+"@"+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
+                                passed=VT_extension_level
+                                continue 
+                              
+                            elif level is not None and level != "3":  
+                                message += ", " +datacenter+"@"+host_ip+"="+level+" (Expected: =3)"+"#"+(VT_extension_level and "PASS" or "FAIL")
+                                self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"."+host_ip+"="+level+" (Expected: =3)",(VT_extension_level and "PASS" or "FAIL"))
+                                passed=VT_extension_level
+                                continue 
             
-        return passed_all , message,path_curr
- 
+                esxi_ssh.close()
+                VCChecker.esxi_ssh = None
+                                    
+        passed_all = passed_all and passed
+         
+        return passed_all,message,path_curr
+
     @checkgroup("hardware_and_bios_checks", "NX-1020 Maximum Cluster Size",["configurability","supportability"],"Less than 8")
     def check_NX1020_Cluster_Size(self):
         entities,cluster,status = self.get_nutanix_cluster_info()
