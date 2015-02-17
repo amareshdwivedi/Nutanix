@@ -102,8 +102,8 @@ jQuery(document).ready(function() {
                         $("#createNewCustomerModel .modal-body .sucessMsg").html(data.message);
                         getCustomers();
 
-                        $('.createCustomer-form').find('input:text').val('');
-                        $('.createCustomer-form').find('input:email').val('');
+                        $('.createCustomer-form').find('input').val('');
+                        //$('.createCustomer-form').find('input:email').val('');
                         location.reload(false);
                     } else {
                         $('#createNewCustomerModel').modal();

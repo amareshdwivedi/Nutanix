@@ -78,6 +78,7 @@ jQuery(document).ready(function() {
 	 
 	 $(".createCustomerLink").click(function(){
 		 $('#createNewCustomerModel').modal();
+         $("#createNewCustomerModel .modal-body .form_fields_container").show();
 		 $(".createCustomer-form .form_input").removeClass("error");
          $("#createNewCustomerModel .modal-body .sucessMsg").hide();
          $(".createNewCustomerBtn").show();
