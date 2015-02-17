@@ -45,6 +45,7 @@ urls = (
     '/connect', 'connect',
     '/run', 'runChecks',
     '/refresh', 'refresh',
+    '/reports/(\d+)/','api.customerReports',
     '/', 'index',
     '/GeneratePdf/','reportGenerator.GeneratePdf',
     '/home/', 'home'
@@ -225,7 +226,11 @@ class runChecks:
         
         with open("display_json.json", "w") as myfile:
             json.dump(run_logs, myfile)
-
+        
+        cid = 1
+        input_json = None
+        taskId = api.model.add_task(cid,input_json,"HealthCheck")
+        
         for checker in checkers_list:
             checker_module = self.checkers[checker]
             
@@ -249,8 +254,8 @@ class runChecks:
         CSVReportGenerator(results,cur_dir)
         
         #Generate PDF Report based on results. 
-        PDFReportGenerator(results,cur_dir)
-            
+        reportFileName = PDFReportGenerator(results,cur_dir)
+        taskId = api.model.update_task(int(taskId), "Complete",reportFileName)
         return True
 
 class refresh:

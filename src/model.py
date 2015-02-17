@@ -45,6 +45,7 @@ class DataModel:
             date_created default current_timestamp,
             json_data TEXT  NULL,
             status varchar(30) NULL,
+            report_file TEXT NULL,
             C_Id INTEGER,
             FOREIGN KEY (C_Id) REFERENCES customer_data(customer_id))''')          
 
@@ -90,12 +91,21 @@ class DataModel:
     def get_history_by_taskid(self,customer_id,task_id):
 
         return list(self._db.select('customer_history', where='id=$task_id and C_Id=$customer_id',
-                               vars=locals()))           
+                               vars=locals()))  
+    
+    def list_report_files(self, customer_id):
+        return list(self._db.select('customer_history',  what="report_file",where='C_Id=$customer_id',
+                               vars=locals()))         
 
-    def add_task(self,cust_id,json_data):
+    def add_task(self,cust_id,json_data, task_type):
     
         now = str(datetime.datetime.now())
-        return self._db.insert('customer_history',C_Id=cust_id,json_data=json_data,task="Deployment",status="Pending")
+        return self._db.insert('customer_history',C_Id=cust_id,json_data=json_data,task=task_type,status="Pending")
+
+    def update_task(self,task_id,task_status, report_file):
+    
+        now = str(datetime.datetime.now())
+        return self._db.update('customer_history',where="id=$task_id",status=task_status,report_file=report_file,vars=locals())
 
     def get_number_of_nodes(self,model):
         

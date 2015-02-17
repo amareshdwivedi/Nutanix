@@ -1835,8 +1835,8 @@ class VCChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))              
         else:
             passed = False
-            message += ", " +check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
+            message += ", " +check_name+" = None (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
+            self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = None (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
         
         return passed,message      
 

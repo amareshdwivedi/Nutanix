@@ -394,12 +394,14 @@ def PDFReportGenerator(resultJson,curdir=None):
     
     pdf_report_name = pdffilename.split(os.path.sep)[-1]
     generic_report_name = pdf_report_name.split('.')[0]
+
+    print "pdf generic :",pdf_report_name, generic_report_name
     
     if curdir is None:
         print "\nReport ("+pdf_report_name+") generated successfully at :: " + os.getcwd() + os.path.sep +"reports"
     else:
         print "\nReport ("+pdf_report_name+") generated successfully at :: " + curdir + os.path.sep +"reports"  
-
+    return pdf_report_name
 
 
 
