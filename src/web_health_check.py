@@ -278,7 +278,7 @@ class refresh:
 
             for item in checkJson["checks"]:
                 chTotal += 1
-                if item["Status"] == "PASS":
+                if item["Status"].upper() == "PASS":
                     chPass += 1
                 else:
                     chFail +=1
