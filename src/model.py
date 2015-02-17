@@ -94,7 +94,7 @@ class DataModel:
                                vars=locals()))  
     
     def list_report_files(self, customer_id):
-        return list(self._db.select('customer_history',  what="report_file",where='C_Id=$customer_id',
+        return list(self._db.select('customer_history',  what="report_file,date_created",where='C_Id=$customer_id',
                                vars=locals()))         
 
     def add_task(self,cust_id,json_data, task_type):
