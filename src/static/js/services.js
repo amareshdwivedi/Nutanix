@@ -751,6 +751,11 @@ jQuery(document).ready(function() {
             name: "group",
             value: group
         });
+        checks.push({
+            name: "customerId",
+            value: $("#customerId").val()
+        });
+
 
         console.log(checks)
         $.ajax({

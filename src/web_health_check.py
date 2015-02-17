@@ -46,6 +46,7 @@ urls = (
     '/run', 'runChecks',
     '/refresh', 'refresh',
     '/reports/(\d+)/','api.customerReports',
+    '/download/','api.downloadReports',
     '/', 'index',
     '/GeneratePdf/','reportGenerator.GeneratePdf',
     '/home/', 'home'
@@ -227,9 +228,9 @@ class runChecks:
         with open("display_json.json", "w") as myfile:
             json.dump(run_logs, myfile)
         
-        cid = 1
+        customerId = data['customerId']
         input_json = None
-        taskId = api.model.add_task(cid,input_json,"HealthCheck")
+        taskId = api.model.add_task(customerId,input_json,"HealthCheck")
         
         for checker in checkers_list:
             checker_module = self.checkers[checker]

@@ -9,7 +9,7 @@ from model import DataModel
 from definedconstants import *
 import json 
 from deployer_web import initiate_deployment
-
+import os,sys
 db = web.database(dbn='sqlite', db='deployer')
 model = DataModel(db) 
 
@@ -326,6 +326,16 @@ class customerReports:
 
             web.header( 'Content-Type','application/json' )
             return json.dumps(availReports)
+
+class downloadReports:
+    def POST(self):
+        try:
+            data = json.loads(web.data())
+            f = open(os.getcwd() + os.path.sep +"reports" + os.path.sep +data['filename'], 'r')
+            return f.read()
+        except:
+            #print sys.exc_info()[0]
+            return ''
 
 
 
