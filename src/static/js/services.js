@@ -213,18 +213,18 @@ jQuery(document).ready(function() {
             foundationObject["cvm_gateway"] = $('#Cvmgateway').val();
             //foundationObject["cvmmemory"] = $('#CvmMemory').val()
 
-            foundationObject["cluster_name"] = $('#cluster_name').val();
+    //        foundationObject["cluster_name"] = $('#cluster_name').val();
             //var cluster_external_ip = $('#externalIP').val();
-            foundationObject["cluster_external_ip"] = $.trim($('#externalIP').val());
+    //        foundationObject["cluster_external_ip"] = $.trim($('#externalIP').val());
             var redundancy_factor = $('#redundancy_factor').val();
             if (redundancy_factor == "null") {
                 redundancy_factor = null;
             }
             foundationObject["redundancy_factor"] = redundancy_factor;
 
-            foundationObject["cvm_dns_servers"] = $('#CVMDNSSERVER').val();
-            foundationObject["cvm_ntp_servers"] = $('#CVMNTPSERVER').val();
-            foundationObject["hypervisor_ntp_servers"] = $('#HYPERVERSIONCVMNTPSERVER').val();
+    //        foundationObject["cvm_dns_servers"] = $('#CVMDNSSERVER').val();
+    //        foundationObject["cvm_ntp_servers"] = $('#CVMNTPSERVER').val();
+    //        foundationObject["hypervisor_ntp_servers"] = $('#HYPERVERSIONCVMNTPSERVER').val();
 
             foundationObject["phoenix_iso"] = $('#phoenix_iso').val();
             foundationObject["hypervisor_iso"] = $('#hypervisor_iso').val();
@@ -232,20 +232,24 @@ jQuery(document).ready(function() {
             //foundationObject["use_foundation_ips"] = $('#foundation_ip').val();
             //foundationObject["use_foundation_ips"] = false;
             foundationObject['use_foundation_ips'] = $("input[name=foundation_ip]:checked").val();
-            foundationObject["cluster_init_successful"] = null;
+    //        foundationObject["cluster_init_successful"] = null;
 
             foundationObject['hypervisor_password'] = $('#hypervisorpass').val();
             foundationObject["hypervisor_iso"] = $('#hypervisor_iso').val();
 
+            foundationObject["hypervisor"] = $('#hypervisor').val();
+            foundationObject["hyperv_sku"] = $('#hyperv_sku').val();
             foundationObject["phoenix_iso"] = $('#phonix_iso').val();
+            foundationObject['skip_hypervisor'] = $("input[name=skip_hypervisor]:checked").val();
 
             foundationObject['cluster_init_now'] = true;
             var nodes = [];
             var mainblock = {}
             var blocks = [];
-
+            var clusters = [];
+            var tests = {};
             var hosts = [];
-
+            var clusterMembersArray = [];
 
             foundationObject["ipmi_netmask"] = $('#IPNM').val();
 
@@ -259,7 +263,6 @@ jQuery(document).ready(function() {
                     var node_id = $(this).attr("id");
                     var vcenterhosts = {};
                     var a = $("#" + block_id + " #" + node_id + " #ipmimac").val();
-
                     var nodeObject = {};
                     //var ipmi_mac = $('#ipmimac'+i).val();
                     nodeObject['ipmi_mac'] = $("#" + block_id + " #" + node_id + " #ipmimac").val();
@@ -270,8 +273,8 @@ jQuery(document).ready(function() {
                     nodeObject['hypervisor_ip'] = $("#" + block_id + " #" + node_id + " #hyperversionip").val(); // $('#hyperversionip'+i).val();
                     //var cvm_ip = $('#cvmip'+i).val();
 
-                    nodeObject['cvm_ip'] = $("#" + block_id + " #" + node_id + " #cvmip").val(); // $('#cvmip'+i).val();
-
+                    //nodeObject['cvm_ip'] = $("#" + block_id + " #" + node_id + " #cvmip").val(); // $('#cvmip'+i).val();
+                    clusterMembersArray.push($("#" + block_id + " #" + node_id + " #cvmip").val());
 
                     if (j == 1 || j == "1") {
 
@@ -288,45 +291,21 @@ jQuery(document).ready(function() {
                     vcenterhosts['pwd'] = $('#v_center_vm_password').val();
                     hosts.push(vcenterhosts);
 
-                    //var cvm_gb_ram = $('#cvm_gb_ram'+i).val();
                     nodeObject['cvm_gb_ram'] = parseInt($('#node_ram').val());
 
-                    //var ipv6_address = $('#ipv6_address'+i).val();
                     nodeObject['ipv6_address'] = $("#" + block_id + " #" + node_id + " #ipv6_address").val(); //$('#ipv6_address'+i).val();
 
-                    //var cluster_member = $("#"+block_id+ " #"+node_id+ " #ipv6_address").val();//$('#cluster_member'+i).val();
-                    /*var cluster_member = 'true'
-						if(cluster_member == 'true'){
-						nodeObject['cluster_member'] = true;
-                        }
-                        else{
-						nodeObject['cluster_member'] = false;
-                        }*/
-                    nodeObject['cluster_member'] = $("#" + block_id + " #" + node_id + " input[name=cluster_member-" + node_id + "]:checked").val();
-                    //var ipmi_configure_now = $("#"+block_id+ " #"+node_id+ " #ipmi_configure_now").val();//$('#ipmi_configure_now'+i).val();
-                    /*var ipmi_configure_now = 'false'
-                        if(ipmi_configure_now == 'true'){
-						nodeObject['ipmi_configure_now'] = true;
-                        }
-
-                        if(ipmi_configure_now == 'false'){
-						nodeObject['ipmi_configure_now'] = false;
-                        }*/
+                    
+                   /* nodeObject['cluster_member'] = $("#" + block_id + " #" + node_id + " input[name=cluster_member-" + node_id + "]:checked").val();*/
+                   
+                    nodeObject['ipmi_configure_successful'] = true;
                     nodeObject['ipmi_configure_now'] = $("#" + block_id + " #" + node_id + " input[name=ipmi_configure_now-" + node_id + "]:checked").val();
-                    //var ipv6_interface = $('#ipv6_interface'+i).val();
-                    //nodeObject['ipv6_interface'] = $("#"+block_id+ " #"+node_id+ " #ipv6_interface").val();//$('#ipv6_interface'+i).val();
+                   
                     nodeObject['ipv6_interface'] = "";
 
-                    //var node_position = $('#node_position'+i).val();
-                    nodeObject['node_position'] = $("#" + block_id + " #" + node_id + " #nodePosition").val(); //nodePosition// $('#node_position'+i).val();
+                     nodeObject['node_position'] = $("#" + block_id + " #" + node_id + " #nodePosition").val(); 
 
-                    /*var image_now = $("#"+block_id+ " #"+node_id+ " #image_now").val();
-                                      if(image_now == 'false'){
-                                          nodeObject['image_now'] = false;
-                                      }
-                                      if(image_now == 'true'){
-                                          nodeObject['image_now'] = true;
-                                      }*/
+                  
                     nodeObject['image_now'] = $("#" + block_id + " #" + node_id + " input[name=image_now-" + node_id + "]:checked").val();
 
                     var image_successful = $("#" + block_id + " #" + node_id + " #image_successful").val(); // $('#image_successful'+i).val();
@@ -337,14 +316,7 @@ jQuery(document).ready(function() {
                     }
 
 
-                    /*var ipmi_configured = $("#"+block_id+ " #"+node_id+ " #ipmi_configured").val();//$('#ipmi_configured'+i).val();
-						//nodeObject['ipmi_configured'] = ipmi_configured;							
-						 if(ipmi_configured == 'false'){
-                            nodeObject['ipmi_configured'] = false;
-                        }
-                        if(ipmi_configured == 'true'){
-                            nodeObject['ipmi_configured'] = true;
-                        }*/
+                    
                     nodeObject['ipmi_configured'] = $("#" + block_id + " #" + node_id + " input[name=ipmi_configured-" + node_id + "]:checked").val();
 
                     nodes.push(nodeObject);
@@ -353,13 +325,31 @@ jQuery(document).ready(function() {
 
                 mainblock['nodes'] = nodes;
                 mainblock['model'] = "undefined";
-                mainblock['block_id'] = "Block-" + i;
+                mainblock['ui_block_id'] = "Block-" + i;
+                mainblock['block_id'] = "null";
                 i = i + 1;
             });
             blocks.push(mainblock);
             foundationObject['blocks'] = blocks;
-
-
+            
+            var clusterObjects = {};
+            clusterObjects['cluster_external_ip'] = $.trim($('#externalIP').val());
+            clusterObjects['cluster_init_successful'] = null;
+            clusterObjects['cluster_name'] = $('#cluster_name').val();
+            clusterObjects['cvm_ntp_servers'] = $('#CVMNTPSERVER').val();   
+            clusterObjects['cvm_dns_servers'] = $('#CVMDNSSERVER').val();
+            clusterObjects['cluster_init_now'] = true;
+            clusterObjects['hypervisor_ntp_servers'] = $('#HYPERVERSIONCVMNTPSERVER').val();    
+            clusterObjects['cluster_members'] = clusterMembersArray;
+            
+            clusters.push(clusterObjects);
+            
+            foundationObject['clusters'] = clusters;
+            
+            tests['run_diagnostics'] = $("input[name=run_diagnostics]:checked").val();
+            tests['run_ncc'] = $("input[name=run_ncc]:checked").val();
+            foundationObject['tests'] = tests;
+            
             restInput['restInput'] = foundationObject;
             restInput['server'] = $('#foundation_server_ip').val();
             main_rest_block['foundation'] = restInput;

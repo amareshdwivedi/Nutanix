@@ -304,8 +304,7 @@ $$(window).load(function() {
 													<input type="text" value="10.1.222.51" id="externalIP" class="form-control form-font required"/>
 												</div>
 											</div>
-											<div class="col-lg-12 col-sm-12 col-xs-12 no-margin no-padding">
-												<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 														Redundancy Factor
 													</label>
@@ -313,7 +312,49 @@ $$(window).load(function() {
 														<input type="text" value="null" id="redundancy_factor" class="form-control form-font required"/>
 													</div>
 												</div>
-											</div>	
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+														Hypervisor
+													</label>
+													<div class="form-group predeployForm">
+														<input type="text" value="esx" id="hypervisor" class="form-control form-font required"/>
+													</div>
+												</div>
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+														Hypervisor SKU
+													</label>
+													<div class="form-group predeployForm">
+														<input type="text" value="null" id="hyperv_sku" class="form-control form-font required"/>
+													</div>
+												</div>
+											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+														Skip Hypervisor
+													</label>
+													<div class="form-group predeployForm">
+                                                        <input type="radio" name="skip_hypervisor" value="true" checked><span class="checkBoxText">True</span>
+                                                        <input type="radio" name="skip_hypervisor" value="false"><span class="checkBoxText">False</span>  
+                                                    </div>
+												</div>
+                                            <div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+														Run Diagnostics
+													</label>
+													<div class="form-group predeployForm">
+                                                        <input type="radio" name="run_diagnostics" value="true" checked><span class="checkBoxText">True</span>
+                                                        <input type="radio" name="run_diagnostics" value="false"><span class="checkBoxText">False</span>  
+                                                    </div>
+												</div>
+                                            <div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
+													<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
+														Run NCC
+													</label>
+													<div class="form-group predeployForm">
+                                                        <input type="radio" name="run_ncc" value="true" checked><span class="checkBoxText">True</span>
+                                                        <input type="radio" name="run_ncc" value="false"><span class="checkBoxText">False</span>  
+                                                    </div>
+												</div>
 											<div  style="display:none;" class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
 												<label class="col-lg-5 col-sm-5 col-xs-12 no-margin no-padding left-label control-label">
 													Cluster Init Successful
