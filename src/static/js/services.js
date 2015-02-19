@@ -19,8 +19,6 @@ jQuery(document).ready(function() {
                     $("table.customersTable tbody").html(customers);
 
                 }
-
-
             },
             error: function(request, status, errorThrown) {
                 alert("No Data Available");
@@ -85,7 +83,6 @@ jQuery(document).ready(function() {
             $('#createNewCustomerModel .form_input input').each(function() {
                 formData[$(this).attr('name')] = $(this).val();
             });
-            //$("#createCustomerModal .modal-body").html("");
             $.ajax({
                 type: "POST",
                 url: "/v1/deployer/customers/",
@@ -135,9 +132,7 @@ jQuery(document).ready(function() {
             url: "/v1/deployer/customers/" + cutomerId + "/tasks/",
             async: false,
             dataType: "json",
-            success: function(data) {
-                //alert(data);
-            },
+            success: function(data) {},
             error: function(request, status, errorThrown) {
                 alert("No Data Available");
             }
@@ -152,11 +147,7 @@ jQuery(document).ready(function() {
             dataType: "json",
             data: JSON.stringify(json_data),
             success: function(data) {
-                //alert(data);
                 if (data.response == 200) {
-                    /*$('#commonModal').modal();
-                     $("#commonModal .modal-header h4.modal-title").html("Create Task");
-					 $("#commonModal .modal-body").html("Task Created Successfully.");*/
                     $("#task_id").val(data.task_id);
                     $(".successMessage").show();
                     $("#mainTabContainer").tabs("enable", 2).tabs("select", 2);
@@ -213,26 +204,23 @@ jQuery(document).ready(function() {
             foundationObject["cvm_gateway"] = $('#Cvmgateway').val();
             //foundationObject["cvmmemory"] = $('#CvmMemory').val()
 
-    //        foundationObject["cluster_name"] = $('#cluster_name').val();
-            //var cluster_external_ip = $('#externalIP').val();
-    //        foundationObject["cluster_external_ip"] = $.trim($('#externalIP').val());
+            //        foundationObject["cluster_name"] = $('#cluster_name').val();
+            //        foundationObject["cluster_external_ip"] = $.trim($('#externalIP').val());
             var redundancy_factor = $('#redundancy_factor').val();
             if (redundancy_factor == "null") {
                 redundancy_factor = null;
             }
             foundationObject["redundancy_factor"] = redundancy_factor;
 
-    //        foundationObject["cvm_dns_servers"] = $('#CVMDNSSERVER').val();
-    //        foundationObject["cvm_ntp_servers"] = $('#CVMNTPSERVER').val();
-    //        foundationObject["hypervisor_ntp_servers"] = $('#HYPERVERSIONCVMNTPSERVER').val();
+            //        foundationObject["cvm_dns_servers"] = $('#CVMDNSSERVER').val();
+            //        foundationObject["cvm_ntp_servers"] = $('#CVMNTPSERVER').val();
+            //        foundationObject["hypervisor_ntp_servers"] = $('#HYPERVERSIONCVMNTPSERVER').val();
 
             foundationObject["phoenix_iso"] = $('#phoenix_iso').val();
             foundationObject["hypervisor_iso"] = $('#hypervisor_iso').val();
 
-            //foundationObject["use_foundation_ips"] = $('#foundation_ip').val();
-            //foundationObject["use_foundation_ips"] = false;
             foundationObject['use_foundation_ips'] = $("input[name=foundation_ip]:checked").val();
-    //        foundationObject["cluster_init_successful"] = null;
+            //        foundationObject["cluster_init_successful"] = null;
 
             foundationObject['hypervisor_password'] = $('#hypervisorpass').val();
             foundationObject["hypervisor_iso"] = $('#hypervisor_iso').val();
@@ -264,16 +252,11 @@ jQuery(document).ready(function() {
                     var vcenterhosts = {};
                     var a = $("#" + block_id + " #" + node_id + " #ipmimac").val();
                     var nodeObject = {};
-                    //var ipmi_mac = $('#ipmimac'+i).val();
                     nodeObject['ipmi_mac'] = $("#" + block_id + " #" + node_id + " #ipmimac").val();
-                    //nodeObject['ipmi_mac'] =$('#ipmimac'+i).val();
-                    //var ipmi_ip = $('#ipmiip'+i).val();
-                    nodeObject['ipmi_ip'] = $("#" + block_id + " #" + node_id + " #ipmiip").val(); //$('#ipmiip'+i).val();
-                    //var hypervisor_ip = $('#hyperversionip'+i).val();
-                    nodeObject['hypervisor_ip'] = $("#" + block_id + " #" + node_id + " #hyperversionip").val(); // $('#hyperversionip'+i).val();
-                    //var cvm_ip = $('#cvmip'+i).val();
+                    nodeObject['ipmi_ip'] = $("#" + block_id + " #" + node_id + " #ipmiip").val();
+                    nodeObject['hypervisor_ip'] = $("#" + block_id + " #" + node_id + " #hyperversionip").val();
 
-                    //nodeObject['cvm_ip'] = $("#" + block_id + " #" + node_id + " #cvmip").val(); // $('#cvmip'+i).val();
+                    nodeObject['cvm_ip'] = $("#" + block_id + " #" + node_id + " #cvmip").val();
                     clusterMembersArray.push($("#" + block_id + " #" + node_id + " #cvmip").val());
 
                     if (j == 1 || j == "1") {
@@ -281,10 +264,8 @@ jQuery(document).ready(function() {
                         var restbaseurl = "https://" + nodeObject['cvm_ip'] + ":9440/PrismGateway/services/rest/";
                         $('#restURL').val(restbaseurl);
                     }
-                    //var hypervisor_hostname = $('#hyperversionhostname'+i).val();
-                    nodeObject['hypervisor_hostname'] = $("#" + block_id + " #" + node_id + " #hyperversionhostname").val(); //$('#hyperversionhostname'+i).val();
 
-
+                    nodeObject['hypervisor_hostname'] = $("#" + block_id + " #" + node_id + " #hyperversionhostname").val();
 
                     vcenterhosts['ip'] = $("#" + block_id + " #" + node_id + " #hyperversionip").val();
                     vcenterhosts['user'] = $('#v_center_user').val();
@@ -292,31 +273,20 @@ jQuery(document).ready(function() {
                     hosts.push(vcenterhosts);
 
                     nodeObject['cvm_gb_ram'] = parseInt($('#node_ram').val());
-
-                    nodeObject['ipv6_address'] = $("#" + block_id + " #" + node_id + " #ipv6_address").val(); //$('#ipv6_address'+i).val();
-
-                    
-                   /* nodeObject['cluster_member'] = $("#" + block_id + " #" + node_id + " input[name=cluster_member-" + node_id + "]:checked").val();*/
-                   
+                    nodeObject['ipv6_address'] = $("#" + block_id + " #" + node_id + " #ipv6_address").val();
                     nodeObject['ipmi_configure_successful'] = true;
                     nodeObject['ipmi_configure_now'] = $("#" + block_id + " #" + node_id + " input[name=ipmi_configure_now-" + node_id + "]:checked").val();
-                   
                     nodeObject['ipv6_interface'] = "";
-
-                     nodeObject['node_position'] = $("#" + block_id + " #" + node_id + " #nodePosition").val(); 
-
-                  
+                    nodeObject['node_position'] = $("#" + block_id + " #" + node_id + " #nodePosition").val();
                     nodeObject['image_now'] = $("#" + block_id + " #" + node_id + " input[name=image_now-" + node_id + "]:checked").val();
 
-                    var image_successful = $("#" + block_id + " #" + node_id + " #image_successful").val(); // $('#image_successful'+i).val();
+                    var image_successful = $("#" + block_id + " #" + node_id + " #image_successful").val();
                     if (image_successful == "") {
                         nodeObject['image_successful'] = null;
                     } else {
                         nodeObject['image_successful'] = image_successful;
                     }
 
-
-                    
                     nodeObject['ipmi_configured'] = $("#" + block_id + " #" + node_id + " input[name=ipmi_configured-" + node_id + "]:checked").val();
 
                     nodes.push(nodeObject);
@@ -331,30 +301,29 @@ jQuery(document).ready(function() {
             });
             blocks.push(mainblock);
             foundationObject['blocks'] = blocks;
-            
+
             var clusterObjects = {};
             clusterObjects['cluster_external_ip'] = $.trim($('#externalIP').val());
             clusterObjects['cluster_init_successful'] = null;
             clusterObjects['cluster_name'] = $('#cluster_name').val();
-            clusterObjects['cvm_ntp_servers'] = $('#CVMNTPSERVER').val();   
+            clusterObjects['cvm_ntp_servers'] = $('#CVMNTPSERVER').val();
             clusterObjects['cvm_dns_servers'] = $('#CVMDNSSERVER').val();
             clusterObjects['cluster_init_now'] = true;
-            clusterObjects['hypervisor_ntp_servers'] = $('#HYPERVERSIONCVMNTPSERVER').val();    
+            clusterObjects['hypervisor_ntp_servers'] = $('#HYPERVERSIONCVMNTPSERVER').val();
             clusterObjects['cluster_members'] = clusterMembersArray;
-            
+
             clusters.push(clusterObjects);
-            
+
             foundationObject['clusters'] = clusters;
-            
+
             tests['run_diagnostics'] = $("input[name=run_diagnostics]:checked").val();
             tests['run_ncc'] = $("input[name=run_ncc]:checked").val();
             foundationObject['tests'] = tests;
-            
+
             restInput['restInput'] = foundationObject;
             restInput['server'] = $('#foundation_server_ip').val();
             main_rest_block['foundation'] = restInput;
 
-            //	if($('#prism').prop('checked')) {
             var prismObject = {};
             var authentication = {};
             var container = {};
@@ -372,11 +341,6 @@ jQuery(document).ready(function() {
             prismObject['storagepool'] = storagepool;
             main_rest_block['prismDetails'] = prismObject;
 
-
-            //	}
-            //	if($('#vcenter').prop('checked')) {
-
-
             var vCenterObject = {};
 
             vCenterObject['host'] = $('#v_center_host').val();
@@ -389,12 +353,8 @@ jQuery(document).ready(function() {
             vCenterObject['datacenter_reuse_if_exist'] = $('#v_center_datacenter_reuse').val();
             vCenterObject['cluster_reuse_if_exist'] = $('#v_center_cluster_reuse').val();
 
-
-
             vCenterObject['hosts'] = hosts;
             main_rest_block['vCenterConf'] = vCenterObject;
-            //	}
-            //		console.log(JSON.stringify(main_rest_block)); 
 
             var customerId = $("#customerId").val();
             createCustomerTask(customerId, main_rest_block);
@@ -418,7 +378,6 @@ jQuery(document).ready(function() {
         }
 
         startDeployment(customerId, taskId, checkValues);
-        //    startDeployment(customerId, "29",checkValues);
     });
 
     var interval = null;
@@ -619,7 +578,7 @@ jQuery(document).ready(function() {
                                 h2 = $('#logs').height();
                             $('#logs').scrollTop(h1 - h2);
                         }
-                        
+
                     }
                     if (categoryType == "view") {
                         $("#logs").empty();
@@ -651,7 +610,7 @@ jQuery(document).ready(function() {
                         var h1 = $('#logs')[0].scrollHeight,
                             h2 = $('#logs').height();
                         $('#logs').scrollTop(h1 - h2);
-                        
+
                     }
                     if (categoryType == "vc") {
                         $("#logs").empty();
@@ -689,43 +648,17 @@ jQuery(document).ready(function() {
                     $("#failCheck").val(data.FAIL);
                     $("#passCheck").val(data.PASS);
                     $("#totalCheck").val(data.Total);
-                    $("#totalPercentage").val(data.Percent); 
-                    //document.getElementById('logs').value = data;
+                    $("#totalPercentage").val(data.Percent);
                 },
-                beforeSend: function(){
-                    
-                    $("."+categoryType+"Status .progressPercentage").html("");
-                    $("."+categoryType+"Status .status").html("");
-                    $("."+categoryType+"Status .status").removeClass("taskCompleted").addClass("progressActiveSec");
-                    $("."+categoryType+"Status .statusMessage").html("Running "+$('#' + categoryType + '_types :selected').text()+"...");
-                    $(".hc_types .runCheck").attr("disabled","disabled");
-                    $(".hc_types select").attr("disabled","disabled");
-                    
-                    /*if (categoryType == "ncc") {
-                        $(".nccStatus .progressPercentage").html("");
-                        $(".nccStatus .status").html("");
-                        $(".nccStatus .status").removeClass("taskCompleted").addClass("progressActiveSec");
-                        $(".nccStatus .statusMessage").html("Running "+$('#' + categoryType + '_types :selected').text()+"...");
-                        $(".hc_types .runCheck").attr("disabled","disabled");
-                        $(".hc_types select").attr("disabled","disabled");
-                    }
-                    if (categoryType == "view") {
-                        $(".viewStatus .progressPercentage").html("");
-                        $(".viewStatus .status").html("");
-                        $(".viewStatus .status").removeClass("taskCompleted").addClass("progressActiveSec");
-                        $(".viewStatus .statusMessage").html("Running "+$('#' + categoryType + '_types :selected').text()+"...");
-                        $(".hc_types .runCheck").attr("disabled","disabled");
-                        $(".hc_types select").attr("disabled","disabled");
-                    }
-                    if (categoryType == "vc") {
-                        $(".vcStatus .progressPercentage").html("");
-                        $(".vcStatus .status").html("");
-                        $(".vcStatus .status").removeClass("taskCompleted").addClass("progressActiveSec");
-                        $(".vcStatus .statusMessage").html("Running "+$('#' + categoryType + '_types :selected').text()+"...");
-                        $(".hc_types .runCheck").attr("disabled","disabled");
-                        $(".hc_types select").attr("disabled","disabled");
-                    }*/
-                    
+                beforeSend: function() {
+
+                    $("." + categoryType + "Status .progressPercentage").html("");
+                    $("." + categoryType + "Status .status").html("");
+                    $("." + categoryType + "Status .status").removeClass("taskCompleted").addClass("progressActiveSec");
+                    $("." + categoryType + "Status .statusMessage").html("Running " + $('#' + categoryType + '_types :selected').text() + "...");
+                    $(".hc_types .runCheck").attr("disabled", "disabled");
+                    $(".hc_types select").attr("disabled", "disabled");
+
                 }
             });
         }
@@ -752,62 +685,25 @@ jQuery(document).ready(function() {
             url: '/run',
             type: "POST",
             data: checks,
-            dataType:'html',
+            dataType: 'html',
             success: function(data) {
                 looping = false;
                 fetch_data();
                 clearInterval(interval);
-                setTimeout(function(){
-                $("#modal_runchecks .runckeckStatus").html(data);
-		        $("#modal_runchecks").modal();
-                    $("."+categoryType+"Status .progressPercentage").html("");
-                    $("."+categoryType+"Status .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>"+$('#totalCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Pass:</span><span class='checkValue'>"+$('#passCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Fail:</span><span class='checkValue'>"+$('#failCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>"+$('#totalPercentage').val()+"%</span></p>");
-                    $("."+categoryType+"Status .status").html("");
-                    $("."+categoryType+"Status .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
-                    $("."+categoryType+"Status .statusMessage").html($('#' + categoryType + '_types :selected').text()+" Completed...");
+                setTimeout(function() {
+                    $("#modal_runchecks .runckeckStatus").html(data);
+                    $("#modal_runchecks").modal();
+                    $("." + categoryType + "Status .progressPercentage").html("");
+                    $("." + categoryType + "Status .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>" + $('#totalCheck').val() + "</span></p>" +
+                        "<p><span class='checkText'>Total Pass:</span><span class='checkValue'>" + $('#passCheck').val() + "</span></p>" +
+                        "<p><span class='checkText'>Total Fail:</span><span class='checkValue'>" + $('#failCheck').val() + "</span></p>" +
+                        "<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>" + $('#totalPercentage').val() + "%</span></p>");
+                    $("." + categoryType + "Status .status").html("");
+                    $("." + categoryType + "Status .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
+                    $("." + categoryType + "Status .statusMessage").html($('#' + categoryType + '_types :selected').text() + " Completed...");
                     $(".hc_types .runCheck").removeAttr("disabled");
                     $(".hc_types select").removeAttr("disabled");
-                    
-                /* if (categoryType == "vc") {
-                        $(".vcStatus .progressPercentage").html("");
-                        $(".vcStatus .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>"+$('#totalCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Pass:</span><span class='checkValue'>"+$('#passCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Fail:</span><span class='checkValue'>"+$('#failCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>"+$('#totalPercentage').val()+"%</span></p>");
-                        $(".vcStatus .status").html("");
-                        $(".vcStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
-                        $(".vcStatus .statusMessage").html($('#' + categoryType + '_types :selected').text()+" Completed...");
-                        $(".hc_types .runCheck").removeAttr("disabled");
-                        $(".hc_types select").removeAttr("disabled");
-                 }
-                if (categoryType == "ncc") {
-                        $(".nccStatus .progressPercentage").html("");
-                        $(".nccStatus .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>"+$('#totalCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Pass:</span><span class='checkValue'>"+$('#passCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Fail:</span><span class='checkValue'>"+$('#failCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>"+$('#totalPercentage').val()+"%</span></p>");
-                        $(".nccStatus .status").html("");
-                        $(".nccStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
-                        $(".nccStatus .statusMessage").html($('#' + categoryType + '_types :selected').text()+" Completed...");
-                        $(".hc_types .runCheck").removeAttr("disabled");
-                        $(".hc_types select").removeAttr("disabled");
-                 }
-                
-                if (categoryType == "view") {
-                        $(".viewStatus .progressPercentage").html("");
-                        $(".viewStatus .progressPercentage").append("<p><span class='checkText'>Total Checks:</span><span class='checkValue'>"+$('#totalCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Pass:</span><span class='checkValue'>"+$('#passCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Fail:</span><span class='checkValue'>"+$('#failCheck').val()+"</span></p>" +
-                		"<p><span class='checkText'>Total Percentage:</span><span class='checkValue'>"+$('#totalPercentage').val()+"%</span></p>");
-                        $(".viewStatus .status").html("");
-                        $(".viewStatus .status").removeClass("progressActiveSec").addClass("taskCompleted").append("<i class='fa fa-check-square'></i>");
-                        $(".viewStatus .statusMessage").html($('#' + categoryType + '_types :selected').text()+" Completed...");
-                        $(".hc_types .runCheck").removeAttr("disabled");
-                        $(".hc_types select").removeAttr("disabled");
-                 }*/
+
                 }, 2000);
             },
         });
