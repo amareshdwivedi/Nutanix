@@ -206,12 +206,13 @@ jQuery(document).ready(function() {
 
             //        foundationObject["cluster_name"] = $('#cluster_name').val();
             //        foundationObject["cluster_external_ip"] = $.trim($('#externalIP').val());
+            /*
             var redundancy_factor = $('#redundancy_factor').val();
             if (redundancy_factor == "null") {
                 redundancy_factor = null;
             }
             foundationObject["redundancy_factor"] = redundancy_factor;
-
+            */
             //        foundationObject["cvm_dns_servers"] = $('#CVMDNSSERVER').val();
             //        foundationObject["cvm_ntp_servers"] = $('#CVMNTPSERVER').val();
             //        foundationObject["hypervisor_ntp_servers"] = $('#HYPERVERSIONCVMNTPSERVER').val();
@@ -219,18 +220,36 @@ jQuery(document).ready(function() {
             foundationObject["phoenix_iso"] = $('#phoenix_iso').val();
             foundationObject["hypervisor_iso"] = $('#hypervisor_iso').val();
 
-            foundationObject['use_foundation_ips'] = $("input[name=foundation_ip]:checked").val();
-            //        foundationObject["cluster_init_successful"] = null;
+            if ($("input[name=foundation_ip]:checked").val() == "true"){
+                foundationObject['use_foundation_ips'] = true; 
+            }
+            else{
+                foundationObject['use_foundation_ips'] = false;
+            }
+            
+            //foundationObject["cluster_init_successful"] = null;
+            //foundationObject['hypervisor_password'] = $('#hypervisorpass').val();
 
-            foundationObject['hypervisor_password'] = $('#hypervisorpass').val();
             foundationObject["hypervisor_iso"] = $('#hypervisor_iso').val();
 
             foundationObject["hypervisor"] = $('#hypervisor').val();
-            foundationObject["hyperv_sku"] = $('#hyperv_sku').val();
+            
+            if (foundationObject["hyperv_sku"] = "null"){
+                foundationObject["hyperv_sku"] = null
+            }
+            else{
+                foundationObject["hyperv_sku"] = $('#hyperv_sku').val();
+            }
+            
             foundationObject["phoenix_iso"] = $('#phonix_iso').val();
-            foundationObject['skip_hypervisor'] = $("input[name=skip_hypervisor]:checked").val();
+            
+            if ($("input[name=skip_hypervisor]:checked").val() == "true"){
+                foundationObject['skip_hypervisor'] = true; 
+            }
+            else{
+                foundationObject['skip_hypervisor'] = false;
+            }
 
-            foundationObject['cluster_init_now'] = true;
             var nodes = [];
             var mainblock = {}
             var blocks = [];
@@ -275,19 +294,29 @@ jQuery(document).ready(function() {
                     nodeObject['cvm_gb_ram'] = parseInt($('#node_ram').val());
                     nodeObject['ipv6_address'] = $("#" + block_id + " #" + node_id + " #ipv6_address").val();
                     nodeObject['ipmi_configure_successful'] = true;
-                    nodeObject['ipmi_configure_now'] = $("#" + block_id + " #" + node_id + " input[name=ipmi_configure_now-" + node_id + "]:checked").val();
+                    if ($("#" + block_id + " #" + node_id + " input[name=ipmi_configure_now-" + node_id + "]:checked").val() == "true"){
+                        nodeObject['ipmi_configure_now']  = true;
+                    }
+                    else{
+                        nodeObject['ipmi_configure_now'] = false;
+                    }
+
                     nodeObject['ipv6_interface'] = "";
                     nodeObject['node_position'] = $("#" + block_id + " #" + node_id + " #nodePosition").val();
-                    nodeObject['image_now'] = $("#" + block_id + " #" + node_id + " input[name=image_now-" + node_id + "]:checked").val();
-
+                    
+                    if($("#" + block_id + " #" + node_id + " input[name=image_now-" + node_id + "]:checked").val() == "true"){
+                        nodeObject['image_now'] = true;
+                    }
+                    else{
+                        nodeObject['image_now'] = false;
+                    }
                     var image_successful = $("#" + block_id + " #" + node_id + " #image_successful").val();
                     if (image_successful == "") {
-                        nodeObject['image_successful'] = null;
+                        nodeObject['image_successful'] = false;
                     } else {
                         nodeObject['image_successful'] = image_successful;
                     }
-
-                    nodeObject['ipmi_configured'] = $("#" + block_id + " #" + node_id + " input[name=ipmi_configured-" + node_id + "]:checked").val();
+                    //nodeObject['ipmi_configured'] = $("#" + block_id + " #" + node_id + " input[name=ipmi_configured-" + node_id + "]:checked").val();
 
                     nodes.push(nodeObject);
                     j = j + 1;
@@ -304,7 +333,8 @@ jQuery(document).ready(function() {
 
             var clusterObjects = {};
             clusterObjects['cluster_external_ip'] = $.trim($('#externalIP').val());
-            clusterObjects['cluster_init_successful'] = null;
+            clusterObjects['cluster_init_successful'] = false;
+            clusterObjects['log_id'] = 3;
             clusterObjects['cluster_name'] = $('#cluster_name').val();
             clusterObjects['cvm_ntp_servers'] = $('#CVMNTPSERVER').val();
             clusterObjects['cvm_dns_servers'] = $('#CVMDNSSERVER').val();
@@ -316,8 +346,22 @@ jQuery(document).ready(function() {
 
             foundationObject['clusters'] = clusters;
 
+            /*
             tests['run_diagnostics'] = $("input[name=run_diagnostics]:checked").val();
             tests['run_ncc'] = $("input[name=run_ncc]:checked").val();
+            */
+            if ($("input[name=run_diagnostics]:checked").val() == "true"){
+                tests['run_diagnostics'] = true; 
+            }
+            else{
+                tests['run_diagnostics'] = false;
+            }
+            if ($("input[name=run_ncc]:checked").val() == "true"){
+                tests['run_ncc'] = true; 
+            }
+            else{
+                tests['run_ncc'] = false;
+            }
             foundationObject['tests'] = tests;
 
             restInput['restInput'] = foundationObject;

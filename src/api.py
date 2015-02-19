@@ -205,6 +205,7 @@ class customeraction:
                         model.create_task_module_status(task_id,'vcenter','Not started')
                    
                     if module_id == "foundation":
+                        model.update_task(task_id,'In-Progress')
                         model.update_task_module_status(task_id,'foundation','started')
                         try:
                             resp = deploy.initiate_foundation()
@@ -264,10 +265,9 @@ class customeraction:
 
 class deploymentstatus:
     
-    def GET(self,cid,tid):
-        
+    def GET(self,cid,tid):        
         final_data = {}
-        if cid and tid:
+        if cid and tid: 
             get_customer_data = model.get_by_id(cid)
             web.header( 'Content-Type','application/json' )
             if get_customer_data:
@@ -276,7 +276,11 @@ class deploymentstatus:
                     json_to_initilize = json.loads(get_customer_specific_task[0]['json_data'])
                     deploy = initiate_deployment(json_to_initilize)
                     resp = deploy.check_foundation_progress()   
-                    model.update_task_module_status(tid,'foundation',resp)                  
+                    
+                    if int(resp) == 100:
+                        model.update_task(tid,'Completed') 
+
+                    model.update_task_module_status(tid,'foundation',str(round(float(resp),2))+"%")                  
                     get_task_status = model.get_task_status_by_id(tid)
                     if get_task_status:
                         final_data['task_status'] = get_task_status
