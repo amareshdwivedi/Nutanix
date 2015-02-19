@@ -102,7 +102,7 @@ class DataModel:
         now = str(datetime.datetime.now())
         return self._db.insert('customer_history',C_Id=cust_id,json_data=json_data,task=task_type,status="Pending")
 
-    def update_task(self,task_id,task_status, report_file):
+    def update_task(self,task_id,task_status, report_file=None):
     
         now = str(datetime.datetime.now())
         return self._db.update('customer_history',where="id=$task_id",status=task_status,report_file=report_file,vars=locals())
