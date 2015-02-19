@@ -857,7 +857,12 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
         elif status == "FAIL":
             return "In cluster ["+cluster+"] Host ["+entity+"] has 10Gbps and 1Gbps network adapter assigned to VDS or VSS", True, 'info'
         else:
-            return "PASS", False, ''                                         
+            return "PASS", False, ''  
+   
+    if check_name == "Check if Default Password has Changed":
+        if status == 'FAIL':
+            return actual_value, True, 'alert'         
+                                               
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":

@@ -120,8 +120,6 @@ def vc_report(story, checks_list,vCenterIP):
                    
                     if properties is not None:
                         xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
-                        if xprop_msg == "":
-                                xprop_msg = check['name']
                                                                 
                         xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
                         if xprop_actual is not None and xprop_actual != 'False':
@@ -173,9 +171,6 @@ def vc_report(story, checks_list,vCenterIP):
                    
                     if properties is not None and properties.get('Status') == 'FAIL':
                         xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
-                        if xprop_msg == "":
-                                xprop_msg = check['name']
-                                
                                 
                         xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
                                 
@@ -189,6 +184,60 @@ def vc_report(story, checks_list,vCenterIP):
                                                          Paragraph(xprop_actual, NormalMessageStyle),
                                                          Paragraph(xprop_exp, NormalMessageStyle),
                                                          Paragraph("info", NormalMessageStyle)])
+                    else:
+                        property_lenght-=1
+                        continue
+                                         
+                checks_property_table = LongTable(checks_property_data, colWidths=[2.8*inch,1.6*inch,1.75*inch,1.5*inch])
+                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (3, 0), colors.fidlightblue),
+                                                           ('ALIGN', (0, 0), (3, property_lenght), 'LEFT'),
+                                            ('INNERGRID', (0, 0), (3, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                            ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                            ('TEXTFONT', (0, 0), (3, 0), 'Times-Roman'),
+                                            ('FONTSIZE', (0, 0), (3, 0), 10)]))
+
+            elif checks.get('Name') == 'Check if Default Password has Changed':
+                checks_property_data = [['Component Name','IP Address','Username','Severity']]
+                property_lenght = len(checks.get('Properties'))
+                for properties in checks.get('Properties'):
+                   
+                    if properties is not None and properties.get('Status') == 'PASS':
+                        xprop_msg, xprop_actual, xprop_exp = properties.get('Message').split("=")
+                           
+                        xprop_actual = xprop_actual.split(' (')[0] or xprop_actual.split(' ')[0] or "None"
+
+                                                     
+                        if xprop_actual == 'SSH Connection Failed' or xprop_actual == 'Connection Failed':
+                            property_lenght-=1
+                            continue
+                        else:  
+                            xprop_msg_list =  xprop_msg.split()
+                            if len(xprop_msg_list) == 5:
+                                component,component_ip = xprop_msg.split()[3:]
+                            elif len(xprop_msg_list) == 6:
+                                component1,component2,component_ip = xprop_msg.split()[3:]
+                                component = component1+" "+component2
+                            component = component.strip(':')
+                            if xprop_actual == 'Not Changed':
+                                severity = 'info'
+                            else:
+                                severity = 'alert'
+                           
+                            if component == 'Host':
+                                username = 'root'
+                            elif component == 'vCenter Server':
+                                username ='root'
+                            elif component == 'CVM':
+                                username = 'nutanix'
+                            elif component == 'Prism':
+                                username = 'admin'
+                            elif component == 'IPMI':
+                                username = 'ADMIN'    
+                            checks_property_data.append([Paragraph(component, NormalMessageStyle),
+                                                         Paragraph(component_ip, NormalMessageStyle),
+                                                         Paragraph(username, NormalMessageStyle),
+                                                         Paragraph(severity, NormalMessageStyle)])
                     else:
                         property_lenght-=1
                         continue
