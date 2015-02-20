@@ -2477,7 +2477,7 @@ class VCChecker(CheckerBase):
                             self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"["+properties.name+"] = [Limit:"+limit+" Shares:"+str(shares)+" Level:"+level+"] (Expected: =[Limit:"+default_settings["limit"]+" Shares:"+str(default_settings["shares"])+" Level:"+default_settings["priority"]+"])" , (passed and "PASS" or "FAIL"))
                             message += ", " +datacenter+"@"+network.name+"@"+"["+properties.name+"] = [Limit:"+limit+" Shares:"+str(shares)+" Level:"+level+"] (Expected: =[Limit:"+default_settings["limit"]+" Shares:"+str(default_settings["shares"])+" Level:"+default_settings["priority"]+"])"+"#"+(passed and "PASS" or "FAIL")                                
              
-            if dvs_found == False:
+            if dvs_found == False and len(network_list)>0:
                  passed =False
                  self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"=False (Expected: =True) " , (passed and "PASS" or "FAIL"))
                  message += ", " +datacenter+"@"+network.name+"=False (Expected: =True) "+"#"+(passed and "PASS" or "FAIL")                     
