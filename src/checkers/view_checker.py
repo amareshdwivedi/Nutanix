@@ -409,9 +409,13 @@ class HorizonViewChecker(CheckerBase):
             
             #get trusted host
             trustedhost,exit_code=self.run_local_command('POWERSHELL "Get-WSManInstance -ResourceURI winrm/config/client | select -ExpandProperty TrustedHosts"')
+      
             if host_ip not in  trustedhost.split(','):
                 #print 'Adding '+host_ip+' to trsuted list'
-                knows_host='winrm s winrm/config/client @{TrustedHosts="'+trustedhost+','+host_ip+'"}'
+                if trustedhost !='':
+                    knows_host='winrm s winrm/config/client @{TrustedHosts="'+trustedhost+','+host_ip+'"}'
+                else:
+                    knows_host='winrm s winrm/config/client @{TrustedHosts="'+host_ip+'"}'
                 output,exit_code=self.run_local_command(knows_host)
                 
                 if exit_code != None:
