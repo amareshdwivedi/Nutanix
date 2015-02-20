@@ -314,11 +314,14 @@ class customerReports:
     def GET(self,cid):
         if cid:
             customerReportFiles = model.list_report_files(cid)
-
             import os
             from os import listdir  
             from os.path import isfile, join
-            reportDir = os.getcwd() + os.path.sep +"reports"
+            import web_health_check
+            if web_health_check.cur_dir is not None:
+                reportDir = web_health_check.cur_dir + os.path.sep +"reports"
+            else:
+                reportDir = os.getcwd() + os.path.sep +"reports"
 
             allReportFiles = [ f for f in listdir(reportDir) if isfile(join(reportDir,f)) ]
             final_data = {}
