@@ -312,7 +312,6 @@ class deploymentstatus:
 
 class customerReports:    
     def GET(self,cid):
-        final_data = {}
         if cid:
             customerReportFiles = model.list_report_files(cid)
 
@@ -322,14 +321,20 @@ class customerReports:
             reportDir = os.getcwd() + os.path.sep +"reports"
 
             allReportFiles = [ f for f in listdir(reportDir) if isfile(join(reportDir,f)) ]
-            availReports = [ ]
+            final_data = {}
+            reports = []
             for xitem in customerReportFiles:
                 fileName, dateCreated = xitem.values()
                 if str(fileName) in allReportFiles:
-                    availReports.append([str(fileName), str(dateCreated)])
+                    currentReport = {}
+                    currentReport['filename'] = str(fileName)
+                    currentReport['date_created'] = str(dateCreated)
+                    reports.append(currentReport)
+            final_data['customer_reports'] = reports
+            final_data['response'] = httplib.OK
 
             web.header( 'Content-Type','application/json' )
-            return json.dumps(availReports)
+            return json.dumps(final_data)
 
 class downloadReports:
     def POST(self):
