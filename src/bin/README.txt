@@ -187,16 +187,15 @@ Table of Contents
  					a. Enabling WinRM
  							i.	Browse to:
  								Policies > Computer Configuration> Administrative Templates > Windows Components > Windows Remote Management (WinRM) > WinRM Service
- 									- Open the ?Allow Remote Server management through WinRM? policy setting (Server 2008 R2 and later).
- 									- Open the ?Allow automatic configuration of listeners? policy setting (Server 2008 and earlier).
+ 									- Open the "Allow Remote Server management through WinRM" policy setting (Server 2008 R2 and later).
  							ii.	Set the Policy to Enabled.
  							iii.Set the IPv4 and IPv6 filters to * unless you need something specific there (check out the help on the right).
  					b.	Setting the Firewall Rules:
  							i.	Browse to:
  								Policies > Computer Configuration > Administrative Templates > Network > Network Connections > Windows Firewall > Domain Profile
- 							ii.	Open the ?Windows Firewall: Define inbound port exceptions? policy setting.
+ 							ii.	Open the "Windows Firewall: Define inbound port exceptions" policy setting.
  							iii.Set it to Enabled if it isn?t already.
- 							iv.	Click the ?Show?? button and add the port exception. We?re going to be opening TCP port 5985, so the exception string will look something like this:
+ 							iv.	Click the 'Show' button and add the port exception. We?re going to be opening TCP port 5985, so the exception string will look something like this:
  								5985:TCP:*:enabled:WSMan
  					c. Service Configuration
  						At this point we have enough in place to get this working, but I like to do a few more things to ensure that the WinRM service is configured to start automatically and to restart on failure.
