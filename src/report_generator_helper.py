@@ -861,8 +861,24 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
    
     if check_name == "Check if Default Password has Changed":
         if status == 'FAIL':
-            return actual_value, True, 'alert'         
-                                               
+            return actual_value, True, 'alert'  
+        
+    if check_name ==  "Host Profiles are Configured and Compliant":
+        if actual_value == "Cannot Determine":
+            return "Cannot Determine",False,''
+        elif message.startswith("Multiple Host Profiles"):
+            cluster_name = message.split("[")[-1].split("[")
+            return "Hosts in cluster ["+cluster_name+"] has few different hosts profiles attached", True , 'info'
+        elif message.startswith("Host") and status == "FAIL":
+            message = message.split(" =")[0]
+            actual_value_list = message.split("]")
+            item_list = []
+            for items in actual_value_list:
+                if "[" in items:
+                    item_list.append(items.split("[")[-1])
+            if len(item_list) == 3:   
+                return " In cluster ["+item_list[1]+"] host ["+item_list[0]+"] is not compliant with host profile ["+item_list[2]+"]", True , 'info'
+                                                   
                  
     # Start of network_and_switch Checks          
     if check_name == "Virtual Standard Switch - Load Balancing":
