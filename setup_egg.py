@@ -24,7 +24,8 @@ setup(
                          'static//js//*.*','static//js//jq_tables//*.*',
                          'static//styles//*.*','static//styles//css//*.*','static//styles//fonts//corbel//*.*','static//styles//fonts//fontawesome//*.*','static//styles//fonts//icon_sweet//*.*','static//styles//fonts//proxima//*.*','static//styles//uploadify//*.*',
                          'static//uploadify//*.*',
-                         'templates//*.*']},
+                         'templates//*.*',
+                         'deployer']},
     install_requires=requires,
     zip_safe=False
       )
