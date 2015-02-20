@@ -46,6 +46,26 @@ jQuery(document).ready(function() {
             }
         });
     }
+    
+    function getCustomerReports(customerId) {
+        $( "#mainTabContainer" ).tabs("enable", 4);
+        $.ajax({
+            type: "GET",
+            url: "../reports/" + customerId + "/",
+            async: false,
+            dataType: "json",
+            success: function(data) {
+                var customerDetail = '';
+                for (var i = 0; i < data.customer_reports.length; i++) {
+                   customerDetail += '<tr><td class="filename"><a href="'+data.customer_reports[i].filename+'">' + data.customer_reports[i].filename + '</a></td><td class="datecreate">' + data.customer_reports[i].date_created + '</td><td class="downloadIcon"><a href="'+data.customer_reports[i].filename+'"><span class="fa fa-file-pdf-o fa-6"></span></a></td></tr>';
+                }
+                $("table.reportTable tbody").html(customerDetail);
+            },
+            error: function(request, status, errorThrown) {
+                alert("No Data Available");
+            }
+        });
+    }
 
     $(".customersTable tbody").on('click', 'tr', function() {
         $(".customersTable tbody tr").removeClass("row_selected");
@@ -53,6 +73,7 @@ jQuery(document).ready(function() {
         var customerId = $(this).find('td.customerId').html();
         $("#customerId").val(customerId);
         getCutomerDetails(customerId);
+        getCustomerReports(customerId);
     });
 
     $(".createNewCustomerBtn").click(function() {

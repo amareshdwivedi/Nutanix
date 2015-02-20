@@ -121,7 +121,7 @@ jQuery(document).ready(function() {
 	 jQuery(".antiscroll-inner").niceScroll();
 	 
 	 $("#mainTabContainer").tabs({
-          disabled: [1,2,4]
+          disabled: [1,2,3,4]
         });
 	 
     /*Predeployer Tabs Functionlity start*/
@@ -233,7 +233,7 @@ jQuery(document).ready(function() {
     $(".createNewTaskBtn").live("click",function(){
         var taskType = $("#task_name").val();
         if(taskType == "healthcheck"){
-            $( "#mainTabContainer" ).tabs("select", 3);
+            $( "#mainTabContainer" ).tabs("enable", 3).tabs("select", 3);
         }else if(taskType == "deployment"){
             $( "#mainTabContainer" ).tabs("enable", 1).tabs("select", 1);
         }        
