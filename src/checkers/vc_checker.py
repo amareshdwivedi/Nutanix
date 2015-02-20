@@ -1945,6 +1945,7 @@ class VCChecker(CheckerBase):
                 
         message = ""
         passed_all = True
+        path = None
         for datacenter, host_list in clusters_map.iteritems():
             passed = True
             #print datacenter

@@ -260,7 +260,7 @@ class runChecks:
         reportFileName = PDFReportGenerator(results,cur_dir)
         if taskId is not None:
             taskId = api.model.update_task(int(taskId), "Complete",reportFileName)
-        return True
+        return "Execution Complete"
 
 class refresh:
     def __init__(self):
