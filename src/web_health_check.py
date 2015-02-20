@@ -227,10 +227,12 @@ class runChecks:
         
         with open("display_json.json", "w") as myfile:
             json.dump(run_logs, myfile)
-        
-        customerId = data['customerId']
-        input_json = None
-        taskId = api.model.add_task(customerId,input_json,"HealthCheck")
+        taskId = None
+        try:
+            customerId = data['customerId']
+            taskId = api.model.add_task(customerId,None,"HealthCheck")
+        except:
+            pass
         
         for checker in checkers_list:
             checker_module = self.checkers[checker]
@@ -256,7 +258,8 @@ class runChecks:
         
         #Generate PDF Report based on results. 
         reportFileName = PDFReportGenerator(results,cur_dir)
-        taskId = api.model.update_task(int(taskId), "Complete",reportFileName)
+        if taskId is not None:
+            taskId = api.model.update_task(int(taskId), "Complete",reportFileName)
         return True
 
 class refresh:
