@@ -194,15 +194,15 @@ Table of Contents
  							i.	Browse to:
  								Policies > Computer Configuration > Administrative Templates > Network > Network Connections > Windows Firewall > Domain Profile
  							ii.	Open the "Windows Firewall: Define inbound port exceptions" policy setting.
- 							iii.Set it to Enabled if it isn?t already.
- 							iv.	Click the 'Show' button and add the port exception. We?re going to be opening TCP port 5985, so the exception string will look something like this:
+ 							iii.Set it to Enabled if it isn't already.
+ 							iv.	Click the 'Show' button and add the port exception. We are going to be opening TCP port 5985, so the exception string will look something like this:
  								5985:TCP:*:enabled:WSMan
  					c. Service Configuration
  						At this point we have enough in place to get this working, but I like to do a few more things to ensure that the WinRM service is configured to start automatically and to restart on failure.
  			
  							i.	Browse to:
  								Policies > Computer Configuration>  Windows Settings > Security Settings > System Services
- 							ii.	Find the ?Windows Remote Management (WS-Management)? service.
+ 							ii.	Find the "Windows Remote Management (WS-Management)" service.
  							iii.Define the policy and give it a startup mode of Automatic.
  							iv.	Browse to:
  								Preferences > Control Panel Settings > Services
