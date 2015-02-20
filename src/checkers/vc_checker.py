@@ -350,6 +350,8 @@ class VCChecker(CheckerBase):
         VCChecker.responseClusterJson={}
         VCChecker.vcenter_server_ssh = None
         VCChecker.esxi_ssh = None
+        VCChecker.ipmi_ssh = None
+        VCChecker.cvm_ssh = None
         
         self.result.passed = ( passed_all and "PASS" or "FAIL" )
         self.result.message = "VC Checks completed with " + (passed_all and "success" or "failure")
@@ -1207,7 +1209,7 @@ class VCChecker(CheckerBase):
     def check_directory_service_set_to_active_directory(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig'
         authenticationStoreInfo = self.get_vc_property(path)
-             
+              
         message = ""
         passed = True
         for hostname,store in authenticationStoreInfo.iteritems():
@@ -1218,9 +1220,9 @@ class VCChecker(CheckerBase):
                         self.reporter.notify_progress(self.reporter.notify_checkLog, hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) " , (is_active_dir_enabled and "PASS" or "FAIL"))
                         passed = passed and (is_active_dir_enabled and True or False)
                         message += ", " +hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) "+"#"+((is_active_dir_enabled) and "PASS" or "FAIL") 
-             
+              
         return passed, message,path
-          
+           
     @checkgroup("esxi_checks", "Validate NTP client is set to Enabled and is in the running state",["reliability"],"NTP client is enabled and running.")
     def check_ntp_client_enable_running(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host'
@@ -1243,7 +1245,7 @@ class VCChecker(CheckerBase):
                         for ruleset in rulesets:
                             if ruleset.key=="ntpClient":
                                 ruleset_enable=ruleset.enabled
-                                       
+                                        
                                 for service in host_services:
                                     if service.key == "ntpd":
                                         service_running=service.running
@@ -1258,19 +1260,19 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )" , (False and "PASS" or "FAIL"))
                     passed = False
                     message += ", " +datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ (False and "PASS" or "FAIL")
-              
+               
         return passed, message, path
-          
+           
     @checkgroup("esxi_checks", "NTP Servers Configured",["availability"],"NTP Servers are configured")
     def check_ntp_servers_configured(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host'
         all_hosts = self.get_vc_property(path)
         message = ""
         passed_all = True
-              
+               
         for cluster, hostObject in all_hosts.iteritems():
             try:
-                      
+                       
                 if len(hostObject) == 0:
                     pass
                     #self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+" = No Hosts are configured ( Expected: = At-least 2 NTP Servers are configured )","FAIL")
@@ -1293,25 +1295,25 @@ class VCChecker(CheckerBase):
                         else:
                             self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+"."+host.name+" = NTP Servers configured ["+','.join(ntp_servers)+"]  (Expected: = at-least 2 NTP Servers are configured )","PASS")
                             message += ", " +cluster+"@"+host.name+"="+','.join(ntp_servers)+" (Expected: =At-least 2 NTP Servers are configured ) #PASS"     
-                              
+                               
                         passed_all = passed_all and passed
             except AttributeError:
                     self.reporter.notify_progress(self.reporter.notify_checkLog, cluster+"=Not-Configured (Expected: =At-least 2 NTP Servers are configured )","FAIL")
                     message += ", " +cluster+"=Not-Configured (Expected: =At-least 2 NTP Servers are configured ) #FAIL"     
                     passed = False
-                          
-              
+                           
+               
         return passed_all,message,path
-      
-          
+       
+           
     @checkgroup("esxi_checks", "Management VMkernel adapter has only Management Traffic Enabled",["performance"],"vMotionTraffic:Disabled<br/> ManagementTraffic:Enabled<br/> FTLogging:Disabled")
     def check_management_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
-             
+              
         message = ""
         passed = True
-              
+               
         for host, netConfig_list in virtual_nic_mgrs.iteritems():
             #print host
             if netConfig_list == "Not-Configured":
@@ -1320,29 +1322,29 @@ class VCChecker(CheckerBase):
                 service_list=[]
                 vmkernal_nic_and_portgrp={}
                 nic_selected_service={}
-                      
+                       
                 for netConfig in netConfig_list:
                     service_list.append(netConfig.nicType)
-                          
+                           
                     candidateVnic_list=netConfig.candidateVnic
                     for candidateVnic in candidateVnic_list:
                         device=candidateVnic.device
-                              
+                               
                         if candidateVnic.key in netConfig.selectedVnic:
                             if device not in nic_selected_service.keys():
                                 nic_selected_service[device]=list()
                             (nic_selected_service[device]).append(netConfig.nicType)
-                              
+                               
                         if device not in vmkernal_nic_and_portgrp.keys():
                             vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
-                          
+                           
                 #print "\t\t",service_list, '\n\t\t',vmkernal_nic_and_portgrp,"\n\t\t",nic_selected_service
                 vmkernal_adapter=vmkernal_nic_and_portgrp.get('management network')
                 enabled_management_service= nic_selected_service.get(vmkernal_adapter)
-                      
+                       
                 status = True
                 excepted_result="vMotionTraffic:Disabled; ManagementTraffic:Enabled; FTLogging:Disabled"
-                      
+                       
                 if enabled_management_service != None:
                     result=''
                     if 'vmotion' in enabled_management_service:
@@ -1350,18 +1352,18 @@ class VCChecker(CheckerBase):
                         result+="vMotionTraffic:Enabled;"
                     else:
                         result+="vMotionTraffic:Disabled;"
-                          
+                           
                     if 'management' in enabled_management_service:
                         result+=" ManagementTraffic:Enabled;"
                     else:
                         result+=" ManagementTraffic:Disabled;"
-                          
+                           
                     if 'faultToleranceLogging' in enabled_management_service:
                         status= False
                         result+=" FTLogging:Enabled"
                     else:
                         result+=" FTLogging:Disabled"
-                          
+                           
                     passed= passed and status
                     message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
@@ -1371,15 +1373,15 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=Management-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 passed= passed and status
         return passed, message,path
-          
+           
     @checkgroup("esxi_checks", "vMotion VMkernel adapter has only vMotion Traffic Enabled",["performance"],"vMotionTraffic:Enabled<br/> ManagementTraffic:Disabled<br/> FTLogging:Disabled")
     def check_vmotion_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
-             
+              
         message = ""
         passed = True
-              
+               
         for host, netConfig_list in virtual_nic_mgrs.iteritems():
             #print host
             if netConfig_list == "Not-Configured":
@@ -1388,25 +1390,25 @@ class VCChecker(CheckerBase):
                 service_list=[]
                 vmkernal_nic_and_portgrp={}
                 nic_selected_service={}
-                      
+                       
                 for netConfig in netConfig_list:
                     service_list.append(netConfig.nicType)
-                          
+                           
                     candidateVnic_list=netConfig.candidateVnic
                     for candidateVnic in candidateVnic_list:
                         device=candidateVnic.device
-                              
+                               
                         if candidateVnic.key in netConfig.selectedVnic:
                             if device not in nic_selected_service.keys():
                                 nic_selected_service[device]=list()
                             (nic_selected_service[device]).append(netConfig.nicType)
-                              
+                               
                         if device not in vmkernal_nic_and_portgrp.keys():
                             vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
-                          
+                           
                 vmkernal_adapter=vmkernal_nic_and_portgrp.get('vmotion')
                 enabled_management_service= nic_selected_service.get(vmkernal_adapter)
-                      
+                       
                 status = True
                 excepted_result="vMotionTraffic:Enabled; ManagementTraffic:Disabled; FTLogging:Disabled"
                 if enabled_management_service !=None :
@@ -1415,19 +1417,19 @@ class VCChecker(CheckerBase):
                         result+="vMotionTraffic:Enabled;"
                     else:
                         result+="vMotionTraffic:Disabled;"
-                          
+                           
                     if 'management' in enabled_management_service:
                         status= False
                         result+=" ManagementTraffic:Enabled;"
                     else:
                         result+=" ManagementTraffic:Disabled;"
-                          
+                           
                     if 'faultToleranceLogging' in enabled_management_service:
                         status= False
                         result+=" FTLogging:Enabled"
                     else:
                         result+=" FTLogging:Disabled"
-                          
+                           
                     message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 else:
@@ -1435,18 +1437,18 @@ class VCChecker(CheckerBase):
                     message += ", " +host+"=vMotion-Adapter-Not-Found (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=vMotion-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 passed= passed and status
-      
+       
         return passed, message,path
-          
            
+            
     @checkgroup("esxi_checks", "FTLogging VMkernel adapter has only FTLogging Enabled",["performance"],"vMotionTraffic:Disabled<br/> ManagementTraffic:Disabled<br/> FTLogging:Enabled")
     def check_ftlogging_vmkernel_has_management_traffic(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
-               
+                
         message = ""
         passed = True
-                
+                 
         for host, netConfig_list in virtual_nic_mgrs.iteritems():
             #print host
             if netConfig_list == "Not-Configured":
@@ -1455,49 +1457,49 @@ class VCChecker(CheckerBase):
                 service_list=[]
                 vmkernal_nic_and_portgrp={}
                 nic_selected_service={}
-                        
+                         
                 for netConfig in netConfig_list:
                     service_list.append(netConfig.nicType)
-                            
+                             
                     candidateVnic_list=netConfig.candidateVnic
                     for candidateVnic in candidateVnic_list:
                         device=candidateVnic.device
-                                
+                                 
                         if candidateVnic.key in netConfig.selectedVnic:
                             if device not in nic_selected_service.keys():
                                 nic_selected_service[device]=list()
                             (nic_selected_service[device]).append(netConfig.nicType)
-                                
+                                 
                         if device not in vmkernal_nic_and_portgrp.keys():
                             vmkernal_nic_and_portgrp[candidateVnic.portgroup.lower()]= device
-                            
+                             
                 #print "\t\t",service_list, '\n\t\t',vmkernal_nic_and_portgrp,"\n\t\t",nic_selected_service
                 vmkernal_adapter=vmkernal_nic_and_portgrp.get('faulttolerancelogging')
                 enabled_management_service= nic_selected_service.get(vmkernal_adapter)
-                        
+                         
                 status = True
                 excepted_result="vMotionTraffic:Disabled; ManagementTraffic:Disabled; FTLogging:Enabled"
-                      
+                       
                 if enabled_management_service !=None:
-                      
+                       
                     result=''
                     if 'vmotion' in enabled_management_service:
                         status= False
                         result+="vMotionTraffic:Enabled;"
                     else:
                         result+="vMotionTraffic:Disabled;"
-                            
+                             
                     if 'management' in enabled_management_service:
                         status= False
                         result+=" ManagementTraffic:Enabled;"
                     else:
                         result+=" ManagementTraffic:Disabled;"
-                            
+                             
                     if 'faultToleranceLogging' in enabled_management_service:
                         result+=" FTLogging:Enabled"
                     else:
                         result+=" FTLogging:Disabled"
-                          
+                           
                     message += ", " +host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"@"+vmkernal_adapter+"="+result+" (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 else:
@@ -1508,28 +1510,84 @@ class VCChecker(CheckerBase):
         return passed, message,path
      
      
-    @checkgroup("esxi_checks", "Host Profiles are Configured",["performance"],"True")
+    @checkgroup("esxi_checks", "Host Profiles are Configured and Compliant",["configurability","manageability","security"],"True")
     def check_hostprofiles_configuration(self):
-        hostprofile_list = self.get_vc_property('content.hostProfileManager.profile')
-                     
+        profile_list = self.get_vc_property('content.hostProfileManager.profile')
+        host_profile_manager = self.get_vc_property('content.hostProfileManager')                 
         message = ""
         passed = True
         profiles_list=[]
-        for key, profiles in hostprofile_list.iteritems():
+        host_profiles_list=[]
+        profile_entity_map = {}
+        for key, profiles in profile_list.iteritems():
             if profiles == None or profiles == "Not-Configured":
                 continue
             for profile in profiles:
-                profiles_list.append(profile.name)
-                  
+                profiles_list.append(profile)
+                profile_entity_map[profile] = profile.entity
+
+        for key,profilemanager in host_profile_manager.iteritems():
+            host_profile_manager = profilemanager 
+          
         if len(profiles_list) > 0:
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Host Profiles are Configured= True (Expected: =True) " , (True and "PASS" or "FAIL"))
-            message += ", "+"Host Profiles are Configured= True (Expected: =True) " +"#"+((True) and "PASS" or "FAIL")
+            path='content.rootFolder.childEntity.hostFolder.childEntity'
+            cluster_map = self.get_vc_property(path)
+            for clusters_key, clusters in cluster_map.iteritems():
+                profile_flag = False
+                if clusters!="Not-Configured":
+                    for cluster in clusters:
+                        cluster_name = cluster.name
+                        if not isinstance(cluster, vim.ClusterComputeResource):
+                            #condition to check if any host attached to datacenter without adding to any cluster
+                            continue
+                        
+                        host_list=cluster.host
+                        if len(host_list) > 0:
+                            for host in host_list:
+                                host_profile_list = host_profile_manager.FindAssociatedProfile(host)
+                                for host_profile in host_profile_list:
+                                    if host_profile in host_profiles_list:
+                                        break
+                                    elif len(host_profiles_list) == 0:
+                                        host_profiles_list.append(host_profile)
+                                    else:
+                                        profile_flag = True    
+                                        
+                        if profile_flag == True:
+                            passed = False
+                            self.reporter.notify_progress(self.reporter.notify_checkLog,"Multiple Host Profiles configured on Hosts in cluster ["+cluster_name+"] =True (Expected: =False)" , (passed and "PASS" or "FAIL"))
+                            message += ", "+"Multiple Host Profiles configured on Hosts in cluster ["+cluster_name+"] =True (Expected: =False)" +"#"+((passed) and "PASS" or "FAIL")
+                        else:
+                            for host in host_list:
+                                for profile in profiles_list:
+                                    entity_host_list = profile_entity_map.get(profile)
+
+                                    if host in entity_host_list:
+                                        temp_host_list = [host]
+                                        compliance_result = profile.CheckProfileCompliance_Task(temp_host_list)
+                                        time.sleep(10)
+                                        compliance_status_list = compliance_result.info.result
+                                        host_name = host.name
+                                        profile_name = profile.name
+                                        if compliance_status_list is not None and len(compliance_status_list) > 0:
+                                            for result in compliance_status_list:
+                                                compliance_status = result.complianceStatus                                                                                    
+                                                if compliance_status == "nonCompliant" or compliance_status == "unknown":
+                                                    passed = False
+                                                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Host ["+host_name+"] on Cluster ["+cluster_name+"] Compliance with Host Profile ["+profile_name+"] =False (Expected: =True)" , (passed and "PASS" or "FAIL"))
+                                                    message += ", "+"Host ["+host_name+"] on Cluster ["+cluster_name+"] Compliance with Host Profile ["+profile_name+"] =False (Expected: =True)" +"#"+((passed) and "PASS" or "FAIL")
+                                        else:
+                                            passed = True
+                                            self.reporter.notify_progress(self.reporter.notify_checkLog,"Host ["+host_name+"] on Cluster ["+cluster_name+"] Compliance with Host Profile ["+profile_name+"] =Cannot Determine (Expected: =True)" , (passed and "PASS" or "FAIL"))
+                                            message += ", "+"Host ["+host_name+"] on Cluster ["+cluster_name+"] Compliance with Host Profile ["+profile_name+"] =Cannot Determine (Expected: =True)" +"#"+((passed) and "PASS" or "FAIL")
+
         else:
-            passed = False
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Host Profiles are Configured= False (Expected: =True) " , (False and "PASS" or "FAIL"))
-            message += ", "+"Host Profiles are Configured= False (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
-               
+            passed = True
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"No Host Profiles Configured =True (Expected: =True) " , (passed and "PASS" or "FAIL"))
+            message += ", "+"No Host Profiles Configured =True (Expected: =True)" +"#"+((passed) and "PASS" or "FAIL")
+                                                 
         return passed,message,''   
+
      
     @checkgroup("esxi_checks", "Error Messages in ESXi Logs",["configurability","manageability","availability","security"],"Error Count")
     def check_esxi_logs(self):
@@ -1541,18 +1599,18 @@ class VCChecker(CheckerBase):
         for datacenter, host_list in clusters_map.iteritems():
             passed = True
             #print datacenter
-                    
+                     
             if host_list == "Not-Configured" :
                 continue
             elif len(host_list)==0: 
                 #condtion to Check if no host found
                 continue
-              
+               
             for host in host_list:
                 host_ip=host.name        
-  
+   
                 flag,esxi_ssh = self.get_esxi_ssh_connection(host_ip)
-                  
+                   
                 if flag == "SSH Connection Failed" or flag == "Authentication Exception":
                     passed = False
                     message += ", " +"Error Messages in ESXi Logs on "+host_ip+" =SSH Connection Failed"+" (Expected: =Error Count)"+"#"+("FAIL")
@@ -1569,14 +1627,14 @@ class VCChecker(CheckerBase):
                             file_name = "vmkernel.log"    
                         elif check_name == "Error Messages in lacp.log":
                             file_name = "lacp.log"
-              
+               
                         cmd_error = "cat /var/log/"+file_name+" | grep \"Error\" | grep -v \"User \'root\' running command\""        
-                          
+                           
                         stdin, stdout, stderr =  esxi_ssh.exec_command(cmd_error)
-                          
+                           
                         for line in stdout:
                             error_count+=1
-                                 
+                                  
                         if error_count > 50:
                             passed = False
                             message += ", " +check_name+" on "+host_ip+"="+str(error_count)+" (Expected: =Less than 50)"+"#"+(passed and "PASS" or "FAIL")
@@ -1589,14 +1647,14 @@ class VCChecker(CheckerBase):
                     passed = False
                     message += ", " +"Error Messages in ESXi Logs on "+host_ip+" =Cannot Determine"+" (Expected: =Error Count)"+"#"+("FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in ESXi Logs on "+host_ip+" =Cannot Determine"+" (Expected: =Error Count)",("FAIL"))
-                              
+                               
                 VCChecker.esxi_ssh = None
-                      
+                       
         passed_all = passed_all and passed
-           
+            
         return passed_all,message,path_curr
-    
-    
+     
+     
     def get_esxi_ssh_connection(self,host_ip):
         if VCChecker.esxi_ssh is None:
                 try:
@@ -1611,9 +1669,9 @@ class VCChecker(CheckerBase):
                     return "SSH Connection Failed",None
         else:
             pass
-                
+                 
         return  "Success",VCChecker.esxi_ssh        
-    
+     
     def get_cvm_ssh_connection(self,cvm_ip):
         if VCChecker.cvm_ssh is None:
                 try:
@@ -1628,9 +1686,9 @@ class VCChecker(CheckerBase):
                     return "SSH Connection Failed",None
         else:
             pass
-                
+                 
         return  "Success",VCChecker.cvm_ssh     
-
+ 
     def get_ipmi_ssh_connection(self,ipmi_ip):
         if VCChecker.ipmi_ssh is None:
                 try:
@@ -1645,13 +1703,13 @@ class VCChecker(CheckerBase):
                     return "SSH Connection Failed",None
         else:
             pass
-                
+                 
         return  "Success",VCChecker.ipmi_ssh     
-
-
+ 
+ 
     @checkgroup("esxi_checks", "Check if Default Password has Changed",["security"],"Password changed Information")
     def check_default_password(self):
-        
+         
         #check esxi passwords
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
         clusters_map = self.get_vc_property(path_curr)
@@ -1661,18 +1719,18 @@ class VCChecker(CheckerBase):
         for datacenter, host_list in clusters_map.iteritems():
             passed = True
             #print datacenter
-                  
+                   
             if host_list == "Not-Configured" :
                 continue
             elif len(host_list)==0: 
                 #condtion to Check if no host found
                 continue
-            
+             
             for host in host_list:
                 host_ip=host.name        
-
+ 
                 flag,esxi_ssh = self.get_esxi_ssh_connection(host_ip)
-                
+                 
                 if flag == "Success":
                     passed = True
                     message += ", " +"Default Password of Host: "+host_ip+" =Not Changed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
@@ -1685,9 +1743,9 @@ class VCChecker(CheckerBase):
                     passed = False
                     message += ", " +"Default Password of Host: "+host_ip+" =SSH Connection Failed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,"Default Password of Host: "+host_ip+" =SSH Connection Failed"+" (Expected: =Not Changed)",(passed and "PASS" or "FAIL"))
-
+ 
                 VCChecker.esxi_ssh = None
-         
+          
         #check vcenter server password via SSH
 #         flag,vcenter_server_ssh,vcenter_ip = self.get_vcenter_server_ssh_connection()
 #  
@@ -1703,14 +1761,14 @@ class VCChecker(CheckerBase):
 #             passed = False
 #             message += ", " +"Default Password of vCenter Server: "+vcenter_ip+" =SSH Connection Failed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
 #             self.reporter.notify_progress(self.reporter.notify_checkLog,"Default Password of vCenter Server: "+vcenter_ip+" =SSH Connection Failed"+" (Expected: =Not Changed)",(passed and "PASS" or "FAIL"))
-
+ 
         #check vcenter server password via HTTP
         vcenter_ip = self.get_vcenter_server_ip()
         vCenterServerURL = "https://"+vcenter_ip+":9443"
-         
+          
         try:
             vCenterServerResonse = requests.get(vCenterServerURL,auth=("root", "vmware"), verify=False)
-             
+              
             if vCenterServerResonse.status_code == 200:
                 passed = True
                 message += ", " +"Default Password of vCenter Server: "+vcenter_ip+" =Not Changed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
@@ -1727,23 +1785,23 @@ class VCChecker(CheckerBase):
             passed = False
             message += ", " +"Default Password of vCenter Server: "+vcenter_ip+" =Connection Failed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
             self.reporter.notify_progress(self.reporter.notify_checkLog,"Default Password of vCenter Server: "+vcenter_ip+" =Connection Failed"+" (Expected: =Not Changed)",(passed and "PASS" or "FAIL"))
-        
+         
         #check cvms password
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name=NTNX*CVM].summary'
         vms_map= self.get_vc_property(path)
         for vms_key, vm in vms_map.iteritems():
-              
+               
             if vm == 'Not-Configured' :
                 #condition to check if any clusters not found 
                 continue
             passed=True
-            
+             
             vms_key='@'.join(vms_key.split('@')[0:-1])
-            
+             
             cvm_ip = vm.guest.ipAddress
             cvm_ip_list.append(cvm_ip)
             flag,cvm_ssh = self.get_cvm_ssh_connection(cvm_ip) 
-
+ 
             if flag == "Success":
                 passed = True
                 message += ", " +"Default Password of CVM: "+cvm_ip+" =Not Changed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
@@ -1756,17 +1814,17 @@ class VCChecker(CheckerBase):
                 passed = False
                 message += ", " +"Default Password of CVM: "+cvm_ip+" =SSH Connection Failed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
                 self.reporter.notify_progress(self.reporter.notify_checkLog,"Default Password of CVM: "+cvm_ip+" =SSH Connection Failed"+" (Expected: =Not Changed)",(passed and "PASS" or "FAIL"))
-
+ 
             VCChecker.cvm_ssh = None
-         
+          
         #check prism passwords
         if len(cvm_ip_list) > 0:
             for cvm_ip in cvm_ip_list:    
                 prismURL = "https://"+cvm_ip+":9440"
-                
+                 
                 try:
                     prismResonse = requests.get(prismURL,auth=("admin", "admin"), verify=False)
-                    
+                     
                     if prismResonse.status_code == 200:
                         passed = True
                         message += ", " +"Default Password of Prism: "+cvm_ip+" =Not Changed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
@@ -1783,7 +1841,7 @@ class VCChecker(CheckerBase):
                         passed = False
                         message += ", " +"Default Password of Prism: "+cvm_ip+" =Connection Failed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
                         self.reporter.notify_progress(self.reporter.notify_checkLog,"Default Password of Prism: "+cvm_ip+" =Connection Failed"+" (Expected: =Not Changed)",(passed and "PASS" or "FAIL"))
-
+ 
         #check IPMI passwords
         if len(cvm_ip_list) > 0:
             ipmi_ip_list = []
@@ -1794,7 +1852,7 @@ class VCChecker(CheckerBase):
                     headers = {'content-type': 'application/json'}
                     try: 
                         prismResonse = requests.get(prismURL,headers=headers,auth=("admin", "admin"), verify=False)
-                    
+                     
                         if prismResonse.status_code == 200:
                             responseHostsJson = json.loads(prismResonse.text)
                             host_entities = responseHostsJson["entities"]
@@ -1804,12 +1862,12 @@ class VCChecker(CheckerBase):
                                 ipmi_flag = True
                     except:        
                             pass
-                            
+                             
             if len(ipmi_ip_list) > 0: 
                 for ipmiip in ipmi_ip_list:
-                    
+                     
                     flag,ipmi_ssh = self.get_ipmi_ssh_connection(ipmiip) 
-
+ 
                     if flag == "Success":
                         passed = True
                         message += ", " +"Default Password of IPMI: "+ipmiip+" =Not Changed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
@@ -1822,38 +1880,38 @@ class VCChecker(CheckerBase):
                         passed = False
                         message += ", " +"Default Password of IPMI: "+ipmiip+" =SSH Connection Failed"+" (Expected: =Not Changed)"+"#"+(passed and "PASS" or "FAIL")
                         self.reporter.notify_progress(self.reporter.notify_checkLog,"Default Password of IPMI: "+ipmiip+" =SSH Connection Failed"+" (Expected: =Not Changed)",(passed and "PASS" or "FAIL"))
-        
-                    VCChecker.ipmi_ssh = None
-            
-
-        passed_all = passed_all and passed
          
+                    VCChecker.ipmi_ssh = None
+             
+ 
+        passed_all = passed_all and passed
+          
         return passed_all,message,path_curr
-
-           
+ 
+            
     @checkgroup("esxi_checks", "Check if only 10GBps VMNIC are Connected",["performance"],"10GBps VMNIC Connected")
     def check_vmnic_10Gbps(self):
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkConfig.pnic'
         host_networks = self.get_vc_property(path)
-            
+             
         message = ""
         pass_all=True
-             
+              
         for key, network in host_networks.iteritems():
             passed = True
             if network == "Not-Configured":
                 continue
-                 
+                  
             speed_flag = False
             duplex_flag = False
-                 
+                  
             for physicalNic in network:
                 linkSpeed = physicalNic.spec.linkSpeed
-                                       
+                                        
                 if linkSpeed is not None:
                     speed = linkSpeed.speedMb
                     duplexMode = linkSpeed.duplex
-                         
+                          
                     if speed == 'None' and duplexMode == 'None':
                         speed_flag = False
                     elif speed == 10000 and duplexMode != True:   
@@ -1863,7 +1921,7 @@ class VCChecker(CheckerBase):
                         speed_flag = True
                         duplex_flag = True
                         continue
-                      
+                       
             if speed_flag == True and duplex_flag == True:
                 passed = True
                 message += ", " +key+"=10GBps VMNIC Connected and in Full Duplex Mode (Expected: =10GBps VMNIC Connected and in Full Duplex Mode)"+"#"+(True and "PASS" or "FAIL")
@@ -1876,55 +1934,55 @@ class VCChecker(CheckerBase):
                 passed = False
                 message += ", " +key+"=10GBps VMNIC Not Connected (Expected: =10GBps VMNIC Connected and in Full Duplex Mode)"+"#"+(False and "PASS" or "FAIL")
                 self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=10GBps VMNIC Not Connected (Expected: =10GBps VMNIC Connected and in Full Duplex Mode)",(False and "PASS" or "FAIL"))                        
-         
+          
             pass_all = pass_all and passed  
         return pass_all, message, path
-  
+   
     @checkgroup("esxi_checks", "Both 10GBps & 1GBps VMNIC Connected to VDS or VSS",["configurability","manageability","availability"],"10GBps and 1GBps VMNIC are Not Connected to VDS or VSS")
     def check_vmnic_10Gbps_and_1GBps(self):
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
         clusters_map = self.get_vc_property(path_curr)
-               
+                
         message = ""
         passed_all = True
         for datacenter, host_list in clusters_map.iteritems():
             passed = True
             #print datacenter
-                 
+                  
             if host_list == "Not-Configured" :
                 continue
             elif len(host_list)==0: 
                 #condtion to Check if no host found
                 continue
-                      
+                       
             for host in host_list:
                 host_ip=host.name
                 check_host_ip = str(host_ip).replace(".", "*")
-                  
+                   
                 path='content.rootFolder.childEntity.hostFolder.childEntity.host[name='+check_host_ip+'].configManager.networkSystem.networkConfig.pnic'
                 host_networks = self.get_vc_property(path)
                 one_gbps_vmnic_map = []
                 ten_gbps_vmnic_map = []
-           
+            
                 for key, network in host_networks.iteritems():
                     passed = True
                     if network == "Not-Configured":
                         continue
-                                    
+                                     
                     for physicalNic in network:
                         linkSpeed = physicalNic.spec.linkSpeed
                         device_name = physicalNic.device
-                             
+                              
                         if linkSpeed is not None:
                             speed = linkSpeed.speedMb
-                                                   
+                                                    
                             if speed == 'None':
                                 continue
                             elif speed == 10000:   
                                 ten_gbps_vmnic_map.append(device_name)
                             elif speed == 1000:    
                                 one_gbps_vmnic_map.append(device_name)
-               
+                
                 if len(one_gbps_vmnic_map)==0:
                     passed = True
                     message += ", " +datacenter+"@"+host_ip+"=1GBps VMNIC Not Present (Expected: =Both 10GBps and 1GBps VMNIC are Not Connected to VDS or VSS)"+"#"+(passed and "PASS" or "FAIL")
@@ -1934,7 +1992,7 @@ class VCChecker(CheckerBase):
                     vswitch_nic_map = self.get_vc_property(vswitch_path)
                     one_gbps_flag = False
                     ten_gbps_flag = False
-  
+   
                     for vswitch, vmnic_list in vswitch_nic_map.iteritems():
                         if vmnic_list == "Not-Configured" :
                             continue
@@ -1945,7 +2003,7 @@ class VCChecker(CheckerBase):
                                     one_gbps_flag = True
                                 elif vnicname in ten_gbps_vmnic_map:   
                                     ten_gbps_flag = True
-                                          
+                                           
                         if one_gbps_flag and ten_gbps_flag:
                             passed = False
                             message += ", " +datacenter+"@"+host_ip+"=1GBps and 10 GBps VMNIC are Present Together (Expected: =Both 10GBps and 1GBps VMNIC are Not Connected to VDS or VSS)"+"#"+(passed and "PASS" or "FAIL")
@@ -1954,9 +2012,9 @@ class VCChecker(CheckerBase):
                             passed = True
                             message += ", " +datacenter+"@"+host_ip+"=1GBps and 10 GBps VMNIC Not Present Together (Expected: =Both 10GBps and 1GBps VMNIC are Not Connected to VDS or VSS)"+"#"+(passed and "PASS" or "FAIL")
                             self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"@"+host_ip+"=1GBps and 10 GBps VMNIC Not Present Together (Expected: =Both 10GBps and 1GBps VMNIC are Not Connected to VDS or VSS)",(passed and "PASS" or "FAIL"))                
-                                 
+                                  
                 passed_all = passed_all and passed  
-              
+               
         return passed_all, message, path
 
     @checkgroup("vcenter_server_checks", "JVM Memory for vSphere Server",["performance"],"Memory Configured")
