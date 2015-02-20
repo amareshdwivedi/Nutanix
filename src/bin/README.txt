@@ -192,11 +192,10 @@ Table of Contents
  							iii.Set the IPv4 and IPv6 filters to * unless you need something specific there (check out the help on the right).
  					b.	Setting the Firewall Rules:
  							i.	Browse to:
- 								Policies > Computer Configuration > Administrative Templates > Network > Network Connections > Windows Firewall > Domain Profile
- 							ii.	Open the "Windows Firewall: Define inbound port exceptions" policy setting.
- 							iii.Set it to Enabled if it isn't already.
- 							iv.	Click the 'Show' button and add the port exception. We are going to be opening TCP port 5985, so the exception string will look something like this:
- 								5985:TCP:*:enabled:WSMan
+ 								Policies > Computer Configuration > Windows Setting > Security Setting >  Windows Firewall with Advance Setting > Inbound Rule > Right Click > New Rule
+ 							ii. New Inbound Rule Wizard:
+ 								- Select Predefine Option and select "Windows Remote management" in drop-down menu
+ 								- Select Windows Remote Management(HTTP-In) only. Unmark Remaining option 
  					c. Service Configuration
  						At this point we have enough in place to get this working, but I like to do a few more things to ensure that the WinRM service is configured to start automatically and to restart on failure.
  			
