@@ -7,6 +7,7 @@ Table of Contents
     03 How to Run Deployer
     04 How to Run HealthCheck
     05 Known Issues
+	06 Prerequisites for Horizon View Healthcheck
 
 01 Overview
 
@@ -161,4 +162,84 @@ Table of Contents
 
    This is alpha release of deplopyer toolkit. The input parameter validations are not done in this release. Please review input values before executing the script.
 
+06 Prerequisites for VMware Horizon View Health Check - 
+ 	6.1 For VMware Horizon View Health Check - 
+ 		6.1.1 On Connection Broker Server , open command prompt(having Administrator privileges) do following configuration for WINRM:
+ 			1	Run the following command to set the default WinRM configuration values.
+ 					c:\> winrm quickconfig
+ 		
+ 			2	(Optional) Run the following command to check whether a listener is running, and verify the default ports.
+ 					c:\> winrm e winrm/config/listener
+ 					The default ports are 5985 for HTTP, and 5986 for HTTPS.
+ 		
+ 			3	Enable basic authentication on the WinRM service.
+ 						a.	Run the following command to check whether basic authentication is allowed.
+ 							c:\> winrm get winrm/config
+ 						b.	Run the following command to enable basic authentication.
+ 							c:\> winrm set winrm/config/service/auth @{Basic="true"}
+ 						
+ 			4	Run the following command to allow transfer of unencrypted data on the WinRM service.
+ 					c:\> winrm set winrm/config/service @{AllowUnencrypted="true"}
+ 				
+ 			5 	Enable and configure Windows PowerShell Remoting using Group Policy: 
+ 					Online help : http://blog.powershell.no/2010/03/04/enable-and-configure-windows-powershell-remoting-using-group-policy/
+ 					- Open group-policy (Start > Run > Edit Group Policy) and do following steps
+ 					a. Enabling WinRM
+ 							i.	Browse to:
+ 								Policies > Computer Configuration> Administrative Templates > Windows Components > Windows Remote Management (WinRM) > WinRM Service
+ 									- Open the ?Allow Remote Server management through WinRM? policy setting (Server 2008 R2 and later).
+ 									- Open the ?Allow automatic configuration of listeners? policy setting (Server 2008 and earlier).
+ 							ii.	Set the Policy to Enabled.
+ 							iii.Set the IPv4 and IPv6 filters to * unless you need something specific there (check out the help on the right).
+ 					b.	Setting the Firewall Rules:
+ 							i.	Browse to:
+ 								Policies > Computer Configuration > Administrative Templates > Network > Network Connections > Windows Firewall > Domain Profile
+ 							ii.	Open the ?Windows Firewall: Define inbound port exceptions? policy setting.
+ 							iii.Set it to Enabled if it isn?t already.
+ 							iv.	Click the ?Show?? button and add the port exception. We?re going to be opening TCP port 5985, so the exception string will look something like this:
+ 								5985:TCP:*:enabled:WSMan
+ 					c. Service Configuration
+ 						At this point we have enough in place to get this working, but I like to do a few more things to ensure that the WinRM service is configured to start automatically and to restart on failure.
+ 			
+ 							i.	Browse to:
+ 								Policies > Computer Configuration>  Windows Settings > Security Settings > System Services
+ 							ii.	Find the ?Windows Remote Management (WS-Management)? service.
+ 							iii.Define the policy and give it a startup mode of Automatic.
+ 							iv.	Browse to:
+ 								Preferences > Control Panel Settings > Services
+ 								Create a new Service preference item with the following parameters:
+ 								-	General Tab
+ 									# 	Startup: No Change (the policy we set above will take precedence over this anyway)
+ 									#	Service name: WinRM
+ 									#	Service action (optional): Start service
+ 								-	Recovery Tab
+ 										First, Second, and Subsequent Failures: Restart the Service
+ 		
+ 		6.1.2 On Client( healthcheck installable ) machine, open command prompt(having Administrator privileges) do following configuration for WINRM::
+ 	
+ 			1.	Run the following command to set the default WinRM configuration values.
+ 				c:\> winrm quickconfig
+ 		
+ 			2.	(Optional) Run the following command to check whether a listener is running, and verify the default ports.
+ 				c:\> winrm e winrm/config/listener
+ 				The default ports are 5985 for HTTP, and 5986 for HTTPS.
+ 		
+ 			3.	Enable basic authentication on the WinRM service.
+ 					a.	Run the following command to check whether basic authentication is allowed.
+ 						c:\> winrm get winrm/config
+ 					b.	Run the following command to enable basic authentication.
+ 						c:\> winrm set winrm/config/client/auth @{Basic="true"}
+ 		
+ 			4.	Run the following command to allow transfer of unencrypted data on the WinRM service.
+ 				c:\> winrm set winrm/config/client @{AllowUnencrypted="true"}
+ 		
+ 		6.1.3 For Configuring healthcheck for VMware Horizon View Health Check
+			Check weather Connection Broker user has domain account and having access to VMware PowerCLI access as well as machine access.
+			Run following command to test weather windows account has access to machine as well as VMware PowerCLI:
+				1. Open Command prompt (as a administrator): 
+					Start > Run > cmd.exe
+				2. Run following commands:
+					a) c:\> powershell
+					b) PS c:\> Add-PSSnapin VMware.View.Broker
+					c) PS c:\> get-ConnectionBroker 
 
