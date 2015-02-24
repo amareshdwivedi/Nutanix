@@ -3,6 +3,7 @@ Created on Jan 2, 2015
 
 @author: RohitD
 '''
+import requests
 import web
 import httplib
 from model import DataModel       
@@ -352,5 +353,25 @@ class downloadReports:
             #print sys.exc_info()[0]
             return ''
 
+class isoImages:    
+    def POST(self):
+        final_data = {}
+        try:
+            data = json.loads(web.data())
+            headers = {'content-type': 'application/json'}
+            
+            iso_url = ''
+            if data['imageType'] == "nos":
+                iso_url = "http://"+data['foundationVM']+":8000/foundation/enumerate_nos_isos"
+            if data['imageType'] == "hypervisor":
+                iso_url = "http://"+data['foundationVM']+":8000/foundation/enumerate_hypervisor_isos"
+            
+            response = requests.get(iso_url)
+            final_data['response'] = httplib.OK
+            final_data['images'] = response.text
+        except:
+            final_data['response'] = httplib.NOT_FOUND
+            final_data['images'] = []
+        return json.dumps(final_data)
 
              

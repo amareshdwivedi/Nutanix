@@ -49,8 +49,8 @@ urls = (
     '/download/','api.downloadReports',
     '/', 'index',
     '/GeneratePdf/','reportGenerator.GeneratePdf',
-    '/home/', 'home'
-
+    '/home/', 'home',
+    '/isoImages/', 'api.isoImages'
 	)
 
 app = web.application(urls, globals())
