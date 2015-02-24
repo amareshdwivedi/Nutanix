@@ -239,4 +239,12 @@ jQuery(document).ready(function() {
         }        
         $('#createTaskModal').modal('hide');
 	});
+    
+    $('#task_name').on('change', function() {
+        if(this.value == "healthcheck"){
+            $("li.importFile").hide();
+        }else if(this.value == "deployment"){
+            $("li.importFile").show();
+        }  
+    })
 });
