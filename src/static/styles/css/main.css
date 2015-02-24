@@ -986,7 +986,7 @@ div.msgbar.msg_Alert p{
 	font-size:13px;
 }
 .form_fields_container li div.form_input{
-	width:75%;
+	width:65%;
 	float:right;
 	display:block;
 	margin-right:25px;
@@ -2335,3 +2335,5 @@ input[type="text"]:invalid {
 .ui-widget-content .downloadIcon a .fa-file-pdf-o, .downloadIcon a .fa-file-pdf-o{ color:#f00}
 .filename a{ text-decoration: none}
 .filename a:hover{ text-decoration: underline}
+
+input[type="file"].form-control{ height: 28px;}
