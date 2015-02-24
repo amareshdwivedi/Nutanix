@@ -11,8 +11,10 @@ if sys.version_info[0] != 2 or sys.version_info[1] < 7:
     print "Please un-install this version and install version 2.7." 
     print "Once version 2.7 in installed, unzip the installation zip to a new folder and run the installation again."
     sys.exit(1)
-   
-cmd = 'python '+os.path.abspath(os.path.dirname(__file__))+os.path.sep +'scripts'+ os.path.sep +'get_pip.py'
+
+current_directory = os.getcwd()    
+os.chdir(current_directory + os.path.sep +'scripts'+ os.path.sep)
+cmd = 'python get_pip.py'
 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
 out, err = p.communicate()
 
@@ -40,9 +42,10 @@ def progress_bar():
         
 def installing_dependencies():
     try:
-        with open("install_log.log", "w+") as output:
-            install_helper=os.path.abspath(os.path.dirname(__file__))+os.path.sep +'scripts'+ os.path.sep +"install_helper.py"
-            subprocess.check_call(["python", install_helper,default_install],stderr=output,stdout=output);
+        log_file = current_directory + os.path.sep + "install_log.log"
+        with open(log_file, "w+") as output:
+            install_helper="install_helper.py"
+            subprocess.check_call(["python", install_helper,default_install,log_file],stderr=output,stdout=output);
     except subprocess.CalledProcessError as cpe:
         global returncode
         returncode = cpe.returncode
@@ -95,7 +98,7 @@ if returncode == 0:
 
     print "Creating IaaSProvisioning script..."
 
-    healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
+    iaasProvisioning_lines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
     'lib_path = ' + "'" + default_install + "'",
     'os.environ["PYTHONPATH"] = lib_path',
     'if not os.path.exists(os.getcwd() + os.path.sep +"reports"):',
@@ -104,34 +107,34 @@ if returncode == 0:
     'os.system(executable_path+sys.argv[1]+" \'"+sys.argv[2]+"\'")']
 
     provisioning_pyfile=open(default_install+os.path.sep+"iaasProvisioning.py","wb")
-    for line in healthchecklines:
+    for line in iaasProvisioning_lines:
         provisioning_pyfile.writelines(line+"\n")
     provisioning_pyfile.close()
     time.sleep(2)
 
     print "Creating DPaaSProvisioning script..."
-    healthchecklines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
+    dpaasProvisioning_lines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys',
     'lib_path = ' + "'" + default_install + "'",
     'os.environ["PYTHONPATH"] = lib_path',
     'executable_path="python "+lib_path+os.path.sep+"service_toolkit-1.0.0-py2.7.egg"+os.path.sep+"src"+os.path.sep+"foundation"+os.path.sep+"DPaaSOperations.pyc "',
     'os.system(executable_path+" \'"+sys.argv[1]+"\'")']
 
     dpass_pyfile=open(default_install+os.path.sep+"dpaasProvisioning.py","wb")
-    for line in healthchecklines:
+    for line in dpaasProvisioning_lines:
         dpass_pyfile.writelines(line+"\n")
     dpass_pyfile.close()
     time.sleep(2)
 
 
-    shutil.copy(default_install+os.path.sep+"healthcheck.py",os.path.abspath(os.path.dirname(__file__)))
-    shutil.copy(default_install+os.path.sep+"webhealthcheck.py",os.path.abspath(os.path.dirname(__file__)))
-    shutil.copy(default_install+os.path.sep+"iaasProvisioning.py",os.path.abspath(os.path.dirname(__file__)))
-    shutil.copy(default_install+os.path.sep+"dpaasProvisioning.py",os.path.abspath(os.path.dirname(__file__)))
+    shutil.copy(default_install+os.path.sep+"healthcheck.py",current_directory)
+    shutil.copy(default_install+os.path.sep+"webhealthcheck.py",current_directory)
+    shutil.copy(default_install+os.path.sep+"iaasProvisioning.py",current_directory)
+    shutil.copy(default_install+os.path.sep+"dpaasProvisioning.py",current_directory)
 
 
     if sys.platform.startswith("linux"):
-        os.chmod(os.path.abspath(os.path.dirname(__file__))+os.path.sep+"healthcheck.py",0755)
-        os.chmod(os.path.abspath(os.path.dirname(__file__))+os.path.sep+"webhealthcheck.py",0755)
+        os.chmod(current_directory+os.path.sep+"healthcheck.py",0755)
+        os.chmod(current_directory+os.path.sep+"webhealthcheck.py",0755)
 
 
     if sys.platform.startswith("win"):
@@ -148,7 +151,7 @@ if returncode == 0:
 
     print "Creating uninstall script..."
 
-    uninstall_lines=['import os,sys,shutil,time',
+    uninstall_lines=["#!"+sys.executable+"\n" if sys.platform.startswith("linux") else '','import os,sys,shutil,time',
     'print "Starting HealthCheck Un-installation..."',                 
     'install_dir = ' + "'" + default_install + "'",                               
     'shutil.rmtree(install_dir, ignore_errors=True)',

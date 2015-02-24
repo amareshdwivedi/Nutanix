@@ -5,6 +5,7 @@ from setuptools.command import easy_install
 import subprocess
 
 install_dir=sys.argv[1]
+log_file=sys.argv[2]
 libs=['web.py-0.37.tar.gz','colorama-0.3.2.tar.gz','pycrypto-2.6.1.tar.gz','ecdsa-0.11.tar.gz','paramiko-1.15.1.tar.gz','prettytable-0.7.2.tar.gz','six-1.8.0.tar.gz','requests-2.4.3.tar.gz','pyvmomi-5.5.0.2014.1.1.tar.gz','Pillow-2.6.1.tar.gz','reportlab-3.1.8.tar.gz','service_toolkit-1.0.0-py2.7.egg','LEPL-5.1.3.tar.gz']
 lib_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep+".."+os.path.sep +"libs"+os.path.sep
 
@@ -18,7 +19,7 @@ if sys.platform.startswith("linux") :
                'emport-1.0.0.tar.gz','infi.execute-0.1.tar.gz','infi.pyutils-1.0.8.tar.gz','infi.run_as_root-0.1.4.tar.gz','munch-2.0.2.tar.gz','infi.execute-0.1.tar.gz','infi.pkgmgr-0.1.8.tar.gz']
    for infi_pkg in  infi_pkgs:
         easy_install.main(["-Z", "--install-dir", install_dir, lib_path + infi_pkg])
-   with open("install_log.log", "a") as output:
+   with open(log_file, "a") as output:
         install_linux_dependencies=os.path.abspath(os.path.dirname(__file__))+os.path.sep+'install_linux_dependencies.py'
         subprocess.call(["python",install_linux_dependencies],stdout=output,stderr=output);
 
