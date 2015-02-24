@@ -183,6 +183,100 @@ jQuery(document).ready(function() {
         });
     }
 
+    /*Import Predeployer Data Start*/
+    if (window.File && window.FileList && window.FileReader) {
+        var filesInput =  document.getElementById("importjsonFile");
+        filesInput.addEventListener("change", function(event) {
+            var files = event.target.files; //FileList object
+            var output = document.getElementById("result");
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var picReader = new FileReader();
+
+                picReader.addEventListener("load", function(event) {
+                    var textFile = event.target;
+                    var parsefile = JSON.parse(textFile.result);	
+                    importData(parsefile);
+                });
+                //Read the text file
+                picReader.readAsBinaryString(file);
+            }
+
+        });
+    }
+    else {
+        console.log("Your browser does not support File API");
+    }
+    
+    
+    function importData(fileData){
+        /*Cluster Configuration values*/
+        $('#cluster_name').val(fileData.foundation.restInput.clusters[0].cluster_name);
+        $('#externalIP').val(fileData.foundation.restInput.clusters[0].cluster_external_ip);
+        $('#redundancy_factor').val("null");
+        $('#hypervisor').val(fileData.foundation.restInput.hypervisor);
+        if(fileData.foundation.restInput.hyperv_sku == null){
+            $('#hyperv_sku').val("null");
+        }else{
+            $('#hyperv_sku').val(fileData.foundation.restInput.hyperv_sku);
+        }
+        $('#node_ram').val(fileData.foundation.restInput.blocks[0].nodes[0].cvm_gb_ram);
+        
+        var blocksLenght = fileData.foundation.restInput.blocks.length;
+        var i,nodeLenght;
+        for(i=0;i<blocksLenght;i++){
+            nodeLenght = fileData.foundation.restInput.blocks[i].nodes.length;
+            for(j=0;j<nodeLenght;j++){
+                $("#block-"+(i+1)+" #node-"+(j+1)+" #ipmimac").val(fileData.foundation.restInput.blocks[i].nodes[j].ipmi_mac);
+                $("#block-"+(i+1)+" #node-"+(j+1)+" #ipmiip").val(fileData.foundation.restInput.blocks[i].nodes[j].ipmi_ip);
+                $("#block-"+(i+1)+" #node-"+(j+1)+" #hyperversionhostname").val(fileData.foundation.restInput.blocks[i].nodes[j].hypervisor_hostname);
+                $("#block-"+(i+1)+" #node-"+(j+1)+" #hyperversionip").val(fileData.foundation.restInput.blocks[i].nodes[j].hypervisor_ip);
+                $("#block-"+(i+1)+" #node-"+(j+1)+" #cvmip").val(fileData.foundation.restInput.blocks[i].nodes[j].cvm_ip);
+                $("#block-"+(i+1)+" #node-"+(j+1)+" #ipv6_address").val(fileData.foundation.restInput.blocks[i].nodes[j].ipv6_address);
+            }
+        }
+        
+        /*Networking  values*/
+        $('#IPMGateway').val(fileData.foundation.restInput.ipmi_gateway);
+        $('#IPNM').val(fileData.foundation.restInput.ipmi_netmask);
+        $('#HyperversionGateway').val(fileData.foundation.restInput.hypervisor_gateway);
+        $('#HyperversionNM').val(fileData.foundation.restInput.hypervisor_netmask);
+        $('#HYPERVERSIONCVMNTPSERVER').val(fileData.foundation.restInput.clusters[0].hypervisor_ntp_servers);
+        $('#HyperverNameServer').val(fileData.foundation.restInput.hypervisor_nameserver);
+        $('#Cvmgateway').val(fileData.foundation.restInput.cvm_gateway);
+        $('#CvmNM').val(fileData.foundation.restInput.cvm_netmask);
+        $('#CVMNTPSERVER').val(fileData.foundation.restInput.clusters[0].cvm_ntp_servers);
+        $('#CVMDNSSERVER').val(fileData.foundation.restInput.clusters[0].cvm_dns_servers);        
+        
+        
+        /*Credentials values*/
+        $('#IPMIUsernanme').val(fileData.foundation.restInput.ipmi_user);
+        $('#IPMIPass').val(fileData.foundation.restInput.ipmi_password);
+        $('#pusername').val(fileData.prismDetails.authentication.username);
+        $('#ppassword').val(fileData.prismDetails.authentication.password);
+        $('#v_center_user').val(fileData.vCenterConf.user);
+        $('#v_center_password').val(fileData.vCenterConf.password);
+        //$('#hypervisorpass').val(fileData.foundation.restInput.);
+        
+        /*Storage values*/
+        $('#storagepool_name').val(fileData.prismDetails.storagepool.name);
+        $('#container_name').val(fileData.prismDetails.container.name);
+        
+        /*vCenter values*/
+        $('#v_center_host').val(fileData.vCenterConf.host);
+        $('#vcenter_port').val(fileData.vCenterConf.port);
+        $('#v_center_user').val(fileData.vCenterConf.user);
+        $('#v_center_vm_password').val(fileData.vCenterConf.hosts[0].pwd);
+        $('#v_center_datacenter').val(fileData.vCenterConf.datacenter);
+        $('#v_center_datacenter_reuse').val(fileData.vCenterConf.datacenter_reuse_if_exist);
+        $('#v_center_cluster').val(fileData.vCenterConf.cluster);
+        $('#v_center_cluster_reuse').val(fileData.vCenterConf.cluster_reuse_if_exist);
+        
+        /*Deployer Infrastructure values*/
+        $("#foundation_server_ip").val(fileData.foundation.server);
+    }
+    /*Import Predeployer Data Start*/
+    
     /*Predeployer Submit Start*/
 
     var main_rest_block = {};
@@ -944,4 +1038,14 @@ jQuery(document).ready(function() {
         return false;
     });
 
+    var machineCheck = $("#machineCheck").val();
+    if(machineCheck == "windows"){
+    	$(".vmwarecheck .hc_types .runCheck").removeAttr("disabled");
+        $(".vmwarecheck .hc_types select").removeAttr("disabled");
+        $(".viewStatus 	.progressStatusMessage .progressPercentage").html("");
+    }else{
+    	$(".vmwarecheck .hc_types .runCheck").attr("disabled", "disabled");
+        $(".vmwarecheck .hc_types select").attr("disabled", "disabled");
+        $(".viewStatus 	.progressStatusMessage .progressPercentage").html("VMware Horizon View Health Check not supported on this operating system. Please use windows machine");
+    }
 });
