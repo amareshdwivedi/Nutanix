@@ -1369,7 +1369,10 @@ $$(window).load(function() {
                                         <input type="button" name="ncc" value="Run" class="btn nutanix-form-btn healthCheckBtn runCheck"/>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer">
+                                
+                                
+                                
+                                <div class="col-lg-4 col-md-4 col-sm-11 col-xs-11 no-padding progressContainer vmwarecheck">
                                     <div class="statusContainer viewStatus healthCheckStatus">
                                         <div class="progressHeading">
                                             <h3>VMWare View</h3>
@@ -1395,6 +1398,9 @@ $$(window).load(function() {
                                         <input type="button" name="view" value="Run" class="btn nutanix-form-btn healthCheckBtn runCheck"/>
                                     </div>
                                 </div>
+                                
+                                $if checkers['view'].config_form:
+                                	<input type="hidden" value="windows" id="machineCheck"/>
                                 
                                 <input type="hidden" value="" id="failCheck"/>
                                 <input type="hidden" value="" id="passCheck"/>
