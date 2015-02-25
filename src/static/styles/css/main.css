@@ -2144,12 +2144,12 @@ background: #e0e0e0;
 .progressHeading{ position: relative}
 .progressStatusMessage, .errorSupport{ position: relative;padding: 20px 0 10px 10px; color: #99abad; height:130px}
 .errorSupport{ display: none;}
-.errorSupport .errorMsg{ display: block}
+.errorSupport .errorMessage{ display: block}
 .errorSupport .errorSupportMsg{ display: block; width: 100%;margin-top: 20px;}
 .errorSupport .errorSupportMsg .fa-exclamation-triangle{float: left;display: inline-block;color: #f00;
     font-size: 65px;margin-right: 3%;
     width: 23%;}
-.errorSupport .errorSupportMsg .errorMsg{display: inline-block;
+.errorSupport .errorSupportMsg .errorMessage{display: block;
     float: left;
     font-size: 14px;
     margin: 0 0 10px;

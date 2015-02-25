@@ -1044,7 +1044,7 @@ jQuery(document).ready(function() {
         $(".vmwarecheck .hc_types select").removeAttr("disabled");
         $(".viewStatus 	.progressStatusMessage").show();
         $(".viewStatus 	.errorSupport").hide();
-        $(".viewStatus 	.errorSupport .errorMsg").html("");
+        $(".viewStatus 	.errorSupport .errorMessage").html("");
         $(".vmwarecheck .hc_types.viewtype .editCheck").removeAttr("disabled");
     }else{
     	$(".vmwarecheck .hc_types .runCheck").attr("disabled", "disabled");
@@ -1052,6 +1052,6 @@ jQuery(document).ready(function() {
         $(".vmwarecheck .hc_types.viewtype .editCheck").attr("disabled", "disabled");
         $(".viewStatus 	.progressStatusMessage").hide();
         $(".viewStatus 	.errorSupport").show();
-        $(".viewStatus 	.errorSupport .errorMsg").html("VMware Horizon View Health Check not supported on this operating system. Please use windows machine");
+        $(".viewStatus 	.errorSupport .errorMessage").html("Health check not supported on this operating system. Use windows machine to run VMware View health check.");
     }
 });
