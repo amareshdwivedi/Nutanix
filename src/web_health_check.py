@@ -50,7 +50,8 @@ urls = (
     '/', 'index',
     '/GeneratePdf/','reportGenerator.GeneratePdf',
     '/home/', 'home',
-    '/isoImages/', 'api.isoImages'
+    '/isoImages/', 'api.isoImages',
+    '/prevTask/','api.customerPrevTask'
 	)
 
 app = web.application(urls, globals())
