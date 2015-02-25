@@ -49,15 +49,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return 'DRS Automation Mode on cluster ['+cluster+'] is [Partially Automated]', True, 'info'
         else: 
             return actual_value, False, ''
-        
-    if check_name == "DRS Automation Mode for CVM":
-        if actual_value == "Not-Configured":
-            return 'Not-Configured', False, ''
-        elif actual_value == "fullyAutomated":
-            return 'DRS Automation Mode On CVM ['+entity+'] is [Not Disabled]', True, 'warning'
-        else: 
-            return actual_value, False, ''
-    
+            
     if check_name == "Cluster Load Balanced":
         if actual_value == "Not-Configured":
             return 'Not-Configured', False , ''
@@ -261,16 +253,14 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             return 'none', False, ''
         else: 
             return  "Isolation response on CVM ["+entity+"] is [Not Leave Powered On]", True, 'alert' 
-         
-    if check_name == "CVM DRS":
-        if actual_value == "False":
-            return 'DRS on VM ['+entity+'] is [Disabled]', True, ''
-        elif actual_value == "True":
-            return 'DRS on VM ['+entity+'] is [Enabled]', True, 'warning'
-        elif actual_value == "Not-Configured":
-            return 'Not-Configured', False, 'warning'
-        else:
-            return 'DRS on VM ['+entity+'] is ['+actual_value+']', True, 'warning' 
+                 
+    if check_name == "DRS Automation Mode for CVM":
+        if actual_value == "Not-Configured":
+            return 'Not-Configured', False, ''
+        elif actual_value == "fullyAutomated":
+            return 'DRS Automation Mode On CVM ['+entity+'] is [Not Disabled]', True, 'warning'
+        else: 
+            return actual_value, False, ''        
         
     if check_name=="Validate HBDatastoreCandidatePolicy for Datastores":
         if actual_value == "Not-Configured":
