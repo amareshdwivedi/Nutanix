@@ -79,7 +79,7 @@ def main():
         if len(options) != 2:
             while True:
                 progPercent = fProcess.get_progress()
-                num = int(progPercent.split('.')[0])
+                num = int(progPercent)
 
                 if num == -1:
                     console_msg("Error Occurred !")
