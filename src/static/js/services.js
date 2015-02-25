@@ -1042,10 +1042,16 @@ jQuery(document).ready(function() {
     if(machineCheck == "windows"){
     	$(".vmwarecheck .hc_types .runCheck").removeAttr("disabled");
         $(".vmwarecheck .hc_types select").removeAttr("disabled");
-        $(".viewStatus 	.progressStatusMessage .progressPercentage").html("");
+        $(".viewStatus 	.progressStatusMessage").show();
+        $(".viewStatus 	.errorSupport").hide();
+        $(".viewStatus 	.errorSupport .errorMsg").html("");
+        $(".vmwarecheck .hc_types.viewtype .editCheck").removeAttr("disabled");
     }else{
     	$(".vmwarecheck .hc_types .runCheck").attr("disabled", "disabled");
         $(".vmwarecheck .hc_types select").attr("disabled", "disabled");
-        $(".viewStatus 	.progressStatusMessage .progressPercentage").html("VMware Horizon View Health Check not supported on this operating system. Please use windows machine");
+        $(".vmwarecheck .hc_types.viewtype .editCheck").attr("disabled", "disabled");
+        $(".viewStatus 	.progressStatusMessage").hide();
+        $(".viewStatus 	.errorSupport").show();
+        $(".viewStatus 	.errorSupport .errorMsg").html("VMware Horizon View Health Check not supported on this operating system. Please use windows machine");
     }
 });
