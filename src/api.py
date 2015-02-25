@@ -374,4 +374,20 @@ class isoImages:
             final_data['images'] = []
         return json.dumps(final_data)
 
+class customerPrevTask:    
+    def POST(self):
+        final_data = {}
+        try:
+            data = json.loads(web.data())
+            print "inside prev task :",data
+            headers = {'content-type': 'application/json'}
+            
+            json_form = model.get_previous_task_form(data['customer_id'],data['task_id'])
+            final_data['response'] = httplib.OK
+            final_data['json_form'] = json_form
+        except:
+            final_data['response'] = httplib.NOT_FOUND
+            final_data['json_form'] = ''
+        return json.dumps(final_data)
+
              

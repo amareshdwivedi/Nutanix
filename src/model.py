@@ -98,12 +98,10 @@ class DataModel:
                                vars=locals()))         
 
     def add_task(self,cust_id,json_data, task_type):
-    
         now = str(datetime.datetime.now())
         return self._db.insert('customer_history',C_Id=cust_id,json_data=json_data,task=task_type,status="Pending")
 
     def update_task(self,task_id,task_status, report_file=None):
-    
         now = str(datetime.datetime.now())
         return self._db.update('customer_history',where="id=$task_id",status=task_status,report_file=report_file,vars=locals())
 
@@ -120,9 +118,11 @@ class DataModel:
                                status = status,vars=locals())
 
     def get_task_status_by_id(self, task_id):
-
         return list(self._db.select('task_module_status', what="status,module", where='T_Id=$task_id',
                                vars=locals()))  
+
+    def get_previous_task_form(self,cust_id,task_id):
+        return list(self._db.select('customer_history',what="json_data",where="id=$task_id and C_Id=$cust_id",vars=locals()))
         
     def delete(self, numberid):
         self._db.delete('deployer_record', where='id=$numberid',
