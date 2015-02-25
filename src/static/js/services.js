@@ -34,6 +34,7 @@ jQuery(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 $(".customerDetails").show();
+                 $("a.kickoffBtn").hide();
                 $(".customerDetails h3 span").html(data.customer_record[0].customer_name);
                 $("table.customersDetailsTable tbody tr:gt(0)").remove();
                 var customerDetail = '';
@@ -154,18 +155,36 @@ jQuery(document).ready(function() {
     });
 
 
+     $(".customersDetailsTable tbody").on('click', 'tr', function() {
+        $(".customersDetailsTable tbody tr").removeClass("row_selected");
+        $(this).addClass("row_selected");
+        var customerId = $(this).find('td.customerId').html();
+        if($(this).find("td.task").text() == "Deployment" ){ 
+            $("a.kickoffBtn").show();
+        }else{
+            $("a.kickoffBtn").hide();
+        }
+    });
+    
+    
     $("a.kickoffBtn").click(function() {
         var cutomerId = $(".customersTable tr.row_selected td.customerId").text();
-        getCustomerTask(cutomerId);
+        var taskId =  $(".customersDetailsTable  tr.row_selected td.id").text();
+        prevCustomerTask(cutomerId,taskId);
     });
 
-    function getCustomerTask(cutomerId) {
+    function prevCustomerTask(cutomerId,taskId) {
+        var json_data = {"customer_id":cutomerId,"task_id":taskId}
         $.ajax({
-            type: "GET",
-            url: "/v1/deployer/customers/" + cutomerId + "/tasks/",
+            type: "POST",
+            url: "/prevTask/",
             async: false,
             dataType: "json",
-            success: function(data) {},
+            data: JSON.stringify(json_data),
+            success: function(data) {
+                $( "#mainTabContainer" ).tabs("enable", 1).tabs("select", 1);
+                importData(data.json_form);
+            },
             error: function(request, status, errorThrown) {
                 alert("No Data Available");
             }
