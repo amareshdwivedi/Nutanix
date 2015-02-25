@@ -2142,7 +2142,18 @@ background: #e0e0e0;
 
 .progressStatus{ background: #fff; height: 160px; width: 100%;position: relative}
 .progressHeading{ position: relative}
-.progressStatusMessage{ position: relative;padding: 20px 0 10px 10px; color: #99abad; height:130px}
+.progressStatusMessage, .errorSupport{ position: relative;padding: 20px 0 10px 10px; color: #99abad; height:130px}
+.errorSupport{ display: none;}
+.errorSupport .errorMsg{ display: block}
+.errorSupport .errorSupportMsg{ display: block; width: 100%;margin-top: 20px;}
+.errorSupport .errorSupportMsg .fa-exclamation-triangle{float: left;display: inline-block;color: #f00;
+    font-size: 65px;margin-right: 3%;
+    width: 23%;}
+.errorSupport .errorSupportMsg .errorMsg{display: inline-block;
+    float: left;
+    font-size: 14px;
+    margin: 0 0 10px;
+    width: 70%;color: #99abad;font-weight: 600;}
 .progressActiveSec, .taskCompleted, .taskError{
     border-left: 174px solid transparent;
     border-top: 160px solid #CDCDCD;
@@ -2337,3 +2348,7 @@ input[type="text"]:invalid {
 .filename a:hover{ text-decoration: underline}
 
 input[type="file"].form-control{ height: 28px;}
+a[disabled]
+{
+  color: #99abad; cursor: default;
+}

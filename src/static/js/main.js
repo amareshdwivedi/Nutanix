@@ -88,25 +88,29 @@ jQuery(document).ready(function() {
 
     $("#healthCheckConfigurationModel .modal-content").hide();
     $(".editCheck").click(function(){
-        var checkerType = $(this).attr("name");    
-		$('#healthCheckConfigurationModel').modal();
-        $("#healthCheckConfigurationModel .modal-content").hide();
-        $("#healthCheckConfigurationModel .statusmessage").hide();
-        $("#healthCheckConfigurationModel .modal-content .formTbl").show();
-        $("#healthCheckConfigurationModel .cancelButton").hide();
-        $("#healthCheckConfigurationModel .conf, #healthCheckConfigurationModel .conn").show();
-        if(checkerType == "vc"){
-            $(".modal-content#modal_vc").show();
-            $(".modal-content#modal_ncc").hide();
-            $(".modal-content#modal_view").hide();
-        }else if(checkerType == "ncc"){
-            $(".modal-content#modal_vc").hide();
-            $(".modal-content#modal_ncc").show();
-            $(".modal-content#modal_view").hide();
-        }else if(checkerType == "view"){
-            $(".modal-content#modal_vc").hide();
-            $(".modal-content#modal_ncc").hide();
-            $(".modal-content#modal_view").show();
+        var checkerType = $(this).attr("name");
+        if($(this).attr('disabled')){
+            return false;
+        }else{
+            $('#healthCheckConfigurationModel').modal();
+            $("#healthCheckConfigurationModel .modal-content").hide();
+            $("#healthCheckConfigurationModel .statusmessage").hide();
+            $("#healthCheckConfigurationModel .modal-content .formTbl").show();
+            $("#healthCheckConfigurationModel .cancelButton").hide();
+            $("#healthCheckConfigurationModel .conf, #healthCheckConfigurationModel .conn").show();
+            if(checkerType == "vc"){
+                $(".modal-content#modal_vc").show();
+                $(".modal-content#modal_ncc").hide();
+                $(".modal-content#modal_view").hide();
+            }else if(checkerType == "ncc"){
+                $(".modal-content#modal_vc").hide();
+                $(".modal-content#modal_ncc").show();
+                $(".modal-content#modal_view").hide();
+            }else if(checkerType == "view"){
+                $(".modal-content#modal_vc").hide();
+                $(".modal-content#modal_ncc").hide();
+                $(".modal-content#modal_view").show();
+            }
         }
 	});
 
