@@ -35,11 +35,18 @@ jQuery(document).ready(function() {
             success: function(data) {
                 $(".customerDetails").show();
                 $(".customerDetails h3 span").html(data.customer_record[0].customer_name);
+                $("table.customersDetailsTable tbody tr:gt(0)").remove();
                 var customerDetail = '';
-                for (var i = 0; i < data.customer_history.length; i++) {
-                    customerDetail += '<tr><td class="id">' + data.customer_history[i].id + '</td><td class="status">' + data.customer_history[i].status + '</td><td class="task">' + data.customer_history[i].task + '</td><td class="date_created">' + data.customer_history[i].date_created + '</td></tr>';
+                if(data.customer_history.length != 0){
+                    $("table.customersDetailsTable tbody tr.noData").hide();
+                    for (var i = 0; i < data.customer_history.length; i++) {
+                        customerDetail += '<tr><td class="id">' + data.customer_history[i].id + '</td><td class="status">' + data.customer_history[i].status + '</td><td class="task">' + data.customer_history[i].task + '</td><td class="date_created">' + data.customer_history[i].date_created + '</td></tr>';
+                    }
+                    $("table.customersDetailsTable tbody").append(customerDetail);
+                }else{
+                    $("table.customersDetailsTable tbody tr.noData").show();
                 }
-                $("table.customersDetailsTable tbody").html(customerDetail);
+                
             },
             error: function(request, status, errorThrown) {
                 alert("No Data Available");
@@ -56,10 +63,15 @@ jQuery(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 var customerDetail = '';
-                for (var i = 0; i < data.customer_reports.length; i++) {
-                   customerDetail += '<tr><td class="filename"><a href="'+data.customer_reports[i].filename+'">' + data.customer_reports[i].filename + '</a></td><td class="datecreate">' + data.customer_reports[i].date_created + '</td><td class="downloadIcon"><a href="'+data.customer_reports[i].filename+'"><span class="fa fa-file-pdf-o fa-6"></span></a></td></tr>';
+                $("table.reportTable tbody tr:gt(0)").remove();
+                if(data.customer_reports.length != 0){
+                    for (var i = 0; i < data.customer_reports.length; i++) {
+                       customerDetail += '<tr><td class="filename"><a href="'+data.customer_reports[i].filename+'">' + data.customer_reports[i].filename + '</a></td><td class="datecreate">' + data.customer_reports[i].date_created + '</td><td class="downloadIcon"><a href="'+data.customer_reports[i].filename+'"><span class="fa fa-file-pdf-o fa-6"></span></a></td></tr>';
+                    }
+                    $("table.reportTable tbody").append(customerDetail);
+                }else{
+                    $("table.reportTable tbody tr.noData").show();
                 }
-                $("table.reportTable tbody").html(customerDetail);
             },
             error: function(request, status, errorThrown) {
                 alert("No Data Available");

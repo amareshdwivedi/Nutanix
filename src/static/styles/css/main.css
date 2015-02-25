@@ -2352,3 +2352,13 @@ a[disabled]
 {
   color: #99abad; cursor: default;
 }
+
+tr.noData span{display: block;
+    margin: 10px auto;
+    text-align: center;
+    width: 100%;}
+table.dataTable tr.noData:hover {
+  background: none;
+  cursor: default;
+}
+table.dataTable tr.noData td{cursor: default;}
