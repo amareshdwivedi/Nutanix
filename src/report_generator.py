@@ -291,7 +291,7 @@ def vc_report(story, checks_list,vCenterIP):
     
                 
                 if len(checks_property_data) == 1:
-                    property_data = [['All Entities Passed']]
+                    property_data = [['Status: PASS(Either all entities configured correctly or No entities found to run check)']]
                     checks_property_table = LongTable(property_data, colWidths=[7.7*inch])
                     checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (0, 0), colors.fidlightblue),
                                                                ('ALIGN', (0, 0), (0, property_lenght), 'LEFT'),
