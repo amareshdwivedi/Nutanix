@@ -191,7 +191,16 @@ jQuery(document).ready(function() {
         });
     }
 
+    function defaultTabSelection(){
+        $("#preDeploy_secondaryNav ul li").removeClass("active").addClass("disabled");
+        $("#preDeploy_secondaryNav ul li:first-child").removeClass("disabled").addClass("active");
+        var tab = $("#preDeploy_secondaryNav ul li:first-child a").attr("href");
+        $(".tab-content").not(tab).css("display", "none");
+        $(tab).fadeIn();
+    }
+    
     function createCustomerTask(cutomerId, json_data) {
+        defaultTabSelection();
         $.ajax({
             type: "POST",
             url: "/v1/deployer/customers/" + cutomerId + "/tasks/",
@@ -241,6 +250,7 @@ jQuery(document).ready(function() {
     
     
     function importData(fileData){
+        defaultTabSelection();
         /*Cluster Configuration values*/
         $('#cluster_name').val(fileData.foundation.restInput.clusters[0].cluster_name);
         $('#externalIP').val(fileData.foundation.restInput.clusters[0].cluster_external_ip);
