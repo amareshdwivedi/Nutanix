@@ -1537,6 +1537,10 @@ class VCChecker(CheckerBase):
                 if clusters!="Not-Configured":
                     for cluster in clusters:
                         cluster_name = cluster.name
+                        if self.authconfig['cluster']!='':
+                            if cluster_name not in self.authconfig['cluster']:
+                                #print "skipping "+cluster_name
+                                continue
                         if not isinstance(cluster, vim.ClusterComputeResource):
                             #condition to check if any host attached to datacenter without adding to any cluster
                             continue
@@ -2496,6 +2500,10 @@ class VCChecker(CheckerBase):
             if clusters!="Not-Configured":
                 for cluster in clusters:
                     cluster_name=cluster.name
+                    if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            #print "skipping "+cluster_name
+                            continue
                     postgroup_passed = True
                     vlanid_passed = True
                     port_group_list = []
@@ -2717,6 +2725,13 @@ class VCChecker(CheckerBase):
                 continue
             
             for cluster in clusters:
+                cluster_name=cluster.name
+                    
+                if self.authconfig['cluster']!='':
+                    if cluster_name not in self.authconfig['cluster']:
+                        #print "skipping "+cluster_name
+                        continue
+
                 if not isinstance(cluster, vim.ClusterComputeResource):
                     #condition to check if host directly attached to cluster
                     continue
@@ -2958,6 +2973,12 @@ class VCChecker(CheckerBase):
             for cluster in clusters:
                 
                 cluster_name=cluster.name
+                    
+                if self.authconfig['cluster']!='':
+                    if cluster_name not in self.authconfig['cluster']:
+                        #print "skipping "+cluster_name
+                        continue
+                    
                 host_version=[]
                 for host in cluster.host:
                     if host.config.product.version not in host_version:

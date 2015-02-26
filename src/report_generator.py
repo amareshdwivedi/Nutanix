@@ -104,7 +104,7 @@ def vc_report(story, checks_list,vCenterIP):
             for category in checks.get('Category'):
                 categoryList += category
                 if(categoryListLen > 1):
-                    categoryList += ","
+                    categoryList += ", "
                     categoryListLen = categoryListLen - 1
                 else : 
                     continue
@@ -289,15 +289,27 @@ def vc_report(story, checks_list,vCenterIP):
                                                      Paragraph(actual_result, NormalMessageStyle),
                                                      Paragraph(severity, NormalMessageStyle)])
     
-                                         
-                checks_property_table = LongTable(checks_property_data, colWidths=[1*inch,1.2*inch,1*inch,1.15*inch,2.7*inch,0.65*inch])
-                checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (5, 0), colors.fidlightblue),
-                                                           ('ALIGN', (0, 0), (5, property_lenght), 'LEFT'),
-                                            ('INNERGRID', (0, 0), (5, -1), 0.25, colors.black),
-                                            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
-                                            ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
-                                            ('TEXTFONT', (0, 0), (5, 0), 'Times-Roman'),
-                                            ('FONTSIZE', (0, 0), (5, 0), 10)]))
+                
+                if len(checks_property_data) == 1:
+                    property_data = [['All Entities Passed']]
+                    checks_property_table = LongTable(property_data, colWidths=[7.7*inch])
+                    checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (0, 0), colors.fidlightblue),
+                                                               ('ALIGN', (0, 0), (0, property_lenght), 'LEFT'),
+                                                ('INNERGRID', (0, 0), (0, -1), 0.25, colors.black),
+                                                ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                                ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                                ('TEXTFONT', (0, 0), (0, 0), 'Times-Roman'),
+                                                ('FONTSIZE', (0, 0), (0, 0), 10)]))
+                
+                elif len(checks_property_data) > 1:                            
+                    checks_property_table = LongTable(checks_property_data, colWidths=[1*inch,1.2*inch,1*inch,1.15*inch,2.7*inch,0.65*inch])
+                    checks_property_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (5, 0), colors.fidlightblue),
+                                                               ('ALIGN', (0, 0), (5, property_lenght), 'LEFT'),
+                                                ('INNERGRID', (0, 0), (5, -1), 0.25, colors.black),
+                                                ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                                                ('BOX', (0, 0), (1, property_lenght), 0.25, colors.black),
+                                                ('TEXTFONT', (0, 0), (5, 0), 'Times-Roman'),
+                                                ('FONTSIZE', (0, 0), (5, 0), 10)]))
                 
                
             story.append(checks_para_table)
@@ -505,7 +517,10 @@ def CSVReportGenerator(resultJson,curdir=None):
                             severity_info =  get_view_severity(xcheck['Name'])
                             rows.append([xchecker, xcheck['Name'],None,None,None,expected_result,actual_result,'|'.join(xcheck['Category']), severity_info])   
                 else:
-                    rows.append([xchecker, xcheck['Name'],None,None,None,None,xcheck['Status'],None,None])
+                    if(xchecker == "vc"):
+                        pass
+                    elif(xchecker == "ncc"):
+                        rows.append([xchecker, xcheck['Name'],None,None,None,None,xcheck['Status'],None,None])
         except KeyError:
                 #It means- No checks were executed for this checker. 
             continue
