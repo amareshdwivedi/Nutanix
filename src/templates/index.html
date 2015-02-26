@@ -184,9 +184,12 @@ $def with (checkers,msg="")
 		                        }
                                 //document.getElementById('logs').value = data;
                              },
-                                beforeSend: function(){
-                                   jQuery('.loader').css('display','inline-block');
-                               }
+                             beforeSend: function(){
+                                jQuery('.loader').css('display','inline-block');
+                                jQuery("#category_select").attr("disabled", "disabled");
+                                jQuery("#group_select").attr("disabled", "disabled");
+                                jQuery("#runchecks").attr("disabled", "disabled");
+                            }
                          });
                   }
 		    	
@@ -212,6 +215,9 @@ $def with (checkers,msg="")
 		                jQuery("#modal_runchecks .runckeckStatus").html(data);
 		                jQuery("#modal_runchecks").modal('show');
                         jQuery('.loader').css('display','none');
+                        jQuery("#category_select").removeAttr("disabled");
+                        jQuery("#group_select").removeAttr("disabled");
+                        jQuery("#runchecks").removeAttr("disabled");
 		            },
 		        });
 		        var interval = setInterval(function(){fetch_data()},3000);
