@@ -66,6 +66,7 @@ jQuery(document).ready(function() {
                 var customerDetail = '';
                 $("table.reportTable tbody tr:gt(0)").remove();
                 if(data.customer_reports.length != 0){
+                    $("table.reportTable tbody tr.noData").hide();
                     for (var i = 0; i < data.customer_reports.length; i++) {
                        customerDetail += '<tr><td class="filename"><a href="'+data.customer_reports[i].filename+'">' + data.customer_reports[i].filename + '</a></td><td class="datecreate">' + data.customer_reports[i].date_created + '</td><td class="downloadIcon"><a href="'+data.customer_reports[i].filename+'"><span class="fa fa-file-pdf-o fa-6"></span></a></td></tr>';
                     }
@@ -212,6 +213,7 @@ jQuery(document).ready(function() {
                     $("#task_id").val(data.task_id);
                     $(".successMessage").show();
                     $("#mainTabContainer").tabs("enable", 2).tabs("select", 2);
+                    $(".preDeploy_maincontent input[type=text]").val("");
                 } else {
                     $('#commonModal').modal();
                     $("#commonModal .modal-body").html("Unable to create task.");
