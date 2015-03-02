@@ -33,19 +33,11 @@ class Logger:
     def __init__(self):
         self.logger = logging.getLogger('hcd')
         if not self.logger.handlers:
-            '''
-            self.hdlr = logging.FileHandler('./hcd.log')
-            self.formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-            self.hdlr.setFormatter(self.formatter)
-            self.logger.addHandler(self.hdlr) 
-            self.logger.setLevel(logging.INFO)
-            '''
             LogConfigFile = os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + "log.conf"
             fp = open(LogConfigFile, 'r')
             logConfigParams = json.load(fp)
             fp.close()
 
-            print "------->",logConfigParams
             self.hdlr = logging.FileHandler(str(logConfigParams['file']))
             self.formatter = logging.Formatter(str(logConfigParams['formatter']))
             self.hdlr.setFormatter(self.formatter)
@@ -69,8 +61,7 @@ class Logger:
         return cls._instance
 
     def LogMessage(self,msgType, msgText):
-        print "inside LogMessage"
-    	if msgType.lower() == "info":
+        if msgType.lower() == "info":
         	self.logger.info(msgText)
 
         elif msgType.lower() == "warning":
