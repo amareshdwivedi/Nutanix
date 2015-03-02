@@ -10,8 +10,9 @@ import time
 from foundation.nutanixFoundation import FoundationProvision
 from foundation.prismProvision import PrismActions
 from serverConfiguration.vCenterServer import VCenterServerConf
+from utility import Logger
 
-
+loggerObj = Logger()
 class initiate_deployment:
         """
             This class would be providing an interface 
@@ -26,13 +27,15 @@ class initiate_deployment:
             #self.deployment_type = deployment_type
             self.inputData = json_input
             self.progressStatus = None
+            self.fProcess = FoundationProvision(self.inputData['foundation'])
+            
 
 
         def initiate_foundation(self):
             """ This function would be initiating foundation installation process"""
 
-            fProcess = FoundationProvision(self.inputData['foundation'])
-            fProcess.init_foundation()
+            #fProcess = FoundationProvision(self.inputData['foundation'])
+            self.fProcess.init_foundation()
             print "Foundation is successfully initialised."
             return True
 
@@ -54,8 +57,7 @@ class initiate_deployment:
             return True
 
         def check_foundation_progress(self):
-            fProcess = FoundationProvision(self.inputData['foundation'])
-            progPercent = fProcess.get_progress()
-            self.progressStatus = progPercent
-            return  self.progressStatus
+            progPercent = self.fProcess.get_progress()
+            progressStatus = progPercent
+            return  progressStatus
 

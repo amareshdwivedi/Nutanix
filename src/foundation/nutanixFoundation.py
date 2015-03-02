@@ -6,14 +6,17 @@ Created on Nov 25, 2014
 import requests
 import json,os,sys
 from lepl.apps.rfc3696 import HttpUrl
+from utility import Logger
+
+loggerObj = Logger()
 
 class FoundationProvision:
     def __init__(self,foundationDetails):
         self.restInput = foundationDetails['restInput']
         self.provision_url = "http://"+foundationDetails['server']+":8000/foundation/image_nodes"
-        self.progress_url  = "http://"+foundationDetails['server']+":8000/foundation/progress"
-
+        self.progress_url  = "http://"+foundationDetails['server']+":8000/foundation/progress"        
         self.validate_urls()
+        
 
     def validate_urls(self):
         validator = HttpUrl()
@@ -23,6 +26,7 @@ class FoundationProvision:
         if not validator(self.progress_url):
             print "Not a valid URL -",self.progress_url
             sys.exit(1)
+        #loggerObj.LogMessage("info","Foundation urls successfully validated.")
 
     def init_foundation(self):
         headers = {'content-type': 'application/json'}
@@ -30,12 +34,15 @@ class FoundationProvision:
         
         response_code = response.status_code
         if(response_code == 200):
+            loggerObj.LogMessage("info","Foundation is successfully Initialized.")
             return None
         elif(response_code == 404):
-            print "Foundation Server not reachable"
+            print "Foundation Server not reachable."
+            loggerObj.LogMessage("error","Foundation Server not reachable.")
             sys.exit(1)
         else:
-            print "Error occurred"
+            print "Error occurred."
+            loggerObj.LogMessage("error","Failed to initialize foundation.")
             sys.exit(1)
 
     def get_progress(self):

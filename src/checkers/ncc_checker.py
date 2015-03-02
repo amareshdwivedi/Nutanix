@@ -7,8 +7,7 @@ from prettytable import PrettyTable
 import sys
 import ast
 import getpass
-from validation import Validate
-from security import Security
+from utility import Validate,Security
 import socket
 from colorama import Fore
 import web

@@ -15,8 +15,7 @@ import sys
 import fnmatch
 import datetime
 import getpass
-from validation import Validate
-from security import Security
+from utility import Validate,Security
 from colorama import Fore
 import web
 from web import form

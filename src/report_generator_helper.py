@@ -1,5 +1,5 @@
 import datetime
-from validation import Validate
+from utility import Validate
 from distutils.log import info
 
 
@@ -749,7 +749,7 @@ def get_vc_check_actual_output_format(check_name,actual_value,entity,datacenter,
             if len(actual_value.split(','))<2:
                 return "Host["+host+"] has only one DNS server["+str(actual_value)+"] configured" , True, 'warning'
             else:
-                from validation import Validate
+                from utility import Validate
                 is_dns=False
                 for ip in actual_value.split(','):
                     if Validate.valid_ip(ip.strip()) == False:

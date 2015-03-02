@@ -11,7 +11,17 @@ from definedconstants import *
 import json 
 from deployer_web import initiate_deployment
 import os,sys
-db = web.database(dbn='sqlite', db='deployer')
+from utility import Logger
+
+loggerObj = Logger()
+db = None
+try:
+    db = web.database(dbn='sqlite', db='deployer')
+except OperationalError:
+    loggerObj.LogMessage("error","Database file not accessible.")
+else:
+    pass
+
 model = DataModel(db) 
 
 class customers:
@@ -29,7 +39,11 @@ class customers:
             if get_customer_data:
                 get_customer_hostory = model.get_history_by_id(id)
                 final_data['customer_record'] = get_customer_data
+                loggerObj.LogMessage("info","Currectnly selected User - "+str(get_customer_data))
+                
                 final_data['customer_history'] = get_customer_hostory
+                loggerObj.LogMessage("info","Task count for current user : "+str(len(get_customer_hostory)))
+                
                 final_data['response'] = httplib.OK
             else:
                 final_data['response'] = httplib.NOT_FOUND
@@ -38,10 +52,12 @@ class customers:
         else:
             all_customers = model.get_all_customers()
             if all_customers:
+                loggerObj.LogMessage("info","Available user count is : "+str(len(all_customers)))
                 final_data['customer_record'] = all_customers
                 final_data['response'] = httplib.OK
                 return json.dumps(final_data)
             else:
+                loggerObj.LogMessage("warning","No user record available in database")
                 final_data['response'] = httplib.NOT_FOUND
                 final_data['error'] = USER_NOT_FOUND
                 
@@ -379,7 +395,6 @@ class customerPrevTask:
         final_data = {}
         try:
             data = json.loads(web.data())
-            print "inside prev task :",data
             headers = {'content-type': 'application/json'}
             
             json_form = model.get_previous_task_form(data['customer_id'],data['task_id'])

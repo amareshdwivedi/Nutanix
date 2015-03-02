@@ -16,7 +16,7 @@ import os
 import httplib
 import paramiko
 import socket
-from security import Security
+from utility import Security
 import warnings
 from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
@@ -24,7 +24,9 @@ from requests.exceptions import ConnectionError
 from deployer_web import initiate_deployment
 import api
 import reportGenerator
+from utility import Logger
 
+loggerObj = Logger()
 
 if (len(sys.argv) > 2):
     cur_dir=sys.argv[2]
@@ -67,6 +69,7 @@ class home:
             checker = checker_class()
             self.checkers[checker.get_name()] = checker
         
+        loggerObj.LogMessage("info","Available Checkers :"+str(self.checkers.keys()))
         for checker in self.checkers.keys():
             checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
             fp = open(checker_conf_path, 'r')
@@ -260,7 +263,7 @@ class runChecks:
         #Generate PDF Report based on results. 
         reportFileName = PDFReportGenerator(results,cur_dir)
         if taskId is not None:
-            taskId = api.model.update_task(int(taskId), "Complete",reportFileName)
+            taskId = api.model.update_task(int(taskId), "Completed",reportFileName)
         return "Execution Complete"
 
 class refresh:
