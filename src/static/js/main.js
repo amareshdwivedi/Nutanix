@@ -142,8 +142,19 @@ jQuery(document).ready(function() {
 	$(".preDeploy_maincontent a.next").click(function(event) {
         var isFormValid = true;
         var currentContainer = $(this).parents().eq(1).find(".mainBody_container input.required");
+        var ipCheck = $(this).parents().eq(1).find(".mainBody_container input.required.ipcheck");
+        //var ipRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        var ipRegex=/^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/;
+        
         currentContainer.each(function(index, value){
 			if ($.trim($(value).val()).length == 0){
+				$(value).addClass("error");
+			} else {
+				$(value).removeClass("error");
+			}
+        });
+        ipCheck.each(function(index, value){
+			if (!($(value).val()).match(ipRegex)){
 				$(value).addClass("error");
 			} else {
 				$(value).removeClass("error");

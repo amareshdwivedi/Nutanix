@@ -399,7 +399,8 @@ class customerPrevTask:
             
             json_form = model.get_previous_task_form(data['customer_id'],data['task_id'])
             final_data['response'] = httplib.OK
-            final_data['json_form'] = json_form
+            final_data['json_form'] = json.loads(json_form[0].json_data)
+            
         except:
             final_data['response'] = httplib.NOT_FOUND
             final_data['json_form'] = ''

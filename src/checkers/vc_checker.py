@@ -1536,6 +1536,10 @@ class VCChecker(CheckerBase):
                 if clusters!="Not-Configured":
                     for cluster in clusters:
                         cluster_name = cluster.name
+                        if self.authconfig['cluster']!='':
+                            if cluster_name not in self.authconfig['cluster']:
+                                #print "skipping "+cluster_name
+                                continue
                         if not isinstance(cluster, vim.ClusterComputeResource):
                             #condition to check if any host attached to datacenter without adding to any cluster
                             continue
@@ -1558,6 +1562,12 @@ class VCChecker(CheckerBase):
                             message += ", "+"Multiple Host Profiles configured on Hosts in cluster ["+cluster_name+"] =True (Expected: =False)" +"#"+((passed) and "PASS" or "FAIL")
                         else:
                             for host in host_list:
+                                host_name=host.name
+                                if self.authconfig['host']!='':
+                                    if host_name not in self.authconfig['host']:
+                                        #print "skipping host "+host_name
+                                        continue                                
+
                                 for profile in profiles_list:
                                     entity_host_list = profile_entity_map.get(profile)
 
@@ -1607,7 +1617,10 @@ class VCChecker(CheckerBase):
                
             for host in host_list:
                 host_ip=host.name        
-   
+                if self.authconfig['host']!='':
+                    if host_ip not in self.authconfig['host']:
+                        #print "skipping host "+host_name
+                        continue   
                 flag,esxi_ssh = self.get_esxi_ssh_connection(host_ip)
                    
                 if flag == "SSH Connection Failed" or flag == "Authentication Exception":
@@ -1726,7 +1739,11 @@ class VCChecker(CheckerBase):
                 continue
              
             for host in host_list:
-                host_ip=host.name        
+                host_ip=host.name
+                if self.authconfig['host']!='':
+                    if host_ip not in self.authconfig['host']:
+                        #print "skipping host "+host_name
+                        continue                       
  
                 flag,esxi_ssh = self.get_esxi_ssh_connection(host_ip)
                  
@@ -1957,6 +1974,10 @@ class VCChecker(CheckerBase):
                        
             for host in host_list:
                 host_ip=host.name
+                if self.authconfig['host']!='':
+                    if host_ip not in self.authconfig['host']:
+                        #print "skipping host "+host_name
+                        continue                
                 check_host_ip = str(host_ip).replace(".", "*")
                    
                 path='content.rootFolder.childEntity.hostFolder.childEntity.host[name='+check_host_ip+'].configManager.networkSystem.networkConfig.pnic'
@@ -2495,6 +2516,10 @@ class VCChecker(CheckerBase):
             if clusters!="Not-Configured":
                 for cluster in clusters:
                     cluster_name=cluster.name
+                    if self.authconfig['cluster']!='':
+                        if cluster_name not in self.authconfig['cluster']:
+                            #print "skipping "+cluster_name
+                            continue
                     postgroup_passed = True
                     vlanid_passed = True
                     port_group_list = []
@@ -2502,7 +2527,7 @@ class VCChecker(CheckerBase):
   
                     hosts = cluster.host
                                                  
-                    for xhost in hosts:
+                    for xhost in hosts: 
                         portgroup_list = xhost.configManager.networkSystem.networkConfig.portgroup
                         for port_group in portgroup_list:
                             portgroup_name = port_group.spec.name
@@ -2512,6 +2537,12 @@ class VCChecker(CheckerBase):
                                 vlan_map[portgroup_name] = str(vlan_id)
   
                     for xhost in hosts:
+                        host_name=xhost.name
+                        if self.authconfig['host']!='':
+                            if host_name not in self.authconfig['host']:
+                                #print "skipping host "+host_name
+                                continue     
+                                               
                         absent_port_group_list = []
                         individual_port_group_list = []
                         absent_vlanId_map = {}
@@ -2716,6 +2747,13 @@ class VCChecker(CheckerBase):
                 continue
             
             for cluster in clusters:
+                cluster_name=cluster.name
+                    
+                if self.authconfig['cluster']!='':
+                    if cluster_name not in self.authconfig['cluster']:
+                        #print "skipping "+cluster_name
+                        continue
+
                 if not isinstance(cluster, vim.ClusterComputeResource):
                     #condition to check if host directly attached to cluster
                     continue
@@ -2957,6 +2995,12 @@ class VCChecker(CheckerBase):
             for cluster in clusters:
                 
                 cluster_name=cluster.name
+                    
+                if self.authconfig['cluster']!='':
+                    if cluster_name not in self.authconfig['cluster']:
+                        #print "skipping "+cluster_name
+                        continue
+                    
                 host_version=[]
                 for host in cluster.host:
                     if host.config.product.version not in host_version:
@@ -2984,6 +3028,11 @@ class VCChecker(CheckerBase):
                     for host in cluster.host:
                         passed= True
                         host_name=host.name
+                        if self.authconfig['host']!='':
+                            if host_name not in self.authconfig['host']:
+                                #print "skipping host "+host_name
+                                continue
+                    
                         for vm in host.vm:
                             vm_name=vm.name
                             version=vm.config.version
@@ -3090,7 +3139,10 @@ class VCChecker(CheckerBase):
                     
             for host in host_list:
                 host_ip=host.name
-
+                if self.authconfig['host']!='':
+                    if host_ip not in self.authconfig['host']:
+                        #print "skipping host "+host_name
+                        continue
                 flag,esxi_ssh = self.get_esxi_ssh_connection(host_ip)
                 
                 if flag == "SSH Connection Failed" or flag == "Authentication Exception":

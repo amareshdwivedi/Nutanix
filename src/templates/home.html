@@ -214,6 +214,11 @@ $$(window).load(function() {
 														</tr>
 													</thead>
 													<tbody>
+                                                        <tr class="noData">
+                                                            <td colspan="4">
+                                                                <span>No Data Available</span>
+                                                            </td>
+                                                        </tr>
 													</tbody>
 												</table>
 											</div>
@@ -221,7 +226,7 @@ $$(window).load(function() {
 										
 										<div class="quick_actions"> 
 										  <!--<a class="button_big btn_blue kickoffBtn" style="float:right;width: 60px;text-align: center;" href="#">Next</a> -->
-										  <!--<a class="btn nutanix-form-btn kickoffBtn" style="float:right;width: 60px;text-align: center;" href="#">Next</a> -->
+										  <a class="btn nutanix-form-btn kickoffBtn" style="float:right;width: 60px;text-align: center;" href="#">Next</a> 
 										  <!--<a class="button_big" href="#" style="float:right;width: 60px;text-align: center;">Cancel</a> --> 
 										</div> 
 									</div>
@@ -302,7 +307,7 @@ $$(window).load(function() {
 													Cluster Shared IP
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="externalIP" class="form-control form-font required"/>
+													<input type="text" value="" id="externalIP" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -415,7 +420,7 @@ $$(window).load(function() {
 																IPMI IP 
 															</label>
 															<div class="form-group predeployForm">
-																<input type="text" value="" id="ipmiip" class="form-control form-font required"/>
+																<input type="text" value="" id="ipmiip" class="form-control form-font required ipcheck"/>
 															</div>
 														</div>
 														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -458,7 +463,7 @@ $$(window).load(function() {
 																Hypervisor IP 
 															</label>
 															<div class="form-group predeployForm">
-																<input type="text" value="" id="hyperversionip" class="form-control form-font required"/>
+																<input type="text" value="" id="hyperversionip" class="form-control form-font required ipcheck"/>
 															</div>
 														</div>
 														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -466,7 +471,7 @@ $$(window).load(function() {
 																CVM IP
 															</label>
 															<div class="form-group predeployForm">
-																<input type="text" value="" id="cvmip" class="form-control form-font required"/>
+																<input type="text" value="" id="cvmip" class="form-control form-font required ipcheck"/>
 															</div>
 														</div>
 															<input type="hidden" id="nodePosition" value="A" />
@@ -476,7 +481,7 @@ $$(window).load(function() {
 																IPV6 Address
 															</label>
 															<div class="form-group predeployForm">
-																<input type="text" value="" id="ipv6_address" class="form-control form-font"/>
+																<input type="text" value="" id="ipv6_address" class="form-control form-font ipcheck"/>
 															</div>
 														</div>
 														<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -534,7 +539,7 @@ $$(window).load(function() {
 															IPMI IP 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="ipmiip" class="form-control form-font required"/>
+															<input type="text" value="" id="ipmiip" class="form-control form-font required ipcheck"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -576,7 +581,7 @@ $$(window).load(function() {
 															Hypervisor IP 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="hyperversionip" class="form-control form-font required"/>
+															<input type="text" value="" id="hyperversionip" class="form-control form-font required ipcheck"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -584,7 +589,7 @@ $$(window).load(function() {
 															CVM IP
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="cvmip" class="form-control form-font required"/>
+															<input type="text" value="" id="cvmip" class="form-control form-font required ipcheck"/>
 														</div>
 													</div>
 													<input type="hidden" id="nodePosition" value="B" />
@@ -593,7 +598,7 @@ $$(window).load(function() {
 															IPV6 Address
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="ipv6_address" class="form-control form-font"/>
+															<input type="text" value="" id="ipv6_address" class="form-control form-font ipcheck"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -651,7 +656,7 @@ $$(window).load(function() {
 															IPMI IP 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="ipmiip" class="form-control form-font required"/>
+															<input type="text" value="" id="ipmiip" class="form-control form-font required ipcheck"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -693,7 +698,7 @@ $$(window).load(function() {
 															Hypervisor IP 
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="hyperversionip" class="form-control form-font required"/>
+															<input type="text" value="" id="hyperversionip" class="form-control form-font required ipcheck"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -701,7 +706,7 @@ $$(window).load(function() {
 															CVM IP
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="cvmip" class="form-control form-font required"/>
+															<input type="text" value="" id="cvmip" class="form-control form-font required ipcheck"/>
 														</div>
 													</div>
 													<input type="hidden" id="nodePosition" value="C" />
@@ -710,7 +715,7 @@ $$(window).load(function() {
 															IPV6 Address
 														</label>
 														<div class="form-group predeployForm">
-															<input type="text" value="" id="ipv6_address" class="form-control form-font"/>
+															<input type="text" value="" id="ipv6_address" class="form-control form-font ipcheck"/>
 														</div>
 													</div>
 													<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -779,7 +784,7 @@ $$(window).load(function() {
 													IPMI Gateway
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="IPMGateway" class="form-control form-font required"/>
+													<input type="text" value="" id="IPMGateway" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -787,7 +792,7 @@ $$(window).load(function() {
 													IPMI Netmask 		
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="IPNM" class="form-control form-font required"/>
+													<input type="text" value="" id="IPNM" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -795,7 +800,7 @@ $$(window).load(function() {
 													Hypervisor Gateway
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="HyperversionGateway" class="form-control form-font required"/>
+													<input type="text" value="" id="HyperversionGateway" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -803,7 +808,7 @@ $$(window).load(function() {
 													Hypervisor Netmask
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="HyperversionNM" class="form-control form-font required"/>
+													<input type="text" value="" id="HyperversionNM" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -811,7 +816,7 @@ $$(window).load(function() {
 													Hypervisor NTP Server
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="HYPERVERSIONCVMNTPSERVER" class="form-control form-font required"/>
+													<input type="text" value="" id="HYPERVERSIONCVMNTPSERVER" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -819,7 +824,7 @@ $$(window).load(function() {
 													Hypervisor Nameserver
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="HyperverNameServer" class="form-control form-font required"/>
+													<input type="text" value="" id="HyperverNameServer" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -827,7 +832,7 @@ $$(window).load(function() {
 													CVM Gateway
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="Cvmgateway" class="form-control form-font required"/>
+													<input type="text" value="" id="Cvmgateway" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -835,7 +840,7 @@ $$(window).load(function() {
 													CVM Netmask	
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="CvmNM" class="form-control form-font required"/>
+													<input type="text" value="" id="CvmNM" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -843,7 +848,7 @@ $$(window).load(function() {
 													CVM NTP Server
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="CVMNTPSERVER" class="form-control form-font required"/>
+													<input type="text" value="" id="CVMNTPSERVER" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 
@@ -852,7 +857,7 @@ $$(window).load(function() {
 													CVM DNS Server
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="" id="CVMDNSSERVER" class="form-control form-font required"/>
+													<input type="text" value="" id="CVMDNSSERVER" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											
@@ -1008,7 +1013,7 @@ $$(window).load(function() {
 													Existing vCenter Server IP
 												</label>
 												<div class="form-group predeployForm">
-													<input type="text" value="10.1.222.184" id="v_center_host" class="form-control form-font required"/>
+													<input type="text" value="10.1.222.184" id="v_center_host" class="form-control form-font required ipcheck"/>
 												</div>
 											</div>
 											<div class="col-lg-6 col-sm-6 col-xs-12 no-margin no-padding fieldColomn">
@@ -1130,7 +1135,7 @@ $$(window).load(function() {
 														Foundation Server IP
 													</label>
 													<div class="form-group predeployForm">
-														<input type="text" value="" id="foundation_server_ip" class="form-control form-font required"/>
+														<input type="text" value="" id="foundation_server_ip" class="form-control form-font required ipcheck"/>
 													</div>
 												</div>
 											</div>		
@@ -1475,7 +1480,12 @@ $$(window).load(function() {
 														</tr>
 													</thead>
                                                     <tbody>
-                                                    </tbody>
+                                                        <tr class="noData">
+                                                            <td colspan="4">
+                                                                <span>No Data Available</span>
+                                                            </td>
+                                                        </tr>
+													</tbody>
 												</table>
 										</div>
 									</div>
@@ -1586,7 +1596,7 @@ $$(window).load(function() {
 								</div>
                             </li>
                             <li class="importFile">
-                                <label>Import external file</label>
+                                <label>Import Configuration File</label>
 								<div class="form_input">
 									<input type="file" id="importjsonFile" class="form-control form-font"/>
 								</div>
@@ -1670,30 +1680,15 @@ $$(window).load(function() {
      <!--Configuration model end-->   
 	
 	<script type="text/javascript" src="/static/js/excanvas.js"></script>
-	<!--<script type="text/javascript" src="/static/js/jquery.flot.js"></script>
-	<script type="text/javascript" src="/static/js/jquery.flot.stack.js"></script>
-	<script type="text/javascript" src="/static/js/jquery.flot.pie.js"></script>
-	<script type="text/javascript" src="/static/js/jquery.quicksand.js"></script>-->
 	<script type="text/javascript" src="/static/js/jquery.easing.1.3.js"></script>
-	<!--<script type="text/javascript" src="/static/js/jquery.tipsy.js"></script>
-	<script type="text/javascript" src="/static/js/cl_editor/jquery.cleditor.min.js"></script>-->
 	<script type="text/javascript" src="/static/uploadify/swfobject.js"></script>
 	<script type="text/javascript" src="/static/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
-    <!--<script type="text/javascript" src="/static/js/jquery.autogrowtextarea.js"></script>-->
-	<script type="text/javascript" src="/static/js/form_elements.js"></script>
+    <script type="text/javascript" src="/static/js/form_elements.js"></script>
 	<script type="text/javascript" src="/static/js/jquery.ui.core.js"></script>
 	<script type="text/javascript" src="/static/js/jquery.ui.widget.js"></script>
-	<!--<script type="text/javascript" src="/static/js/jquery.ui.mouse.js"></script>-->
-	<!--<script type="text/javascript" src="/static/js/jquery.ui.slider.js"></script>-->
 	<script type="text/javascript" src="/static/js/jquery.ui.progressbar.js"></script>
-	<!--<script type="text/javascript" src="/static/js/jquery.ui.datepicker.js"></script>-->
 	<script type="text/javascript" src="/static/js/jquery.ui.tabs.js"></script>
-	<!--<script type="text/javascript" src="/static/js/fullcalendar.js"></script>-->
-	<!--<script type="text/javascript" src="/static/js/gcal.js"></script>-->
 	<script type="text/javascript" src="/static/js/bootstrap-modal.js"></script>
-	<!--<script type="text/javascript" src="/static/js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
-	<script type="text/javascript" src="/static/js/fancybox/jquery.mousewheel-3.0.4.pack.js"></script>
-	<script type="text/javascript" src="/static/js/highlight.js"></script>-->
 	<script type="text/javascript" src="/static/js/jq_tables/jquery.dataTables.js"></script>
 	<script type="text/javascript" src="/static/js/jquery.nicescroll.min.js"></script>
 	<script type="text/javascript" src="/static/js/jquery.nicescroll.plus.js"></script>

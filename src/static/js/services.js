@@ -34,12 +34,20 @@ jQuery(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 $(".customerDetails").show();
+                 $("a.kickoffBtn").hide();
                 $(".customerDetails h3 span").html(data.customer_record[0].customer_name);
+                $("table.customersDetailsTable tbody tr:gt(0)").remove();
                 var customerDetail = '';
-                for (var i = 0; i < data.customer_history.length; i++) {
-                    customerDetail += '<tr><td class="id">' + data.customer_history[i].id + '</td><td class="status">' + data.customer_history[i].status + '</td><td class="task">' + data.customer_history[i].task + '</td><td class="date_created">' + data.customer_history[i].date_created + '</td></tr>';
+                if(data.customer_history.length != 0){
+                    $("table.customersDetailsTable tbody tr.noData").hide();
+                    for (var i = 0; i < data.customer_history.length; i++) {
+                        customerDetail += '<tr><td class="id">' + data.customer_history[i].id + '</td><td class="status">' + data.customer_history[i].status + '</td><td class="task">' + data.customer_history[i].task + '</td><td class="date_created">' + data.customer_history[i].date_created + '</td></tr>';
+                    }
+                    $("table.customersDetailsTable tbody").append(customerDetail);
+                }else{
+                    $("table.customersDetailsTable tbody tr.noData").show();
                 }
-                $("table.customersDetailsTable tbody").html(customerDetail);
+                
             },
             error: function(request, status, errorThrown) {
                 alert("No Data Available");
@@ -56,10 +64,16 @@ jQuery(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 var customerDetail = '';
-                for (var i = 0; i < data.customer_reports.length; i++) {
-                   customerDetail += '<tr><td class="filename"><a href="'+data.customer_reports[i].filename+'">' + data.customer_reports[i].filename + '</a></td><td class="datecreate">' + data.customer_reports[i].date_created + '</td><td class="downloadIcon"><a href="'+data.customer_reports[i].filename+'"><span class="fa fa-file-pdf-o fa-6"></span></a></td></tr>';
+                $("table.reportTable tbody tr:gt(0)").remove();
+                if(data.customer_reports.length != 0){
+                    $("table.reportTable tbody tr.noData").hide();
+                    for (var i = 0; i < data.customer_reports.length; i++) {
+                       customerDetail += '<tr><td class="filename"><a href="'+data.customer_reports[i].filename+'">' + data.customer_reports[i].filename + '</a></td><td class="datecreate">' + data.customer_reports[i].date_created + '</td><td class="downloadIcon"><a href="'+data.customer_reports[i].filename+'"><span class="fa fa-file-pdf-o fa-6"></span></a></td></tr>';
+                    }
+                    $("table.reportTable tbody").append(customerDetail);
+                }else{
+                    $("table.reportTable tbody tr.noData").show();
                 }
-                $("table.reportTable tbody").html(customerDetail);
             },
             error: function(request, status, errorThrown) {
                 alert("No Data Available");
@@ -142,25 +156,52 @@ jQuery(document).ready(function() {
     });
 
 
+     $(".customersDetailsTable tbody").on('click', 'tr', function() {
+        $(".customersDetailsTable tbody tr").removeClass("row_selected");
+        $(this).addClass("row_selected");
+        var customerId = $(this).find('td.customerId').html();
+        if($(this).find("td.task").text() == "Deployment" ){ 
+            $("a.kickoffBtn").show();
+        }else{
+            $("a.kickoffBtn").hide();
+        }
+    });
+    
+    
     $("a.kickoffBtn").click(function() {
         var cutomerId = $(".customersTable tr.row_selected td.customerId").text();
-        getCustomerTask(cutomerId);
+        var taskId =  $(".customersDetailsTable  tr.row_selected td.id").text();
+        prevCustomerTask(cutomerId,taskId);
     });
 
-    function getCustomerTask(cutomerId) {
+    function prevCustomerTask(cutomerId,taskId) {
+        var json_data = {"customer_id":cutomerId,"task_id":taskId}
         $.ajax({
-            type: "GET",
-            url: "/v1/deployer/customers/" + cutomerId + "/tasks/",
+            type: "POST",
+            url: "/prevTask/",
             async: false,
             dataType: "json",
-            success: function(data) {},
+            data: JSON.stringify(json_data),
+            success: function(data) {
+                $( "#mainTabContainer" ).tabs("enable", 1).tabs("select", 1);
+                importData(data.json_form);
+            },
             error: function(request, status, errorThrown) {
                 alert("No Data Available");
             }
         });
     }
 
+    function defaultTabSelection(){
+        $("#preDeploy_secondaryNav ul li").removeClass("active").addClass("disabled");
+        $("#preDeploy_secondaryNav ul li:first-child").removeClass("disabled").addClass("active");
+        var tab = $("#preDeploy_secondaryNav ul li:first-child a").attr("href");
+        $(".tab-content").not(tab).css("display", "none");
+        $(tab).fadeIn();
+    }
+    
     function createCustomerTask(cutomerId, json_data) {
+        defaultTabSelection();
         $.ajax({
             type: "POST",
             url: "/v1/deployer/customers/" + cutomerId + "/tasks/",
@@ -172,6 +213,7 @@ jQuery(document).ready(function() {
                     $("#task_id").val(data.task_id);
                     $(".successMessage").show();
                     $("#mainTabContainer").tabs("enable", 2).tabs("select", 2);
+                    $(".preDeploy_maincontent input[type=text]").val("");
                 } else {
                     $('#commonModal').modal();
                     $("#commonModal .modal-body").html("Unable to create task.");
@@ -210,6 +252,7 @@ jQuery(document).ready(function() {
     
     
     function importData(fileData){
+        defaultTabSelection();
         /*Cluster Configuration values*/
         $('#cluster_name').val(fileData.foundation.restInput.clusters[0].cluster_name);
         $('#externalIP').val(fileData.foundation.restInput.clusters[0].cluster_external_ip);
