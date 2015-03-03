@@ -4,6 +4,9 @@ import abc
 import json
 import os
 from reporters import CheckerResult,ViewCheckerResult
+from utility import Logger
+
+loggerObj = Logger()
 
 def check(func):
     def wrapper(*args, **kwargs):
@@ -26,6 +29,7 @@ class CheckerBase:
         self.reporter = None
         self.checks=[]
         self.result = CheckerResult(name)
+        loggerObj.LogMessage("info","Initialized Checker "+str(CheckerResult(name)))
         self.realtime_results = {}
 
     @abc.abstractmethod
@@ -66,11 +70,14 @@ class CheckerBase:
             authconfig = json.load(fp)
             fp.close()
             auth=authconfig[checker]
-        except ValueError:
+            loggerObj.LogMessage("info","Successfully initialized auth.conf")
+        except ValueError as e:
             print checker+ " not configured"
+            loggerObj.LogMessage("error","Failed to initialize auth.conf:: " + e.message)
             self.setup()
-        except KeyError:
+        except Exception as e:
             print checker+ " not configured"
+            loggerObj.LogMessage("error","Failed to initialize auth.conf:: " + e.message)
             self.setup()
         return auth
  
@@ -83,12 +90,13 @@ class CheckerBase:
             authconfig = json.load(fp)
             fp.close()
             
-        except ValueError:
-            "do nothing"
+        except ValueError as e:
+            loggerObj.LogMessage("error","Failed to update auth.conf:: " + e)
             
         authconfig[checker_name]=data
         auth_path=os.path.join(os.path.abspath(os.path.dirname(__file__))+os.path.sep+".."+os.path.sep+"conf"+os.path.sep+"auth.conf")
         fp = open(auth_path,"w")
         json.dump(authconfig, fp, indent=2)
         fp.close()
+        loggerObj.LogMessage("info","Successfully updated auth.conf")
     
