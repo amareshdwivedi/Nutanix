@@ -31,6 +31,8 @@ class Security :
 
 class Logger:
     def __init__(self,cur_dir=None):
+        #import traceback
+        #traceback.print_stack()
         self.logger = logging.getLogger('hcd')
         if not self.logger.handlers:
             LogConfigFile = os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + "log.conf"
@@ -41,7 +43,6 @@ class Logger:
             if cur_dir is None:
                 self.hdlr = logging.FileHandler(os.getcwd() + os.path.sep + str(logConfigParams['file']))
             else:
-                print "log location :: " + cur_dir + os.path.sep + str(logConfigParams['file'])
                 self.hdlr = logging.FileHandler(cur_dir + os.path.sep + str(logConfigParams['file']))
             
             self.formatter = logging.Formatter(str(logConfigParams['formatter']))

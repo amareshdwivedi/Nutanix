@@ -1,3 +1,12 @@
+import sys
+if (len(sys.argv) > 2):
+    cur_dir=" ".join(sys.argv[2:])
+else:
+    cur_dir = None
+
+from utility import Logger
+loggerObj = Logger(cur_dir)
+
 import web
 import requests
 from web import form
@@ -11,7 +20,6 @@ from prettytable import PrettyTable
 import json
 from operator import itemgetter
 import csv, time
-import sys
 import os
 import httplib
 import paramiko
@@ -21,18 +29,11 @@ import warnings
 from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
 from requests.exceptions import ConnectionError
+import reportGenerator
+
+
 from deployer_web import initiate_deployment
 import api
-import reportGenerator
-from utility import Logger
-
-
-if (len(sys.argv) > 2):
-    cur_dir=" ".join(sys.argv[2:])
-else:
-    cur_dir = None
-    
-loggerObj = Logger(cur_dir)
     
 urls = (
 

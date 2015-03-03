@@ -43,6 +43,7 @@ os.chdir(home_dir+os.sep+"src"+os.sep+"libs")
 for xfile in os.listdir("."):
 	shutil.copy(xfile, home_dir+os.sep+"service_toolkit-1.0.0"+os.sep+"libs")
 
+shutil.copy(home_dir+os.sep+"src"+os.sep+"conf"+os.sep+"input.json", home_dir+os.sep+"service_toolkit-1.0.0")
 
 os.chdir(home_dir+os.sep+"src"+os.sep+"bin")
 for xfile in os.listdir("."):
