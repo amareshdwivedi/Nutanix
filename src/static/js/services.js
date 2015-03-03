@@ -41,7 +41,7 @@ jQuery(document).ready(function() {
                 if(data.customer_history.length != 0){
                     $("table.customersDetailsTable tbody tr.noData").hide();
                     for (var i = 0; i < data.customer_history.length; i++) {
-                        customerDetail += '<tr><td class="id">' + data.customer_history[i].id + '</td><td class="status">' + data.customer_history[i].status + '</td><td class="task">' + data.customer_history[i].task + '</td><td class="date_created">' + data.customer_history[i].date_created + '</td></tr>';
+                        customerDetail += '<tr><td class="id">' + data.customer_history[i].id + '</td><td class="task">' + data.customer_history[i].task + '</td><td class="status">' + data.customer_history[i].status + '</td><td class="date_created">' + data.customer_history[i].date_created + '</td></tr>';
                     }
                     $("table.customersDetailsTable tbody").append(customerDetail);
                 }else{
