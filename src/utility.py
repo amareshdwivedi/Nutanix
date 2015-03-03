@@ -30,7 +30,7 @@ class Security :
         return data
 
 class Logger:
-    def __init__(self):
+    def __init__(self,cur_dir=None):
         self.logger = logging.getLogger('hcd')
         if not self.logger.handlers:
             LogConfigFile = os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + "log.conf"
@@ -38,7 +38,12 @@ class Logger:
             logConfigParams = json.load(fp)
             fp.close()
 
-            self.hdlr = logging.FileHandler(str(logConfigParams['file']))
+            if cur_dir is None:
+                self.hdlr = logging.FileHandler(os.getcwd() + os.path.sep + str(logConfigParams['file']))
+            else:
+                print "log location :: " + cur_dir + os.path.sep + str(logConfigParams['file'])
+                self.hdlr = logging.FileHandler(cur_dir + os.path.sep + str(logConfigParams['file']))
+            
             self.formatter = logging.Formatter(str(logConfigParams['formatter']))
             self.hdlr.setFormatter(self.formatter)
             self.logger.addHandler(self.hdlr) 

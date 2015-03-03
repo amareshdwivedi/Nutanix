@@ -26,12 +26,13 @@ import api
 import reportGenerator
 from utility import Logger
 
-loggerObj = Logger()
 
 if (len(sys.argv) > 2):
     cur_dir=" ".join(sys.argv[2:])
 else:
     cur_dir = None
+    
+loggerObj = Logger(cur_dir)
     
 urls = (
 
