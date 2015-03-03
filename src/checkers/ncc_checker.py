@@ -18,6 +18,8 @@ MSG_WIDTH = 120
 
 loggerObj = Logger()
 
+file_name = os.path.basename(__file__)
+
 def exit_with_message(message):
     print message
     sys.exit(1)
@@ -75,13 +77,13 @@ class NCCChecker(CheckerBase):
             ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=Security.decrypt(self.authconfig['cvm_pwd']))
         
         except paramiko.AuthenticationException:
-            loggerObj.LogMessage("error","NCC Authentication failed - Invalid username or password")
+            loggerObj.LogMessage("error",file_name + " :: NCC Authentication failed - Invalid username or password")
             exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
         except paramiko.SSHException, e:
-            loggerObj.LogMessage("error","NCC SSH Exception" + e.message)
+            loggerObj.LogMessage("error",file_name + " :: NCC SSH Exception" + e.message)
             exit_with_message("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
         except socket.error, e:
-            loggerObj.LogMessage("error","NCC Socket Error" + e.message)
+            loggerObj.LogMessage("error",file_name + " :: NCC Socket Error" + e.message)
             exit_with_message(str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
 
         self.result = CheckerResult("ncc",self.authconfig)    
@@ -100,25 +102,25 @@ class NCCChecker(CheckerBase):
         #old command
         #cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false " + " ".join(args) or self.config['ncc_path']
         cmd = ntnx_env + cmd
-        loggerObj.LogMessage("info","NCC Command to execute:: " + str(cmd))
+        loggerObj.LogMessage("info",file_name + " :: NCC Command to execute -  " + str(cmd))
         status_text = {0 : "Done",1 : "Done", 3 : "Pass",4: "Pass",5: "Warn",6: "Fail", 7: "Err"}
         time.sleep(1)
         try:
             stdin, stdout, stderr =  ssh.exec_command(cmd)
         except paramiko.ChannelException,e:
-            loggerObj.LogMessage("error","NCC SSH execution failed:: " + e.message)
+            loggerObj.LogMessage("error",file_name + " :: NCC SSH execution failed:: " + e.message)
             exit_with_message(str(e)+"\n\nUnable to get NCC results through SSH")            
                 
         passed_all = True
         #self.realtime_results['ncc'] = []
         first_json = 0
         for line in stdout:
-            loggerObj.LogMessage("info","NCC Success Output:: " + line.strip('\n'))
+            loggerObj.LogMessage("info",file_name + " :: NCC Success Output - " + line.strip('\n'))
             try :
                 t = ast.literal_eval(line.strip('\n').replace("null","'null'").replace("true","'true'").replace("false","'false'"))
                 first_json += 1
             except :
-                loggerObj.LogMessage("error","NCC Failure Output:: " + line.strip('\n'))
+                loggerObj.LogMessage("error",file_name + " :: NCC Failure Output - " + line.strip('\n'))
                 continue
             
             if first_json == 1:
@@ -127,14 +129,14 @@ class NCCChecker(CheckerBase):
             check_name = t["output holder list"][0]["message"]            
             status = t["status"]
 
-            loggerObj.LogMessage("info","NCC Check Name:: " + check_name + ", Check Status:: " + str(status))
+            loggerObj.LogMessage("info",file_name + " :: NCC Check Name - " + check_name + ", Check Status - " + str(status))
             
             try:
                 self.realtime_results = json.load(open("display_json.json","r"))
                 self.realtime_results['ncc']['checks'].append({'Name':check_name ,'Status': status_text[status]})
                 with open("display_json.json", "w") as myfile:
                     json.dump(self.realtime_results, myfile)
-                loggerObj.LogMessage("info","NCC Check dumped to JSON file")
+                loggerObj.LogMessage("info",file_name + " :: NCC Check dumped to JSON file")
             except:
                 pass    
             message = ""
@@ -162,13 +164,13 @@ class NCCChecker(CheckerBase):
         cvm_ip=cvm_ip.strip()
         if cvm_ip == "":
             if(current_cvm_ip == "Not Set"):
-                loggerObj.LogMessage("error","Error: Set CVM IP.")
+                loggerObj.LogMessage("error",file_name + " :: Error: Set CVM IP.")
                 exit_with_message("Error: Set CVM IP.")
             cvm_ip=current_cvm_ip
         
         if Validate.valid_ip(cvm_ip) == False:
-            loggerObj.LogMessage("error","Error : Invalid CVM IP address.")
-            exit_with_message("\nError : Invalid CVM IP address.")
+            loggerObj.LogMessage("error",file_name + " :: Error: Invalid CVM IP address.")
+            exit_with_message("\nError: Invalid CVM IP address.")
         
         #cvm_ip=raw_input("Enter CVM IP : ")
         
@@ -178,7 +180,7 @@ class NCCChecker(CheckerBase):
         cvm_user=cvm_user.strip()
         if cvm_user == "":
             if(current_cvm_user == "Not Set"):
-                loggerObj.LogMessage("error","Error : Set CVM SSH Host Username.")
+                loggerObj.LogMessage("error",file_name + " :: Error: Set CVM SSH Host Username.")
                 current_cvm_user("Error: Set CVM SSH Host Username.")
             cvm_user=current_cvm_user
         #cvm_user=raw_input("Enter CVM User Name : ")
@@ -188,7 +190,7 @@ class NCCChecker(CheckerBase):
         cvm_pwd=None
         if new_pass == "":
             if(current_pass == "Not Set"):
-                loggerObj.LogMessage("error","Error : Set CVM SSH Host Password.")
+                loggerObj.LogMessage("error",file_name + " :: Error: Set CVM SSH Host Password.")
                 exit_with_message("Error: Set CVM SSH Host Password.")
             cvm_pwd = current_pass
         else:
@@ -199,7 +201,7 @@ class NCCChecker(CheckerBase):
             
         #Test SSH connection
         print "Checking CVM Connection Status:",
-        loggerObj.LogMessage("info","Checking CVM Connection Status")
+        loggerObj.LogMessage("info",file_name + " :: Checking CVM Connection Status")
         
         status, message = self.check_connectivity(cvm_ip, cvm_user, cvm_pwd)
         if status == True:
@@ -216,7 +218,7 @@ class NCCChecker(CheckerBase):
         ncc_auth["cvm_pwd"]=cvm_pwd;
      
         CheckerBase.save_auth_into_auth_config(self.get_name(),ncc_auth)
-        loggerObj.LogMessage("info","NCC configurations saved successfully")
+        loggerObj.LogMessage("info",file_name + " :: NCC configurations saved successfully")
         exit_with_message("NCC is configured Successfully ")
         return
     
@@ -230,11 +232,11 @@ class NCCChecker(CheckerBase):
             ssh.close()
         
         except paramiko.AuthenticationException:
-            loggerObj.LogMessage("error","NCC Authentication failed - Invalid username or password")
+            loggerObj.LogMessage("error",file_name + " :: NCC Authentication failed - Invalid username or password")
             return False,("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
         except paramiko.SSHException, e:
-            loggerObj.LogMessage("error","NCC SSH Exception" + e.message)
+            loggerObj.LogMessage("error",file_name + " :: NCC SSH Exception" + e.message)
             return False,("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command again.")
         except socket.error, e:
-            loggerObj.LogMessage("error","NCC Socket Error" + e.message)
+            loggerObj.LogMessage("error",file_name + " :: NCC Socket Error" + e.message)
             return False,(str(e)+"\n\nPlease run \"ncc setup\" command again.")

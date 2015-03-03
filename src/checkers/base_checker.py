@@ -8,6 +8,8 @@ from utility import Logger
 
 loggerObj = Logger()
 
+file_name = os.path.basename(__file__)
+
 def check(func):
     def wrapper(*args, **kwargs):
         args[0].reporter.notify_progress("Running " + func.__name__)
@@ -29,7 +31,7 @@ class CheckerBase:
         self.reporter = None
         self.checks=[]
         self.result = CheckerResult(name)
-        loggerObj.LogMessage("info","Initialized Checker "+str(CheckerResult(name)))
+        loggerObj.LogMessage("info",file_name + " :: Initialized Checker "+name)
         self.realtime_results = {}
 
     @abc.abstractmethod
@@ -70,14 +72,14 @@ class CheckerBase:
             authconfig = json.load(fp)
             fp.close()
             auth=authconfig[checker]
-            loggerObj.LogMessage("info","Successfully initialized auth.conf")
+            loggerObj.LogMessage("info",file_name + " :: Successfully initialized auth.conf")
         except ValueError as e:
             print checker+ " not configured"
-            loggerObj.LogMessage("error","Failed to initialize auth.conf:: " + e.message)
+            loggerObj.LogMessage("error",file_name + " :: Failed to initialize auth.conf," + e.message)
             self.setup()
         except Exception as e:
             print checker+ " not configured"
-            loggerObj.LogMessage("error","Failed to initialize auth.conf:: " + e.message)
+            loggerObj.LogMessage("error",file_name + " :: Failed to initialize auth.conf," + e.message)
             self.setup()
         return auth
  
@@ -91,12 +93,12 @@ class CheckerBase:
             fp.close()
             
         except ValueError as e:
-            loggerObj.LogMessage("error","Failed to update auth.conf:: " + e)
+            loggerObj.LogMessage("error",file_name + " :: Failed to update auth.conf," + e)
             
         authconfig[checker_name]=data
         auth_path=os.path.join(os.path.abspath(os.path.dirname(__file__))+os.path.sep+".."+os.path.sep+"conf"+os.path.sep+"auth.conf")
         fp = open(auth_path,"w")
         json.dump(authconfig, fp, indent=2)
         fp.close()
-        loggerObj.LogMessage("info","Successfully updated auth.conf")
+        loggerObj.LogMessage("info",file_name + " :: Successfully updated auth.conf")
     

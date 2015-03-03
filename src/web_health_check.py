@@ -35,6 +35,8 @@ import reportGenerator
 from deployer_web import initiate_deployment
 import api
     
+file_name = os.path.basename(__file__)
+    
 urls = (
 
     '/v1/deployer/customers/$','api.customers' ,       
@@ -74,12 +76,14 @@ class home:
         loggerObj.LogMessage("info","Available Checkers :"+str(self.checkers.keys()))
         for checker in self.checkers.keys():
             checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
+            loggerObj.LogMessage("info",file_name + " :: Checker configration path - " + checker_conf_path)
             fp = open(checker_conf_path, 'r')
             checker_config = json.load(fp)
             fp.close()
             checker_module = self.checkers[checker]
             self.reporter = DefaultConsoleReporter(checker)
             checker_module.configure(checker_config, self.reporter)
+            loggerObj.LogMessage("info",file_name + " :: Configured checker "+checker)
 
     def GET(self):
         return render.home(self.checkers)
@@ -95,12 +99,14 @@ class index:
         
         for checker in self.checkers.keys():
             checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
+            loggerObj.LogMessage("info",file_name + " :: Checker configration path - " + checker_conf_path)
             fp = open(checker_conf_path, 'r')
             checker_config = json.load(fp)
             fp.close()
             checker_module = self.checkers[checker]
             self.reporter = DefaultConsoleReporter(checker)
             checker_module.configure(checker_config, self.reporter)
+            loggerObj.LogMessage("info",file_name + " :: Configured checker "+checker)
 
     def GET(self):
         return render.index(self.checkers)
@@ -120,6 +126,7 @@ class config:
                           "vc_pwd": Security.encrypt(data['vCenter Server Password'])
                         }
             CheckerBase.save_auth_into_auth_config("vc",conf_data)
+            loggerObj.LogMessage("info",file_name + " :: Configured auth.conf for vc")
             status = {"Configuration": "Success"}
             return json.dumps(status)
 
@@ -130,6 +137,7 @@ class config:
                           }
 
             CheckerBase.save_auth_into_auth_config("ncc",conf_data)
+            loggerObj.LogMessage("info",file_name + " :: Configured auth.conf for ncc")            
             status = {"Configuration": "Success"}        
             return json.dumps(status)
         
@@ -144,6 +152,7 @@ class config:
                           }
 
             CheckerBase.save_auth_into_auth_config("view",conf_data)
+            loggerObj.LogMessage("info",file_name + " :: Configured auth.conf for view")            
             status = {"Configuration": "Success"}        
             return json.dumps(status)           
 
@@ -162,12 +171,14 @@ class connect:
         if data['checker'] == "vc":
             ret , msg = self.checkers['vc'].check_connectivity(data['vCenter Server IP'],data['vCenter Server Username'],Security.encrypt(data['vCenter Server Password']),data['vCenter Server Port'])
             if ret:
+                loggerObj.LogMessage("info",file_name + " :: vc connection successfull")                            
                 status['Connection'] = "Success"
             return json.dumps(status)
     
         if data['checker'] == "ncc":
             ret , msg = self.checkers['ncc'].check_connectivity(data['CVM IP'],data['CVM SSH Host Username'],Security.encrypt(data['CVM SSH Host Password']))
             if ret:
+                loggerObj.LogMessage("info",file_name + " :: ncc connection successfull")                            
                 status['Connection'] = "Success"
             return json.dumps(status)
          
@@ -175,6 +186,7 @@ class connect:
             ret , msg = self.checkers['view'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
             vc_ret , vc_msg = self.checkers['view'].check_view_vc_connectivity(data['VC Server'],data['VC User'],Security.encrypt(data['VC Password']),data['VC Port'])
             if ret and vc_ret:
+                loggerObj.LogMessage("info",file_name + " :: view connection successfull")                            
                 status['Connection'] = "Success"
             return json.dumps(status)        
         
@@ -189,12 +201,15 @@ class runChecks:
         
         for checker in self.checkers.keys():
             checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
+            loggerObj.LogMessage("info",file_name + " :: Checker configration path - " + checker_conf_path)            
             fp = open(checker_conf_path, 'r')
             checker_config = json.load(fp)
             fp.close()
             checker_module = self.checkers[checker]
             self.reporter = DefaultConsoleReporter(checker)
             checker_module.configure(checker_config, self.reporter)
+            loggerObj.LogMessage("info",file_name + " :: Configured checker "+checker)
+
 
     def POST(self):
         data = web.input()
@@ -244,12 +259,16 @@ class runChecks:
             checker_module = self.checkers[checker]
             
             if checker == "vc":
+                loggerObj.LogMessage("info",file_name + " :: Executing vc checks")
                 result = checker_module.execute(group)
             elif checker == 'ncc':
+                loggerObj.LogMessage("info",file_name + " :: Executing ncc checks")
                 result = checker_module.execute(group)
             elif checker == 'view':
+                loggerObj.LogMessage("info",file_name + " :: Executing view checks")
                 result = checker_module.execute(group)    
-            else:        
+            else: 
+                loggerObj.LogMessage("info",file_name + " :: Executing run_all")       
                 result = checker_module.execute(["run_all"])
             
             results[checker] = result.to_dict()
@@ -258,12 +277,17 @@ class runChecks:
         outfile = open(os.getcwd() + os.path.sep +"reports"+os.path.sep+"results.json", 'w')
         json.dump(results, outfile, indent=2)
         outfile.close()
+        loggerObj.LogMessage("info",file_name + " :: Results JSON generated successfully")
                     
         #Generate CSV Reports
         CSVReportGenerator(results,cur_dir)
+        loggerObj.LogMessage("info",file_name + " :: CSV report generated successfully")
+        
         
         #Generate PDF Report based on results. 
         reportFileName = PDFReportGenerator(results,cur_dir)
+        loggerObj.LogMessage("info",file_name + " :: PDF report generated successfully")
+        
         if taskId is not None:
             taskId = api.model.update_task(int(taskId), "Completed",reportFileName)
         return "Execution Complete"

@@ -12,6 +12,11 @@ from operator import itemgetter
 import csv, time
 import sys
 import os
+from utility import Logger
+
+loggerObj = Logger()
+
+file_name = os.path.basename(__file__)
 
 def exit_with_message(message):
     print message+"\n"
@@ -34,6 +39,7 @@ def usage(checkers, message=None):
 
 
 def main():
+    loggerObj.LogMessage("info",file_name + " :: Starting Healthcheck - inside main()")
     checkers = {}
     for checker_class in CheckerBase.__subclasses__():
         checker = checker_class()
@@ -67,12 +73,14 @@ def main():
     # in case some module is not configured properly
     for checker in checkers_list:
         checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
+        loggerObj.LogMessage("info",file_name + " :: Checker configration path " + checker_conf_path)
         fp = open(checker_conf_path, 'r')
         checker_config = json.load(fp)
         fp.close()
         checker_module = checkers[checker]
         reporter = DefaultConsoleReporter(checker)
         checker_module.configure(checker_config, reporter)
+        loggerObj.LogMessage("info",file_name + " :: Configured checker "+checker)
  
     results = {}
  
@@ -91,6 +99,7 @@ def main():
             
         
     healthcheckreportfolder=os.getcwd() + os.path.sep +"reports"
+    loggerObj.LogMessage("info",file_name + " :: HealthCheck report folder - " + healthcheckreportfolder)
     if not os.path.exists(healthcheckreportfolder):
         os.mkdir(healthcheckreportfolder) 
  
@@ -99,12 +108,17 @@ def main():
     outfile = open(os.getcwd() + os.path.sep +"reports"+os.path.sep+"results.json", 'w')
     json.dump(results, outfile, indent=2)
     outfile.close()
+    loggerObj.LogMessage("info",file_name + " :: Results JSON generated successfully")
     
     #Generate CSV Reports
     CSVReportGenerator(results)
+    loggerObj.LogMessage("info",file_name + " :: CSV report generated successfully")
+ 
         
     #Generate PDF Report based on results. 
     PDFReportGenerator(results)
+    loggerObj.LogMessage("info",file_name + " :: PDF report generated successfully")
+
      
 
 if __name__ == "__main__":
