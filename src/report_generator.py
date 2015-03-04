@@ -17,7 +17,7 @@ import copy
 import time
 import os
 import csv
-
+from utility import Logger
 
 # registering the font colors for each message type
 PSstyle1 = ParagraphStyle
@@ -60,6 +60,11 @@ stylesheet.add(PSstyle1(name='Warning',
                       fontName='Times-Roman'))
 WarningMsgStyle = copy.deepcopy(stylesheet['Warning'])
 
+
+loggerObj = Logger()
+
+file_name = os.path.basename(__file__)
+
 # Function for returning the font color based on the message
 def getFontColor(status):
     
@@ -79,6 +84,7 @@ def _header_footer(canvas, doc):
         canvas.saveState()
         # Header
         png_path=os.path.dirname(__file__)+os.path.sep+'static'+os.path.sep+'images'+os.path.sep+'nutanixlogo.png'
+        loggerObj.LogMessage("info",file_name + " :: PNG File path - " + png_path)        
         header = Image(png_path, height=0.50 * inch, width=5 * cm)
         w, h = header.wrap(doc.width, doc.topMargin)
         header.drawOn(canvas, doc.leftMargin, doc.height + doc.topMargin - h)
@@ -95,6 +101,7 @@ def _header_footer(canvas, doc):
         
 # Function to generate report for VC        
 def vc_report(story, checks_list,vCenterIP):
+    loggerObj.LogMessage("info",file_name + " :: vc_report() Enter")    
     count = 0
     for checks in checks_list:
             count += 1
@@ -316,10 +323,13 @@ def vc_report(story, checks_list,vCenterIP):
             story.append(Spacer(1, 0.05 * inch))
             story.append(checks_property_table)
             story.append(Spacer(1, 0.3 * inch))
+
+    loggerObj.LogMessage("info",file_name + " :: vc_report() Exit")    
     
             
 # Function to generate report for NCC
 def ncc_report(story, checks_list):
+    loggerObj.LogMessage("info",file_name + " :: ncc_report() Enter")        
     property_lenght = len(checks_list)
     checks_property_data = [['Properties Tested', 'Status']]
     for checks in checks_list:
@@ -345,10 +355,13 @@ def ncc_report(story, checks_list):
     story.append(Spacer(1, 0.05 * inch))
     story.append(checks_property_table)
     story.append(Spacer(1, 0.3 * inch))
+    
+    loggerObj.LogMessage("info",file_name + " :: vc_report() Exit")    
 
 
 # Function to generate report for VIEW
 def view_report(story, checks_list):
+    loggerObj.LogMessage("info",file_name + " :: view_report() Enter")        
     count = 0
     for checks in checks_list:
             count += 1
@@ -397,8 +410,14 @@ def view_report(story, checks_list):
             story.append(Spacer(1, 0.05 * inch))
             story.append(checks_property_table)
             story.append(Spacer(1, 0.3 * inch))
+            
+    loggerObj.LogMessage("info",file_name + " :: view_report() Exit")    
+            
     
-def PDFReportGenerator(resultJson,curdir=None):   
+def PDFReportGenerator(resultJson,curdir=None):
+    file_name = os.path.basename(__file__)
+    loggerObj.LogMessage("info",file_name + " :: PDFReportGenerator() Enter")    
+     
     # Adding timestamp to the report name  
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     
@@ -407,6 +426,8 @@ def PDFReportGenerator(resultJson,curdir=None):
         pdffilename = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.pdf'
     else:
         pdffilename =  curdir + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.pdf' 
+
+    loggerObj.LogMessage("info",file_name + " :: PDF report path is - " + pdffilename)    
         
     doc = SimpleDocTemplate(pdffilename, pagesizes=letter, format=landscape, rightMargin=inch / 8, leftMargin=inch / 12, topMargin=inch, bottomMargin=inch / 4)
     story = []
@@ -446,10 +467,13 @@ def PDFReportGenerator(resultJson,curdir=None):
         if resultJson[checkers].get('checks') is None:
             exit()
         if checkers == 'vc':
+            loggerObj.LogMessage("info",file_name + " :: PDF report for vc")                    
             vc_report(story, resultJson[checkers].get('checks'),resultJson[checkers].get('ip'))
         if checkers == 'ncc':
+            loggerObj.LogMessage("info",file_name + " :: PDF report for ncc")                    
             ncc_report(story, resultJson[checkers].get('checks'))
         if checkers == 'view':
+            loggerObj.LogMessage("info",file_name + " :: PDF report for view")                    
             view_report(story, resultJson[checkers].get('checks'))            
     doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
     
@@ -459,18 +483,26 @@ def PDFReportGenerator(resultJson,curdir=None):
     if curdir is None:
         print "\nReport ("+pdf_report_name+") generated successfully at :: " + os.getcwd() + os.path.sep +"reports"
     else:
-        print "\nReport ("+pdf_report_name+") generated successfully at :: " + curdir + os.path.sep +"reports"  
+        print "\nReport ("+pdf_report_name+") generated successfully at :: " + curdir + os.path.sep +"reports" 
+    
+    loggerObj.LogMessage("info",file_name + " :: PDF report generated successfully")        
+    loggerObj.LogMessage("info",file_name + " :: PDFReportGenerator() Exit")    
+         
     return pdf_report_name
 
 
 
 def CSVReportGenerator(resultJson,curdir=None): 
+    file_name = os.path.basename(__file__)
+    loggerObj.LogMessage("info",file_name + " :: CSVReportGenerator() Enter")    
        
     timestamp = time.strftime("%Y%m%d-%H%M%S")  
     if curdir is None:
         csvfilename = os.getcwd() + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'
     else:
         csvfilename =  curdir + os.path.sep +"reports" + os.path.sep+ 'Healthcheck-' + timestamp + '.csv'      
+
+    loggerObj.LogMessage("info",file_name + " :: CSV report path is - " + csvfilename)    
         
     rows = []
     details = []
@@ -481,7 +513,7 @@ def CSVReportGenerator(resultJson,curdir=None):
         details.append(["Category",allChecks['Name']])
         details.append(["User Name",allChecks['user']])
         details.append(["Timestamp",str(time.strftime("%B %d, %Y %H:%M:%S"))])
-        details.append(["Overall Check Status",allChecks['Status']])
+        #details.append(["Overall Check Status",allChecks['Status']])
             
         try:
             for xcheck in allChecks['checks']:
@@ -525,12 +557,14 @@ def CSVReportGenerator(resultJson,curdir=None):
                 #It means- No checks were executed for this checker. 
             continue
         
-    if len(rows) > 1:
-        details.append([None])
-        file_name = csvfilename
-        csv_file = open(file_name ,'wb')
-        csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        csv_writer.writerows(details)
-        csv_writer.writerows(rows)
-        csv_file.close()
+#    if len(rows) > 1:
+    details.append([None])
+    csv_file_name = csvfilename
+    csv_file = open(csv_file_name ,'wb')
+    csv_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+    csv_writer.writerows(details)
+    csv_writer.writerows(rows)
+    csv_file.close()
+
+    loggerObj.LogMessage("info",file_name + " :: CSVReportGenerator() Exit")    
              
