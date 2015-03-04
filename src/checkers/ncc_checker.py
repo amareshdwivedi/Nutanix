@@ -99,9 +99,15 @@ class NCCChecker(CheckerBase):
             
         #new command that run only health_checks for ncc
         cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false health_checks " + " ".join(args) or self.config['ncc_path']+" health_checks "
+        
+        # JIRA GSO-535
+        # Exporting sbin path as As to run network_checks and data_protection_checks of NCC. 
+        # sbin is required in PATH as NCC execute /sbin/ route & /sbin/ifconfig command while executing network_checks and data_protection_checks respectively.  
+        export_env="export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin && "
+        
         #old command
         #cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false " + " ".join(args) or self.config['ncc_path']
-        cmd = ntnx_env + cmd
+        cmd =  ntnx_env + export_env +cmd
         loggerObj.LogMessage("info",file_name + " :: NCC Command to execute -  " + str(cmd))
         status_text = {0 : "Done",1 : "Done", 3 : "Pass",4: "Pass",5: "Warn",6: "Fail", 7: "Err"}
         time.sleep(1)
