@@ -394,7 +394,7 @@ def view_report(story, checks_list):
                     
                 checks_property_data.append([Paragraph(actual_result.replace(';','<br/>'), NormalMessageStyle),
                                              Paragraph(expected_result.replace(';','<br/>'), NormalMessageStyle),
-                                             Paragraph(check_status, NormalMessageStyle),
+                                             Paragraph(check_status,getFontColor(check_status)),
                                              Paragraph(severity_info, NormalMessageStyle)])
 
             checks_property_table = LongTable(checks_property_data, colWidths=[2.5*inch,2.75*inch,1*inch,0.75*inch])

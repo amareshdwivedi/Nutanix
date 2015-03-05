@@ -115,6 +115,10 @@ $def with (checkers,msg="")
 					                        	jQuery(".result"+i+"").addClass("success");
 					                        }else if(jQuery(".result"+i+"").html()=="Fail"){
 					                        	jQuery(".result"+i+"").addClass("fail");
+					                        }else if(jQuery(".result"+i+"").html()=="Warn"){
+					                        	jQuery(".result"+i+"").addClass("warn");
+					                        }else if(jQuery(".result"+i+"").html()=="Err"){
+					                        	jQuery(".result"+i+"").addClass("err");
 					                        }
 				                        var h1 = jQuery('#logs')[0].scrollHeight,h2 = jQuery('#logs').height();
 				                        jQuery('#logs').scrollTop(h1 - h2);	
@@ -140,9 +144,9 @@ $def with (checkers,msg="")
 			                        		"<div class='col-lg-5 col-md-5 col-sm-5'>"+obj.view.checks[i].Properties[j].Expected.replace(/;/g,'<br/>')+"</div>"+
 			                        		"<div class='col-lg-2 col-md-2 col-sm-2  result"+i+j+"'>"+obj.view.checks[i].Properties[j].Status+"</div></div>");
 			                        		
-			                        		if(jQuery(".result"+i+j+"").html()=="PASS"){
+			                        		if(jQuery(".result"+i+j+"").html()=="Pass"){
 					                        	jQuery(".result"+i+j+"").addClass("success");
-					                        }else if(jQuery(".result"+i+j+"").html()=="FAIL"){
+					                        }else if(jQuery(".result"+i+j+"").html()=="Fail"){
 					                        	jQuery(".result"+i+j+"").addClass("fail");
 					                        }
 		                        		}

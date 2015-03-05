@@ -211,7 +211,12 @@ input[type="text"], input[type="password"], select {background-color: #fff;
 .success{
     color:#42b663 !important;
 }
-
+.warn{
+    color:#800080 !important;
+}
+.err{
+    color:#ffff00 !important;
+}
 .loader{ display:none; margin-left: 10px;}
 .modal-dialog{ width:300px;}
 .modal-header, .modal-footer{ padding:10px 15px;}
