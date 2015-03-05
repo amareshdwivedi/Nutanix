@@ -375,17 +375,28 @@ class isoImages:
         try:
             data = json.loads(web.data())
             headers = {'content-type': 'application/json'}
+            nos_url = "http://"+data['foundationVM']+":8000/foundation/enumerate_nos_isos"
+            hyp_url = "http://"+data['foundationVM']+":8000/foundation/enumerate_hypervisor_isos"
             
-            iso_url = ''
-            if data['imageType'] == "nos":
-                iso_url = "http://"+data['foundationVM']+":8000/foundation/enumerate_nos_isos"
-            if data['imageType'] == "hypervisor":
-                iso_url = "http://"+data['foundationVM']+":8000/foundation/enumerate_hypervisor_isos"
-            
-            response = requests.get(iso_url)
+            nos_response = requests.get(nos_url)
+            hyp_response = requests.get(hyp_url)
+            print nos_response, type(nos_response)
+            print hyp_response, type(hyp_response)
             final_data['response'] = httplib.OK
-            final_data['images'] = response.text
+            
+            nos_images = []
+            for item in json.loads(nos_response.text):
+                nos_images.append(item)
+
+            hyp_images = []
+            for item in json.loads(hyp_response.text):
+                hyp_images.append(item)
+            
+            final_data['images'] = {}
+            final_data['images']['nos'] = nos_images
+            final_data['images']['hypervisor'] = hyp_images
         except:
+            print sys.exc_info()
             final_data['response'] = httplib.NOT_FOUND
             final_data['images'] = []
         return json.dumps(final_data)
