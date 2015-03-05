@@ -15,13 +15,15 @@ import sys
 import fnmatch
 import datetime
 import getpass
-from utility import Validate,Security
+from utility import Validate,Security,Logger
 from colorama import Fore
 import web
 from web import form
 import time
 
+loggerObj = Logger()
 
+file_name = os.path.basename(__file__)
 
 def exit_with_message(message):
     print message
@@ -122,17 +124,20 @@ class VCChecker(CheckerBase):
         vc_ip=vc_ip.strip()
         if vc_ip == "":
             if(current_vc_ip == "Not Set"):
+                loggerObj.LogMessage("error",file_name + " :: Error: Set vCenter Server IP.")        
                 exit_with_message("Error: Set vCenter Server IP.")
             vc_ip=current_vc_ip
         
         if Validate.valid_ip(vc_ip) == False:
-            exit_with_message("\nError: Invalid vCenter Server IP address")
+            loggerObj.LogMessage("error",file_name + " :: Error: Invalid vCenter Server IP address.")            
+            exit_with_message("\nError: Invalid vCenter Server IP address.")
                 
         current_vc_user=self.authconfig['vc_user'] if ('vc_user' in self.authconfig.keys()) else "Not Set"
         vc_user=raw_input("Enter vCenter Server Username [default: "+current_vc_user+"]: ")
         vc_user=vc_user.strip()
         if vc_user == "":
             if(current_vc_user == "Not Set"):
+                loggerObj.LogMessage("error",file_name + " :: Error: Set vCenter Server Username.")            
                 exit_with_message("Error: Set vCenter Server Username.")
             vc_user=current_vc_user
             
@@ -142,6 +147,7 @@ class VCChecker(CheckerBase):
         
         if new_vc_pwd == "":
             if(current_pwd == "Not Set"):
+                loggerObj.LogMessage("error",file_name + " :: Error: Set vCenter Server Password.")                            
                 exit_with_message("Error: Set vCenter Server Password.")
             vc_pwd = current_pwd
         else:
@@ -155,12 +161,14 @@ class VCChecker(CheckerBase):
 
         if vc_port == "":
             if(current_vc_port == "Not Set"):
+                loggerObj.LogMessage("error",file_name + " :: Error: Set vCenter Server Port.")                                            
                 exit_with_message("Error: Set vCenter Server Port.")
             vc_port=int(current_vc_port)
         else:
             vc_port=int(vc_port)
         if isinstance(vc_port, int ) == False:
-            exit_with_message("\nError: Port number is not a numeric value")
+            loggerObj.LogMessage("error",file_name + " :: Error: Port number is not a numeric value.")                                                        
+            exit_with_message("\nError: Port number is not a numeric value.")
         
         current_cluster=self.authconfig['cluster'] if ('cluster' in self.authconfig.keys()) else "Not Set"
         cluster=raw_input("Enter Cluster Name [default: "+current_cluster+"] {multiple names separated by comma(,); blank to include all clusters}: ")
@@ -196,10 +204,12 @@ class VCChecker(CheckerBase):
             si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
             return True,None
         except vim.fault.InvalidLogin:
+            loggerObj.LogMessage("error",file_name + " :: Error : Invalid vCenter Server Username or password.")                                                                   
             return False,"Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command again!!"
         except ConnectionError as e:
+            loggerObj.LogMessage("error",file_name + " :: Error : Connection Error.")                                                                    
             return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
-        finally:
+        finally:   
             Disconnect(si)
     
     def execute(self, args):
@@ -248,8 +258,10 @@ class VCChecker(CheckerBase):
         try:
             self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=Security.decrypt(self.authconfig['vc_pwd']), port=self.authconfig['vc_port'])
         except vim.fault.InvalidLogin:
+            loggerObj.LogMessage("error",file_name + " :: Error : Invalid vCenter Server Username or password.")                                                                            
             exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command to configure vc")
         except ConnectionError as e:
+            loggerObj.LogMessage("error",file_name + " :: Error : Connection Error.")                                                                         
             exit_with_message("Error : Connection Error"+"\n\nPlease run \"vc setup\" command to configure vc")
         
         passed_all = True
@@ -539,6 +551,7 @@ class VCChecker(CheckerBase):
    
     @checkgroup("cluster_checks", "Cluster Advance Settings das.ignoreInsufficientHbDatastore",["availability","post-install"],"True")
     def check_cluster_das_ignoreInsufficientHbDatastore(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_das_ignoreInsufficientHbDatastore - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         cluster_map = self.get_vc_property(path)
         passed = True
@@ -577,12 +590,15 @@ class VCChecker(CheckerBase):
                             passed = False
                             self.reporter.notify_progress(self.reporter.notify_checkLog,  clusters_key +'@'+cluster_name+ "=Not-Configured (Expected: =true)", (False and "PASS" or "FAIL"))
                             message += ", "+clusters_key +"=Not-Configured (Expected: =true)#"+(False and "PASS" or "FAIL")
+                            
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_das_ignoreInsufficientHbDatastore - Exit")                                                                                                                                                                          
         return passed, message,path
    
    
     
     @checkgroup("cluster_checks", "Validate Datastore Heartbeat", ["availability"],"Heatbeat Datastore Name")
     def check_datastore_heartbeat(self):
+        loggerObj.LogMessage("info",file_name + " :: check_datastore_heartbeat - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         cluster_map = self.get_vc_property(path)
         passed = True
@@ -613,48 +629,54 @@ class VCChecker(CheckerBase):
                         names=','.join(datastore_names)
                         self.reporter.notify_progress(self.reporter.notify_checkLog,clusters_key+"@"+cluster_name+"="+names+" (Expected: =Datastore Name) " , (True and "PASS" or "FAIL"))
                         message += ", " +clusters_key+"@"+cluster_name+"="+names+" (Expected: =Datastore Name) "+"#"+(True and "PASS" or "FAIL")
+                        
+        loggerObj.LogMessage("info",file_name + " :: check_datastore_heartbeat - Exit")                                                                                                                                                                      
         return passed, message,path
     
     
     @checkgroup("cluster_checks", "VSphere Cluster Nodes in Same Version", ["availability"],"All Nodes in Same Version")
     def check_vSphere_cluster_nodes_in_same_version(self):
-            path='content.rootFolder.childEntity'
-            root = self.get_vc_property(path) or {}
-            message = ""
-            passed_all = True
-    
-            for dc, dcInfo in root.iteritems():
-                for xdc in dcInfo:
-                    for xcluster in xdc.hostFolder.childEntity:
-                        if self.authconfig['cluster']!='':
-                            if xcluster.name not in self.authconfig['cluster']:
-                                #print "skipping "+xcluster.name
-                                continue
-                        passed = True
-                        mult_vers_flag, versions = False, [] 
-                        hosts = xcluster.host
-                                                   
-                        for xhost in hosts:
-                            nodeInfo = xhost.config.product 
-                            if len(versions) == 0:
+        loggerObj.LogMessage("info",file_name + " :: check_vSphere_cluster_nodes_in_same_version - Enter")                                                                                                        
+        path='content.rootFolder.childEntity'
+        root = self.get_vc_property(path) or {}
+        message = ""
+        passed_all = True
+
+        for dc, dcInfo in root.iteritems():
+            for xdc in dcInfo:
+                for xcluster in xdc.hostFolder.childEntity:
+                    if self.authconfig['cluster']!='':
+                        if xcluster.name not in self.authconfig['cluster']:
+                            #print "skipping "+xcluster.name
+                            continue
+                    passed = True
+                    mult_vers_flag, versions = False, [] 
+                    hosts = xcluster.host
+                                               
+                    for xhost in hosts:
+                        nodeInfo = xhost.config.product 
+                        if len(versions) == 0:
+                            versions.append(nodeInfo.version)
+                        else:
+                            if nodeInfo.version not in versions:
+                                passed = False
                                 versions.append(nodeInfo.version)
-                            else:
-                                if nodeInfo.version not in versions:
-                                    passed = False
-                                    versions.append(nodeInfo.version)
-                                    mult_vers_flag = True
-                        
-                        if len(versions) == 0: # to test weather any HOST configured to cluster
-                            mult_vers_flag = True
-                            versions = "Not-Configured"
-                        
-                        self.reporter.notify_progress(self.reporter.notify_checkLog,"Datacenters."+xdc.name+"."+xcluster.name + "=" + str(versions) + " (Expected: =Multiple versions not present) " , (not mult_vers_flag and "PASS" or "FAIL"))
-                        message += ", "+"@Datacenters@"+xdc.name+"@"+xcluster.name + "="+str(versions)+" (Expected: =Multiple versions not present)#"+(not mult_vers_flag and "PASS" or "FAIL")   
-                        passed_all = passed_all and passed    
-            return passed_all, message,path
+                                mult_vers_flag = True
+                    
+                    if len(versions) == 0: # to test weather any HOST configured to cluster
+                        mult_vers_flag = True
+                        versions = "Not-Configured"
+                    
+                    self.reporter.notify_progress(self.reporter.notify_checkLog,"Datacenters."+xdc.name+"."+xcluster.name + "=" + str(versions) + " (Expected: =Multiple versions not present) " , (not mult_vers_flag and "PASS" or "FAIL"))
+                    message += ", "+"@Datacenters@"+xdc.name+"@"+xcluster.name + "="+str(versions)+" (Expected: =Multiple versions not present)#"+(not mult_vers_flag and "PASS" or "FAIL")   
+                    passed_all = passed_all and passed    
+
+        loggerObj.LogMessage("info",file_name + " :: check_vSphere_cluster_nodes_in_same_version - Exit")                                                                                                                                                          
+        return passed_all, message,path
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress1",["availability","post-install"],"IP Address of any Nutanix CVM")
     def check_cluster_das_isolationaddress1(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_das_isolationaddress1 - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         all_cluster = self.get_vc_property(path) or {}
         message = ""
@@ -717,10 +739,13 @@ class VCChecker(CheckerBase):
                 self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter +"@"+ "=Not-Configured (Expected: =IP Address of any Nutanix CVM)", (False and "PASS" or "FAIL"))
                 message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             passed_all = passed_all and passed
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_das_isolationaddress1 - Exit")                                                                                                                                                      
         return passed_all , message,path
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2",["availability"],"IP Address of any Nutanix CVM")
     def check_cluster_das_isolationaddress2(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_das_isolationaddress2 - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         all_cluster = self.get_vc_property(path) or {}
         message = ""
@@ -783,10 +808,13 @@ class VCChecker(CheckerBase):
                 message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             
             passed_all = passed_all and passed
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_das_isolationaddress2 - Exit")                                                                                                                                                      
         return passed_all , message,path
     
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress3",["availability"],"IP Address of any Nutanix CVM")
     def check_cluster_das_isolationaddress3(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_das_isolationaddress3 - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         all_cluster = self.get_vc_property(path) or {}
         message = ""
@@ -849,11 +877,14 @@ class VCChecker(CheckerBase):
                 message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             
             passed_all = passed_all and passed
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_das_isolationaddress3 - Exit")                                                                                                                                                      
         return passed_all , message,path
  
     
     @checkgroup("cluster_checks", "Cluster Load Balanced",["performance"],"Load Balanced")
     def check_cluster_load_balanced(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_load_balanced - Enter")                                                                                                        
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.summary.currentBalance'
         current_balance = self.get_vc_property(path_curr)
         path_tar='content.rootFolder.childEntity.hostFolder.childEntity.summary.targetBalance'
@@ -874,11 +905,13 @@ class VCChecker(CheckerBase):
                 message += ", "+current_key + "="+str(cur_bal)+" (Expected: =Less than "+str(tar_bal)+")#FAIL"             
             
             passed_all = passed_all and passed
-        
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_load_balanced - Exit")                                                                                                                                                      
         return passed_all , message,path_curr
     
     @checkgroup("cluster_checks", "Storage DRS",["performance"],"False")
     def check_cluster_storgae_drs(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_storgae_drs - Enter")                                                                                                        
         path_curr='content.rootFolder.childEntity.datastoreFolder.childEntity'
         storage_clusters_map = self.get_vc_property(path_curr)
         
@@ -930,11 +963,13 @@ class VCChecker(CheckerBase):
             
               
             passed_all = passed_all and passed
-        
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_storgae_drs - Exit")                                                                                                                                                      
         return passed_all , message,path_curr+".datastore"
     
     @checkgroup("cluster_checks", "Number of DRS Faults",["performance"],"Number of DRS Faults")
     def check_cluster_drs_fault_count(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_drs_fault_count - Enter")                                                                                                        
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.drsFault'
         clusters_map = self.get_vc_property(path_curr)
         
@@ -951,11 +986,13 @@ class VCChecker(CheckerBase):
             message += ", "+datacenter + "="+str(count)+" (Expected: =0)#"+((True if count ==0 else False) and "PASS" or "FAIL") 
             passed = (True if count ==0 else False)
             passed_all = passed_all and passed
-        
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_drs_fault_count - Exit")                                                                                                                                                      
         return passed_all , message,path_curr
     
     @checkgroup("cluster_checks", "Number of Cluster Events",["availability","manageability"],"Number of Cluster Events")
     def check_cluster_events_count(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_events_count - Enter")                                                                                                        
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.configIssue'
         clusters_map = self.get_vc_property(path_curr)
         
@@ -972,11 +1009,13 @@ class VCChecker(CheckerBase):
             message += ", "+datacenter + "="+str(count)+" (Expected: =0)#"+((True if count ==0 else False) and "PASS" or "FAIL") 
             passed = (True if count ==0 else False)
             passed_all = passed_all and passed
-        
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_events_count - Exit")                                                                                                                                                      
         return passed_all , message,path_curr    
     
     @checkgroup("cluster_checks", "Cluster Memory Utilization %",["performance"],"Memory Consumed %")
     def check_cluster_memory_utilization(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_memory_utilization - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.summary'
         clusters_summary = self.get_vc_property(path)
         message = ""
@@ -1002,10 +1041,13 @@ class VCChecker(CheckerBase):
                 message += ", "+clusters_key + "=total_memory_is_zero (Expected: =memory-consumed-%)#"+(False and "PASS" or "FAIL")
              
             passed_all = passed_all and passed
+            
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_memory_utilization - Exit")                                                                                                                                                          
         return passed_all , message,path
     
     @checkgroup("cluster_checks", "Cluster Memory Overcommitment",["performance"],"Memory Oversubscrption %")
     def check_cluster_memory_overcommitment(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_memory_overcommitment - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
         message = ""
@@ -1043,10 +1085,13 @@ class VCChecker(CheckerBase):
                     message += ", "+clusters_key+"@" +cluster_name+ "=total_memory_is_zero (Expected: =memory-oversubscrption-%)#"+(False and "PASS" or "FAIL")
                     
         passed_all = passed_all and passed
+        
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_memory_overcommitment - Exit")                                                                                                                                                      
         return passed_all , message,path
     
     @checkgroup("cluster_checks", "Ratio pCPU/vCPU",["performance"],"pCPU/vCPU ratio")
     def check_cluster_ratio_pCPU_vCPU(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_ratio_pCPU_vCPU - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
         message = ""
@@ -1080,10 +1125,13 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, clusters_key+"@" +cluster_name+ "=pCPU_is_zero (Expected: =pCPU/vCPU)", (False and "PASS" or "FAIL"))
                     message += ", "+clusters_key+"@" +cluster_name+ "=pCPU_is_zero (Expected: =pCPU/vCPU)#"+(False and "PASS" or "FAIL")
                 passed_all = passed_all and passed
+                
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_ratio_pCPU_vCPU - Exit")                                                                                                                                                              
         return passed_all , message,path
     
     @checkgroup("cluster_checks", "Admission Control Policy - Percentage Based on Nodes in the Cluster",["performance","availability"],"True")
     def check_cluster_acpPercentage_basedOn_nodes(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_acpPercentage_basedOn_nodes - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
         message = ""
@@ -1138,10 +1186,13 @@ class VCChecker(CheckerBase):
                     message += ", "+clusters_key+"@" +cluster_name+ "=true (Expected: =true)#"+(True and "PASS" or "FAIL")
                            
                 passed_all = passed_all and passed
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_acpPercentage_basedOn_nodes - Exit")                                                                                                                                                      
         return passed_all , message,path
     
     @checkgroup("cluster_checks", "Verify reserved memory and cpu capacity versus Admission control policy set",["performance"],"Cluster Failover Resources %")
     def check_cluster_validate_reserverdMemory_and_reservedCPU_vs_acp(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_validate_reserverdMemory_and_reservedCPU_vs_acp - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_map= self.get_vc_property(path)
         message = ""
@@ -1202,10 +1253,13 @@ class VCChecker(CheckerBase):
                 message += ", "+clusters_key+"@" +cluster_name+ "="+msg+" (Expected: =Cluster Failover Resources %)#"+(passed and "PASS" or "FAIL")
 
                 passed_all = passed_all and passed
+
+        loggerObj.LogMessage("info",file_name + " :: check_cluster_validate_reserverdMemory_and_reservedCPU_vs_acp - Exit")                                                                                                                                                      
         return passed_all , message,path
      
     @checkgroup("esxi_checks", "Validate the Directory Services Configuration is set to Active Directory",["security"],"True")
     def check_directory_service_set_to_active_directory(self):
+        loggerObj.LogMessage("info",file_name + " :: check_directory_service_set_to_active_directory - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.config.authenticationManagerInfo.authConfig'
         authenticationStoreInfo = self.get_vc_property(path)
               
@@ -1219,11 +1273,13 @@ class VCChecker(CheckerBase):
                         self.reporter.notify_progress(self.reporter.notify_checkLog, hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) " , (is_active_dir_enabled and "PASS" or "FAIL"))
                         passed = passed and (is_active_dir_enabled and True or False)
                         message += ", " +hostname+"="+str(is_active_dir_enabled) + " (Expected: =True) "+"#"+((is_active_dir_enabled) and "PASS" or "FAIL") 
-              
+
+        loggerObj.LogMessage("info",file_name + " :: check_directory_service_set_to_active_directory - Exit")                                                                                                                                                            
         return passed, message,path
            
     @checkgroup("esxi_checks", "Validate NTP client is set to Enabled and is in the running state",["reliability"],"NTP client is enabled and running.")
     def check_ntp_client_enable_running(self):
+        loggerObj.LogMessage("info",file_name + " :: check_ntp_client_enable_running - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host'
         datacenter_hosts =self.get_vc_property(path)
         message = ""
@@ -1259,11 +1315,13 @@ class VCChecker(CheckerBase):
                     self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )" , (False and "PASS" or "FAIL"))
                     passed = False
                     message += ", " +datacenter+" = NTP Client not configured (Expected: = NTP Client enable: True and running: True )#"+ (False and "PASS" or "FAIL")
-               
+
+        loggerObj.LogMessage("info",file_name + " :: check_ntp_client_enable_running - Exit")                                                                                                                                                             
         return passed, message, path
            
     @checkgroup("esxi_checks", "NTP Servers Configured",["availability"],"NTP Servers are configured")
     def check_ntp_servers_configured(self):
+        loggerObj.LogMessage("info",file_name + " :: check_ntp_servers_configured - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host'
         all_hosts = self.get_vc_property(path)
         message = ""
@@ -1301,12 +1359,13 @@ class VCChecker(CheckerBase):
                     message += ", " +cluster+"=Not-Configured (Expected: =At-least 2 NTP Servers are configured ) #FAIL"     
                     passed = False
                            
-               
+        loggerObj.LogMessage("info",file_name + " :: check_ntp_servers_configured - Exit")                                                                                                                                                             
         return passed_all,message,path
        
            
     @checkgroup("esxi_checks", "Management VMkernel adapter has only Management Traffic Enabled",["performance"],"vMotionTraffic:Disabled<br/> ManagementTraffic:Enabled<br/> FTLogging:Disabled")
     def check_management_vmkernel_has_management_traffic(self):
+        loggerObj.LogMessage("info",file_name + " :: check_management_vmkernel_has_management_traffic - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
               
@@ -1371,10 +1430,13 @@ class VCChecker(CheckerBase):
                     message += ", " +host+"=Management-Adapter-Not-Found (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=Management-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 passed= passed and status
+
+        loggerObj.LogMessage("info",file_name + " :: check_management_vmkernel_has_management_traffic - Exit")                                                                                                                                                      
         return passed, message,path
            
     @checkgroup("esxi_checks", "vMotion VMkernel adapter has only vMotion Traffic Enabled",["performance"],"vMotionTraffic:Enabled<br/> ManagementTraffic:Disabled<br/> FTLogging:Disabled")
     def check_vmotion_vmkernel_has_management_traffic(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vmotion_vmkernel_has_management_traffic - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
               
@@ -1436,12 +1498,14 @@ class VCChecker(CheckerBase):
                     message += ", " +host+"=vMotion-Adapter-Not-Found (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=vMotion-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 passed= passed and status
-       
+
+        loggerObj.LogMessage("info",file_name + " :: check_vmotion_vmkernel_has_management_traffic - Exit")                                                                                                                                                     
         return passed, message,path
            
             
     @checkgroup("esxi_checks", "FTLogging VMkernel adapter has only FTLogging Enabled",["performance"],"vMotionTraffic:Disabled<br/> ManagementTraffic:Disabled<br/> FTLogging:Enabled")
     def check_ftlogging_vmkernel_has_management_traffic(self):
+        loggerObj.LogMessage("info",file_name + " :: check_ftlogging_vmkernel_has_management_traffic - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.virtualNicManager.info.netConfig'
         virtual_nic_mgrs = self.get_vc_property(path)
                 
@@ -1506,11 +1570,14 @@ class VCChecker(CheckerBase):
                     message += ", " +host+"=FTLogging-Adapter-Not-Found (Expected: ="+excepted_result+")"+"#"+(status and "PASS" or "FAIL")
                     self.reporter.notify_progress(self.reporter.notify_checkLog,host+"=FTLogging-Adapter-Not-Found (Expected: ="+excepted_result+")",(status and "PASS" or "FAIL"))
                 passed= passed and status
+
+        loggerObj.LogMessage("info",file_name + " :: check_ftlogging_vmkernel_has_management_traffic - Exit")                                                                                                                                                      
         return passed, message,path
      
      
     @checkgroup("esxi_checks", "Host Profiles are Configured and Compliant",["configurability","manageability","security"],"True")
     def check_hostprofiles_configuration(self):
+        loggerObj.LogMessage("info",file_name + " :: check_hostprofiles_configuration - Enter")                                                                                                        
         profile_list = self.get_vc_property('content.hostProfileManager.profile')
         host_profile_manager = self.get_vc_property('content.hostProfileManager')                 
         message = ""
@@ -1594,12 +1661,14 @@ class VCChecker(CheckerBase):
             passed = True
             self.reporter.notify_progress(self.reporter.notify_checkLog,"No Host Profiles Configured =True (Expected: =True) " , (passed and "PASS" or "FAIL"))
             message += ", "+"No Host Profiles Configured =True (Expected: =True)" +"#"+((passed) and "PASS" or "FAIL")
-                                                 
+
+        loggerObj.LogMessage("info",file_name + " :: check_hostprofiles_configuration - Exit")                                                                                                                                                                                               
         return passed,message,''   
 
      
     @checkgroup("esxi_checks", "Error Messages in ESXi Logs",["configurability","manageability","availability","security"],"Error Count")
     def check_esxi_logs(self):
+        loggerObj.LogMessage("info",file_name + " :: check_esxi_logs - Enter")                                                                                                        
         check_list = ["Failed Logins in auth.log","Error Messages in hostd.log","Error Messages in vmkernel.log","Error Messages in lacp.log"]
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
         clusters_map = self.get_vc_property(path_curr)
@@ -1632,15 +1701,15 @@ class VCChecker(CheckerBase):
                         error_count = 0
                         time.sleep(1)
                         if check_name == "Failed Logins in auth.log":
-                            file_name = "auth.log" 
+                            log_file_name = "auth.log" 
                         elif check_name == "Error Messages in hostd.log":
-                            file_name = "hostd.log"    
+                            log_file_name = "hostd.log"    
                         elif check_name == "Error Messages in vmkernel.log":
-                            file_name = "vmkernel.log"    
+                            log_file_name = "vmkernel.log"    
                         elif check_name == "Error Messages in lacp.log":
-                            file_name = "lacp.log"
+                            log_file_name = "lacp.log"
                
-                        cmd_error = "cat /var/log/"+file_name+" | grep \"Error\" | grep -v \"User \'root\' running command\""        
+                        cmd_error = "cat /var/log/"+log_file_name+" | grep \"Error\" | grep -v \"User \'root\' running command\""        
                            
                         stdin, stdout, stderr =  esxi_ssh.exec_command(cmd_error)
                            
@@ -1663,11 +1732,13 @@ class VCChecker(CheckerBase):
                 VCChecker.esxi_ssh = None
                        
         passed_all = passed_all and passed
-            
+
+        loggerObj.LogMessage("info",file_name + " :: check_esxi_logs - Exit")                                                                                                                                                          
         return passed_all,message,path_curr
      
      
     def get_esxi_ssh_connection(self,host_ip):
+        loggerObj.LogMessage("info",file_name + " :: get_esxi_ssh_connection - Enter")                                                                                                        
         if VCChecker.esxi_ssh is None:
                 try:
                     VCChecker.esxi_ssh = paramiko.SSHClient()
@@ -1681,10 +1752,12 @@ class VCChecker(CheckerBase):
                     return "SSH Connection Failed",None
         else:
             pass
-                 
+
+        loggerObj.LogMessage("info",file_name + " :: get_esxi_ssh_connection - Exit")                                                                                                                                                               
         return  "Success",VCChecker.esxi_ssh        
      
     def get_cvm_ssh_connection(self,cvm_ip):
+        loggerObj.LogMessage("info",file_name + " :: get_cvm_ssh_connection - Enter")                                                                                                        
         if VCChecker.cvm_ssh is None:
                 try:
                     VCChecker.cvm_ssh = paramiko.SSHClient()
@@ -1698,10 +1771,12 @@ class VCChecker(CheckerBase):
                     return "SSH Connection Failed",None
         else:
             pass
-                 
+
+        loggerObj.LogMessage("info",file_name + " :: get_cvm_ssh_connection - Exit")                                                                                                                                                               
         return  "Success",VCChecker.cvm_ssh     
  
     def get_ipmi_ssh_connection(self,ipmi_ip):
+        loggerObj.LogMessage("info",file_name + " :: get_ipmi_ssh_connection - Enter")                                                                                                        
         if VCChecker.ipmi_ssh is None:
                 try:
                     VCChecker.ipmi_ssh = paramiko.SSHClient()
@@ -1715,13 +1790,14 @@ class VCChecker(CheckerBase):
                     return "SSH Connection Failed",None
         else:
             pass
-                 
+
+        loggerObj.LogMessage("info",file_name + " :: get_ipmi_ssh_connection - Exit")                                                                                                                                                               
         return  "Success",VCChecker.ipmi_ssh     
  
  
     @checkgroup("esxi_checks", "Check if Default Password has Changed",["security"],"Password changed Information")
     def check_default_password(self):
-         
+        loggerObj.LogMessage("info",file_name + " :: check_default_password - Enter")                                                                                                                 
         #check esxi passwords
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
         clusters_map = self.get_vc_property(path_curr)
@@ -1901,12 +1977,14 @@ class VCChecker(CheckerBase):
              
  
         passed_all = passed_all and passed
-          
+ 
+        loggerObj.LogMessage("info",file_name + " :: check_default_password - Exit")                                                                                                                                                        
         return passed_all,message,path_curr
  
             
     @checkgroup("esxi_checks", "Check if only 10GBps VMNIC are Connected",["performance"],"10GBps VMNIC Connected")
     def check_vmnic_10Gbps(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vmnic_10Gbps - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkConfig.pnic'
         host_networks = self.get_vc_property(path)
              
@@ -1951,11 +2029,14 @@ class VCChecker(CheckerBase):
                 message += ", " +key+"=10GBps VMNIC Not Connected (Expected: =10GBps VMNIC Connected and in Full Duplex Mode)"+"#"+(False and "PASS" or "FAIL")
                 self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=10GBps VMNIC Not Connected (Expected: =10GBps VMNIC Connected and in Full Duplex Mode)",(False and "PASS" or "FAIL"))                        
           
-            pass_all = pass_all and passed  
+            pass_all = pass_all and passed 
+            
+        loggerObj.LogMessage("info",file_name + " :: check_vmnic_10Gbps - Exit")                                                                                                                                                           
         return pass_all, message, path
    
     @checkgroup("esxi_checks", "Both 10GBps & 1GBps VMNIC Connected to VDS or VSS",["configurability","manageability","availability"],"10GBps and 1GBps VMNIC are Not Connected to VDS or VSS")
     def check_vmnic_10Gbps_and_1GBps(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vmnic_10Gbps_and_1GBps - Enter")                                                                                                        
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
         clusters_map = self.get_vc_property(path_curr)
                 
@@ -2035,11 +2116,13 @@ class VCChecker(CheckerBase):
                             self.reporter.notify_progress(self.reporter.notify_checkLog,datacenter+"@"+host_ip+"=1GBps and 10 GBps VMNIC Not Present Together (Expected: =Both 10GBps and 1GBps VMNIC are Not Connected to VDS or VSS)",(passed and "PASS" or "FAIL"))                
                                   
                 passed_all = passed_all and passed  
-               
+
+        loggerObj.LogMessage("info",file_name + " :: check_vmnic_10Gbps_and_1GBps - Exit")                                                                                                                                                             
         return passed_all, message, path
 
     @checkgroup("vcenter_server_checks", "JVM Memory for vSphere Server",["performance"],"Memory Configured")
     def check_jvm_memory(self):
+        loggerObj.LogMessage("info",file_name + " :: check_jvm_memory - Enter")                                                                                                        
         check_list = ["JVM Memory for vSphere Web Client","JVM Memory for Inventory Services","JVM Memory for Storage Base Profiles"]
         message = ""     
         passed_all = True
@@ -2083,10 +2166,12 @@ class VCChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkLog,"JVM Memory for vSphere Server =Cannot Determine"+" (Expected: =JVM Memory Information)",("FAIL"))
                  
         passed_all = passed_all and passed
-         
+
+        loggerObj.LogMessage("info",file_name + " :: check_jvm_memory - Exit")                                                                                                                                                       
         return passed_all,message,''
     
     def jvm_memory_helper(self,check_name,memory,expected_result,message):
+        loggerObj.LogMessage("info",file_name + " :: jvm_memory_helper - Enter")                                                                                                        
         passed = True
         if memory is not None and int(memory.strip()) == expected_result:     
             message += ", " +check_name+" = "+memory.strip()+" (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
@@ -2099,11 +2184,13 @@ class VCChecker(CheckerBase):
             passed = False
             message += ", " +check_name+" = None (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
             self.reporter.notify_progress(self.reporter.notify_checkLog,check_name+" = None (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
-        
+
+        loggerObj.LogMessage("info",file_name + " :: jvm_memory_helper - Exit")                                                                                                                                                      
         return passed,message      
 
    
     def get_inventory_info(self):
+        loggerObj.LogMessage("info",file_name + " :: get_inventory_info - Enter")                                                                                                        
         host_count = 0
         vm_count = 0
         vcenter_guest_info = self.get_vc_property('content.about')
@@ -2138,10 +2225,12 @@ class VCChecker(CheckerBase):
             inventory_size = "large_inventory"
         else:
             inventory_size = "small_inventory"
-        
+
+        loggerObj.LogMessage("info",file_name + " :: get_inventory_info - Exit")                                                                                                                                                      
         return server_version,inventory_size
             
     def get_vcenterserver_vm(self):
+        loggerObj.LogMessage("info",file_name + " :: get_vcenterserver_vm - Enter")                                                                                                        
         vcenter_ip = self.get_vcenter_server_ip()
         hosts = self.get_vc_property('content.rootFolder.childEntity.hostFolder.childEntity.host.vm')
                                             
@@ -2153,21 +2242,26 @@ class VCChecker(CheckerBase):
                 guest_info = vm.guest          
                 if guest_info is not None and guest_info.ipAddress == vcenter_ip:
                     return vm
-             
+
+        loggerObj.LogMessage("info",file_name + " :: get_vcenterserver_vm - Exit")                                                                                                                                                           
         return None            
 
     def get_vcenterserver_default_memory(self,server_version,inventory_size,property):
+        loggerObj.LogMessage("info",file_name + " :: get_vcenterserver_default_memory - Enter")                                                                                                        
         if len(VCChecker.vcenter_stats_config) == 0:                    
             vcenter_stats_path=os.path.abspath(os.path.dirname(__file__)) + os.path.sep + ".." + os.path.sep +"conf" + os.path.sep + "vcenter_stats.json"
             fp = open(vcenter_stats_path, 'r')
             VCChecker.vcenter_stats_config = json.load(fp)
             fp.close()
         else:
-            pass    
+            pass
+        
+        loggerObj.LogMessage("info",file_name + " :: get_vcenterserver_default_memory - Exit")                                                                                                                                                          
         return VCChecker.vcenter_stats_config[server_version][inventory_size][property]
 
     @checkgroup("vcenter_server_checks", "Memory Utilization of vCenter Server",["performance"],"Memory Utilization")
     def check_memory_utilization(self):
+        loggerObj.LogMessage("info",file_name + " :: check_memory_utilization - Enter")                                                                                                        
         message = ""     
         passed = True
         vm = self.get_vcenterserver_vm()
@@ -2183,12 +2277,14 @@ class VCChecker(CheckerBase):
         else:
             passed = False
             message += ", " +"Memory Utilization of vCenter Server =Cannot Determine (Expected: =Memory Utilization)"+"#"+(passed and "PASS" or "FAIL")
-            self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Utilization of vCenter Server =Cannot Determine (Expected: =Memory Utilization)",(passed and "PASS" or "FAIL"))
-                     
+            self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Utilization of vCenter Server =Cannot Determine (Expected: =Memory Utilization)",(passed and "PASS" or "FAIL"))                                                                                                                                              
+
+        loggerObj.LogMessage("info",file_name + " :: check_memory_utilization - Exit")                                                                                                                                                                   
         return passed ,message,''  
  
     @checkgroup("vcenter_server_checks", "Memory Assigned to vCenter Server",["performance"],"Memory Assigned")
     def check_memory_assigned(self):
+        loggerObj.LogMessage("info",file_name + " :: check_memory_assigned - Enter")                                                                                                        
         message = ""     
         passed = True
         vm = self.get_vcenterserver_vm()
@@ -2207,11 +2303,13 @@ class VCChecker(CheckerBase):
             passed = False
             message += ", " +"Memory Assigned to vCenter Server =Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
             self.reporter.notify_progress(self.reporter.notify_checkLog,"Memory Assigned to vCenter Server =Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
-                     
+
+        loggerObj.LogMessage("info",file_name + " :: check_memory_assigned - Exit")                                                                                                                                                                   
         return passed ,message,''  
  
     @checkgroup("vcenter_server_checks", "CPU Utilization of vCenter Server",["performance"],"CPU Utilization")
     def check_CPU_utilization(self):
+        loggerObj.LogMessage("info",file_name + " :: check_CPU_utilization - Enter")                                                                                                        
         message = ""     
         passed = True
         vm = self.get_vcenterserver_vm()
@@ -2228,11 +2326,13 @@ class VCChecker(CheckerBase):
             passed = False
             message += ", " +"CPU Utilization of vCenter Server =Cannot Determine (Expected: =CPU Utilization)"+"#"+(passed and "PASS" or "FAIL")
             self.reporter.notify_progress(self.reporter.notify_checkLog,"CPU Utilization of vCenter Server =Cannot Determine (Expected: =CPU Utilization)",(passed and "PASS" or "FAIL"))
-                     
+
+        loggerObj.LogMessage("info",file_name + " :: check_CPU_utilization - Exit")                                                                                                                                                                   
         return passed ,message,''  
  
     @checkgroup("vcenter_server_checks", "CPUs Assigned to vCenter Server",["performance"],"Number of CPU Assigned")
     def check_CPU_assigned(self):
+        loggerObj.LogMessage("info",file_name + " :: check_CPU_assigned - Enter")                                                                                                        
         message = ""     
         passed = True
         vm = self.get_vcenterserver_vm()
@@ -2251,11 +2351,13 @@ class VCChecker(CheckerBase):
             passed = False
             message += ", " +"CPUs Assigned to vCenter Server =Cannot Determine (Expected: = "+str(expected_result)+")"+"#"+(passed and "PASS" or "FAIL")
             self.reporter.notify_progress(self.reporter.notify_checkLog,"CPUs Assigned to vCenter Server =Cannot Determine (Expected: = "+str(expected_result)+")",(passed and "PASS" or "FAIL"))
-                     
+
+        loggerObj.LogMessage("info",file_name + " :: check_CPU_assigned - Exit")                                                                                                                                                                   
         return passed ,message,''  
  
     @checkgroup("vcenter_server_checks", "Validate vCenter Server has VMware Tools installed and is up to date",["performance"],"Tools Ok")
     def check_vcenter_server_tool_status(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vcenter_server_tool_status - Enter")                                                                                                        
         message = ""     
         passed = True
         vm = self.get_vcenterserver_vm()
@@ -2274,11 +2376,13 @@ class VCChecker(CheckerBase):
             passed = False
             self.reporter.notify_progress(self.reporter.notify_checkLog, "vCenter Server VMware Tools installed Status =Cannot Determine (Expected: =toolsOk)" , (passed and "PASS" or "FAIL"))
             message += ", "+"vCenter Server VMware Tools installed Status =Cannot Determine (Expected: =toolsOk)" +"#"+(passed and "PASS" or "FAIL")
-                 
+
+        loggerObj.LogMessage("info",file_name + " :: check_vcenter_server_tool_status - Exit")                                                                                                                                                               
         return passed,message,''    
              
     @checkgroup("vcenter_server_checks", "Error Messages in vpxd.log",["configurability","manageability","availability","security"],"Error Count")
     def check_vpxd_logs(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vpxd_logs - Enter")                                                                                                        
         message = ""     
         passed_all = True
         passed = True               
@@ -2314,19 +2418,24 @@ class VCChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkLog,"Error Messages in vpxd.log =Cannot Determine"+" (Expected: =Error Count)",("FAIL"))
                                    
         passed_all = passed_all and passed
-             
+
+        loggerObj.LogMessage("info",file_name + " :: check_vpxd_logs - Exit")                                                                                                                                                           
         return passed_all ,message,''
 
     def get_vcenter_server_ip(self):
+        loggerObj.LogMessage("info",file_name + " :: get_vcenter_server_ip - Enter")                                                                                                        
         vcenter_ip = None
         path_curr='content.setting.setting[key=VirtualCenter*AutoManagedIPV4].value'
         vcenter_ipv4 = self.get_vc_property(path_curr)
         for key,ip in vcenter_ipv4.iteritems():
             vcenter_ip=ip
+            
+        loggerObj.LogMessage("info",file_name + " :: get_vcenter_server_ip - Exit")                                                                                                                                                          
         return vcenter_ip  
 
     
     def get_vcenter_server_ssh_connection(self):
+        loggerObj.LogMessage("info",file_name + " :: get_vcenter_server_ssh_connection - Enter")                                                                                                        
         vcenter_ip = self.get_vcenter_server_ip()
         if vcenter_ip == None :
             return "vCenter IP Not configured",None,None
@@ -2343,12 +2452,14 @@ class VCChecker(CheckerBase):
                     return "SSH Connection Failed",None,vcenter_ip
         else:
             pass
-                
+
+        loggerObj.LogMessage("info",file_name + " :: get_vcenter_server_ssh_connection - Exit")                                                                                                                                                              
         return  "Success",VCChecker.vcenter_server_ssh,vcenter_ip            
         
      
     @checkgroup("vcenter_server_checks", "vCenter Server Disk Utilization",["performance","manageability"],"Disk Utilization Information")
     def check_disk_utilization(self):
+        loggerObj.LogMessage("info",file_name + " :: check_disk_utilization - Enter")                                                                                                        
         line_map = {}
         line_count = 0
         message = ""     
@@ -2387,11 +2498,13 @@ class VCChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Disk Utilization =Cannot Determine"+" (Expected: =Disk Utilization Information)",("FAIL"))
                            
         passed_all = passed_all and passed
-             
+
+        loggerObj.LogMessage("info",file_name + " :: check_disk_utilization - Exit")                                                                                                                                                           
         return passed_all ,message,''
              
     @checkgroup("vcenter_server_checks", "Validate vCenter Server License Expiration Date",["availability"],"No expiration date or expiration date less than 60 days")
     def check_vcenter_server_license_expiry(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vcenter_server_license_expiry - Enter")                                                                                                        
         expirationDate = self.get_vc_property('content.licenseManager.evaluation.properties[key=expirationDate].value')
          
         message = ""
@@ -2404,11 +2517,14 @@ class VCChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkLog,"License Expiration Validation date:: " + str(expiry_date) + " (Expected: =Not within next 60 days or always valid)" , (valid_60_days and "PASS" or "FAIL"))
             passed = passed and valid_60_days
             message += ", "+"License Expiration Validation = " + str(expiry_date) + " (Expected: =Not within next 60 days or always valid) "+"#"+((valid_60_days) and "PASS" or "FAIL")
+
+        loggerObj.LogMessage("info",file_name + " :: check_vcenter_server_license_expiry - Exit")                                                                                                                                                      
         return passed, message,''
   
      
     @checkgroup("vcenter_server_checks", "vCenter Server Plugins",["performance"],"List of plugins")
     def check_vcenter_server_plugins(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vcenter_server_plugins - Enter")                                                                                                        
         vcenter_plugins_map = self.get_vc_property('content.extensionManager.extensionList')
                 
         message = ""
@@ -2427,11 +2543,13 @@ class VCChecker(CheckerBase):
             passed = False
             self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Plugins= Plugins-Not-Found (Expected: =Plugin List)" , (False and "PASS" or "FAIL"))
             message += ", "+"vCenter Plugins = Plugins-Not-Found (Expected: =Plugin List) "+"#"+((False) and "PASS" or "FAIL")
-          
+
+        loggerObj.LogMessage("info",file_name + " :: check_vcenter_server_plugins - Exit")                                                                                                                                                       
         return passed,message,''
      
     @checkgroup("vcenter_server_checks", "vCenter Server Role Based Access",["performance"],"Role Based Access is Implemented")
     def check_vcenter_role_based_access(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vcenter_role_based_access - Enter")                                                                                                        
         vcenter_roleList = self.get_vc_property('content.authorizationManager.roleList')
                 
         message = ""
@@ -2450,21 +2568,26 @@ class VCChecker(CheckerBase):
             passed = False
             self.reporter.notify_progress(self.reporter.notify_checkLog,"vCenter Server Role Based Access= False (Expected: =True) " , (False and "PASS" or "FAIL"))
             message += ", "+"vCenter Server Role Based Access= False (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
-          
+
+        loggerObj.LogMessage("info",file_name + " :: check_vcenter_role_based_access - Exit")                                                                                                                                                        
         return passed,message,''    
 
     def get_network_resource_pool_settings(self,resource_pool_property):
+        loggerObj.LogMessage("info",file_name + " :: get_network_resource_pool_settings - Enter")                                                                                                        
         if len(VCChecker.resource_pool_config) == 0:                    
             resource_pool_path=os.path.abspath(os.path.dirname(__file__)) + os.path.sep + ".." + os.path.sep +"conf" + os.path.sep + "resource_pool.json"
             fp = open(resource_pool_path, 'r')
             VCChecker.resource_pool_config = json.load(fp)
             fp.close()
         else:
-            pass   
+            pass 
+        
+        loggerObj.LogMessage("info",file_name + " :: get_network_resource_pool_settings - Exit")                                                                                                                                                        
         return VCChecker.resource_pool_config[resource_pool_property]
     
     @checkgroup("network_and_switch_checks", "Network Resource Pool Settings",["performance"],"Configured Values")
     def check_network_resource_pool_settings(self):
+        loggerObj.LogMessage("info",file_name + " :: check_network_resource_pool_settings - Enter")                                                                                                        
         path='content.rootFolder.childEntity.networkFolder.childEntity'
         datacenter_networks = self.get_vc_property(path)
         
@@ -2501,11 +2624,13 @@ class VCChecker(CheckerBase):
                  passed =False
                  self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"."+network.name+"=False (Expected: =True) " , (passed and "PASS" or "FAIL"))
                  message += ", " +datacenter+"@"+network.name+"=False (Expected: =True) "+"#"+(passed and "PASS" or "FAIL")                     
-                 
+
+        loggerObj.LogMessage("info",file_name + " :: check_network_resource_pool_settings - Exit")                                                                                                                                                               
         return passed, message, path
 
     @checkgroup("network_and_switch_checks", "Port Group and VLAN Consistency across vSphere Clusters",["manageability","availability"],"Port Group and VLAN Consistency within cluster")
     def check_portgroup_consistency(self):
+        loggerObj.LogMessage("info",file_name + " :: check_portgroup_consistency - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         cluster_map = self.get_vc_property(path)
         passed = True
@@ -2573,10 +2698,13 @@ class VCChecker(CheckerBase):
                             self.reporter.notify_progress(self.reporter.notify_checkLog,clusters_key+"."+cluster_name+"."+xhost.name+" =Missing VLAN IDs::[" + ','.join(set(absent_vlanId_map.values())) + "] (Expected: =All VLAN IDs must be Present)" , (vlanid_passed and "PASS" or "FAIL"))
                             message += ", "+clusters_key+"@"+cluster_name+"@"+xhost.name+" =Missing VLAN IDs::[" +','.join(set(absent_vlanId_map.values())) + "]::"+xhost.name+" (Expected: =All VLAN IDs must be Present)"+"#"+(vlanid_passed and "PASS" or "FAIL")
             passed_all = passed_all and passed
+
+        loggerObj.LogMessage("info",file_name + " :: check_portgroup_consistency - Exit")                                                                                                                                                      
         return passed_all, message, path
       
     @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - Network IO Control",["performance"],"Enabled")
     def check_virtual_distributed_switch_networ_io_control(self):
+        loggerObj.LogMessage("info",file_name + " :: check_virtual_distributed_switch_networ_io_control - Enter")                                                                                                        
         path='content.rootFolder.childEntity.networkFolder.childEntity'
         datacenter_networks = self.get_vc_property(path)
           
@@ -2598,11 +2726,12 @@ class VCChecker(CheckerBase):
                 self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"@=Not-Configured (Expected: =True) " , (False and "PASS" or "FAIL"))
                 message += ", " +datacenter+"=Not-Configured (Expected: =True) "+"#"+((False) and "PASS" or "FAIL")
                        
-                   
+        loggerObj.LogMessage("info",file_name + " :: check_virtual_distributed_switch_networ_io_control - Exit")                                                                                                                                                                 
         return passed, message, path
            
     @checkgroup("network_and_switch_checks", "Virtual Distributed Switch - MTU",["performance"],"1500")
     def check_virtual_distributed_switch_mtu(self):
+        loggerObj.LogMessage("info",file_name + " :: check_virtual_distributed_switch_mtu - Enter")                                                                                                        
         path='content.rootFolder.childEntity.networkFolder.childEntity'
         datacenter_networks = self.get_vc_property(path)
           
@@ -2632,12 +2761,13 @@ class VCChecker(CheckerBase):
                 pass_all=False
                 self.reporter.notify_progress(self.reporter.notify_checkLog, datacenter+"=Not-Configured (Expected: ="+str(maxMtu_expected)+") " , ( False and "PASS" or "FAIL"))
                 message += ", " +datacenter+"@=Not-Configured (Expected: ="+str(maxMtu_expected)+")"+"#"+(False and "PASS" or "FAIL")
-               
-           
+
+        loggerObj.LogMessage("info",file_name + " :: check_virtual_distributed_switch_mtu - Exit")                                                                                                                                                                       
         return pass_all, message, path
        
     @checkgroup("network_and_switch_checks", "Check if vSwitchNutanix has no physical adapters",["security","performance"],"None")
     def check_vswitch_no_physical_nic(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vswitch_no_physical_nic - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
         host_networks = self.get_vc_property(path)
           
@@ -2678,11 +2808,13 @@ class VCChecker(CheckerBase):
                 message += ", " +key+"=vSwitchNutanix-Not-Found (Expected: =None)"+"#"+(False and "PASS" or "FAIL")
                 self.reporter.notify_progress(self.reporter.notify_checkLog,key+"=vSwitchNutanix-Not-Found (Expected: =None)",(False and "PASS" or "FAIL"))
             pass_all = passed and pass_all    
-    
+
+        loggerObj.LogMessage("info",file_name + " :: check_vswitch_no_physical_nic - Exit")                                                                                                                                                  
         return pass_all, message, path
        
     @checkgroup("network_and_switch_checks", "vSwitchNutanix Connected to CVM only",["manageability","availability","performance"],"CVM")
     def check_vswitchnutanix_connected_to_only_CVM(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vswitchnutanix_connected_to_only_CVM - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.configManager.networkSystem.networkInfo'
         host_networks = self.get_vc_property(path)
           
@@ -2731,11 +2863,14 @@ class VCChecker(CheckerBase):
                         passed= False
                         message += ", " +vmkey+"="+name+" (Expected: =CVM)"+"#"+(False and "PASS" or "FAIL")
                         self.reporter.notify_progress(self.reporter.notify_checkLog,vmkey+"="+name+" (Expected: =CVM)",(False and "PASS" or "FAIL"))
-                    pass_all = passed and pass_all    
+                    pass_all = passed and pass_all 
+                       
+        loggerObj.LogMessage("info",file_name + " :: check_vswitchnutanix_connected_to_only_CVM - Exit")                                                                                                                                              
         return pass_all, message, "content.rootFolder.childEntity.hostFolder.childEntity.network.vm"
     
     @checkgroup("storage_and_vm_checks", "Hardware Acceleration of Datastores", ["performance"], "Supported")
     def check_vStorageSupport(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vStorageSupport - Enter")                                                                                                        
         path ='content.rootFolder.childEntity.hostFolder.childEntity'
         clusters_object= self.get_vc_property(path)
         message = ""
@@ -2793,11 +2928,13 @@ class VCChecker(CheckerBase):
                             message += ", " +dcs_key+"@"+cluster_name+"@"+hostname+"@"+cluster_ds_name+"="+actual_vStorageSupported+ " (Expected: ="+expected_vStorageSupported+")"+"#"+((expected_vStorageSupported == actual_vStorageSupported) and "PASS" or "FAIL")
                             self.reporter.notify_progress(self.reporter.notify_checkLog,dcs_key+"@"+cluster_name+"@"+hostname+"@"+cluster_ds_name+"="+actual_vStorageSupported+ " (Expected: ="+expected_vStorageSupported+")" , ( (expected_vStorageSupported == actual_vStorageSupported) and "PASS" or "FAIL"))
                 # End of datastore mount to host            
+        loggerObj.LogMessage("info",file_name + " :: check_vStorageSupport - Exit")                                                                                                                                              
         return pass_all, message,path+'.host.datastore'
     
     
     @checkgroup("storage_and_vm_checks", "USB Device Connected to VM", ["manageability","reliability"], "False")
     def check_usb_disabled(self):
+        loggerObj.LogMessage("info",file_name + " :: check_usb_disabled - Enter")                                                                                                        
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.hardware.device'
         vms_virtual_hardware= self.get_vc_property(path)
         message = ""
@@ -2820,11 +2957,14 @@ class VCChecker(CheckerBase):
             if usb_found==False:
                 message += ", " +vms_key+"=Not-Attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Not-Attached (Expected: =False)", (True and "PASS" or "FAIL"))
-            pass_all= pass_all and passed    
+            pass_all= pass_all and passed  
+              
+        loggerObj.LogMessage("info",file_name + " :: check_usb_disabled - Exit")                                                                                                                                              
         return pass_all, message,path
     
     @checkgroup("storage_and_vm_checks", "RS-232 Serial Port Connected to VM", ["manageability","reliability"], "False")
     def check_rs232_serial_port_disabled(self):
+        loggerObj.LogMessage("info",file_name + " :: check_rs232_serial_port_disabled - Enter")                                                                                                        
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.hardware.device'
         vms_virtual_hardware= self.get_vc_property(path)
         message = ""
@@ -2848,10 +2988,13 @@ class VCChecker(CheckerBase):
                 message += ", " +vms_key+"=Not-Attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Not-Attached (Expected: =False)", (True and "PASS" or "FAIL"))                   
             pass_all= pass_all and passed
+            
+        loggerObj.LogMessage("info",file_name + " :: check_rs232_serial_port_disabled - Exit")                                                                                                                                              
         return pass_all, message,path
     
     @checkgroup("storage_and_vm_checks", "CD-ROM Connected to VM",["manageability","reliability"], "False")
     def check_cdrom_disabled(self):
+        loggerObj.LogMessage("info",file_name + " :: check_cdrom_disabled - Enter")                                                                                                        
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config.hardware.device'
         vms_virtual_hardware= self.get_vc_property(path)
         message = ""
@@ -2875,10 +3018,13 @@ class VCChecker(CheckerBase):
                 message += ", " +vms_key+"=Not-Attached (Expected: =False)"+"#"+(True and "PASS" or "FAIL")
                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"=Not-Attached (Expected: =False)", (True and "PASS" or "FAIL"))     
             pass_all= pass_all and passed
+            
+        loggerObj.LogMessage("info",file_name + " :: check_cdrom_disabled - Exit")                                                                                                                                              
         return pass_all, message,path
     
     @checkgroup("storage_and_vm_checks", "VM OS Version same as Guest OS Version",["performance","manageability","configurability"],"OS Versions Should Match")
     def check_VM_OS_Versions(self):
+        loggerObj.LogMessage("info",file_name + " :: check_VM_OS_Versions - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.summary'
         vm_list = self.get_vc_property(path)
         message = ""
@@ -2901,12 +3047,14 @@ class VCChecker(CheckerBase):
                 message += ", "+vms_key+ "="+str(guest_OS_version)+" (Expected: ="+str(vm_OS_version)+")#FAIL"             
             
             passed_all = passed_all and passed
-        
+
+        loggerObj.LogMessage("info",file_name + " :: check_VM_OS_Versions - Exit")                                                                                                                                                      
         return passed_all , message,path
         
       
     @checkgroup("cvm_checks", "Memory Reservation Per CVM(MB)", ["performance"], "Equal to size of VM memory")
     def check_memory_reservation_of_cvm(self):
+        loggerObj.LogMessage("info",file_name + " :: check_memory_reservation_of_cvm - Enter")                                                                                                        
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm[name=NTNX*CVM].summary'
         vms_map= self.get_vc_property(path)
         message = ""
@@ -2934,11 +3082,13 @@ class VCChecker(CheckerBase):
                 self.reporter.notify_progress(self.reporter.notify_checkLog, vms_key+"="+ str(memory_reservation) +" (Expected: ="+str(vm_memory)+")", (True and "PASS" or "FAIL"))
                 
             pass_all= pass_all and passed
-  
+
+        loggerObj.LogMessage("info",file_name + " :: check_memory_reservation_of_cvm - Exit")                                                                                                                                                
         return pass_all, message,path    
           
     @checkgroup("storage_and_vm_checks", "VM using the VMXNET3 virtual network device",["performance"], "Vmxnet3")
     def check_vm_using_vmxnet3(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vm_using_vmxnet3 - Enter")                                                                                                        
         path ='content.rootFolder.childEntity.hostFolder.childEntity.host.vm.config'
         vms= self.get_vc_property(path)
         message = ""
@@ -2978,10 +3128,13 @@ class VCChecker(CheckerBase):
             message += ", " +vm_key+"="+(','.join(adapter))+" (Expected: =Vmxnet3)"+"#"+(passed and "PASS" or "FAIL")
             self.reporter.notify_progress(self.reporter.notify_checkLog,vm_key+"="+(','.join(adapter))+" (Expected: =Vmxnet3)", (passed and "PASS" or "FAIL"))     
             pass_all= pass_all and passed
+
+        loggerObj.LogMessage("info",file_name + " :: check_vm_using_vmxnet3 - Exit")                                                                                                                                                          
         return pass_all, message,path
     
     @checkgroup("storage_and_vm_checks", "VM hardware version is the most up to date with the ESXI version",["performance"], "VM hardware version should be in the latest version supported by ESXi in the cluster")
     def check_vm_hardware_version_ailing_with_esxi_version(self):
+        loggerObj.LogMessage("info",file_name + " :: check_vm_hardware_version_ailing_with_esxi_version - Enter")                                                                                                        
         path ='content.rootFolder.childEntity.hostFolder.childEntity' #.host.vm.config
         clusters_map= self.get_vc_property(path)
         message = ""
@@ -3049,12 +3202,15 @@ class VCChecker(CheckerBase):
                                 self.reporter.notify_progress(self.reporter.notify_checkLog,cluster_key+"@"+cluster_name+"@"+host_name+"@"+vm_name+"="+ version+" (Expected: =Greater than vmx-"+str(allvm_version)+")", (False and "PASS" or "FAIL"))
    
                             pass_all= pass_all and passed
+                            
+        loggerObj.LogMessage("info",file_name + " :: check_vm_hardware_version_ailing_with_esxi_version - Exit")                                                                                                                                              
         return pass_all, message,path+".host.vm"
 
 
 
 
     def get_nutanix_cluster_info(self):
+        loggerObj.LogMessage("info",file_name + " :: get_nutanix_cluster_info - Enter")                                                                                                        
         if len(VCChecker.responseHostsJson) == 0 or len(VCChecker.responseClusterJson) == 0:                    
             ncc_auth_conf_path=os.path.abspath(os.path.dirname(__file__)) + os.path.sep + ".." + os.path.sep +"conf" + os.path.sep + "auth.conf"
             fp = open(ncc_auth_conf_path, 'r')
@@ -3085,10 +3241,12 @@ class VCChecker(CheckerBase):
         else:
             pass
         
+        loggerObj.LogMessage("info",file_name + " :: get_nutanix_cluster_info - Exit")                                                                                                                                                      
         return VCChecker.responseHostsJson["entities"] , VCChecker.responseClusterJson["name"] , True    
 
     @checkgroup("hardware_and_bios_checks", "XD-Execute Disabled",["performance"],"True")
     def check_XD_enabled(self):
+        loggerObj.LogMessage("info",file_name + " :: check_XD_enabled - Enter")                                                                                                        
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host.hardware.cpuFeature'
         host_map = self.get_vc_property(path_curr)
             
@@ -3116,11 +3274,13 @@ class VCChecker(CheckerBase):
                     passed=xd_enabled
                     continue   
             passed_all = passed_all and passed
-           
+
+        loggerObj.LogMessage("info",file_name + " :: check_XD_enabled - Exit")                                                                                                                                                         
         return passed_all , message,path_curr
   
     @checkgroup("hardware_and_bios_checks", "VT-Extensions",["performance"],"3")
     def check_VT_extensions(self):
+        loggerObj.LogMessage("info",file_name + " :: check_VT_extensions - Enter")                                                                                                        
         path_curr='content.rootFolder.childEntity.hostFolder.childEntity.host'
         clusters_map = self.get_vc_property(path_curr)
              
@@ -3177,11 +3337,13 @@ class VCChecker(CheckerBase):
                 VCChecker.esxi_ssh = None
                                     
         passed_all = passed_all and passed
-         
+
+        loggerObj.LogMessage("info",file_name + " :: check_VT_extensions - Exit")                                                                                                                                                       
         return passed_all,message,path_curr
 
     @checkgroup("hardware_and_bios_checks", "NX-1020 Maximum Cluster Size",["configurability","supportability"],"Less than 8")
     def check_NX1020_Cluster_Size(self):
+        loggerObj.LogMessage("info",file_name + " :: check_NX1020_Cluster_Size - Enter")                                                                                                        
         entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         model_count = 0;
@@ -3214,12 +3376,14 @@ class VCChecker(CheckerBase):
              self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Cluster size less than 8)",("FAIL"))
         
         passed_all = passed_all and passed    
-               
+
+        loggerObj.LogMessage("info",file_name + " :: check_NX1020_Cluster_Size - Exit")                                                                                                                                                     
         return passed_all,message,''   
  
  
     @checkgroup("hardware_and_bios_checks", "NX-1020 Nodes mixed with Other Nodes",["configurability","performance","supportability"],"Mixed Nodes Not Present")
     def check_NX1020_Mixed_Nodes_Not_Present(self):
+        loggerObj.LogMessage("info",file_name + " :: check_NX1020_Mixed_Nodes_Not_Present - Enter")                                                                                                        
         entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         nx1020_model_count = 0;
@@ -3256,12 +3420,14 @@ class VCChecker(CheckerBase):
              self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =NX-1020 Node Count 0)",("FAIL"))
              
         passed_all = passed_all and passed    
-               
+
+        loggerObj.LogMessage("info",file_name + " :: check_NX1020_Mixed_Nodes_Not_Present - Exit")                                                                                                                                                             
         return passed_all,message,''   
  
  
     @checkgroup("hardware_and_bios_checks", "NX-6000 Nodes mixed with NX-2000 Nodes",["configurability","supportability"],"Mixed Nodes Not Present")
     def check_NX6000_mixed_with_NX2000(self):
+        loggerObj.LogMessage("info",file_name + " :: check_NX6000_mixed_with_NX2000 - Enter")                                                                                                        
         entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         nx6000_model_count = 0;
@@ -3299,11 +3465,13 @@ class VCChecker(CheckerBase):
              self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =NX-6000,NX-2000 Node Count 0)",("FAIL"))
              
         passed_all = passed_all and passed    
-               
+
+        loggerObj.LogMessage("info",file_name + " :: check_NX6000_mixed_with_NX2000 - Exit")                                                                                                                                                             
         return passed_all,message,''   
 
     @checkgroup("hardware_and_bios_checks", "NX-1050 Maximum Cluster Size",["configurability","supportability","performance"],"Less than 8")
     def check_NX1050_Cluster_Size(self):
+        loggerObj.LogMessage("info",file_name + " :: check_NX1050_Cluster_Size - Enter")                                                                                                        
         entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         model_count = 0;
@@ -3342,12 +3510,14 @@ class VCChecker(CheckerBase):
              message += ", " +"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Cluster size less than 8)"+"#"+("FAIL")
              self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Cluster size less than 8)",("FAIL"))
             
-        passed_all = passed_all and passed    
-              
+        passed_all = passed_all and passed 
+           
+        loggerObj.LogMessage("info",file_name + " :: check_NX1050_Cluster_Size - Exit")                                                                                                                                                            
         return passed_all,message,''   
 
     @checkgroup("hardware_and_bios_checks", "NX-1050 Nodes mixed with Other Nodes",["configurability","supportability"],"Mixed Nodes Not Present")
     def check_NX1050_mixed_with_other_nodes(self):
+        loggerObj.LogMessage("info",file_name + " :: check_NX1050_mixed_with_other_nodes - Enter")                                                                                                        
         entities,cluster,status = self.get_nutanix_cluster_info()
         model_map = {}
         nx1050_model_count = 0;
@@ -3389,11 +3559,13 @@ class VCChecker(CheckerBase):
              message += ", " +"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Non NX-1050 Node Count 0)"+"#"+("FAIL")
              self.reporter.notify_progress(self.reporter.notify_checkLog,"Check Status"+"="+"SSH Connection Failed"+" (Expected: =Non NX-1050 Node Count 0)",("FAIL"))
              
-        passed_all = passed_all and passed    
-               
+        passed_all = passed_all and passed 
+           
+        loggerObj.LogMessage("info",file_name + " :: check_NX1050_mixed_with_other_nodes - Exit")                                                                                                                                                             
         return passed_all,message,''
     
     def check_vmnic_connection(self,check_host_ip):
+        loggerObj.LogMessage("info",file_name + " :: check_vmnic_connection - Enter")                                                                                                        
         path='content.rootFolder.childEntity.hostFolder.childEntity.host[name='+check_host_ip+'].configManager.networkSystem.networkConfig.pnic'
         host_networks = self.get_vc_property(path)
         
@@ -3419,6 +3591,6 @@ class VCChecker(CheckerBase):
                     elif speed == 1000:    
                         speed_flag = True
                         continue
-                                      
+        loggerObj.LogMessage("info",file_name + " :: check_vmnic_connection - Exit")                                                                                                                                              
         return speed_flag
     
