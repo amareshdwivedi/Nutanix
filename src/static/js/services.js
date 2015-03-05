@@ -654,7 +654,7 @@ jQuery(document).ready(function() {
                 for (var i = 0; i < data.task_status.length; i++) {
                     if (data.task_status[i].module == "foundation") {
                         $("#foundationStatus .progressPercentage").html(data.task_status[i].status);
-                        if (data.task_status[i].status == "100.0%" && !completeTask) {
+                        if (data.task_status[i].status == "100.0%") {
                             if (checkValues.indexOf("prism") > -1) {
                                 var post_data = {};
                                 post_data["customer_id"] = customerId;
@@ -709,7 +709,7 @@ jQuery(document).ready(function() {
                             $("#foundationStatus .statusMessage").html("Setup InProgress...");
                         }
                     }
-                    if (data.task_status[i].module == "prism" && prismCheck) {
+                    if (data.task_status[i].module == "prism" && prismCheck && completeTask) {
                         $("#prismStatus .progressPercentage").html(data.task_status[i].status);
                         if (data.task_status[i].status == "Failed") {
                             $("#prismStatus .status").html("");
@@ -726,7 +726,7 @@ jQuery(document).ready(function() {
                         }
                     }
 
-                    if (data.task_status[i].module == "vcenter" && vcenterCheck) {
+                    if (data.task_status[i].module == "vcenter" && vcenterCheck && completeTask) {
                         $("#vcenterStatus .progressPercentage").html(data.task_status[i].status);
                         if (data.task_status[i].status == "Failed") {
                             $("#vcenterStatus .status").html("");
@@ -1097,4 +1097,36 @@ jQuery(document).ready(function() {
         $(".viewStatus 	.errorSupport").show();
         $(".viewStatus 	.errorSupport .errorMessage").html("Health check not supported on this operating system. Use windows machine to run VMware View health check.");
     }
+    
+    $( "#foundation_server_ip" ).keyup(function( event ) {
+        var ipRegex=/^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/;
+        var inputVal = $(this).val();
+        if((inputVal).match(ipRegex))
+        {
+            var post_data = {};
+            post_data["foundationVM"] = inputVal;
+            $('#phonix_iso').find('option:gt(0)').remove();
+            $('#hypervisor_iso').find('option:gt(0)').remove();
+            $.ajax({
+                url: '/isoImages/',
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify(post_data),
+                success: function(data) {
+                    for(var i=0;i<data.images.nos.length;i++){
+                        $('#phonix_iso').append($('<option>', { 
+                            value: data.images.nos[i],
+                            text : data.images.nos[i]
+                        }));
+                    }
+                    for(var j=0;j<data.images.hypervisor.length;j++){
+                        $('#hypervisor_iso').append($('<option>', { 
+                            value: data.images.hypervisor[j],
+                            text : data.images.hypervisor[j]
+                        }));
+                    }
+                },
+            });
+        }
+    });
 });
