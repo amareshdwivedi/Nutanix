@@ -654,7 +654,7 @@ jQuery(document).ready(function() {
                 for (var i = 0; i < data.task_status.length; i++) {
                     if (data.task_status[i].module == "foundation") {
                         $("#foundationStatus .progressPercentage").html(data.task_status[i].status);
-                        if (data.task_status[i].status == "100.0%" && !completeTask) {
+                        if (data.task_status[i].status == "100.0%") {
                             if (checkValues.indexOf("prism") > -1) {
                                 var post_data = {};
                                 post_data["customer_id"] = customerId;
@@ -709,7 +709,7 @@ jQuery(document).ready(function() {
                             $("#foundationStatus .statusMessage").html("Setup InProgress...");
                         }
                     }
-                    if (data.task_status[i].module == "prism" && prismCheck) {
+                    if (data.task_status[i].module == "prism" && prismCheck && completeTask) {
                         $("#prismStatus .progressPercentage").html(data.task_status[i].status);
                         if (data.task_status[i].status == "Failed") {
                             $("#prismStatus .status").html("");
@@ -726,7 +726,7 @@ jQuery(document).ready(function() {
                         }
                     }
 
-                    if (data.task_status[i].module == "vcenter" && vcenterCheck) {
+                    if (data.task_status[i].module == "vcenter" && vcenterCheck && completeTask) {
                         $("#vcenterStatus .progressPercentage").html(data.task_status[i].status);
                         if (data.task_status[i].status == "Failed") {
                             $("#vcenterStatus .status").html("");
