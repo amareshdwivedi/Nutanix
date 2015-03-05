@@ -1097,4 +1097,36 @@ jQuery(document).ready(function() {
         $(".viewStatus 	.errorSupport").show();
         $(".viewStatus 	.errorSupport .errorMessage").html("Health check not supported on this operating system. Use windows machine to run VMware View health check.");
     }
+    
+    $( "#foundation_server_ip" ).keyup(function( event ) {
+        var ipRegex=/^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/;
+        var inputVal = $(this).val();
+        if((inputVal).match(ipRegex))
+        {
+            var post_data = {};
+            post_data["foundationVM"] = inputVal;
+            $('#phonix_iso').find('option:gt(0)').remove();
+            $('#hypervisor_iso').find('option:gt(0)').remove();
+            $.ajax({
+                url: '/isoImages/',
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify(post_data),
+                success: function(data) {
+                    for(var i=0;i<data.images.nos.length;i++){
+                        $('#phonix_iso').append($('<option>', { 
+                            value: data.images.nos[i],
+                            text : data.images.nos[i]
+                        }));
+                    }
+                    for(var j=0;j<data.images.hypervisor.length;j++){
+                        $('#hypervisor_iso').append($('<option>', { 
+                            value: data.images.hypervisor[j],
+                            text : data.images.hypervisor[j]
+                        }));
+                    }
+                },
+            });
+        }
+    });
 });
