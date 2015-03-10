@@ -16,6 +16,7 @@ import fnmatch
 import datetime
 import getpass
 from utility import Validate,Security,Logger
+import utility
 from colorama import Fore
 import web
 from web import form
@@ -270,6 +271,9 @@ class VCChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_checkGroup,check_group)
            
             for check in self.config[check_group]:
+                if utility.glob_stopExecution:
+                    return self.result, "Stopped"
+
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])              
                 
                 if self.category!=None: #condition for category 
@@ -320,7 +324,9 @@ class VCChecker(CheckerBase):
        
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
-                    
+                    if utility.glob_stopExecution:
+                        return self.result, "Stopped"
+
                     if self.category!=None:#condition for category for custom checks 
                         if self.category not in check_function.category:
                             continue
@@ -368,7 +374,7 @@ class VCChecker(CheckerBase):
         self.result.message = "VC Checks completed with " + (passed_all and "success" or "failure")
         self.reporter.notify_progress(self.reporter.notify_info,"VC Checks complete")
 
-        return self.result
+        return self.result, "Complete"
 
 
     def validate_vc_property(self, path, operator, expected):

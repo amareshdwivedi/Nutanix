@@ -8,6 +8,7 @@ import sys
 import ast
 import getpass
 from utility import Validate,Security,Logger
+import utility
 import socket
 from colorama import Fore
 import web
@@ -121,6 +122,8 @@ class NCCChecker(CheckerBase):
         #self.realtime_results['ncc'] = []
         first_json = 0
         for line in stdout:
+            if utility.glob_stopExecution:
+                    return self.result, "Stopped"
             loggerObj.LogMessage("info",file_name + " :: NCC Success Output - " + line.strip('\n'))
             try :
                 t = ast.literal_eval(line.strip('\n').replace("null","'null'").replace("true","'true'").replace("false","'false'"))
@@ -160,7 +163,7 @@ class NCCChecker(CheckerBase):
             self.reporter.notify_progress(self.reporter.notify_info,"NCC Checks complete")
         ssh.close()
         
-        return self.result
+        return self.result, "Complete"
  
     
     def setup(self):

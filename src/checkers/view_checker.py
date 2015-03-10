@@ -15,6 +15,7 @@ import fnmatch
 import datetime
 import getpass
 from utility import Validate,Security,Logger
+import utility
 from colorama import Fore
 import web
 from web import form
@@ -528,6 +529,9 @@ class HorizonViewChecker(CheckerBase):
             for check in self.config[check_group]:
                 self.reporter.notify_progress(self.reporter.notify_checkName,check['name'])              
                 
+                if utility.glob_stopExecution:
+                    return self.result, "Stopped"
+
                 if self.category!=None: #condition for category 
                     if self.category not in check['category']:
                         continue
@@ -570,7 +574,10 @@ class HorizonViewChecker(CheckerBase):
        
             if check_group in check_functions:
                 for check_function in check_functions[check_group]:
-                     
+                    
+                    if utility.glob_stopExecution:
+                        return self.result, "Stopped"
+ 
                     if self.category!=None:#condition for category for custom checks 
                         if self.category not in check_function.category:
                             continue                      
@@ -602,7 +609,7 @@ class HorizonViewChecker(CheckerBase):
         self.result.message = "View Checks completed with " + (passed_all and "success" or "failure")
         self.reporter.notify_progress(self.reporter.notify_info," VMware Horizon View Checks complete")
 
-        return self.result
+        return self.result, "Complete"
 
     def get_view_property(self,powershell_cmd):
         actual=HorizonViewChecker.run_powershell(self.authconfig['view_ip'],self.authconfig['view_user'],Security.decrypt(self.authconfig['view_pwd']),powershell_cmd)

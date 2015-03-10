@@ -30,11 +30,10 @@ from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
 from requests.exceptions import ConnectionError
 import reportGenerator
-
-
+import utility 
 from deployer_web import initiate_deployment
 import api
-    
+
 file_name = os.path.basename(__file__)
     
 urls = (
@@ -51,6 +50,7 @@ urls = (
     '/connect', 'connect',
     '/run', 'runChecks',
     '/refresh', 'refresh',
+    '/stopExecute', 'stopExecute',
     '/reports/(\d+)/','api.customerReports',
     '/download/','api.downloadReports',
     '/', 'index',
@@ -260,19 +260,20 @@ class runChecks:
             
             if checker == "vc":
                 loggerObj.LogMessage("info",file_name + " :: Executing vc checks")
-                result = checker_module.execute(group)
+                result, status = checker_module.execute(group)
             elif checker == 'ncc':
                 loggerObj.LogMessage("info",file_name + " :: Executing ncc checks")
-                result = checker_module.execute(group)
+                result, status = checker_module.execute(group)
             elif checker == 'view':
                 loggerObj.LogMessage("info",file_name + " :: Executing view checks")
-                result = checker_module.execute(group)    
+                result, status = checker_module.execute(group)    
             else: 
                 loggerObj.LogMessage("info",file_name + " :: Executing run_all")       
-                result = checker_module.execute(["run_all"])
+                result, status = checker_module.execute(["run_all"])
             
             results[checker] = result.to_dict()
-            
+        
+        utility.glob_stopExecution = False
         #Generate Json Reports 
         outfile = open(os.getcwd() + os.path.sep +"reports"+os.path.sep+"results.json", 'w')
         json.dump(results, outfile, indent=2)
@@ -290,8 +291,9 @@ class runChecks:
         
         if taskId is not None:
             taskId = api.model.update_task(int(taskId), "Completed",reportFileName)
-        return "Execution Complete"
 
+        return "Execution "+status
+        
 class refresh:
     def __init__(self):
         pass
@@ -325,7 +327,15 @@ class refresh:
 
         except:
             return True
-      
+        
+class stopExecute:
+    def __init__(self):
+        pass
+
+    def GET(self):
+        utility.glob_stopExecution = True
+
+
 if __name__ == "__main__":
     web.internalerror = web.debugerror
     app.run()

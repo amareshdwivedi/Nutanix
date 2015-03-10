@@ -5,6 +5,7 @@ from Crypto.Cipher import ARC4
 import json
 import os
 
+glob_stopExecution = False
 class Validate:
     
     @staticmethod

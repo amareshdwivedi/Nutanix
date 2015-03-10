@@ -87,8 +87,21 @@ $def with (checkers,msg="")
 				
 			});
 			
+			jQuery("#stoprunchecks").click(function() {
+					console.log("stopping the execution");
+		            jQuery.ajax({
+		                url: '/stopExecute',
+		                type: "GET",
+		                //contentType: 'application/x-www-form-urlencoded',
+		                //dataType: "json",
+		                //data: form_data,
+		                success: function(data) {
+		                    console.log("Execution Stopped")
+		                },
+		            });
+		        });
+
 		    jQuery("#runchecks").click(function() {
-		    	
 		    	function fetch_data(){
 		    		//cont_run = [];
 			        //cont_run.push({name: 'operation', value: 'refresh_logs'});
@@ -448,6 +461,9 @@ $def with (checkers,msg="")
 		            <input type="button" data-toggle="modal" data-target="#modal_runchecks" id="runchecks" value="Run" disabled class="btn btn-primary healthCheckBtn runBtn"/>
                     
                     <span class="loader"><img src="/static/images/loading.gif" /></span>
+
+                    <input type="button" id="stoprunchecks" value="Stop" class="btn btn-primary healthCheckBtn runBtn"/>
+                    
                     </div>
                     <div class="modal fade" id="modal_runchecks" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 					  <div class="modal-dialog">
