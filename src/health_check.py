@@ -87,7 +87,7 @@ def main():
     for checker in checkers_list:
  
         checker_module = checkers[checker]
-        result = checker_module.execute(args[1:])
+        result, status = checker_module.execute(args[1:])
         results[checker] = result.to_dict()
         
         # This is to sort the checks in given checker based on the severity ( asc order )
