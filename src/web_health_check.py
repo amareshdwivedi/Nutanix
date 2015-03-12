@@ -187,7 +187,6 @@ class connect:
         if data['checker'] == "view":
             ret , msg = self.checkers['view'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
             vc_ret , vc_msg = self.checkers['view'].check_view_vc_connectivity(data['VC Server'],data['VC User'],Security.encrypt(data['VC Password']),data['VC Port'],"web")
-            print "ret vc_ret :",ret, vc_ret
             if ret and vc_ret:
                 loggerObj.LogMessage("info",file_name + " :: view connection successfull")                            
                 status['Connection'] = "Connection Success"

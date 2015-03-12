@@ -97,15 +97,32 @@ $def with (checkers,msg="")
 		                //data: form_data,
 		                success: function(data) {
 		                    console.log("Execution Stopped")
+
+		                var runButton = document.getElementById('runchecks');
+    					runButton.style.display = 'inline';
+    					runButton.style.visibility = 'visible';
+
+    					var stopButton = document.getElementById('stoprunchecks');
+    					stopButton.style.display = 'none';
+    					stopButton.style.visibility = 'hidden';
 		                },
 		            });
 		        });
 
 		    jQuery("#runchecks").click(function() {
+
+		    	var runButton = document.getElementById('runchecks');
+				runButton.style.display = 'none';
+				runButton.style.visibility = 'hidden';
+
+				var stopButton = document.getElementById('stoprunchecks');
+				stopButton.style.display = 'inline';
+				stopButton.style.visibility = 'visible';
+
 		    	function fetch_data(){
 		    		//cont_run = [];
-			        //cont_run.push({name: 'operation', value: 'refresh_logs'});
-                    
+			        //cont_run.push({name: 'operation', value: 'refresh_logs'})
+
                         jQuery.ajax({
                             url: '/refresh',
                             type: "GET",
@@ -227,6 +244,15 @@ $def with (checkers,msg="")
 		            success: function(data) {
 		            	looping = false;
 		            	clearInterval(interval);
+
+		            	var runButton = document.getElementById('runchecks');
+    					runButton.style.display = 'inline';
+    					runButton.style.visibility = 'visible';
+
+    					var stopButton = document.getElementById('stoprunchecks');
+    					stopButton.style.display = 'none';
+    					stopButton.style.visibility = 'hidden';
+
 		            	fetch_data();
 		                //alert(data);
 		                jQuery("#modal_runchecks .runckeckStatus").html(data);
@@ -460,9 +486,9 @@ $def with (checkers,msg="")
 		            
 		            <input type="button" data-toggle="modal" data-target="#modal_runchecks" id="runchecks" value="Run" disabled class="btn btn-primary healthCheckBtn runBtn"/>
                     
+                    <input type="button" id="stoprunchecks" value="Stop" style="visibility:hidden;" class="btn btn-primary healthCheckBtn runBtn"/>
                     <span class="loader"><img src="/static/images/loading.gif" /></span>
 
-                    <input type="button" id="stoprunchecks" value="Stop" class="btn btn-primary healthCheckBtn runBtn"/>
                     
                     </div>
                     <div class="modal fade" id="modal_runchecks" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
