@@ -171,38 +171,75 @@ class VCChecker(CheckerBase):
             loggerObj.LogMessage("error",file_name + " :: Error: Port number is not a numeric value.")                                                        
             exit_with_message("\nError: Port number is not a numeric value.")
         
-        current_cluster=self.authconfig['cluster'] if ('cluster' in self.authconfig.keys()) else "Not Set"
-        cluster=raw_input("Enter Cluster Name [default: "+current_cluster+"] {multiple names separated by comma(,); blank to include all clusters}: ")
-        cluster=cluster.strip()
-        
-        current_host=self.authconfig['host'] if ('host' in self.authconfig.keys()) else "Not Set"
-        hosts=raw_input("Enter Host IP [default: "+current_host+"] {multiple names separated by comma(,); blank to include all hosts}: ")
+        current_host=self.authconfig['host'] if ('host' in self.authconfig.keys()) else "Not Set"        
+#         cluster=raw_input("Enter Cluster Name [default: "+current_cluster+"] {multiple names separated by comma(,); blank to include all clusters}: ")
+#         cluster=cluster.strip()
+#          
+#         current_host=self.authconfig['host'] if ('host' in self.authconfig.keys()) else "Not Set"
+#         hosts=raw_input("Enter Host IP [default: "+current_host+"] {multiple names separated by comma(,); blank to include all hosts}: ")
         
         #Test Connection Status
         print "Checking vCenter Server Connection Status:",
         status, message = self.check_connectivity(vc_ip, vc_user, vc_pwd, vc_port)
         if status == True:
             print Fore.GREEN+" Connection successful"+Fore.RESET
+            vc_auth = dict()
+            vc_auth["vc_ip"]=vc_ip;
+            vc_auth["vc_user"]=vc_user;
+            vc_auth["vc_pwd"]=vc_pwd;
+            vc_auth["vc_port"]=vc_port;
+            vc_auth["cluster"]="";
+            vc_auth["host"]="";
+            CheckerBase.save_auth_into_auth_config(self.get_name(),vc_auth)
+            
+            cluster_map,message = self.get_cluster_list(vc_ip, vc_user, vc_pwd, vc_port) 
+            if len(cluster_map) == 0:
+                cluster = ""
+                pass
+            else:
+                current_cluster=self.authconfig['cluster'] if ('cluster' in self.authconfig.keys()) else "Not Set"
+                print "\nSelect one or more cluster names to run Healthcheck on from below list:"
+                for key,value in cluster_map.iteritems():
+                    print key, ':' , value 
+                cluster=raw_input("Enter Cluster Name [default: "+current_cluster+"] {multiple names separated by comma(,); blank to include all clusters}: ")
+                cluster=cluster.strip().replace(' ', '*')
+
+                vc_auth["cluster"] = self.authconfig["cluster"] = cluster
+                CheckerBase.save_auth_into_auth_config(self.get_name(),vc_auth)
+
+                if cluster != '':
+                    host_map,message = self.get_host_list(vc_ip, vc_user, vc_pwd, vc_port,cluster)
+                     
+                else:
+                    host_map = {}     
+                 
+                if len(host_map) == 0:
+                    hosts=""
+                    pass
+                else:
+                    current_host=self.authconfig['host'] if ('host' in self.authconfig.keys()) else "Not Set"        
+                    print "\nSelect one or more host IPs to run Healthcheck on from below list:"
+                    for key,value in host_map.iteritems():
+                        print key, ':' , value 
+                    hosts=raw_input("Enter Host IP [default: "+current_host+"] {multiple names separated by comma(,); blank to include all hosts}: ")           
+                    hosts=hosts.strip()
+                    vc_auth["host"] = self.authconfig["host"] = hosts;
+                    CheckerBase.save_auth_into_auth_config(self.get_name(),vc_auth)
+
         else:
-           print Fore.RED+" Connection failure"+Fore.RESET
-           exit_with_message(message)
-           
-        vc_auth = dict()
-        vc_auth["vc_ip"]=vc_ip;
-        vc_auth["vc_user"]=vc_user;
-        vc_auth["vc_pwd"]=vc_pwd;
-        vc_auth["vc_port"]=vc_port;
-        vc_auth["cluster"]=cluster;
-        vc_auth["host"]=hosts;
-        CheckerBase.save_auth_into_auth_config(self.get_name(),vc_auth)
-        exit_with_message("vCenter Server is configured Successfully ")
+            print Fore.RED+" Connection failure"+Fore.RESET
+            exit_with_message(message) 
+                      
+        Disconnect(self.si)
+        exit_with_message("vCenter Server is Configured Successfully ")
         return
     
+        
     def check_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port):
-        si=None
+        self.si=None
         warnings.simplefilter('ignore')
         try:
-            si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
+            self.si = SmartConnect(host=vc_ip, user=vc_user, pwd=Security.decrypt(vc_pwd), port=vc_port)
             return True,None
         except vim.fault.InvalidLogin:
             loggerObj.LogMessage("error",file_name + " :: Error : Invalid vCenter Server Username or password.")                                                                   
@@ -210,8 +247,54 @@ class VCChecker(CheckerBase):
         except ConnectionError as e:
             loggerObj.LogMessage("error",file_name + " :: Error : Connection Error.")                                                                    
             return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
-        finally:   
-            Disconnect(si)
+ 
+ 
+    def get_cluster_list(self,vc_ip,vc_user,vc_pwd,vc_port):
+        warnings.simplefilter('ignore')
+        cluster_map = {}
+        key = 0
+        try:
+            path='content.rootFolder.childEntity.hostFolder.childEntity'
+            clusters_map = self.get_vc_property(path)
+            for clusters_key, clusters in clusters_map.iteritems():
+                if clusters!="Not-Configured":
+                    for cluster in clusters:
+                        key+=1
+                        cluster_name=cluster.name
+                        cluster_map[key] = cluster_name            
+            return cluster_map,None
+        except vim.fault.InvalidLogin:
+            loggerObj.LogMessage("error",file_name + " :: Connection Failure.")                                                                   
+            return cluster_map,"Error : Connection Failure"
+        except ConnectionError as e:
+            loggerObj.LogMessage("error",file_name + " :: Connection Failure.")                                                                    
+            return cluster_map,"Error : Connection Failure"
+
+    def get_host_list(self,vc_ip,vc_user,vc_pwd,vc_port,cluster):
+        warnings.simplefilter('ignore')
+        hosts_map = {}
+        key = 0
+        cluster_list = []
+        try:
+            cluster_path='content.rootFolder.childEntity.hostFolder.childEntity[name='+cluster+'].host'
+            cluster_map = self.get_vc_property(cluster_path)
+            for datacenter, host_list in cluster_map.iteritems():
+                if host_list == "Not-Configured" :
+                    continue
+                elif len(host_list)==0: 
+                    continue
+                           
+                for host in host_list:
+                    host_ip=host.name
+                    key+=1
+                    hosts_map[key] = host_ip
+            return hosts_map,None
+        except vim.fault.InvalidLogin:
+            loggerObj.LogMessage("error",file_name + " :: Connection Failure.")                                                                   
+            return hosts_map,"Error : Connection Failure"
+        except ConnectionError as e:
+            loggerObj.LogMessage("error",file_name + " :: Connection Failure.")                                                                    
+            return hosts_map,"Error : Connection Failure"
     
     def execute(self, args):
 
@@ -493,14 +576,13 @@ class VCChecker(CheckerBase):
           
         if node == "hostFolder":
             cluster_level_entity = True
-            
+        
         if node == "childEntity" and cluster_level_entity:
             if self.authconfig['cluster'] != "":
                 filter = "name="+self.authconfig['cluster']
         if node == "host":
             if self.authconfig['host'] != "":
                 filter = "name="+self.authconfig['host']
-                
         try:
             attr = getattr(cur_obj, node)
         except AttributeError:
