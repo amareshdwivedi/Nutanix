@@ -167,27 +167,36 @@ class connect:
     def POST(self):
         data = web.input()
         
-        status = {"Connection": "Failed"}
+        status = {}
         if data['checker'] == "vc":
-            ret , msg = self.checkers['vc'].check_connectivity(data['vCenter Server IP'],data['vCenter Server Username'],Security.encrypt(data['vCenter Server Password']),data['vCenter Server Port'])
+            ret , msg = self.checkers['vc'].check_connectivity(data['vCenter Server IP'],data['vCenter Server Username'],Security.encrypt(data['vCenter Server Password']),data['vCenter Server Port'],"web")
             if ret:
                 loggerObj.LogMessage("info",file_name + " :: vc connection successfull")                            
-                status['Connection'] = "Success"
+                status['Connection'] = "Connection Success"
+            else:
+                status['Connection'] = msg
             return json.dumps(status)
     
         if data['checker'] == "ncc":
-            ret , msg = self.checkers['ncc'].check_connectivity(data['CVM IP'],data['CVM SSH Host Username'],Security.encrypt(data['CVM SSH Host Password']))
+            ret , msg = self.checkers['ncc'].check_connectivity(data['CVM IP'],data['CVM SSH Host Username'],Security.encrypt(data['CVM SSH Host Password']),"web")
             if ret:
                 loggerObj.LogMessage("info",file_name + " :: ncc connection successfull")                            
-                status['Connection'] = "Success"
+                status['Connection'] = "Connection Success"
             return json.dumps(status)
          
         if data['checker'] == "view":
             ret , msg = self.checkers['view'].check_connectivity(data['Server'],data['User'],Security.encrypt(data['Password']))
-            vc_ret , vc_msg = self.checkers['view'].check_view_vc_connectivity(data['VC Server'],data['VC User'],Security.encrypt(data['VC Password']),data['VC Port'])
+            vc_ret , vc_msg = self.checkers['view'].check_view_vc_connectivity(data['VC Server'],data['VC User'],Security.encrypt(data['VC Password']),data['VC Port'],"web")
+            print "ret vc_ret :",ret, vc_ret
             if ret and vc_ret:
                 loggerObj.LogMessage("info",file_name + " :: view connection successfull")                            
-                status['Connection'] = "Success"
+                status['Connection'] = "Connection Success"
+            else:
+                if not ret:
+                    status['Connection'] = msg
+                else:
+                    status['Connection'] = vc_msg
+
             return json.dumps(status)        
         
     
@@ -260,38 +269,43 @@ class runChecks:
             
             if checker == "vc":
                 loggerObj.LogMessage("info",file_name + " :: Executing vc checks")
-                result, status = checker_module.execute(group)
+                result, status = checker_module.execute(group,"web")
             elif checker == 'ncc':
                 loggerObj.LogMessage("info",file_name + " :: Executing ncc checks")
-                result, status = checker_module.execute(group)
+                result, status = checker_module.execute(group,"web")
             elif checker == 'view':
                 loggerObj.LogMessage("info",file_name + " :: Executing view checks")
-                result, status = checker_module.execute(group)    
+                result, status = checker_module.execute(group,"web")    
             else: 
                 loggerObj.LogMessage("info",file_name + " :: Executing run_all")       
-                result, status = checker_module.execute(["run_all"])
+                result, status = checker_module.execute(["run_all"],"web")
             
             results[checker] = result.to_dict()
         
         utility.glob_stopExecution = False
-        #Generate Json Reports 
-        outfile = open(os.getcwd() + os.path.sep +"reports"+os.path.sep+"results.json", 'w')
-        json.dump(results, outfile, indent=2)
-        outfile.close()
-        loggerObj.LogMessage("info",file_name + " :: Results JSON generated successfully")
-                    
-        #Generate CSV Reports
-        CSVReportGenerator(results,cur_dir)
-        loggerObj.LogMessage("info",file_name + " :: CSV report generated successfully")
         
-        
-        #Generate PDF Report based on results. 
-        reportFileName = PDFReportGenerator(results,cur_dir)
-        loggerObj.LogMessage("info",file_name + " :: PDF report generated successfully")
-        
+        if status in ['Stopped','Complete']:
+            #Generate Json Reports 
+            outfile = open(os.getcwd() + os.path.sep +"reports"+os.path.sep+"results.json", 'w')
+            json.dump(results, outfile, indent=2)
+            outfile.close()
+            loggerObj.LogMessage("info",file_name + " :: Results JSON generated successfully")
+                        
+            #Generate CSV Reports
+            CSVReportGenerator(results,cur_dir)
+            loggerObj.LogMessage("info",file_name + " :: CSV report generated successfully")
+            
+            
+            #Generate PDF Report based on results. 
+            reportFileName = PDFReportGenerator(results,cur_dir)
+            loggerObj.LogMessage("info",file_name + " :: PDF report generated successfully")
+        else:
+            loggerObj.LogMessage("error", "Exception Caused:: "+status)
+            return status
+
         if taskId is not None:
             taskId = api.model.update_task(int(taskId), "Completed",reportFileName)
-
+        
         return "Execution "+status
         
 class refresh:

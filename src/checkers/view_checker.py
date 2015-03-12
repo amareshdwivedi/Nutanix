@@ -407,7 +407,7 @@ class HorizonViewChecker(CheckerBase):
         
         return vm_data
      
-    def check_view_vc_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port):
+    def check_view_vc_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port, reqType="cmd"):
         si=None
         warnings.simplefilter('ignore')
         try:
@@ -415,10 +415,16 @@ class HorizonViewChecker(CheckerBase):
             return True,None
         except vim.fault.InvalidLogin:
             loggerObj.LogMessage("error",file_name + " :: Error : Invalid vCenter Server Username or password.")                                                                                
-            return False,"Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command again!!"
+            if reqType == "cmd":
+                return False,"Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command again!!"
+            else:
+                return False,"Error : Invalid vCenter Server Username or password"
         except ConnectionError as e:
-            loggerObj.LogMessage("error",file_name + " :: Error : Connection Error.")                                                                                
-            return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
+            loggerObj.LogMessage("error",file_name + " :: Error : Connection Error.")
+            if reqType == "cmd":                                                                              
+                return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
+            else:
+                return False,"Error : Connection Error"
         finally:
             Disconnect(si)
          
@@ -462,7 +468,7 @@ class HorizonViewChecker(CheckerBase):
                 test_output,exit_code=self.run_local_command(knows_host)
                 return False,output.strip()
     
-    def execute(self, args):
+    def execute(self, args, reqType="cmd"):
 
         if len(args) == 0:
             self.usage()
@@ -508,18 +514,26 @@ class HorizonViewChecker(CheckerBase):
         #Check weather OS is windows if not execute view setup command message is shown
         if not sys.platform.startswith("win") :
             loggerObj.LogMessage("error",file_name + " :: Error : Horizon View Connection Error on windows platform")                                                                                            
-            exit_with_message("Error : Horizon View Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View Server")
+            if reqType == "cmd":
+                exit_with_message("Error : Horizon View Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View Server")
+            else:
+                return self.result, "Error : Horizon View Connection Error"    
         #check view server connectivity
         status, message = self.check_connectivity(self.authconfig['view_ip'],self.authconfig['view_user'],self.authconfig['view_pwd'])
         if status == False:
-           loggerObj.LogMessage("error",file_name + " :: Error : Horizon View Connection Error")                                                                                            
-           exit_with_message("Error : Horizon View Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View Server")
-        
+            loggerObj.LogMessage("error",file_name + " :: Error : Horizon View Connection Error")                                                                                            
+            if reqType == "cmd":
+                exit_with_message("Error : Horizon View Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View Server")
+            else:
+                return self.result, "Error : Horizon View Connection Error"
         vcstatus, vcmessage = self.check_view_vc_connectivity(self.authconfig['view_vc_ip'],self.authconfig['view_vc_user'],self.authconfig['view_vc_pwd'],self.authconfig['view_vc_port'])         
         
         if vcstatus == False:
-           loggerObj.LogMessage("error",file_name + " :: Error : View VC Connection Error")                                                                                                        
-           exit_with_message("Error : View VC Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View VC Server")
+            loggerObj.LogMessage("error",file_name + " :: Error : View VC Connection Error")
+            if reqType == "cmd":
+                exit_with_message("Error : View VC Connection Error"+"\n\nPlease run \"view setup\" command to configure VMware Horizon View VC Server")
+            else:
+                return self.result, "Error : Horizon View Connection Error"
             
         passed_all = True
         

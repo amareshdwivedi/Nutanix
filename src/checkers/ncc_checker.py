@@ -64,7 +64,7 @@ class NCCChecker(CheckerBase):
         message = message is None and str(x) or "\nERROR : "+ message + "\n\n" + str(x)
         exit_with_message(message)
 
-    def execute(self, args):
+    def execute(self, args, reqType="cmd"):
         
         if len(args) != 0:
             if args[0] == 'setup':
@@ -79,13 +79,22 @@ class NCCChecker(CheckerBase):
         
         except paramiko.AuthenticationException:
             loggerObj.LogMessage("error",file_name + " :: NCC Authentication failed - Invalid username or password")
-            exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
+            if reqType == "cmd":
+                exit_with_message("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
+            else:
+                return self.result, "Error : Authentication failed - Invalid username or password"              
         except paramiko.SSHException, e:
             loggerObj.LogMessage("error",file_name + " :: NCC SSH Exception" + e.message)
-            exit_with_message("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
+            if reqType == "cmd":
+                exit_with_message("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
+            else:
+                return self.result, "Error :  NCC SSH Exception"              
         except socket.error, e:
             loggerObj.LogMessage("error",file_name + " :: NCC Socket Error" + e.message)
-            exit_with_message(str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
+            if reqType == "cmd":
+                exit_with_message(str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
+            else:
+                return self.result, "Error : NCC Socket Error"  
 
         self.result = CheckerResult("ncc",self.authconfig)    
 
@@ -116,7 +125,10 @@ class NCCChecker(CheckerBase):
             stdin, stdout, stderr =  ssh.exec_command(cmd)
         except paramiko.ChannelException,e:
             loggerObj.LogMessage("error",file_name + " :: NCC SSH execution failed:: " + e.message)
-            exit_with_message(str(e)+"\n\nUnable to get NCC results through SSH")            
+            if reqtType == "cmd":
+                exit_with_message(str(e)+"\n\nUnable to get NCC results through SSH")            
+            else:
+                return self.result, "Error : Unable to get NCC results through SSH"
                 
         passed_all = True
         #self.realtime_results['ncc'] = []
@@ -231,7 +243,7 @@ class NCCChecker(CheckerBase):
         exit_with_message("NCC is configured Successfully ")
         return
     
-    def check_connectivity(self,cvm_ip,cvm_user,cvm_pwd):
+    def check_connectivity(self,cvm_ip,cvm_user,cvm_pwd,reqType="cmd"):
         ssh=None
         try:
             ssh = paramiko.SSHClient()
@@ -242,10 +254,19 @@ class NCCChecker(CheckerBase):
         
         except paramiko.AuthenticationException:
             loggerObj.LogMessage("error",file_name + " :: NCC Authentication failed - Invalid username or password")
-            return False,("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
+            if reqType == "cmd":
+                return False,("Error : "+ "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc.")
+            else:
+                return False, "Error : Authentication failed - Invalid username or password"
         except paramiko.SSHException, e:
             loggerObj.LogMessage("error",file_name + " :: NCC SSH Exception" + e.message)
-            return False,("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command again.")
+            if reqType == "cmd":
+                return False,("Error : "+ str(e)+"\n\nPlease run \"ncc setup\" command again.")
+            else:
+                return False,"Error : "+ str(e)
         except socket.error, e:
             loggerObj.LogMessage("error",file_name + " :: NCC Socket Error" + e.message)
-            return False,(str(e)+"\n\nPlease run \"ncc setup\" command again.")
+            if reqType == "cmd":
+                return False,(str(e)+"\n\nPlease run \"ncc setup\" command again.")
+            else:
+                return False,str(e)

@@ -235,7 +235,7 @@ class VCChecker(CheckerBase):
         return
     
         
-    def check_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port):
+    def check_connectivity(self,vc_ip,vc_user,vc_pwd,vc_port,reqType="cmd"):
         self.si=None
         warnings.simplefilter('ignore')
         try:
@@ -243,11 +243,16 @@ class VCChecker(CheckerBase):
             return True,None
         except vim.fault.InvalidLogin:
             loggerObj.LogMessage("error",file_name + " :: Error : Invalid vCenter Server Username or password.")                                                                   
-            return False,"Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command again!!"
+            if reqType == "cmd":
+                return False,"Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command again!!"
+            else:
+                return False,"Error : Invalid vCenter Server Username or password"
         except ConnectionError as e:
-            loggerObj.LogMessage("error",file_name + " :: Error : Connection Error.")                                                                    
-            return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
- 
+            loggerObj.LogMessage("error",file_name + " :: Error : Connection Error.")
+            if reqType == "cmd":                                                                   
+                return False,"Error : Connection Error"+"\n\nPlease run \"vc setup\" command again!!"
+            else:
+                return False,"Error : Connection Error"
  
     def get_cluster_list(self,vc_ip,vc_user,vc_pwd,vc_port):
         warnings.simplefilter('ignore')
@@ -296,7 +301,7 @@ class VCChecker(CheckerBase):
             loggerObj.LogMessage("error",file_name + " :: Connection Failure.")                                                                    
             return hosts_map,"Error : Connection Failure"
     
-    def execute(self, args):
+    def execute(self, args, requestType="cmd"):
 
         if len(args) == 0:
             self.usage()
@@ -342,11 +347,18 @@ class VCChecker(CheckerBase):
         try:
             self.si = SmartConnect(host=self.authconfig['vc_ip'], user=self.authconfig['vc_user'], pwd=Security.decrypt(self.authconfig['vc_pwd']), port=self.authconfig['vc_port'])
         except vim.fault.InvalidLogin:
-            loggerObj.LogMessage("error",file_name + " :: Error : Invalid vCenter Server Username or password.")                                                                            
-            exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command to configure vc")
+            loggerObj.LogMessage("error",file_name + " :: Error : Invalid vCenter Server Username or password.")
+            if requestType == "cmd":
+                exit_with_message("Error : Invalid vCenter Server Username or password\n\nPlease run \"vc setup\" command to configure vc")
+            else:
+                return self.result, "Error : Invalid vCenter Server Username or password"
         except ConnectionError as e:
             loggerObj.LogMessage("error",file_name + " :: Error : Connection Error.")                                                                         
-            exit_with_message("Error : Connection Error"+"\n\nPlease run \"vc setup\" command to configure vc")
+            if requestType == "cmd":
+                exit_with_message("Error : Connection Error"+"\n\nPlease run \"vc setup\" command to configure vc")
+            else:
+                return self.result, "Error : Connection Error"
+
         
         passed_all = True
         
