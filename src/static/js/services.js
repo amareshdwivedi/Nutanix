@@ -754,7 +754,6 @@ jQuery(document).ready(function() {
     /*post deploye / health check run*/
     $(".runCheck").click(function() {
         var categoryType = $(this).attr("name");
-
         function fetch_data() {
             $.ajax({
                 url: '/refresh',
@@ -1015,7 +1014,7 @@ jQuery(document).ready(function() {
                     var status = data["Connection"];
                     console.log(status);
                     $("#healthCheckConfigurationModel .statusmessage").show();
-                    $("#healthCheckConfigurationModel .statusmessage").html("Connection " + status);
+                    $("#healthCheckConfigurationModel .statusmessage").html(status);
                     $(".modal-content#modal_vc .formTbl").hide();
                     $(".modal-content#modal_ncc .formTbl").hide();
                     $(".modal-content#modal_view .formTbl").hide();
@@ -1042,7 +1041,7 @@ jQuery(document).ready(function() {
                     var status = data["Connection"];
                     console.log(status);
                     $("#healthCheckConfigurationModel .statusmessage").show();
-                    $("#healthCheckConfigurationModel .statusmessage").html("Connection " + status);
+                    $("#healthCheckConfigurationModel .statusmessage").html(status);
                     $(".modal-content#modal_vc .formTbl").hide();
                     $(".modal-content#modal_ncc .formTbl").hide();
                     $(".modal-content#modal_view .formTbl").hide();
@@ -1069,7 +1068,7 @@ jQuery(document).ready(function() {
                     var status = data["Connection"];
                     console.log(status);
                     $("#healthCheckConfigurationModel .statusmessage").show();
-                    $("#healthCheckConfigurationModel .statusmessage").html("Connection " + status);
+                    $("#healthCheckConfigurationModel .statusmessage").html(status);
                     $(".modal-content#modal_vc .formTbl").hide();
                     $(".modal-content#modal_ncc .formTbl").hide();
                     $(".modal-content#modal_view .formTbl").hide();
