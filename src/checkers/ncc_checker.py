@@ -76,7 +76,6 @@ class NCCChecker(CheckerBase):
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(self.authconfig['cvm_ip'], username=self.authconfig['cvm_user'], password=Security.decrypt(self.authconfig['cvm_pwd']))
-        
         except paramiko.AuthenticationException:
             loggerObj.LogMessage("error",file_name + " :: NCC Authentication failed - Invalid username or password")
             if reqType == "cmd":
@@ -94,22 +93,30 @@ class NCCChecker(CheckerBase):
             if reqType == "cmd":
                 exit_with_message(str(e)+"\n\nPlease run \"ncc setup\" command to configure ncc.")
             else:
-                return self.result, "Error : NCC Socket Error"  
+                return self.result, "Error : NCC Socket Error" 
+        except:
+            loggerObj.LogMessage("error",file_name + " :: " + sys.exc_info()[0])
+            if reqType == "cmd":
+                exit_with_message("Unexpected Error :"+sys.exc_info()[0])
+            else:
+                return self.result, "Error : "+sys.exc_info()[0]
 
         self.result = CheckerResult("ncc",self.authconfig)    
 
         ntnx_env = "source /etc/profile.d/zookeeper_env.sh && source /usr/local/nutanix/profile.d/nutanix_env.sh && "
         
         #check if ncc is installed on the CVM
-        stdin, stdout, stderr =  ssh.exec_command(ntnx_env + "ncc")
-
+        stdin, stdout, stderr =  ssh.exec_command(ntnx_env + "ncc --ncc_version")
         for line in stderr:
              if ("ncc: not found" in line) or ("ncc: command not found" in line) or ("can\'t open \'/etc/profile.d/zookeeper_env.sh\'" in line) or ("can\'t open \'/usr/local/nutanix/profile.d/nutanix_env.sh'" in line):
-                 exit_with_message("NCC is not installed on this CVM\nPlease login to CVM,install NCC and then run Healthcheck again.")
-            
+                if reqType == "cmd":
+                    exit_with_message("NCC is not installed on this CVM\nPlease login to CVM,install NCC and then run Healthcheck again.")
+                else:
+                    return self.result, "Error : NCC is not installed on this CVM"
+        loggerObj.LogMessage("info","NCC Version Running on CVM :: " + stdout.readline().strip())
+        
         #new command that run only health_checks for ncc
         cmd = len(args) > 0 and self.config['ncc_path'] + " --ncc_interactive=false health_checks " + " ".join(args) or self.config['ncc_path']+" health_checks "
-        
         # JIRA GSO-535
         # Exporting sbin path as As to run network_checks and data_protection_checks of NCC. 
         # sbin is required in PATH as NCC execute /sbin/ route & /sbin/ifconfig command while executing network_checks and data_protection_checks respectively.  
@@ -129,11 +136,24 @@ class NCCChecker(CheckerBase):
                 exit_with_message(str(e)+"\n\nUnable to get NCC results through SSH")            
             else:
                 return self.result, "Error : Unable to get NCC results through SSH"
-                
+        except:
+            loggerObj.LogMessage("error",file_name + " :: " + sys.exc_info()[0])
+            if reqType == "cmd":
+                exit_with_message("Unexpected Error :"+sys.exc_info()[0])
+            else:
+                return self.result, "Error : "+sys.exc_info()[0]
+        
         passed_all = True
         #self.realtime_results['ncc'] = []
         first_json = 0
         for line in stdout:
+            if "Another execution of NCC is in progress" in line:
+                loggerObj.LogMessage("error",file_name + " :: Another execution of NCC is in progress")
+                if reqType == "cmd":
+                    exit_with_message("Error : Another execution of NCC is in progress.\nPlease run NCC Healthcheck after some time.")
+                else:
+                    return self.result, "Error : Another execution of NCC is in progress"
+
             if utility.glob_stopExecution:
                     return self.result, "Stopped"
             loggerObj.LogMessage("info",file_name + " :: NCC Success Output - " + line.strip('\n'))
