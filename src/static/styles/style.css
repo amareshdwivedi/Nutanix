@@ -170,6 +170,12 @@ body {
     color: #fff;
     font-family: ProximaNovaSoftSemiBold;
     font-size: 11px; padding: 3px 8px;}
+.stopBtn {
+  color: #fff;
+  background-color: #d9534f;
+  border-color: #d43f3a;font-family: ProximaNovaSoftSemiBold;
+    font-size: 11px; padding: 3px 8px;
+}
 .formButtonsSec{ text-align: right; margin-right:10px; padding: 0;}
 .formTbl table{ width: 100%; font-size: 12px;font-family: 'ProximaNovaSoftRegular'; }
 .connectionForms{ border-bottom: 1px solid #ccc; padding: 5px 0 15px; margin-bottom:10px;}
