@@ -182,6 +182,8 @@ class connect:
             if ret:
                 loggerObj.LogMessage("info",file_name + " :: ncc connection successfull")                            
                 status['Connection'] = "Connection Success"
+            else:
+                status['Connection'] = msg
             return json.dumps(status)
          
         if data['checker'] == "view":
