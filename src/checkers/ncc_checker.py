@@ -156,12 +156,11 @@ class NCCChecker(CheckerBase):
 
             if utility.glob_stopExecution:
                     return self.result, "Stopped"
-            loggerObj.LogMessage("info",file_name + " :: NCC Success Output - " + line.strip('\n'))
             try :
                 t = ast.literal_eval(line.strip('\n').replace("null","'null'").replace("true","'true'").replace("false","'false'"))
                 first_json += 1
             except :
-                loggerObj.LogMessage("error",file_name + " :: NCC Failure Output - " + line.strip('\n'))
+                print line
                 continue
             
             if first_json == 1:
@@ -290,3 +289,4 @@ class NCCChecker(CheckerBase):
                 return False,(str(e)+"\n\nPlease run \"ncc setup\" command again.")
             else:
                 return False,str(e)
+        
