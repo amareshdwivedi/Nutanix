@@ -43,7 +43,7 @@ class CheckerBase:
         return
 
     @abc.abstractmethod
-    def configure(self, config, reporter):
+    def configure(self, config, knowledge_pool, reporter):
         return
 
     @abc.abstractmethod
@@ -101,4 +101,3 @@ class CheckerBase:
         json.dump(authconfig, fp, indent=2)
         fp.close()
         loggerObj.LogMessage("info",file_name + " :: Successfully updated auth.conf")
-    

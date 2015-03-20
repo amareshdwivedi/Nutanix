@@ -7,7 +7,7 @@ init()
 
 MSG_WIDTH = 121
 class CheckerResult:
-    def __init__(self, name, authconfig=None, passed=None, message=None, category=None, path=None, expected_result=None):
+    def __init__(self, name, authconfig=None, passed=None, message=None, category=None, path=None, expected_result=None, help_content=None):
         self.name = name
         self.passed = passed
         if str(self.passed) in ("True","False"):
@@ -28,6 +28,7 @@ class CheckerResult:
         self.steps = []
         self.path = path
         self.expected_result = expected_result
+        self.help_content = help_content
 
     def add_check_result(self, step):
         self.steps.append(step)
@@ -68,21 +69,19 @@ class CheckerResult:
             xprop = xprop.replace('NoName.','').replace('NoName','')    
             props.append({"Message":xprop,"Status":xstatus,"Datacenter":datacenter,"Cluster":cluster,"Host":host, "Entity":entity})
         return props
-      
+
     def to_dict(self):
         if self.message is None:
-            dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user, "Category": self.category} 
+            dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user, "Category": self.category, "Help_content":self.help_content} 
         elif ',' in self.message:
             self.props = self.prop_dict()
-            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Category": self.category, "Expected_Result": self.expected_result}
+            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Category": self.category, "Expected_Result": self.expected_result, "Help_content":self.help_content}
         else:
             try:
-                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "ip":self.ip, "user":self.user, "Category": self.category}
+                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message, "ip":self.ip, "user":self.user, "Category": self.category, "Help_content":self.help_content}
             except AttributeError:
-                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message,"Category": self.category}
-                
-                
-            
+                dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.message,"Category": self.category, "Help_content":self.help_content}
+
         if len(self.steps) > 0:
             steps_dict = []
             for step in self.steps:
@@ -106,15 +105,15 @@ class ViewCheckerResult(CheckerResult):
     def to_dict(self):
         #print "view to_dict"
         if self.message is None:
-            dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user, "Category": self.category} 
+            dict_obj = {"Name": self.name, "Status": self.passed, "ip":self.ip, "user":self.user, "Category": self.category,  "Help_content":self.help_content}
         elif ',' in self.message:
             self.props = self.prop_dict()
-            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Category": self.category, "Expected_Result": self.expected_result}
+            dict_obj = {"Name": self.name, "Status": self.passed, "Properties": self.props, "Category": self.category, "Expected_Result": self.expected_result, "Help_content":self.help_content}
         else:
             try:
-                dict_obj = {"Name": self.name, "Status": self.passed, "Message": self.message, "ip":self.ip, "user":self.user, "Category": self.category}
+                dict_obj = {"Name": self.name, "Status": self.passed, "Message": self.message, "ip":self.ip, "user":self.user, "Category": self.category, "Help_content":self.help_content}
             except AttributeError:
-                dict_obj = {"Name": self.name, "Status": self.passed, "Message": self.message,"Category": self.category}
+                dict_obj = {"Name": self.name, "Status": self.passed, "Message": self.message,"Category": self.category, "Help_content":self.help_content}
                 
                 
             

@@ -74,17 +74,27 @@ def main():
     # We call configure on each module first so that we can fail-fast
     # in case some module is not configured properly
     for checker in checkers_list:
-        checker_conf_path = os.path.abspath(os.path.dirname(__file__))+os.path.sep \
-        +"conf" + os.path.sep + checker + ".conf"
+        conf_path = os.path.abspath(os.path.dirname(__file__))+os.path.sep \
+        +"conf"
         LOGGER_OBJ.LogMessage("info", FILE_NAME + " :: Checker configration path " \
-                             + checker_conf_path)
-        fp1 = open(checker_conf_path, 'r')
-        checker_config = json.load(fp1)
-        fp1.close()
+                             + conf_path)
+
+        checker_conf_file = conf_path + os.path.sep + checker + ".conf" 
+        file_ptr = open(checker_conf_file, 'r')
+        checker_config = json.load(file_ptr)
+        file_ptr.close()
+
+        knowledge_file = conf_path + os.path.sep + "knowledge_base.json" 
+        file_ptr = open(knowledge_file, 'r')
+        knowledge_config = json.load(file_ptr)
+        file_ptr.close()
+
         checker_module = checkers[checker]
         reporter = DefaultConsoleReporter(checker)
-        checker_module.configure(checker_config, reporter)
-        LOGGER_OBJ.LogMessage("info", FILE_NAME + " :: Configured checker "+checker)
+        checker_module.configure(checker_config, knowledge_config, reporter)
+        LOGGER_OBJ.LogMessage("info", FILE_NAME + " :: Configured checker Details"+checker)
+
+        
     results = {}
     for checker in checkers_list:
         checker_module = checkers[checker]

@@ -58,7 +58,7 @@ urls = (
     '/home/', 'home',
     '/isoImages/', 'api.isoImages',
     '/prevTask/','api.customerPrevTask'
-	)
+    )
 
 app = web.application(urls, globals())
 #web.header('Content-Type', 'applicaton/json')
@@ -88,7 +88,7 @@ class home:
     def GET(self):
         return render.home(self.checkers)
     
-	
+    
 class index:
     def __init__(self):
         self.checkers = {}
@@ -98,14 +98,23 @@ class index:
             self.checkers[checker.get_name()] = checker
         
         for checker in self.checkers.keys():
-            checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
-            loggerObj.LogMessage("info",file_name + " :: Checker configration path - " + checker_conf_path)
-            fp = open(checker_conf_path, 'r')
-            checker_config = json.load(fp)
-            fp.close()
+            conf_path = os.path.abspath(os.path.dirname(__file__))+os.path.sep\
+             +"conf"
+            loggerObj.LogMessage("info",file_name + " :: Checker configration path - " + conf_path)
+             
+            checker_conf_file = conf_path + os.path.sep + checker + ".conf" 
+            file_ptr = open(checker_conf_file, 'r')
+            checker_config = json.load(file_ptr)
+            file_ptr.close()
+
+            knowledge_file = conf_path + os.path.sep + "knowledge_base.json" 
+            file_ptr = open(knowledge_file, 'r')
+            knowledge_config = json.load(file_ptr)
+            file_ptr.close()
+
             checker_module = self.checkers[checker]
             self.reporter = DefaultConsoleReporter(checker)
-            checker_module.configure(checker_config, self.reporter)
+            checker_module.configure(checker_config, knowledge_config, self.reporter)
             loggerObj.LogMessage("info",file_name + " :: Configured checker "+checker)
 
     def GET(self):
@@ -210,14 +219,23 @@ class runChecks:
             self.checkers[checker.get_name()] = checker
         
         for checker in self.checkers.keys():
-            checker_conf_path=os.path.abspath(os.path.dirname(__file__))+os.path.sep +"conf" + os.path.sep + checker + ".conf"
-            loggerObj.LogMessage("info",file_name + " :: Checker configration path - " + checker_conf_path)            
-            fp = open(checker_conf_path, 'r')
-            checker_config = json.load(fp)
-            fp.close()
+            conf_path = os.path.abspath(os.path.dirname(__file__))+os.path.sep\
+             +"conf"
+            loggerObj.LogMessage("info",file_name + " :: Checker configration path - " + conf_path)
+
+            checker_conf_file = conf_path + os.path.sep + checker + ".conf" 
+            file_ptr = open(checker_conf_file, 'r')
+            checker_config = json.load(file_ptr)
+            file_ptr.close()
+
+            knowledge_file = conf_path + os.path.sep + "knowledge_base.json" 
+            file_ptr = open(knowledge_file, 'r')
+            knowledge_config = json.load(file_ptr)
+            file_ptr.close()
+
             checker_module = self.checkers[checker]
             self.reporter = DefaultConsoleReporter(checker)
-            checker_module.configure(checker_config, self.reporter)
+            checker_module.configure(checker_config, knowledge_config, self.reporter)
             loggerObj.LogMessage("info",file_name + " :: Configured checker "+checker)
 
 
@@ -267,7 +285,6 @@ class runChecks:
         
         for checker in checkers_list:
             checker_module = self.checkers[checker]
-            
             if checker == "vc":
                 loggerObj.LogMessage("info",file_name + " :: Executing vc checks")
                 result, status = checker_module.execute(group,"web")

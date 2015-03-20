@@ -45,8 +45,9 @@ class NCCChecker(CheckerBase):
     def get_desc(self):
         return "Performs Nutanix cluster health checks"
 
-    def configure(self, config, reporter):
+    def configure(self, config, knowledge_pool, reporter):
         self.config = config
+        self.knowledge_pool = knowledge_pool[self.get_name()]
         self.reporter = reporter
         self.authconfig = self.get_auth_config(self.get_name())
         CheckerBase.validate_config(self.authconfig, "cvm_ip")
@@ -178,7 +179,7 @@ class NCCChecker(CheckerBase):
 
             try:
                 self.realtime_results = json.load(open("display_json.json", "r"))
-                self.realtime_results['ncc']['checks'].append({'Name':check_name, 'Status': status_text[status]})
+                self.realtime_results['ncc']['checks'].append({'Name':check_name, 'Status':status_text[status],  "knowledge":self.knowledge_pool.get(check_name, None)})
                 with open("display_json.json", "w") as myfile:
                     json.dump(self.realtime_results, myfile)
                 LOGGER_OBJ.LogMessage("info", FILE_NAME + " :: NCC Check dumped to JSON file")
@@ -188,7 +189,11 @@ class NCCChecker(CheckerBase):
             if status in [7]:
                 message = json_equiv["detail canvas"]["output holder list"][0]["message list"][0]
 
-            self.result.add_check_result(CheckerResult(check_name, None, status_text[status], message))
+            if status < 6:
+                self.result.add_check_result(CheckerResult(check_name, None, status_text[status], message))
+            else:
+                self.result.add_check_result(CheckerResult(check_name, None, status_text[status], message, None, None, None, self.knowledge_pool.get(check_name, None)))
+
             self.reporter.notify_one_line(check_name, status_text[status])
             if status not in [0, 1, 3, 4]:
                 passed_all = False
@@ -262,7 +267,7 @@ class NCCChecker(CheckerBase):
         exit_with_message("NCC is configured Successfully ")
         return
 
-    def check_connectivity(self, cvm_ip, cvm_user, cvm_pwd, req_type="cmd"):
+    def check_connectivity(self,cvm_ip, cvm_user, cvm_pwd, req_type="cmd"):
         ssh = None
         try:
             ssh = paramiko.SSHClient()

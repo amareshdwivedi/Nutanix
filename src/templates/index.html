@@ -162,7 +162,12 @@ $def with (checkers,msg="")
 		                        	jQuery("#vcMainData").remove();
 		                        	jQuery("#vcDataHead").remove();		                        	
 		                        	for(i=0; i<obj.view.checks.length; i++){
-		                        		jQuery("#logs").append("<h4>"+obj.view.checks[i].Message+"</h4>");
+		                        		if(obj.view.checks[i].Status.toLowerCase() == "fail"){
+		                        			jQuery("#logs").append("<h4>"+obj.view.checks[i].Message+"<a href="+obj.view.checks[i].knowledge.content+"><i class='fa fa-question'></i></a>"+"</h4>");
+		                        		}
+		                        		else{
+		                        			jQuery("#logs").append("<h4>"+obj.view.checks[i].Message+"</h4>");
+		                        		}
 		                        		jQuery("#logs").append("<div class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
 						        			"<div class='col-lg-5 col-md-5 col-sm-5'>Actual</div>"+
 						        			"<div class='col-lg-5 col-md-5 col-sm-5'>Expected</div>"+
@@ -192,7 +197,13 @@ $def with (checkers,msg="")
 		                        	jQuery("#viewMainData").remove();
 		                        	jQuery("#viewDataHead").remove();		                        	
 		                        	for(i=0; i<obj.vc.checks.length; i++){
-		                        		jQuery("#logs").append("<h4>"+obj.vc.checks[i].Message+"</h4>");
+		                        		if(obj.vc.checks[i].Status == "FAIL"){
+		                        			jQuery("#logs").append("<h4>"+obj.vc.checks[i].Message+"<a href="+obj.vc.checks[i].knowledge.content+"><i class='fa fa-question'></i></a>"+"</h4>");
+		                        		}
+		                        		else{
+		                        			jQuery("#logs").append("<h4>"+obj.vc.checks[i].Message+"</h4>");
+		                        		}
+
 		                        		jQuery("#logs").append("<div class='logsHeading col-lg-12 col-md-12 col-sm-12'>"+
 						        			"<div class='col-lg-7 col-md-7 col-sm-7'>Check</div>"+
 						        			"<div class='col-lg-2 col-md-2 col-sm-2'>Expected</div>"+

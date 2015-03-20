@@ -76,8 +76,9 @@ class VCChecker(CheckerBase):
     def get_desc(self):
         return "Performs vCenter Server health checks"
 
-    def configure(self, config, reporter):
+    def configure(self, config, knowledge_pool, reporter):
         self.config = config
+        self.knowledge_pool = knowledge_pool[self.get_name()]
         self.reporter = reporter
         self.authconfig=self.get_auth_config(self.get_name())
         CheckerBase.validate_config(self.authconfig, "vc_ip")
@@ -394,13 +395,17 @@ class VCChecker(CheckerBase):
                         xporp_act_msg = xprop_msg.replace('NoName@','').replace("NoName",'').replace('@','.')
                         props.append({"Message":xporp_act_msg,"Status":xstatus,"Expected":xprop_exp , "Actual":xprop_actual })
 
-                    self.realtime_results['vc']['checks'].append({'Message':check['name'] ,'Status': (passed and "PASS" or "FAIL"),"Properties": props})
+                    self.realtime_results['vc']['checks'].append({'Message' : check['name'], 'Status' : (passed and "PASS" or "FAIL"), "Properties" : props, "knowledge" : self.knowledge_pool.get(check['name'], None)})
                     with open("display_json.json", "w") as myfile:
                         json.dump(self.realtime_results, myfile)
                 except:
                     # Need to handle temp-file case for command line
                     pass
-                self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'],check['path'],check['expectedresult']))
+
+                if passed:
+                    self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'], check['path'], check['expectedresult']))
+                else:
+                    self.result.add_check_result(CheckerResult(check['name'], None, passed, message, check['category'], check['path'], check['expectedresult'], self.knowledge_pool.get(check['name'], None)))
                 passed_all = passed_all and passed
 
             if check_group in check_functions:
@@ -436,7 +441,13 @@ class VCChecker(CheckerBase):
                             json.dump(self.realtime_results, myfile)
                     except:
                         pass
-                    self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.category, path,check_function.expected_result))
+                    #self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.category, path,check_function.expected_result))
+                    if passed:
+                        self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.category, path, check_function.expected_result))
+                    else:
+                        print "GAMGAM :", check_function.descr, self.knowledge_pool.get(check_function.descr, None)
+                        self.result.add_check_result(CheckerResult(check_function.descr, None, passed, message, check_function.category, path, check_function.expected_result, self.knowledge_pool.get(check_function.descr, None)))
+
                     passed_all = passed_all and passed
             self.reporter.notify_progress(self.reporter.notify_checkName,"")
 
@@ -810,13 +821,12 @@ class VCChecker(CheckerBase):
                 message += ", "+datacenter +"@"+"=Not-Configured (Expected: =IP Address of any Nutanix CVM)#"+(False and "PASS" or "FAIL")
             passed_all = passed_all and passed
 
-        LOGGER_OBJ.LogMessage("info", FILE_NAME + " :: check_cluster_das_isolationaddress1 - Exit")                                                                                                                                                      
+        LOGGER_OBJ.LogMessage("info", FILE_NAME + " :: check_cluster_das_isolationaddress1 - Exit")
         return passed_all, message, path
-
 
     @checkgroup("cluster_checks", "Cluster Advance Settings das.isolationaddress2", ["availability"], "IP Address of any Nutanix CVM")
     def check_cluster_das_isolationaddress2(self):
-        LOGGER_OBJ.LogMessage("info", FILE_NAME + " :: check_cluster_das_isolationaddress2 - Enter")                                                                                                        
+        LOGGER_OBJ.LogMessage("info", FILE_NAME + " :: check_cluster_das_isolationaddress2 - Enter")
         path='content.rootFolder.childEntity.hostFolder.childEntity'
         all_cluster = self.get_vc_property(path) or {}
         message = ""
