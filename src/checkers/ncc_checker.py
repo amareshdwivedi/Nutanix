@@ -262,30 +262,31 @@ class NCCChecker(CheckerBase):
         exit_with_message("NCC is configured Successfully ")
         return
 
-def check_connectivity(cvm_ip, cvm_user, cvm_pwd, req_type="cmd"):
-    ssh = None
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(cvm_ip, username=cvm_user, password=Security.decrypt(cvm_pwd))
-        ssh.close()
-        return (True, None)
-    except paramiko.AuthenticationException:
-        LOGGER_OBJ.LogMessage("error", FILE_NAME + " :: NCC Authentication failed - Invalid username or password")
-        if req_type == "cmd":
-            return (False, ("Error : " + "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc."))
-        else:
-            return (False, "Error : Authentication failed - Invalid username or password")
-    except paramiko.SSHException, exception_obj:
-        LOGGER_OBJ.LogMessage("error", FILE_NAME + " :: NCC SSH Exception" + exception_obj.message)
-        if req_type == "cmd":
-            return (False, ("Error : " + str(exception_obj) + "\n\nPlease run \"ncc setup\" command again."))
-        else:
-            return (False, "Error : " + str(exception_obj))
-    except socket.error, exception_obj:
-        LOGGER_OBJ.LogMessage("error", FILE_NAME + " :: NCC Socket Error" + exception_obj.message)
-        if req_type == "cmd":
-            return (False, (str(exception_obj) + "\n\nPlease run \"ncc setup\" command again."))
-        else:
-            return (False, str(exception_obj))
+    def check_connectivity(self, cvm_ip, cvm_user, cvm_pwd, req_type="cmd"):
+        ssh = None
+        print "-->", cvm_ip, cvm_user, cvm_pwd, req_type
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(cvm_ip, username=cvm_user, password=Security.decrypt(cvm_pwd))
+            ssh.close()
+            return (True, None)
+        except paramiko.AuthenticationException:
+            LOGGER_OBJ.LogMessage("error", FILE_NAME + " :: NCC Authentication failed - Invalid username or password")
+            if req_type == "cmd":
+                return (False, ("Error : " + "Authentication failed - Invalid username or password \n\nPlease run \"ncc setup\" command to configure ncc."))
+            else:
+                return (False, "Error : Authentication failed - Invalid username or password")
+        except paramiko.SSHException, exception_obj:
+            LOGGER_OBJ.LogMessage("error", FILE_NAME + " :: NCC SSH Exception" + exception_obj.message)
+            if req_type == "cmd":
+                return (False, ("Error : " + str(exception_obj) + "\n\nPlease run \"ncc setup\" command again."))
+            else:
+                return (False, "Error : " + str(exception_obj))
+        except socket.error, exception_obj:
+            LOGGER_OBJ.LogMessage("error", FILE_NAME + " :: NCC Socket Error" + exception_obj.message)
+            if req_type == "cmd":
+                return (False, (str(exception_obj) + "\n\nPlease run \"ncc setup\" command again."))
+            else:
+                return (False, str(exception_obj))
 
