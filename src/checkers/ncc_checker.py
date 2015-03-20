@@ -264,7 +264,6 @@ class NCCChecker(CheckerBase):
 
     def check_connectivity(self, cvm_ip, cvm_user, cvm_pwd, req_type="cmd"):
         ssh = None
-        print "-->", cvm_ip, cvm_user, cvm_pwd, req_type
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
